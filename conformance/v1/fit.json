@@ -82,6 +82,89 @@
 			"expect": { "feasible": false }
 		},
 		{
+			"description": "minSpacing spreads a cluster of identical filters",
+			"profile": { "bandCount": 8, "rules": [{ "type": "minSpacing", "octaves": 1 }] },
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 20, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 20, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 20, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 20, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 20, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 20, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 20, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 20, "q": 1, "gain": 1 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "ascendingFrequency that can never hold: passes cycle",
+			"profile": {
+				"bandCount": 6,
+				"band": {
+					"freq": { "min": 1000, "max": 4000 },
+					"q": { "min": null, "max": null, "step": null, "values": [4] },
+					"gain": { "min": 1, "max": 6, "step": null }
+				},
+				"bands": [
+					{ "index": 0, "gain": { "min": -6, "max": 6, "step": 0.1 } },
+					{ "index": 2, "freq": { "value": 100 } },
+					{ "index": 3, "freq": { "values": [250] }, "gain": { "min": -6, "max": 6, "step": 0.1 } }
+				],
+				"rules": [{ "type": "ascendingFrequency" }]
+			},
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 1000, "q": 4, "gain": 0.1 },
+					{ "type": "PK", "freq": 1000, "q": 4, "gain": 1 },
+					{ "type": "PK", "freq": 100, "q": 4, "gain": 1 },
+					{ "type": "PK", "freq": 4000, "q": 4, "gain": 1 },
+					{ "type": "PK", "freq": 250, "q": 4, "gain": 1.1 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": false }
+		},
+		{
+			"description": "ascendingFrequency that can never hold: a long cycle of passes",
+			"profile": {
+				"bandCount": 8,
+				"band": {
+					"types": ["LSC", "PK", "HSC"],
+					"freq": { "min": 20, "max": 1000, "step": 0.5 },
+					"q": { "min": null, "max": null, "step": null, "values": [1.41, 2] },
+					"gain": { "min": 1, "max": 6, "step": null }
+				},
+				"bands": [
+					{ "index": 2, "types": ["NO", "BP", "LSC"] },
+					{ "index": 3, "freq": { "min": 8000, "max": 20000 } }
+				],
+				"rules": [{ "type": "ascendingFrequency", "strict": false }],
+				"realization": {
+					"laws": [{ "law": "shelfFrequencyShift", "types": ["LSC", "HSC"], "designRate": 48000 }],
+					"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+				},
+				"preamp": { "mode": "auto" }
+			},
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "BP", "freq": 21, "q": 1, "gain": 0 },
+					{ "type": "BP", "freq": 17, "q": 1, "gain": 0 },
+					{ "type": "NO", "freq": 10, "q": 1, "gain": 0 },
+					{ "type": "PK", "freq": 10, "q": 1, "gain": 1 },
+					{ "type": "LSC", "freq": 21, "q": 1, "gain": -7.5 },
+					{ "type": "PK", "freq": 20.25, "q": 1, "gain": -0.5 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": false }
+		},
+		{
 			"description": "partitioned engine ordered by frequency",
 			"profile": "examples/c-partitioned-windows",
 			"op": "fit",

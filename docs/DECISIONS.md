@@ -313,6 +313,13 @@ the draft left room, these choices were made (all now in SPEC §6–§8 and §13
   filters. The reference repeats its pass on its own realized output until the slots stop
   changing, because heuristic choices that depend on the input otherwise break idempotence (the
   property tests found such cases on profiles whose rules can never be met).
+  *2026-10-02:* the passes can also cycle. With slots fixed below an earlier slot's window, the
+  frequency-ordered assignment shifts the filters one slot along the chain on every pass. The
+  reference now stops when the slots repeat any earlier pass and takes the cycle member with the
+  fewest violations, then the least distance to the wanted filters (matched as multisets), then
+  the first in slot order. The choice depends only on the cycle, so it is idempotent. The cap on
+  passes went from 8 to 32, because the property tests found cycles that only repeat after more
+  than 8.
 - **Idempotence is stated precisely:** same slots, realized filters, preamp and feasibility. On an
   infeasible result, filters may come back paired with different inputs, so `changes` can differ.
   A new normative property, *safe*, says every written value of `fit` is in its domain.

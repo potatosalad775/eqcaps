@@ -1,4 +1,4 @@
-import { assignEngine, orderedAssignEngine, type AssignResult } from './assign.ts';
+import { assignEngine, hungarian, orderedAssignEngine, type AssignResult } from './assign.ts';
 import { compareNear, near } from './domain.ts';
 import { fitToSlot } from './fit-slot.ts';
 import { isActive, normalizeFilter, usesGain, type Filter } from './filter.ts';
@@ -39,8 +39,12 @@ export interface FitResult {
  *
  * One pass assigns, projects and applies the rules. Some of its choices (which assignment wins
  * under ascendingFrequency) depend on the input values, so a pass over its own realized output
- * can choose differently. fit therefore repeats the pass on its realized output until nothing
- * changes (at most MAX_PASSES times), and that fixpoint is idempotent by construction.
+ * can choose differently. fit therefore repeats the pass on its realized output until a result
+ * comes back (at most MAX_PASSES times). Usually that is a fixpoint. On profiles whose rules can
+ * never be met it can be a cycle, and fit takes the member with the fewest violations, then the
+ * one whose realized filters are closest to the wanted ones as a multiset, then the first in slot
+ * order. Both are idempotent: a fit of the chosen result's realized filters walks the same cycle,
+ * the choice depends only on its members, and there the chosen result is at distance 0.
  */
 export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): FitResult {
 	const p = engineProfile(profile);
@@ -48,6 +52,7 @@ export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): F
 	const pre = fitPreamp(profile.preamp, preamp);
 
 	let cur = pass(p, wanted, pre);
+	const seen = [cur];
 	for (let i = 1; i < MAX_PASSES; i++) {
 		const input = cur.slots.flatMap((f, s) => (f ? [{ s, f: realize(p.laws, f) }] : []));
 		const next = pass(
@@ -55,7 +60,11 @@ export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): F
 			input.map((x) => x.f),
 			pre
 		);
-		if (sameSlots(next.slots, cur.slots)) break;
+		const back = seen.findIndex((x) => sameSlots(next.slots, x.slots));
+		if (back >= 0) {
+			cur = closest(p, wanted, seen.slice(back));
+			break;
+		}
 		// Compose: input filter k → slot s of this pass → entry j of the next input → next slot.
 		const entry = new Map(input.map((x, j) => [x.s, j]));
 		const lost = new Map(cur.lost);
@@ -67,6 +76,7 @@ export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): F
 			return next.slotOf[j] ?? null;
 		});
 		cur = { ...next, slotOf, lost };
+		seen.push(cur);
 	}
 
 	const { slots, slotOf, lost } = cur;
@@ -102,7 +112,74 @@ export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): F
 }
 
 /** Upper bound on fit's passes; in practice a second pass confirms the first. */
-const MAX_PASSES = 8;
+const MAX_PASSES = 32;
+
+/**
+ * The member of a cycle of passes that fit returns: fewest violations, then least distance to the
+ * wanted filters, then first in slot order. It depends only on the cycle's members.
+ */
+function closest(p: EngineProfile, wanted: readonly Filter[], passes: readonly Pass[]): Pass {
+	const active = wanted.filter(isActive);
+	const scored = passes.map((x) => ({
+		x,
+		d: distance(
+			active,
+			x.slots.flatMap((s) => (s ? [realize(p.laws, s)] : []))
+		)
+	}));
+	scored.sort(
+		(a, b) =>
+			a.x.violations.length - b.x.violations.length ||
+			compareNear(a.d, b.d) ||
+			compareSlots(a.x.slots, b.x.slots)
+	);
+	return (scored[0] as { x: Pass }).x;
+}
+
+/** Penalty for a type change, a lost filter or a non-finite field. */
+const FAR = 1e3;
+
+const octaves = (a: number, b: number) => {
+	const d = Math.abs(Math.log2(a / b));
+	return Number.isFinite(d) ? d : FAR;
+};
+
+/** Octaves of freq and q plus gain in 6 dB units, as assign measures a move. */
+function apart(w: Filter, r: Filter): number {
+	const gain = usesGain(w.type) || usesGain(r.type) ? Math.abs(w.gain - r.gain) / 6 : 0;
+	return (
+		(w.type === r.type ? 0 : FAR) +
+		octaves(w.freq, r.freq) +
+		octaves(w.q, r.q) +
+		(Number.isFinite(gain) ? gain : FAR)
+	);
+}
+
+/** Min-cost matching of the wanted filters onto the realized ones, as multisets. */
+function distance(wanted: readonly Filter[], realized: readonly Filter[]): number {
+	const at = (r: number, j: number) =>
+		j < realized.length ? apart(wanted[r] as Filter, realized[j] as Filter) : FAR;
+	const rowToCol = hungarian(wanted.length, realized.length + wanted.length, at);
+	return rowToCol.reduce((sum, j, r) => sum + at(r, j), 0);
+}
+
+function compareSlots(a: readonly (Filter | null)[], b: readonly (Filter | null)[]): number {
+	for (let i = 0; i < Math.min(a.length, b.length); i++) {
+		const x = a[i];
+		const y = b[i];
+		if (!x || !y) {
+			if (x || y) return x ? 1 : -1;
+			continue;
+		}
+		const c =
+			(x.type < y.type ? -1 : x.type > y.type ? 1 : 0) ||
+			compareNear(x.freq, y.freq) ||
+			compareNear(x.q, y.q) ||
+			compareNear(x.gain, y.gain);
+		if (c) return c;
+	}
+	return a.length - b.length;
+}
 
 function sameSlots(a: readonly (Filter | null)[], b: readonly (Filter | null)[]): boolean {
 	return (
@@ -202,7 +279,7 @@ function spread(
 		.flatMap((f, s) => (f && isActive(f) ? [s] : []))
 		.sort((a, b) => compareNear((slots[a] as Filter).freq, (slots[b] as Filter).freq) || a - b);
 	const farEnough = (a: number, b: number) => {
-		const gap = Math.abs(Math.log2(b / a));
+		const gap = Math.log2(b / a);
 		return gap >= octaves || near(gap, octaves);
 	};
 	for (let i = 1; i < order.length; i++) {

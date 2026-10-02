@@ -705,8 +705,13 @@ unchanged and `fit(fit(x).realized) = fit(x)`.
 
 Some choices above (which assignment wins under `ascendingFrequency`) depend on the input, so one
 pass over its own realized output can choose differently. The reference repeats steps 1–4 on its
-own realized output until the slots stop changing (at most 8 passes), and composes the mapping from
-wanted filters to slots. Idempotence then holds by construction.
+own realized output until the slots repeat an earlier pass (at most 32 passes), and composes the
+mapping from wanted filters to slots. Usually that is a fixpoint. On a profile whose rules can never
+be met it can be a cycle; the reference then takes the pass in the cycle with the fewest
+violations, then the one whose realized filters are closest to the wanted ones (a min-cost matching
+of the two as multisets), then the first in slot order. Idempotence holds by construction: fitting
+that result's realized filters walks the same cycle, the choice depends only on its members, and
+the result is at distance 0 from them.
 
 `fit` does **not** approximate curves. Folding a parametric curve onto a graphic EQ well means
 re-optimizing against the target response (AutoEQ's job), using the per-slot domains this format

@@ -167,7 +167,11 @@ function matching(c: Costs): Assignment {
  * Min-cost assignment of n rows to distinct columns (n ≤ cols), O(n²·cols). Returns the column
  * of each row.
  */
-function hungarian(n: number, cols: number, cost: (r: number, j: number) => number): number[] {
+export function hungarian(
+	n: number,
+	cols: number,
+	cost: (r: number, j: number) => number
+): number[] {
 	const u = new Float64Array(n + 1);
 	const v = new Float64Array(cols + 1);
 	const p = new Int32Array(cols + 1);

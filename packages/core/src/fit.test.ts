@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { present } from '../test/checks.ts';
 import { example, pk, profile } from '../test/fixtures.ts';
 import { fit } from './fit.ts';
 import { toRealized } from './realization.ts';
@@ -66,6 +67,17 @@ describe('fit (SPEC §13.6)', () => {
 		expect(r.feasible).toBe(true);
 	});
 
+	it('spreads a cluster for minSpacing in one pass, so the result is a fixpoint', () => {
+		// A filter left below one that just moved is still too close to the one before.
+		const p = profile({ bandCount: 8, rules: [{ type: 'minSpacing', octaves: 1 }] });
+		const cluster = Array.from({ length: 8 }, () => pk(20, 1));
+		const r = fit(p, cluster);
+		expect(r.slots.map((s) => s?.freq)).toEqual([20, 40, 80, 160, 320, 640, 1280, 2560]);
+		expect(r.feasible).toBe(true);
+		const again = fit(p, present(r.realized));
+		expect(again.slots).toEqual(r.slots);
+	});
+
 	it('marks a minSpacing it cannot fix as infeasible and leaves the filter', () => {
 		const p = profile({
 			band: { freq: { min: 20, max: 160 } },
@@ -74,6 +86,39 @@ describe('fit (SPEC §13.6)', () => {
 		const r = fit(p, [pk(100, 3), pk(150, 2)]);
 		expect(r.slots[1]?.freq).toBe(150);
 		expect(r.feasible).toBe(false);
+	});
+
+	it('settles a cycle of passes on the result closest to the wanted filters', () => {
+		// ascendingFrequency can't hold: slot 0 is 1000–4000 Hz, slots 2 and 3 sit at 100 and
+		// 250 Hz. Each frequency-ordered pass shifts the filters one slot along that chain.
+		const p = profile({
+			bandCount: 6,
+			band: { freq: { min: 1000, max: 4000 }, q: { values: [4] }, gain: { min: 1, max: 6 } },
+			bands: [
+				{ index: 0, gain: { min: -6, max: 6, step: 0.1 } },
+				{ index: 2, freq: { value: 100 } },
+				{ index: 3, freq: { values: [250] }, gain: { min: -6, max: 6, step: 0.1 } }
+			],
+			rules: [{ type: 'ascendingFrequency' }]
+		});
+		const r = fit(p, [
+			pk(1000, 0.1, 4),
+			pk(1000, 1, 4),
+			pk(100, 1, 4),
+			pk(4000, 1, 4),
+			pk(250, 1.1, 4)
+		]);
+		expect(r.slots.map((s) => s && [s.freq, s.gain])).toEqual([
+			[1000, 1],
+			null,
+			[100, 1],
+			[250, 1.1],
+			[1000, 1],
+			[4000, 1]
+		]);
+		expect(r.feasible).toBe(false);
+		const again = fit(p, present(r.realized));
+		expect(again.slots).toEqual(r.slots);
 	});
 
 	it('orders a partitioned engine by frequency (SPEC §12 C)', () => {

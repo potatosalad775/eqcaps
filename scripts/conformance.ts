@@ -80,6 +80,41 @@ const LOCKED_MIDDLE = {
 	rules: [{ type: 'ascendingFrequency' }]
 };
 const SPACING = { rules: [{ type: 'minSpacing', octaves: 1 }] };
+/** Slot 0 sits above the slots fixed at 100 and 250 Hz, so no assignment is in order. */
+const UNORDERABLE = {
+	bandCount: 6,
+	band: {
+		freq: { min: 1000, max: 4000 },
+		q: { min: null, max: null, step: null, values: [4] },
+		gain: { min: 1, max: 6, step: null }
+	},
+	bands: [
+		{ index: 0, gain: { min: -6, max: 6, step: 0.1 } },
+		{ index: 2, freq: { value: 100 } },
+		{ index: 3, freq: { values: [250] }, gain: { min: -6, max: 6, step: 0.1 } }
+	],
+	rules: [{ type: 'ascendingFrequency' }]
+};
+/** Slot 3 sits above every later slot; fit's passes repeat only after more than 8 of them. */
+const LONG_CYCLE = {
+	bandCount: 8,
+	band: {
+		types: ['LSC', 'PK', 'HSC'],
+		freq: { min: 20, max: 1000, step: 0.5 },
+		q: { min: null, max: null, step: null, values: [1.41, 2] },
+		gain: { min: 1, max: 6, step: null }
+	},
+	bands: [
+		{ index: 2, types: ['NO', 'BP', 'LSC'] },
+		{ index: 3, freq: { min: 8000, max: 20000 } }
+	],
+	rules: [{ type: 'ascendingFrequency', strict: false }],
+	realization: {
+		laws: [{ law: 'shelfFrequencyShift', types: ['LSC', 'HSC'], designRate: 48000 }],
+		sources: source
+	},
+	preamp: { mode: 'auto' }
+};
 const CONDITIONS = {
 	band: {
 		types: ['PK', 'LSC', 'LPQ'],
@@ -473,6 +508,26 @@ const files: Record<string, { description: string; vectors: Vector[] }> = {
 				{ band: { freq: { min: 20, max: 160 } }, rules: [{ type: 'minSpacing', octaves: 1 }] },
 				[pk(100, 3), pk(150, 2)]
 			),
+			fitVector(
+				'minSpacing spreads a cluster of identical filters',
+				{ bandCount: 8, rules: [{ type: 'minSpacing', octaves: 1 }] },
+				Array.from({ length: 8 }, () => pk(20, 1))
+			),
+			fitVector('ascendingFrequency that can never hold: passes cycle', UNORDERABLE, [
+				pk(1000, 0.1, 4),
+				pk(1000, 1, 4),
+				pk(100, 1, 4),
+				pk(4000, 1, 4),
+				pk(250, 1.1, 4)
+			]),
+			fitVector('ascendingFrequency that can never hold: a long cycle of passes', LONG_CYCLE, [
+				f('BP', 21, 1, 0),
+				f('BP', 17, 1, 0),
+				f('NO', 10, 1, 0),
+				pk(10, 1),
+				f('LSC', 21, 1, -7.5),
+				pk(20.25, -0.5)
+			]),
 			fitVector('partitioned engine ordered by frequency', PARTITIONED, [
 				pk(5000, 1),
 				pk(2000, 1),
