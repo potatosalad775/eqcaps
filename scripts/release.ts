@@ -1,6 +1,6 @@
-// Publishes a release from this machine (DECISIONS D32): @potatosalad775/eqcaps-core and -client
-// to npm, a git tag, and a GitHub Release with the current bundle.json. Run it from a clean,
-// pushed main; npm asks for your 2FA code as it publishes.
+// Publishes a release from this machine (DECISIONS D32): @potatosalad775/eqcaps-core, -client
+// and -device-bridge to npm, a git tag, and a GitHub Release with the current bundle.json. Run it
+// from a clean, pushed main; npm asks for your 2FA code as it publishes.
 //
 // Usage: npm run release -- <version> [--dry-run] [--otp <code>]
 //
@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const PUBLISHED = ['core', 'client'];
+const PUBLISHED = ['core', 'client', 'device-bridge'];
 
 function run(cmd: string, args: string[], options: { capture?: boolean } = {}): string {
 	const result = spawnSync(cmd, args, {

@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`profile domains the wire cannot carry 1`] = `
+{
+  "fiio-air-amp (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-air-link (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-br15-r2r (fiio-usb-hid)": [
+    "types LPQ HPQ AP",
+  ],
+  "fiio-bt11 (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-btr13 (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-dm15-r2r (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-fg3 (fiio-usb-hid)": [
+    "types LPQ HPQ BP",
+  ],
+  "fiio-fx17 (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-k13-r2r (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-k15 (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-ka15 (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-ka17 (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-q7 (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-qx11 (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-qx13 (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "fiio-retro-nano (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "jadeaudio-jiezi (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "snowsky-melody (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "snowsky-tiny-a (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+  "snowsky-tiny-b (fiio-usb-hid)": [
+    "types LPQ HPQ BP AP",
+  ],
+}
+`;

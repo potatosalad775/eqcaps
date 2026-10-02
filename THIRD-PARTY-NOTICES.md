@@ -12,7 +12,8 @@ Those are not covered by devicePEQ's license.
 ## devicePEQ
 
 <https://github.com/jeromeof/devicePEQ>. Source of the seed constraint registry and device
-configurations, and upstream of the device bridge.
+configurations, and upstream of the device bridge: its handlers were ported from commit `0617f38`,
+and its recorded device captures (`tests/captures/`) are the bridge's regression tests.
 
 ```
 Copyright 2024 Jerome O'Flaherty (jerome.oflaherty@icloud.com)
@@ -31,8 +32,9 @@ PERFORMANCE OF THIS SOFTWARE.
 
 ## modernGraphTool
 
-<https://github.com/potatosalad775/modernGraphTool>. Source of the device bridge
-(`src/lib/device-peq/`) and of constraint registrations.
+<https://github.com/potatosalad775/modernGraphTool>. Its TypeScript port of devicePEQ
+(`src/lib/device-peq/`) is where the device bridge started, and it contributed constraint
+registrations.
 
 ```
 MIT License

@@ -1,0 +1,1582 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`fiio_fiio_ka15.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 20,
+      "gain": 4.2,
+      "q": 0.6,
+      "type": "PK",
+    },
+    {
+      "freq": 56,
+      "gain": 1.2,
+      "q": 2.9,
+      "type": "PK",
+    },
+    {
+      "freq": 150,
+      "gain": -3.1,
+      "q": 0.7,
+      "type": "PK",
+    },
+    {
+      "freq": 430,
+      "gain": 11.8,
+      "q": 3.82,
+      "type": "PK",
+    },
+    {
+      "freq": 770,
+      "gain": -3.9,
+      "q": 0.9,
+      "type": "PK",
+    },
+    {
+      "freq": 2900,
+      "gain": 1.9,
+      "q": 3.72,
+      "type": "PK",
+    },
+    {
+      "freq": 5000,
+      "gain": 6.7,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 7200,
+      "gain": 2.6,
+      "q": 4.92,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "fiio-usb-hid",
+  "slot": 9,
+}
+`;
+
+exports[`fiio_fiio_ka17.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 20,
+      "gain": -3,
+      "q": 3,
+      "type": "PK",
+    },
+    {
+      "freq": 64,
+      "gain": 2,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 125,
+      "gain": 2,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 250,
+      "gain": 3,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 500,
+      "gain": 4,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 5,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 3,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 2,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 1,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 1,
+      "q": 0.71,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -0.4,
+  "protocol": "fiio-usb-hid",
+  "slot": 4,
+}
+`;
+
+exports[`fiio_fiio_oak_nano.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 64,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 250,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 500,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 12,
+  "protocol": "fiio-usb-hid",
+  "slot": 160,
+}
+`;
+
+exports[`fiio_fiio_qx13.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 32,
+      "gain": 1.7,
+      "q": 0.71,
+      "type": "LSC",
+    },
+    {
+      "freq": 64,
+      "gain": 1.9,
+      "q": 0.71,
+      "type": "HSC",
+    },
+    {
+      "freq": 125,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 250,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 5500,
+      "gain": -9,
+      "q": 3.6,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 0,
+      "q": 1.39,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 10.1,
+  "protocol": "fiio-usb-hid",
+  "slot": 160,
+}
+`;
+
+exports[`fiio_jadeaudio_ja11.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 250,
+      "gain": -4,
+      "q": 5,
+      "type": "PK",
+    },
+    {
+      "freq": 120,
+      "gain": 3,
+      "q": 1,
+      "type": "LSC",
+    },
+    {
+      "freq": 1400,
+      "gain": -3,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 3400,
+      "gain": -2,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 7000,
+      "gain": -5,
+      "q": 1,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 9,
+  "protocol": "fiio-usb-hid",
+  "slot": 3,
+}
+`;
+
+exports[`fiio_snowsky_melody.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 32,
+      "gain": 3,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 64,
+      "gain": 1,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 125,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 250,
+      "gain": -1.5,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 500,
+      "gain": -3.5,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 3.5,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 1.5,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 0,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 1,
+      "q": 0.71,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 2,
+      "q": 0.71,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -4,
+  "protocol": "fiio-usb-hid",
+  "slot": 1,
+}
+`;
+
+exports[`fosi_audio_ds3.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 20,
+      "gain": 9.7,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 88,
+      "gain": -4,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 300,
+      "gain": 6.6,
+      "q": 1.9,
+      "type": "PK",
+    },
+    {
+      "freq": 390,
+      "gain": -5.2,
+      "q": 2,
+      "type": "PK",
+    },
+    {
+      "freq": 580,
+      "gain": 6,
+      "q": 2,
+      "type": "PK",
+    },
+    {
+      "freq": 980,
+      "gain": -8.7,
+      "q": 2,
+      "type": "PK",
+    },
+    {
+      "freq": 1700,
+      "gain": 4.8,
+      "q": 1.6,
+      "type": "PK",
+    },
+    {
+      "freq": 3500,
+      "gain": 8.6,
+      "q": 2,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "protocol": "fosi-audio-usb-hid",
+  "slot": 7,
+}
+`;
+
+exports[`ktmicro_chu2_dsp.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 25,
+      "gain": 0,
+      "q": 0.3,
+      "type": "PK",
+    },
+    {
+      "freq": 200,
+      "gain": -3,
+      "q": 2,
+      "type": "LSC",
+    },
+    {
+      "freq": 1400,
+      "gain": 0,
+      "q": 7,
+      "type": "PK",
+    },
+    {
+      "freq": 3500,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 9000,
+      "gain": 0,
+      "q": 1.5,
+      "type": "PK",
+    },
+  ],
+  "findings": [
+    {
+      "allowed": {
+        "max": 5,
+        "min": 0.1,
+        "step": 0.001,
+      },
+      "code": "out-of-range",
+      "field": "q",
+      "slot": 2,
+    },
+  ],
+  "preamp": 0,
+  "protocol": "ktmicro-usb-hid",
+}
+`;
+
+exports[`ktmicro_kiwi_ears_allegro_mini.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": -1,
+      "q": 0.707,
+      "type": "LSC",
+    },
+    {
+      "freq": 3000,
+      "gain": -6,
+      "q": 0.707,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 1,
+      "q": 0.707,
+      "type": "PK",
+    },
+    {
+      "freq": 10000,
+      "gain": 2,
+      "q": 0.707,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "ktmicro-usb-hid",
+}
+`;
+
+exports[`ktmicro_kiwi_ears_allegro_pro.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 18,
+      "gain": 1,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 56,
+      "gain": -1,
+      "q": 2,
+      "type": "PK",
+    },
+    {
+      "freq": 930,
+      "gain": 2,
+      "q": 0.8,
+      "type": "PK",
+    },
+    {
+      "freq": 5000,
+      "gain": -2,
+      "q": 0.8,
+      "type": "PK",
+    },
+    {
+      "freq": 17200,
+      "gain": -2,
+      "q": 0.8,
+      "type": "PK",
+    },
+  ],
+  "findings": [
+    {
+      "allowed": {
+        "max": 20000,
+        "min": 20,
+        "step": 1,
+      },
+      "code": "out-of-range",
+      "field": "freq",
+      "slot": 0,
+    },
+  ],
+  "preamp": 0,
+  "protocol": "ktmicro-usb-hid",
+}
+`;
+
+exports[`ktmicro_kiwi_ears_chorus.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 61,
+      "gain": 1.5,
+      "q": 0.7,
+      "type": "PK",
+    },
+    {
+      "freq": 105,
+      "gain": -1.4,
+      "q": 0.7,
+      "type": "PK",
+    },
+    {
+      "freq": 184,
+      "gain": 1.1,
+      "q": 0.7,
+      "type": "PK",
+    },
+    {
+      "freq": 243,
+      "gain": -1.3,
+      "q": 0.7,
+      "type": "PK",
+    },
+    {
+      "freq": 316,
+      "gain": 1.3,
+      "q": 0.8,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "ktmicro-usb-hid",
+}
+`;
+
+exports[`ktmicro_kiwi_ears_slink.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 101,
+      "gain": 1.1,
+      "q": 0.7,
+      "type": "PK",
+    },
+    {
+      "freq": 231,
+      "gain": -2.3,
+      "q": 0.7,
+      "type": "PK",
+    },
+    {
+      "freq": 379,
+      "gain": 3.7,
+      "q": 2,
+      "type": "PK",
+    },
+    {
+      "freq": 4696,
+      "gain": -3.4,
+      "q": 0.7,
+      "type": "PK",
+    },
+    {
+      "freq": 16788,
+      "gain": 5.8,
+      "q": 0.7,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "ktmicro-usb-hid",
+}
+`;
+
+exports[`ktmicro_kt02h20_hifi_audio.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 300,
+      "gain": -4,
+      "q": 3,
+      "type": "PK",
+    },
+    {
+      "freq": 20000,
+      "gain": -5,
+      "q": 0.1,
+      "type": "PK",
+    },
+    {
+      "freq": 180,
+      "gain": -1,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 800,
+      "gain": -1,
+      "q": 0.3,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 2,
+      "q": 1,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "ktmicro-usb-hid",
+}
+`;
+
+exports[`ktmicro_tanchjim_bunny_dsp.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 50,
+      "gain": -4,
+      "q": 6,
+      "type": "PK",
+    },
+    {
+      "freq": 200,
+      "gain": 6,
+      "q": 0.5,
+      "type": "PK",
+    },
+    {
+      "freq": 800,
+      "gain": -0.3,
+      "q": 0.5,
+      "type": "PK",
+    },
+    {
+      "freq": 1700,
+      "gain": -3,
+      "q": 4.5,
+      "type": "PK",
+    },
+    {
+      "freq": 7500,
+      "gain": -6,
+      "q": 7,
+      "type": "PK",
+    },
+  ],
+  "findings": [
+    {
+      "allowed": {
+        "max": 5,
+        "min": 0.1,
+        "step": 0.001,
+      },
+      "code": "out-of-range",
+      "field": "q",
+      "slot": 0,
+    },
+    {
+      "allowed": {
+        "max": 5,
+        "min": 0.1,
+        "step": 0.001,
+      },
+      "code": "out-of-range",
+      "field": "q",
+      "slot": 4,
+    },
+  ],
+  "preamp": -6,
+  "protocol": "ktmicro-usb-hid",
+}
+`;
+
+exports[`ktmicro_tanchjim_fission_dsp.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 30,
+      "gain": 10,
+      "q": 0.3,
+      "type": "PK",
+    },
+    {
+      "freq": 200,
+      "gain": -6.5,
+      "q": 0.4,
+      "type": "PK",
+    },
+    {
+      "freq": 1300,
+      "gain": -1.2,
+      "q": 0.9,
+      "type": "PK",
+    },
+    {
+      "freq": 3000,
+      "gain": -4.8,
+      "q": 0.4,
+      "type": "PK",
+    },
+    {
+      "freq": 9000,
+      "gain": -9.5,
+      "q": 4,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -2,
+  "protocol": "ktmicro-usb-hid",
+}
+`;
+
+exports[`ktmicro_tanchjim_one_dsp.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 30,
+      "gain": -4,
+      "q": 3,
+      "type": "LSC",
+    },
+    {
+      "freq": 200,
+      "gain": -3,
+      "q": 8,
+      "type": "PK",
+    },
+    {
+      "freq": 800,
+      "gain": -0.3,
+      "q": 0.5,
+      "type": "PK",
+    },
+    {
+      "freq": 1700,
+      "gain": -4,
+      "q": 0.6,
+      "type": "PK",
+    },
+    {
+      "freq": 4500,
+      "gain": -5,
+      "q": 6,
+      "type": "PK",
+    },
+  ],
+  "findings": [
+    {
+      "allowed": {
+        "max": 5,
+        "min": 0.1,
+        "step": 0.001,
+      },
+      "code": "out-of-range",
+      "field": "q",
+      "slot": 1,
+    },
+    {
+      "allowed": {
+        "max": 5,
+        "min": 0.1,
+        "step": 0.001,
+      },
+      "code": "out-of-range",
+      "field": "q",
+      "slot": 4,
+    },
+  ],
+  "preamp": 0,
+  "protocol": "ktmicro-usb-hid",
+}
+`;
+
+exports[`walkplay_default_moondrop_marigold.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 25,
+      "gain": 0,
+      "q": 0.5,
+      "type": "PK",
+    },
+    {
+      "freq": 150,
+      "gain": 0,
+      "q": 3,
+      "type": "PK",
+    },
+    {
+      "freq": 778,
+      "gain": 0,
+      "q": 7.19921875,
+      "type": "PK",
+    },
+    {
+      "freq": 1100,
+      "gain": 0,
+      "q": 1.6015625,
+      "type": "PK",
+    },
+    {
+      "freq": 2100,
+      "gain": 0,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 8600,
+      "gain": 0,
+      "q": 0.3984375,
+      "type": "PK",
+    },
+    {
+      "freq": 10000,
+      "gain": 0,
+      "q": 1.19921875,
+      "type": "PK",
+    },
+    {
+      "freq": 10630,
+      "gain": 0,
+      "q": 7,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeNo10_jm98max.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ],
+  "findings": [],
+  "preamp": -3,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno11_cs43131_hifi_audio_dsp.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 48.875,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 195.5,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 97.75,
+      "gain": 10,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 977.5,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 2443.75,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 4887.5,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 9775,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 14662.5,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -10,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno11_epz_tp13.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 19.55,
+      "gain": 2.8984375,
+      "q": 1.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 107.525,
+      "gain": -3.19921875,
+      "q": 0.5,
+      "type": "PK",
+    },
+    {
+      "freq": 1075.25,
+      "gain": -1.1015625,
+      "q": 2,
+      "type": "PK",
+    },
+    {
+      "freq": 2346,
+      "gain": 1.3984375,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 4887.5,
+      "gain": 1,
+      "q": 2,
+      "type": "LSC",
+    },
+    {
+      "freq": 97.75,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 97.75,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 97.75,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+  ],
+  "findings": [
+    {
+      "allowed": {
+        "max": 19999.65,
+        "min": 20.5275,
+        "step": 0.9775,
+      },
+      "code": "out-of-range",
+      "field": "freq",
+      "slot": 0,
+    },
+  ],
+  "preamp": -3,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno11_hi_max.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 30.3025,
+      "gain": 1,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 60.605,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 122.1875,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 244.375,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 488.75,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 977.5,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 1955,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 3910,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno11_quark2.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 78.2,
+      "gain": 2,
+      "q": 0.5,
+      "type": "PK",
+    },
+    {
+      "freq": 391,
+      "gain": -6,
+      "q": 6,
+      "type": "PK",
+    },
+    {
+      "freq": 2737,
+      "gain": -2.5,
+      "q": 1.6015625,
+      "type": "PK",
+    },
+    {
+      "freq": 6842.5,
+      "gain": -4.80078125,
+      "q": 5,
+      "type": "PK",
+    },
+    {
+      "freq": 17595,
+      "gain": -3,
+      "q": 1.5,
+      "type": "PK",
+    },
+    {
+      "freq": 977.5,
+      "gain": -1.5,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 9775,
+      "gain": 2.19921875,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 19550,
+      "gain": 0,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -4,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno15_ddhifi_dsp_cable.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 50,
+      "gain": -10,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 200,
+      "gain": -6,
+      "q": 5,
+      "type": "PK",
+    },
+    {
+      "freq": 500,
+      "gain": 9.1015625,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 1,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 2500,
+      "gain": 0,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 5000,
+      "gain": 0,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 10000,
+      "gain": 0,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 15000,
+      "gain": 0,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -9,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno15_tanchjim_stargate_ii.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 0.1796875,
+      "type": "PK",
+    },
+    {
+      "freq": 180,
+      "gain": -6.19921875,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 220,
+      "gain": -0.80078125,
+      "q": 2,
+      "type": "PK",
+    },
+    {
+      "freq": 500,
+      "gain": -2.5,
+      "q": 1.30078125,
+      "type": "PK",
+    },
+    {
+      "freq": 1080,
+      "gain": 8.8984375,
+      "q": 0.80078125,
+      "type": "PK",
+    },
+    {
+      "freq": 2180,
+      "gain": -7.5,
+      "q": 2,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -8,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno16_protocol_max.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 31,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 62,
+      "gain": 0,
+      "q": 5,
+      "type": "PK",
+    },
+    {
+      "freq": 125,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 250,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 500,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 6,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno16_tanchjim_space_pro.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 62,
+      "gain": 0,
+      "q": 0.7109375,
+      "type": "PK",
+    },
+    {
+      "freq": 125,
+      "gain": 0,
+      "q": 0.7109375,
+      "type": "PK",
+    },
+    {
+      "freq": 250,
+      "gain": 0,
+      "q": 0.7109375,
+      "type": "PK",
+    },
+    {
+      "freq": 500,
+      "gain": 0,
+      "q": 0.7109375,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 0,
+      "q": 0.7109375,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 0,
+      "q": 0.7109375,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 0,
+      "q": 0.7109375,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 0,
+      "q": 0.7109375,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 0,
+      "q": 0.7109375,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 0,
+      "q": 0.70703125,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno16_tp35_pro.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 21,
+      "gain": 7,
+      "q": 0.6015625,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 1,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -7,
+  "protocol": "walkplay-hid",
+}
+`;
+
+exports[`walkplay_schemeno18_nicehck_octave.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 20,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 50,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 100,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 200,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 4500,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 7000,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 12500,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 15000,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+    {
+      "freq": 18000,
+      "gain": 0,
+      "q": 0.75,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "walkplay-hid",
+}
+`;

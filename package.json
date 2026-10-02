@@ -11,7 +11,8 @@
 	"workspaces": [
 		"packages/core",
 		"packages/client",
-		"packages/build"
+		"packages/build",
+		"packages/device-bridge"
 	],
 	"scripts": {
 		"lint": "prettier --check . && eslint .",

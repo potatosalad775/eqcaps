@@ -9,7 +9,11 @@
 		"paths": {
 			"@potatosalad775/eqcaps-core": ["./packages/core/src/index.ts"],
 			"@potatosalad775/eqcaps-client": ["./packages/client/src/index.ts"],
-			"@potatosalad775/eqcaps-build": ["./packages/build/src/index.ts"]
+			"@potatosalad775/eqcaps-build": ["./packages/build/src/index.ts"],
+			"@potatosalad775/eqcaps-device-bridge": ["./packages/device-bridge/src/index.ts"],
+			"@potatosalad775/eqcaps-device-bridge/browser": [
+				"./packages/device-bridge/src/browser/index.ts"
+			]
 		}
 	},
 	"include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts", "scripts/**/*.ts", "*.ts"],
