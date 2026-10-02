@@ -517,9 +517,14 @@ drop most Walkplay devices; restricting groups to one vendor id, which drops rea
   export, so a consumer can match against an embedded bundle without the client. The client
   reads `fetch` and timers from `globalThis` and declares only the types it uses, so it has no
   DOM or Node types.
-- **Releases:** a `v*` tag publishes `core` and `client` to npm with provenance (versions are set
-  from the tag) and attaches `bundle.json` to a GitHub Release. The data package
+- **Releases** are made locally with `npm run release -- <version>`: checks, build, `npm publish`
+  of `core` and `client`, a git tag, and a GitHub Release with `bundle.json`. Versions are set
+  only for the publish; `package.json` files stay at 0.0.0. The data package
   `@potatosalad775/eqcaps` (D24) waits for the freeze, when its contents become stable.
+  *2026-10-02:* first done by a tag-triggered workflow with an npm token, which failed on the
+  account's 2FA. Releases are rare, so a local script that lets npm prompt for 2FA beats managing
+  an automation token. Lost: npm provenance attestations, which need a CI publish. Revisit with
+  npm trusted publishing (OIDC from Actions, no token) if releases become frequent.
 
 ---
 

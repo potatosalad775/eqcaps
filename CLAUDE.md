@@ -7,13 +7,14 @@ identity and provenance. The repo also holds the tooling to author, verify, vali
 profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor), and anyone else
 who adopts the format.
 
-**Status: Phases 0–2 done; Phase 3 (data pipeline, seed data, client) built, waiting on the owner's
-GitHub/npm steps (PLAN §5).** Read `docs/PLAN.md` first.
+**Status: Phases 0–2 done; Phase 3 (data pipeline, seed data, client) done, `/next/` live;
+first npm release pending (PLAN §5).** Read `docs/PLAN.md` first.
 
 Commands: `npm run lint` · `npm run check` (codegen and vector drift + typecheck) · `npm test` ·
 `npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json` ·
 `npm run conformance` after changing engine behaviour · `npm run data:validate` · `npm run data:build`
-(writes `dist/site/next/`). Never edit `schema/v1/source.schema.json`,
+(writes `dist/site/next/`) · `npm run release -- <version>` (owner only, run locally for npm 2FA).
+Never edit `schema/v1/source.schema.json`,
 `*.generated.ts` or `conformance/v1/*.json` (engine vectors) by hand.
 
 ## Docs

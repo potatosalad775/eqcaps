@@ -24,7 +24,8 @@
 		"conformance": "node scripts/conformance.ts",
 		"data:validate": "node --conditions=eqcaps:source packages/build/src/cli.ts validate",
 		"data:build": "node --conditions=eqcaps:source packages/build/src/cli.ts build --out dist/site/next --schema-url https://potatosalad775.github.io/eqcaps/next/schema/profile.schema.json",
-		"data:import": "node scripts/import/seed.ts"
+		"data:import": "node scripts/import/seed.ts",
+		"release": "node scripts/release.ts"
 	},
 	"engines": {
 		"node": ">=22.18"
