@@ -11,7 +11,7 @@
 	},
 	"bandCount": 5,
 	"band": {
-		"types": ["PK", "LSC", "HSC"],
+		"types": ["PK"],
 		"freq": { "min": 20, "max": 20000, "step": 1 },
 		"q": { "min": 0.10009765625, "max": 10, "step": 0.000244140625 },
 		"gain": { "min": -12, "max": 12, "step": 0.016666666666666666 }
@@ -26,6 +26,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. The Bluetooth name is a placeholder until confirmed: devicePEQ identifies this device only by its serial service class."
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. The Bluetooth name is a placeholder until confirmed: devicePEQ identifies this device only by its serial service class. devicePEQ's shared constraints list shelves, but its handler writes every band with the same type byte (0): only peaking can be sent until the shelf codes are known (corrected 2026-10-02)."
 	}
 }

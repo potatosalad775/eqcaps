@@ -1,5 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-10-band-12db-all-filters-7",
 	"id": "fiio-ka15",
 	"schemaVersion": "1.0",
 	"kind": "hardware",
@@ -11,14 +12,6 @@
 			{ "vendorId": "0x0a12", "productName": "FIIO KA15" }
 		]
 	},
-	"bandCount": 10,
-	"band": {
-		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "AP"],
-		"freq": { "min": 20, "max": 20000, "step": 1 },
-		"q": { "min": 0.1015625, "max": 10, "step": 0.00390625 },
-		"gain": { "min": -12, "max": 12, "step": 0.00390625 }
-	},
-	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127, "step": 1 } },
 	"meta": {
 		"status": "draft",
 		"sources": [
@@ -33,6 +26,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Its recorded capture's product id is in devicePEQ's \"WalkPlay-SchemeNo10\" group, whose settings apply under the device's own."
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. The seed gave this device the Walkplay handler's wire grids, because devicePEQ lets the \"WalkPlay-SchemeNo10\" group that its product id falls in pick the handler; its recorded capture is FiiO's protocol, so it has FiiO's grids (corrected 2026-10-02)."
 	}
 }

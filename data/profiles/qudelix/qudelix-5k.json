@@ -12,9 +12,9 @@
 	"bandCount": 10,
 	"band": {
 		"types": ["PK", "LSC", "HSC"],
-		"freq": { "min": 20, "max": 20000 },
-		"q": { "min": 0.1, "max": 7 },
-		"gain": { "min": -12, "max": 12 }
+		"freq": { "min": 20, "max": 20000, "step": 1 },
+		"q": { "min": 0.1005859375, "max": 7, "step": 0.0009765625 },
+		"gain": { "min": -12, "max": 12, "step": 0.1 }
 	},
 	"preamp": { "mode": "unknown" },
 	"meta": {
@@ -31,6 +31,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from AutoEQ by scripts/import/seed.ts. Band count, gain range and peaking Q range from AutoEQ's PEQ_CONFIGS QUDELIX_5K, which is an optimizer setting: the engine may allow more bands. The frequency range and the shelves' Q range are assumptions. USB identity from a devicePEQ recorded capture."
+		"notes": "Seeded from AutoEQ by scripts/import/seed.ts. Band count, gain range and peaking Q range from AutoEQ's PEQ_CONFIGS QUDELIX_5K, which is an optimizer setting: the engine may allow more bands. The frequency range and the shelves' Q range are assumptions. USB identity from a devicePEQ recorded capture. Steps are the USB write's resolution (freq 1 Hz, gain 0.1 dB, Q 1/1024), with Q's minimum moved onto that grid (corrected 2026-10-02)."
 	}
 }
