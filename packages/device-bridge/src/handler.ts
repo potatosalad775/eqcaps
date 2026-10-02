@@ -8,7 +8,10 @@ export interface Slot {
 }
 
 export interface PullRequest {
-	/** Preset slot to read, where the protocol reads by slot. Default: the current one. */
+	/**
+	 * Preset slot to read. Default: the current one. Refused where the protocol can't read a
+	 * chosen slot (`readsSlot`), rather than answered with the current one.
+	 */
 	slot?: number;
 	/** Bands to read, where the protocol can't tell. Default: the profile's `bandCount`. */
 	bands?: number;
@@ -105,6 +108,8 @@ export interface HandlerCapabilities {
 	canWrite: boolean;
 	/** Pull returns the preamp. */
 	readsPreamp: boolean;
+	/** Pull reads the preset `slot` it is given. */
+	readsSlot: boolean;
 	/** Push writes `preamp` when given. */
 	writesPreamp: boolean;
 	/** Push writes to the preset `slot` when given. */

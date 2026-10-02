@@ -5,6 +5,7 @@ import { describe, expect, test } from 'vitest';
 import { wireInt } from '../src/bytes.ts';
 import { airohaCodec, decodeAirohaRecords } from '../src/handlers/airoha.ts';
 import { edifierCodec } from '../src/handlers/edifier-serial.ts';
+import { fosiAudioCodec } from '../src/handlers/fosi-audio-usb-hid.ts';
 import { decodeF110Bands, f110Frame } from '../src/handlers/fiio-f110.ts';
 import { fiioSerialFrame } from '../src/handlers/fiio-usb-serial.ts';
 import { encodeFiioBand } from '../src/handlers/fiio-usb-hid.ts';
@@ -91,6 +92,17 @@ describe('codec rules', () => {
 		expect(() => codes.encode('HPQ')).toThrow(/no wire code/);
 	});
 
+	test('Fosi Audio frequencies must be above 0 Hz, which reads back as an empty band', () => {
+		for (const freq of [0, -0, 1e-50, NaN]) {
+			expect(() => fosiAudioCodec.encode({ filters: [pk(freq, 0)] }, {}), String(freq)).toThrow(
+				expect.objectContaining({ code: 'unrepresentable' })
+			);
+		}
+		const min = fosiAudioCodec.wire({}).freq as { min: number };
+		const frames = fosiAudioCodec.encode({ filters: [pk(min.min, 0)] }, {});
+		expect(fosiAudioCodec.decode(frames, {}).filters[0]?.freq).toBeGreaterThan(0);
+	});
+
 	test('UTF-8 agrees with the platform', () => {
 		const text = 'Gain ±12 dB — 低音 🎧';
 		expect(utf8Encode(text)).toEqual(Uint8Array.from(Buffer.from(text, 'utf8')));
@@ -115,6 +127,12 @@ describe('device session', () => {
 	test('a pull needs a band count when the protocol has none', async () => {
 		const device = open(silentHid(), 'tanchjim-one-dsp');
 		await expect(device.pull()).rejects.toMatchObject({ code: 'invalid-request' });
+	});
+
+	test('a pull of a chosen slot is refused where only the current one can be read', async () => {
+		const device = open(silentHid(), 'tanchjim-one-dsp', 5);
+		expect(device.capabilities.readsSlot).toBe(false);
+		await expect(device.pull({ slot: 3 })).rejects.toMatchObject({ code: 'invalid-request' });
 	});
 
 	test('write-only handlers refuse to pull', async () => {

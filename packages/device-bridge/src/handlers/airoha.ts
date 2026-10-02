@@ -118,6 +118,7 @@ export const airoha: StreamHandler<AirohaOptions> = {
 		canRead: true,
 		canWrite: true,
 		readsPreamp: false,
+		readsSlot: true,
 		writesPreamp: false,
 		writesSlot: t.kind !== 'ble' && !o.ble,
 		bands: BANDS,

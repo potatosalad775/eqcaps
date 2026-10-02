@@ -5,7 +5,9 @@
 // gain f32 LE]; 0x8E reads a band as a feature request and commits it as an output report. Type
 // codes are the vendor app's. 0x8A selects a preset, 0x92 saves it, 0x91 opens a write. EQ on/off
 // (0x9D, answered on the feature report) is separate, persistent state that writing a preset
-// doesn't change, so a push also switches it on.
+// doesn't change, so a push also switches it on. A pull selects the preset it reads, as the
+// vendor app does, so it changes the active preset. A band at 0 Hz and 0 dB reads back as empty,
+// so frequencies must be above 0 (upstream never sends 0 Hz either).
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { f32le, F32_FIELD, field, readF32le, tidyF32, U8 } from '../bytes.ts';
@@ -32,6 +34,15 @@ const SAVE = 0x92;
 const SET_EQ_ENABLE = 0x9d;
 const GET_EQ_ENABLE = 0x9e;
 const BYPASS = 0;
+/** The smallest positive float32: anything below rounds to 0 Hz. */
+const MIN_FREQ = 2 ** -149;
+
+function frequency(freq: number) {
+	if (!(Math.fround(freq) >= MIN_FREQ)) {
+		throw new BridgeError('unrepresentable', `Fosi Audio: freq ${freq} must be above 0 Hz`);
+	}
+	return f32le(freq, 'freq');
+}
 
 export const FOSI_TYPES = typeCodes('fosi-audio', {
 	AP: 1,
@@ -69,7 +80,7 @@ export function decodeFosiBand(
 
 export const fosiAudioCodec: Codec<FosiAudioHidOptions, HidFrame> = {
 	types: FOSI_TYPES.types,
-	wire: () => ({ freq: F32_FIELD, q: F32_FIELD, gain: F32_FIELD }),
+	wire: () => ({ freq: { ...F32_FIELD, min: MIN_FREQ }, q: F32_FIELD, gain: F32_FIELD }),
 	encode(request, o) {
 		refuseUncarried('fosi-audio-usb-hid', request, { slot: true });
 		const { filters, slot } = request;
@@ -88,7 +99,7 @@ export const fosiAudioCodec: Codec<FosiAudioHidOptions, HidFrame> = {
 			);
 			band.set(
 				[
-					...f32le(f.freq, 'freq'),
+					...frequency(f.freq),
 					...f32le(f.q, 'q'),
 					...f32le(o.bandwidth ?? 0),
 					...f32le(f.gain, 'gain')
@@ -152,6 +163,7 @@ export const fosiAudioUsbHid: HidHandler<FosiAudioHidOptions> = {
 		canRead: true,
 		canWrite: true,
 		readsPreamp: false,
+		readsSlot: true,
 		writesPreamp: false,
 		writesSlot: true,
 		needsBandCount: true,

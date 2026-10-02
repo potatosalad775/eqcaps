@@ -87,6 +87,7 @@ export const moondropEdgeSerial: StreamHandler = {
 		canRead: true,
 		canWrite: true,
 		readsPreamp: false,
+		readsSlot: false,
 		writesPreamp: false,
 		writesSlot: false,
 		bands: BANDS,

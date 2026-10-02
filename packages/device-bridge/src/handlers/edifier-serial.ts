@@ -96,6 +96,7 @@ export const edifierSerial: StreamHandler = {
 		canRead: false,
 		canWrite: true,
 		readsPreamp: false,
+		readsSlot: false,
 		writesPreamp: false,
 		writesSlot: false,
 		bands: BAND_IDS.length,

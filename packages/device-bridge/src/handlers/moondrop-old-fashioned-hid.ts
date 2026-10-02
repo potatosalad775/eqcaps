@@ -71,6 +71,7 @@ export const moondropOldFashionedHid: HidHandler = {
 		canRead: true,
 		canWrite: true,
 		readsPreamp: false,
+		readsSlot: false,
 		writesPreamp: false,
 		writesSlot: false,
 		needsBandCount: true,

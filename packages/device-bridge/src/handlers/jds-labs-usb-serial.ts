@@ -159,6 +159,7 @@ export const jdsLabsUsbSerial: StreamHandler = {
 		canRead: true,
 		canWrite: true,
 		readsPreamp: true,
+		readsSlot: false,
 		writesPreamp: true,
 		writesSlot: false,
 		bands: JDS_BANDS.length,

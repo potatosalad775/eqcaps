@@ -108,6 +108,7 @@ export const moondropUsbHid: HidHandler = {
 		canRead: true,
 		canWrite: true,
 		readsPreamp: true,
+		readsSlot: false,
 		writesPreamp: true,
 		writesSlot: false,
 		needsBandCount: true,

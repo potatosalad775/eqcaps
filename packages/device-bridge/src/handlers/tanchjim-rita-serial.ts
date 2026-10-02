@@ -72,6 +72,7 @@ export const tanchjimRitaSerial: StreamHandler = {
 		canRead: true,
 		canWrite: true,
 		readsPreamp: false,
+		readsSlot: false,
 		writesPreamp: false,
 		writesSlot: false,
 		bands: BANDS,

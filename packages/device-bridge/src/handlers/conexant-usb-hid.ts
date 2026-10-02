@@ -97,6 +97,7 @@ export const conexantUsbHid: HidHandler = {
 		canRead: false,
 		canWrite: true,
 		readsPreamp: false,
+		readsSlot: false,
 		writesPreamp: false,
 		writesSlot: false,
 		bands: BANDS,

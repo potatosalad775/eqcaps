@@ -94,6 +94,7 @@ export const fiioF110: StreamHandler = {
 		canRead: true,
 		canWrite: true,
 		readsPreamp: false,
+		readsSlot: false,
 		writesPreamp: false,
 		writesSlot: false,
 		bands: BANDS,

@@ -113,7 +113,15 @@ export function openDevice(
 					throw new BridgeError('unsupported', `${handler.id} can't read from this device`);
 				}
 				const r: { slot?: number; bands?: number } = {};
-				if (request.slot !== undefined) r.slot = request.slot;
+				if (request.slot !== undefined) {
+					if (!capabilities.readsSlot) {
+						throw new BridgeError(
+							'invalid-request',
+							`${handler.id} reads only the current preset, not a chosen slot`
+						);
+					}
+					r.slot = request.slot;
+				}
 				if (capabilities.needsBandCount) {
 					const bands = request.bands ?? options.profile?.bandCount ?? undefined;
 					if (typeof bands !== 'number' || !Number.isInteger(bands) || bands < 0) {

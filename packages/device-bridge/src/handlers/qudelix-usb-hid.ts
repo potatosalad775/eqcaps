@@ -122,6 +122,7 @@ export const qudelixUsbHid: HidHandler<QudelixOptions> = {
 		canRead: false,
 		canWrite: true,
 		readsPreamp: false,
+		readsSlot: false,
 		writesPreamp: true,
 		writesSlot: true,
 		needsBandCount: false,

@@ -151,6 +151,7 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 		canRead: true,
 		canWrite: true,
 		readsPreamp: true,
+		readsSlot: false,
 		writesPreamp: true,
 		writesSlot: false,
 		...(o.bandRegisters ? { bands: o.bandRegisters.length } : {}),

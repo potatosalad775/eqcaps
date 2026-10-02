@@ -562,7 +562,8 @@ Edge, Edifier, Airoha (SPP and BLE).
   Values are rounded onto the wire grid; a value that doesn't fit its field is a `BridgeError`
   `unrepresentable`, a type without a wire code `unsupported-type`, both before anything is sent.
   The grid leaves out field values the decoder reads as "unset" (Walkplay 0 and 0xFFFF Hz, Moondrop
-  outside 10 Hz–24 kHz), so what a codec says it carries reads back as written.
+  outside 10 Hz–24 kHz, FiiO and Fosi Audio 0 Hz), so what a codec says it carries reads back as
+  written.
   An unknown code reads back as the extension type `x-wire-<code>` and encodes to the same code,
   so a pull hides nothing and a probe can send any code. Constant wire factors are protocol
   options (`freqScale`: Walkplay SchemeNo11 0.9775, KT Micro 2), matching the profiles' grids
@@ -574,7 +575,8 @@ Edge, Edifier, Airoha (SPP and BLE).
   silently, it would look applied.
 - **Pull returns written values** in band order, `null` for a band that is off or unset, plus
   the preamp and slot where the protocol reports them. Protocols that read band by band take the
-  count from the caller or the profile (`needsBandCount`).
+  count from the caller or the profile (`needsBandCount`). A chosen `slot` is refused where the
+  protocol reads only the current preset (`readsSlot`), rather than answered with the current one.
 - **Protocols are keyed by profile id.** `PROTOCOLS` maps each hardware profile to its handler,
   protocol options, preset slots and transport details (baud rate, disconnect on save). Which
   profile a connected device is, is the database's question, answered once by the client's
@@ -596,7 +598,8 @@ Edge, Edifier, Airoha (SPP and BLE).
   the model's off preset rather than preset `maxFilters`; FiiO pulls ask one question at a time
   and keep band order; Walkplay coefficients use the plain cookbook arithmetic; Airoha SPP writes
   32-bit frequencies (upstream's 16 bits overflow above 655 Hz); Edifier frequencies missing from
-  the code table are refused rather than snapped; KT Micro devices with listed band registers
+  the code table are refused rather than snapped; a Fosi Audio band at 0 Hz is refused rather than
+  sent at 1000 Hz; KT Micro devices with listed band registers
   refuse bands past them; decoders return exact wire values rather than rounding to two decimals;
   Qudelix 5K is in the table (experimental, write-only) as modernGraphTool does.
 - **Not ported:** compensation (profile `realization` now, D29) and the sample-rate reads that
