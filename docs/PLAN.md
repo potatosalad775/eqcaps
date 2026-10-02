@@ -72,13 +72,13 @@ eqcaps/
 │   ├── client/                   fetch/cache index, profiles, bundle; matchDevice()
 │   ├── build/                    structural validation (Ajv) and the validation pipeline; later
 │   │                             compile, index, bundle, hashes and the CI CLI
-│   ├── device-bridge/            codecs + transport interface + browser transports (WebHID/WebSerial/BLE/network);
-│   │                             extracted from modernGraphTool, caught up with upstream devicePEQ (D20)
+│   ├── device-bridge/            codecs, sessions, protocols by profile id, transport interface and
+│   │                             browser transports (WebHID/Web Serial/Web Bluetooth); from devicePEQ (D20, D33)
 │   └── kotlin/                   (not scheduled, D15) Kotlin port of core
 ├── apps/inspector/               Svelte 5 + Vite static SPA
 ├── scripts/
 │   ├── codegen.ts                source.schema.json + TS types from profile.schema.json (D13)
-│   └── import/                   one-off seed importers (devicePEQ, modernGraphTool, AutoEQ)
+│   └── import/                   one-off importers: seed data (devicePEQ, modernGraphTool, AutoEQ)
 ├── LICENSE                       MIT: packages/, apps/, scripts/
 ├── LICENSE-DATA                  CC0-1.0: data/, schema/, conformance/ and all published JSON (D25)
 ├── THIRD-PARTY-NOTICES.md        devicePEQ (0BSD), modernGraphTool (MIT), AutoEQ (MIT)
@@ -127,7 +127,7 @@ Every property runs on 10k random profiles in `npm test` and passed at 100k
 `scripts/conformance.ts`. What the implementation settled is recorded in D30 and SPEC §6–§8 and
 §13, including a new *safe* property of `fit` and `complete` returning warnings.
 
-### Phase 3: Data pipeline, seed data, `/next/` · M (≈2 weeks) · done 2026-10-02 except the first npm release
+### Phase 3: Data pipeline, seed data, `/next/` · M (≈2 weeks) · done 2026-10-02
 - `packages/build` + CLI: `validate`, `build` (flatten, index, bundle, sha256), `check-collisions`.
 - `scripts/import/`: devicePEQ registry + device configs, modernGraphTool registrations, AutoEQ
   `PEQ_CONFIGS` → `draft` profiles, enriched with wire grids from
@@ -153,10 +153,10 @@ profiles, 15 bases; what was taken and skipped is in D31), the client (D32), CI 
 with line annotations, the Pages deploy, the local release script (`npm run release`),
 `CONTRIBUTING.md`, the PR template and issue forms. `scripts/sample-consumer.ts` fetches, matches,
 validates and fits, and a test runs it against the built data. The repository is public, `/next/`
-is live on Pages, and `main` is protected (one approval, CI required, D28). Left: the first npm
-release (`npm run release -- 0.1.0`).
+is live on Pages, and `main` is protected (one approval, CI required, D28). `core` and `client`
+0.1.0 are on npm.
 
-### Phase 4: Inspector v1 (T0, T1, T2, T4) and spec freeze · L (3–4 weeks)
+### Phase 4: Inspector v1 (T0, T1, T2, T4) and spec freeze · L (3–4 weeks) · in progress
 - `packages/device-bridge`: extract from modernGraphTool, keep behaviour, add identity extraction,
   "any device" connect, capability flags, `profileId` linkage for migrated handlers.
   - Define the transport interface with no browser types in handlers, so the Android app can plug
@@ -173,10 +173,19 @@ release (`npm run release -- 0.1.0`).
 - **Exit:** a real HID device goes connect → matched profile → read → validate → prefilled PR,
   end to end. **Freeze format v1** and publish `/v1/` alongside `/next/`.
 
+The device bridge is built (D33): 16 protocols from devicePEQ `0617f38`, each a pure codec
+(request ↔ frames, plus the wire grid it can carry) and a session that does the I/O, behind
+transports without browser types, with WebHID, Web Serial and Web Bluetooth implementations.
+Protocols are keyed by profile id, so the client's `matchDevice` is the only identity answer;
+devices without a profile get a vendor guess marked experimental. Tests decode the recorded device
+answers, round-trip every codec on its wire grid, check every hardware profile against its codec,
+and run the consumer recipe (`fit` → `complete` → push) for every profile. They corrected three
+seeded profiles and found two codec bugs; the open data findings are listed in D33. Left: publish
+the bridge, confirm it on real hardware, the inspector, and the hand-authored profiles.
+
 ### Phase 5: Probe mode (T3) · L (3–4 weeks)
-- Bridge: codec/transport split for handlers with read-back (start with FiiO HID, Walkplay HID,
-  JDS Labs, Rita, Airoha); raw push; offline codec analysis that produces `handler-code` sources
-  automatically.
+- Bridge: offline codec analysis (the codecs' `wire()` and `types`, D33) that produces
+  `handler-code` sources automatically.
 - Probe engine: planner, parallel per-slot search, step inference, whole-set-rejection fallback,
   backup/restore, evidence writer, safety UX (INSPECTOR §3).
 - Fake-device tests for every failure path (disconnect mid-probe, rejected write, silent reset).
@@ -213,7 +222,10 @@ release (`npm run release -- 0.1.0`).
 
 ## 7. Immediate next steps
 
-1. Phase 3: publish `core` and `client` 0.1.0 (`npm run release -- 0.1.0`).
-2. Answer Q11 (compact USB match entries), or leave it until the index grows.
-3. Phase 4: extract `packages/device-bridge`, start the inspector, hand-author the ≥ 10 verified
-   profiles the freeze needs.
+1. Owner: publish the bridge with `core` and `client` as 0.2.0 (`npm run release -- 0.2.0`). The
+   captures prove the bytes, not that a write lands: the first real-hardware check comes with the
+   inspector's connect → read flow, or modernGraphTool switching over to the package.
+2. Phase 4: start `apps/inspector` (T0 browse and playground first; T1/T2 on the bridge).
+3. Hand-author the ≥ 10 verified profiles the freeze needs. Candidates from D33's findings: the
+   FiiO filter types and the KT Micro Q ranges, settled from vendor apps or docs.
+4. Answer Q11 (compact USB match entries), or leave it until the index grows.

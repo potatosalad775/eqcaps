@@ -7,8 +7,8 @@ identity and provenance. The repo also holds the tooling to author, verify, vali
 profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor), and anyone else
 who adopts the format.
 
-**Status: Phases 0–2 done; Phase 3 (data pipeline, seed data, client) done, `/next/` live;
-first npm release pending (PLAN §5).** Read `docs/PLAN.md` first.
+**Status: Phases 0–3 done (`/next/` live, `core` and `client` 0.1.0 on npm); Phase 4 in progress:
+`packages/device-bridge` built, inspector next (PLAN §5).** Read `docs/PLAN.md` first.
 
 Commands: `npm run lint` · `npm run check` (codegen and vector drift + typecheck) · `npm test` ·
 `npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json` ·
@@ -66,6 +66,14 @@ in the same change. Don't define format details anywhere except SPEC-DRAFT.md.
   validate it. `<brand>` is `brandSlug(device.brand)`. Abstract bases: `data/bases/<id>.json`.
 - `data/` was seeded once by `scripts/import/seed.ts` (D31) and is now edited by hand. Don't re-run
   the importer over it.
+- Device bridge (D33): handlers see only the transport interfaces in `src/transport.ts`, never
+  browser APIs (those are in `src/browser/`, typed structurally). Codecs write exactly the written
+  values they're given: round onto the wire grid, never clamp, pad or convert types; anything the
+  wire can't carry is a `BridgeError`. A handler is a pure codec (`encode`/`decode`/`wire`) plus a
+  session that does the I/O. `src/protocols.ts` maps profile ids to handler settings; constraints
+  stay in profiles and identities in profile `match` (the client matches, the bridge doesn't).
+  Protocols come from devicePEQ `0617f38`; test against device answers
+  (`packages/device-bridge/test/captures/`) and codec round trips, not devicePEQ's bytes.
 - Workspace packages import each other by package name. Node scripts that need sources run with
   `--conditions=eqcaps:source`; `scripts/*.ts` import sources by relative path.
 - USB ids are lowercase 4-digit hex strings (`"0x2972"`). HID `productName` matches exactly,
@@ -80,10 +88,9 @@ in the same change. Don't define format details anywhere except SPEC-DRAFT.md.
 
 ## Related code
 
-- `../modernGraphTool` is the first consumer, and its `src/lib/device-peq/` is the TS device bridge
-  (MIT) to be extracted into `packages/device-bridge`. Its `src/lib/types/eq-constraint.ts` is the
-  flat model this project replaces. Read it for reference; don't edit it from this repo's tasks.
-  Its bridge is behind upstream devicePEQ (no Conexant handler, no recorded captures).
+- `../modernGraphTool` is the first consumer. Its `src/lib/device-peq/` is the older TS bridge
+  (MIT) that `packages/device-bridge` replaces, and its `src/lib/types/eq-constraint.ts` the flat
+  model this project replaces. Read it for reference; don't edit it from this repo's tasks.
 - `../devicePEQ` is a local clone of `jeromeof/devicePEQ` (0BSD), upstream of that bridge. Seed data:
   `devicePEQ/peqConstraintsConfig.json` (36 shape-named profiles) + `devicePEQ/*DeviceConfig.js`.
   Also worth reading: `devicePEQ/compensation.js` (source of the realization laws, D29) and

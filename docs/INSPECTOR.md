@@ -159,14 +159,22 @@ The inspector uses `packages/device-bridge`, extracted from modernGraphTool's `s
 | --- | --- |
 | Identify unknown devices | connectors accept "any device" mode; identity separated from handler lookup |
 | T2/T3 attribution | **split each handler into a pure codec** (`encode(bands) → bytes`, `decode(bytes) → bands`) and transport I/O. The codec alone can be probed offline (encode→decode) to learn wire-level limits with no hardware, which feeds `handler-code` sources automatically. It also gives a virtual device for tests and UI work. |
-| Raw push | `push(..., { raw: true })` sends written values straight to the codec: no `normalizeFiltersForDevice`, no clamping. With realization in profiles (SPEC §8) the bridge has no compensation to bypass, unlike devicePEQ, which needed a verification-only switch. |
-| Portable transports | handlers talk to a transport interface (open, send/receive reports or bytes, close) with no browser types. WebHID, Web Serial, Web Bluetooth and fetch are the browser implementations. The Android app supplies a native USB one (DECISIONS D27). |
+| Raw push | push sends written values straight to the codec: no `normalizeFiltersForDevice`, no clamping. With realization in profiles (SPEC §8) the bridge has no compensation to bypass, unlike devicePEQ, which needed a verification-only switch. Every push is raw; consumers fit first (DECISIONS D33). |
+| Portable transports | handlers talk to a transport interface (open, send/receive reports or bytes, close) with no browser types. WebHID, Web Serial and Web Bluetooth are the browser implementations. The Android app supplies a native USB one (DECISIONS D27). |
 | Capability flags | `canRead`, `canWrite`, `slots`, `disconnectOnSave`, `supportsPreamp` exposed per handler |
 | Link to DB | registrations reference a profile **id** instead of carrying `minGain`/`maxGain`/`maxFilters`/`supportsLSHSFilters`. Protocol-only fields (`reportId`, `schemeNo`, `baudRate`, slots…) stay in the bridge. |
 
 Handlers are migrated incrementally: an unmigrated handler still supports T1/T2 and simply can't be
 probed. Upstream devicePEQ's recorded device captures (`tests/captures/`, real device exchanges
 per model) become codec regression tests and seed the virtual device.
+
+*2026-10-02:* the bridge exists (DECISIONS D33): portable transports with browser implementations,
+"any device" WebHID connect, identity extraction, the descriptor as `collections`, capability
+flags, raw push, and the captures as regression tests. Every handler is split into a pure codec
+(`encode`, `decode`, and `wire()`: the range and resolution each field can carry) and a session,
+so offline probing and a virtual device can start from the codecs. Protocols are keyed by profile
+id rather than carried by registrations: the device is identified once, by the client against the
+database, and an unknown device gets its vendor's usual protocol, marked experimental.
 
 ## 5. Architecture
 

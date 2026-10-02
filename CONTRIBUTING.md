@@ -42,6 +42,17 @@ Most profiles were seeded from devicePEQ, modernGraphTool and AutoEQ by
 [`scripts/import/seed.ts`](scripts/import/seed.ts) and are `draft`. Their notes say what is known
 to be uncertain. Checking one against your device is one of the most useful things you can do.
 
+## Adding a device to the bridge
+
+If an existing protocol already drives your device, give the device a profile (its `match` is how
+apps recognize it), then add an entry for the profile id to
+[`packages/device-bridge/src/protocols.ts`](packages/device-bridge/src/protocols.ts) with the
+handler and its protocol settings. Constraints (bands, ranges, types) go in the profile, never in
+the protocol entry; the tests check that the profile only allows what the protocol can write. A
+recorded exchange with the device in `packages/device-bridge/test/captures/` makes it a regression
+test. New protocols need a handler, a codec and a session: see the existing ones and
+[DECISIONS D33](docs/DECISIONS.md).
+
 ## Checking your change
 
 Requires Node 22.18 or later.

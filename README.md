@@ -18,6 +18,7 @@ quantization, conditional domains, cross-band rules, preamp, device identity and
 | [`conformance/v1/`](conformance/v1/) | Fixtures and vectors any implementation can test against |
 | [`packages/core`](packages/core/) | Types, semantic validator and the reference engine. Zero dependencies. |
 | [`packages/client`](packages/client/) | Fetching, caching and device matching. Never throws into the host app. |
+| [`packages/device-bridge`](packages/device-bridge/) | Reads and writes EQ on every hardware device in the database over HID, serial and Bluetooth, behind transport interfaces with no browser types. |
 | [`data/`](data/) | The profiles (`profiles/<brand>/<id>.json`) and shared bases. See [CONTRIBUTING.md](CONTRIBUTING.md). |
 | [`packages/build`](packages/build/) | Validation pipeline and data build used by CI |
 
@@ -36,6 +37,9 @@ npm run conformance  # after changing engine behaviour or scripts/conformance.ts
 npm run data:validate  # check data/ as CI does
 npm run data:build     # publish /next/ into dist/site/next/
 ```
+
+`@potatosalad775/eqcaps-core` and `@potatosalad775/eqcaps-client` are on npm; the device bridge
+will be `@potatosalad775/eqcaps-device-bridge` from the next release.
 
 ## License
 

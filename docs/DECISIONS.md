@@ -375,6 +375,8 @@ depend on it**. modernGraphTool later switches to consuming the package.
 - Upstream's compensation code (`compensation.js`) is **not** ported. Its laws become profile data
   and core applies them (D29). Codecs apply only constant wire factors (KTMicro ×2, Walkplay
   ×0.9775).
+*2026-10-02 (Phase 4):* done, from devicePEQ `0617f38` directly, since modernGraphTool's port
+predates most of upstream's changes. What the bridge looks like is D33.
 
 ### D21. Tech stack (accepted)
 npm workspaces, TypeScript strict, Vitest + fast-check, Ajv, Svelte 5 + Vite for the inspector, and
@@ -505,6 +507,10 @@ don't exist. `index.json` is 357 KB, 32 KB gzipped. See Q11.
 **Rejected:** shape-named published profiles (D3); skipping the product-id groups, which would
 drop most Walkplay devices; restricting groups to one vendor id, which drops real devices
 (Moondrop and others ship under their own ids); copying modernGraphTool's constraint values.
+*2026-10-02:* the bridge's tests (D33) corrected four seeded profiles: `fiio-ka15` had Walkplay
+grids, because devicePEQ lets the product id group pick the handler; `moondrop-edge` and
+`tanchjim-rita` allowed shelves their handlers can't write; `qudelix-5k` had continuous ranges
+where its USB write is quantized.
 
 ### D32. Data pipeline and client (accepted, 2026-10-02)
 - **Build:** `packages/build` validates `data/` (repository layout, schemas, semantic and
@@ -532,6 +538,86 @@ drop most Walkplay devices; restricting groups to one vendor id, which drops rea
   account's 2FA. Releases are rare, so a local script that lets npm prompt for 2FA beats managing
   an automation token. Lost: npm provenance attestations, which need a CI publish. Revisit with
   npm trusted publishing (OIDC from Actions, no token) if releases become frequent.
+
+### D33. Device bridge: transports, codecs and protocols (accepted, 2026-10-02)
+`packages/device-bridge` (`@potatosalad775/eqcaps-device-bridge`) drives the devices the database
+describes. Its protocols come from devicePEQ at `0617f38`, the commit the seed import read (D31).
+16 handlers: FiiO (USB HID, USB serial, "F1 10" over SPP and BLE), Walkplay, Moondrop, Moondrop
+Old Fashioned, Conexant, KT Micro, Fosi Audio, Qudelix, JDS Labs, Nothing, Tanchjim Rita, Moondrop
+Edge, Edifier, Airoha (SPP and BLE).
+- **Transports.** Handlers see two interfaces and nothing else: HID (reports, feature reports,
+  input listener, descriptor collections) and stream (serial or BLE: write, read with a timeout).
+  A stream request first drops the bytes already received, and answers are matched to their
+  command, so a late answer to an earlier write is never taken for the next one's.
+  No browser types. WebHID, Web Serial and Web Bluetooth implementations are in the `./browser`
+  entry, typed structurally. The Android app implements the same interfaces over its native USB
+  plugin (D27).
+- **A handler is a codec and a session.** The codec is pure: `encode(request)` gives the write
+  frames, `decode(frames)` reads them back, `wire()` says what the frames can carry (range and
+  resolution per field, or the list of frequencies) and `types` which filter types have codes. The
+  session does the I/O: pull, push (sends the codec's frames, with the waits and acknowledgements
+  the device needs), current slot, EQ on/off. The inspector can ask a codec what a value becomes
+  on the wire without a device.
+- **Codecs write what they are given.** No clamping, padding, type conversion or compensation.
+  Values are rounded onto the wire grid; a value that doesn't fit its field is a `BridgeError`
+  `unrepresentable`, a type without a wire code `unsupported-type`, both before anything is sent.
+  The grid leaves out field values the decoder reads as "unset" (Walkplay 0 and 0xFFFF Hz, Moondrop
+  outside 10 Hz–24 kHz), so what a codec says it carries reads back as written.
+  An unknown code reads back as the extension type `x-wire-<code>` and encodes to the same code,
+  so a pull hides nothing and a probe can send any code. Constant wire factors are protocol
+  options (`freqScale`: Walkplay SchemeNo11 0.9775, KT Micro 2), matching the profiles' grids
+  (D29).
+- **Push takes written values**, one per band in band order, normally `fit` then `complete`; the
+  bridge does no fitting of its own, so INSPECTOR §4's raw push is the only push. The preamp is
+  written only when given (Nothing sends it with the bands, so it is 0 when left out). A `preamp`
+  or `slot` the write can't carry (`writesPreamp`, `writesSlot`) is an `invalid-request`: dropped
+  silently, it would look applied.
+- **Pull returns written values** in band order, `null` for a band that is off or unset, plus
+  the preamp and slot where the protocol reports them. Protocols that read band by band take the
+  count from the caller or the profile (`needsBandCount`).
+- **Protocols are keyed by profile id.** `PROTOCOLS` maps each hardware profile to its handler,
+  protocol options, preset slots and transport details (baud rate, disconnect on save). Which
+  profile a connected device is, is the database's question, answered once by the client's
+  `matchDevice`; the bridge holds no device identities. A device with no profile gets
+  `guessProtocol(vendorId)`, its vendor's usual HID protocol, marked experimental. Browser
+  choosers are filtered from the database entries the app has (`chooserFilters(index.profiles)`),
+  plus the guessable vendors, so an app that embeds the bundle works offline (invariant 8).
+- **Tests check the protocols against devices and data, not against devicePEQ's bytes.** The
+  recorded captures (devicePEQ `tests/captures/`, its own 0BSD files; not `external/`, which is
+  vendor web-app traffic) are kept where they hold real device answers: every pull decodes them,
+  and the recorded writes, decoded and re-encoded, give the same band frames. Every codec, under
+  every option set the table uses, round-trips any request on its wire grid (end points
+  included) and refuses values outside it (fast-check). Every hardware profile has a protocol,
+  `freqScale` equals its frequency step, and what a profile allows beyond the codec's wire, in
+  range, grid or types, is listed.
+- **Differences from upstream:** the FIIO KA15 is driven by the FiiO handler (devicePEQ lets its
+  product id group pick Walkplay; the capture is FiiO's); Moondrop Old Fashioned uses its register
+  handler (upstream imports it under a name the module doesn't export); FiiO's "EQ off" selects
+  the model's off preset rather than preset `maxFilters`; FiiO pulls ask one question at a time
+  and keep band order; Walkplay coefficients use the plain cookbook arithmetic; Airoha SPP writes
+  32-bit frequencies (upstream's 16 bits overflow above 655 Hz); Edifier frequencies missing from
+  the code table are refused rather than snapped; KT Micro devices with listed band registers
+  refuse bands past them; decoders return exact wire values rather than rounding to two decimals;
+  Qudelix 5K is in the table (experimental, write-only) as modernGraphTool does.
+- **Not ported:** compensation (profile `realization` now, D29) and the sample-rate reads that
+  only fed it; non-EQ extras (mic gain, DAC filter, balance, battery); handlers for devices the
+  database has no profile for (EarFun, WiiM, Luxsin, Topping); upstream's UI (toasts, device
+  pickers).
+
+**Found in the data:** `fiio-ka15` had Walkplay wire grids, `moondrop-edge` and `tanchjim-rita`
+allowed shelves their handlers can't write, and `qudelix-5k` had continuous ranges on a quantized
+write; all four are corrected (D31). Left open, kept visible by the tests: FiiO profiles allow LPQ,
+HPQ, BP and AP, which no FiiO codec has codes for; recorded devices hold values outside their
+draft ranges (KT Micro Chu 2, Bunny and One DSP with Q up to 8 against 5, Kiwi Ears Allegro Pro
+at 18 Hz, EPZ TP13 at 19.55 Hz).
+**Rejected:** keeping devicePEQ's `normalizeFiltersForDevice` in the bridge (constraint logic that
+duplicates core's `fit`); passing profiles to the bridge for writes; a Kotlin bridge (D27); a
+registry in the bridge that matches device identities to handlers, hand-written or generated from
+the data (two matchers for one question; the client already matches, offline too, from an
+embedded bundle); tests that require pushes to reproduce devicePEQ's recorded bytes down to its
+arithmetic quirks (the goal is driving the database's devices, not reproducing devicePEQ);
+devicePEQ's synthetic captures (Conexant, the two BLE ones, Qudelix) and non-EQ ones (mic gain,
+the vendor site).
 
 ---
 
