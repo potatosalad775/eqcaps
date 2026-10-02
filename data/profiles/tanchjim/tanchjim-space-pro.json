@@ -1,0 +1,48 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-peq-10-band-10db-pk-only",
+	"id": "tanchjim-space-pro",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Tanchjim", "model": "Space Pro" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x3302", "productId": "0x4367", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x0104", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x011b", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x011d", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x0661", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x0663", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x0666", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x0762", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x0909", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x0d8c", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x2fc6", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x3302", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x34be", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x35d8", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x36a7", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x373b", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x60c1", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0x60e1", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0xb445", "productName": "TANCHJIM-SPACE PRO" },
+			{ "vendorId": "0xb44d", "productName": "TANCHJIM-SPACE PRO" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/walkplay_schemeno16_tanchjim_space_pro.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Its recorded capture's product id is in devicePEQ's \"SchemeNo16\" group, whose settings apply under the device's own."
+	}
+}

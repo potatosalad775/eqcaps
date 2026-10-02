@@ -1,0 +1,25 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-spp-peq-10-band-20db-full-shelves",
+	"id": "fiio-eh13",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "FiiO", "model": "EH13" },
+	"match": { "bluetooth": [{ "name": "FIIO EH13" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbSerialDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/bluetoothBleDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ reaches this engine over Bluetooth SPP and BLE with slightly different limits; this profile keeps the values both accept."
+	}
+}

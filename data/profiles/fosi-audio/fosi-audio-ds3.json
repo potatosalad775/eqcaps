@@ -1,0 +1,50 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "fosi-audio-ds3",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Fosi Audio", "model": "DS3" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x152a", "productId": "0x889b", "productName": "Fosi Audio DS3" },
+			{ "vendorId": "0x152a", "productName": "Fosi Audio DS3" }
+		]
+	},
+	"bandCount": 8,
+	"band": {
+		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "NO", "AP"],
+		"freq": { "min": 20, "max": 20000 },
+		"q": { "min": 0.1, "max": 10 },
+		"gain": { "min": -12, "max": 12 }
+	},
+	"realization": {
+		"laws": [
+			{ "law": "gainScaledQ", "types": ["PK", "LSC", "HSC"] },
+			{ "law": "shelfFrequencyShift", "types": ["LSC", "HSC"], "designRate": 48000 }
+		],
+		"sources": [
+			{
+				"kind": "community",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/compensation.js",
+				"date": "2026-10-02"
+			}
+		]
+	},
+	"preamp": { "mode": "none" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/fosi_audio_ds3.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ also lists band-stop and constant-Q peaking filters. Band-stop is the notch (NO); constant-Q peaking has no code in the format."
+	}
+}

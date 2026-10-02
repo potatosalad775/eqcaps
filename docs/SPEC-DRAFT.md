@@ -764,15 +764,24 @@ types, laws and filter types this engine version doesn't know, so a consumer can
 
 ## 14. Published artifacts
 
+Each channel (`/v1/`, and `/next/` before the freeze) holds:
+
 | Path | Content |
 | --- | --- |
-| `/v1/index.json` | `{ schemaVersion, dataVersion, generatedAt, profiles: [{ id, kind, brand, model, engine, status, match, path, sha256, bytes }] }`. It includes `match`, so clients can identify a device without fetching every profile. |
-| `/v1/profiles/<id>.json` | One flattened profile. |
-| `/v1/bundle.json` | Every non-deprecated profile in one file, for apps that embed a snapshot (Android). |
-| `/v1/schema/profile.schema.json` | The JSON Schema. |
-| `/v1/conformance/` | Vectors. |
+| `index.json` | `{ schemaVersion, dataVersion, generatedAt, profiles: [{ id, kind, brand, model, aliases?, engine?, status, replacedBy?, match?, path, sha256, bytes }] }`, one entry per profile, deprecated ones included, sorted by id. It includes `match`, so clients can identify a device without fetching every profile. `path` is relative to the index. |
+| `profiles/<id>.json` | One flattened profile. |
+| `bundle.json` | `{ schemaVersion, dataVersion, generatedAt, profiles: [...] }`: every non-deprecated profile in one file, for apps that embed a snapshot (Android). |
+| `schema/profile.schema.json` | The JSON Schema. |
+| `conformance/` | Fixtures and vectors (§13.8). |
 
-`dataVersion` = `YYYY.MM.DD-<short git sha>`. Profiles are cacheable by `sha256`.
+`dataVersion` = `YYYY.MM.DD-<short git sha>`, from the commit the data was built from.
+`schemaVersion` of the index and the bundle is the format version the build implements. `sha256`
+is the hex SHA-256 of the profile file's bytes, so profiles are cacheable by it. A profile's
+`$schema` points at the schema of its channel.
+
+A client treats every artifact leniently (§15): it ignores a document whose major version it
+doesn't know, ignores entries and profiles it can't read, and never lets a failure to load reach
+the host app: the database enhances an app and never blocks it. The reference client is `packages/client`.
 
 ## 15. Versioning and compatibility
 

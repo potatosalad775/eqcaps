@@ -1,0 +1,27 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-10-band-12db-wide-shelves",
+	"id": "fiio-btr17",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "FiiO", "model": "BTR17" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x2972", "productName": "FIIO BTR17" },
+			{ "vendorId": "0x2972", "productName": "BTR17" },
+			{ "vendorId": "0x0a12", "productName": "FIIO BTR17" },
+			{ "vendorId": "0x0a12", "productName": "BTR17" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+	}
+}

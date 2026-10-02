@@ -43,6 +43,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # First, so a contributor's data mistakes are the first thing the PR shows. Each issue is
+      # also an annotation on the offending line of the diff.
+      - name: Validate data
+        run: npm run data:validate
+
       - name: Lint (Prettier + ESLint)
         run: npm run lint
 
@@ -54,6 +59,9 @@ jobs:
 
       - name: Build packages
         run: npm run build
+
+      - name: Build data (/next/)
+        run: npm run data:build
 
       # After a clean checkout, an install, a type generation check and a build, nothing tracked
       # may have changed. If .gitattributes ever stops pinning LF, this fails on Windows only.

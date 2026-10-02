@@ -127,7 +127,7 @@ Every property runs on 10k random profiles in `npm test` and passed at 100k
 `scripts/conformance.ts`. What the implementation settled is recorded in D30 and SPEC §6–§8 and
 §13, including a new *safe* property of `fit` and `complete` returning warnings.
 
-### Phase 3: Data pipeline, seed data, `/next/` · M (≈2 weeks)
+### Phase 3: Data pipeline, seed data, `/next/` · M (≈2 weeks) · built 2026-10-02, waiting on owner steps
 - `packages/build` + CLI: `validate`, `build` (flatten, index, bundle, sha256), `check-collisions`.
 - `scripts/import/`: devicePEQ registry + device configs, modernGraphTool registrations, AutoEQ
   `PEQ_CONFIGS` → `draft` profiles, enriched with wire grids from
@@ -147,6 +147,15 @@ Every property runs on 10k random profiles in `npm test` and passed at 100k
   consume them from there.
 - **Exit:** `/next/index.json` is live with all importable devices as drafts; a malformed PR fails
   CI with a readable message; a 20-line sample consumer fetches, matches and validates.
+
+Built: the build CLI (`npm run data:validate`, `npm run data:build`), the seed import (98 draft
+profiles, 15 bases; what was taken and skipped is in D31), the client (D32), CI data validation
+with line annotations, the Pages deploy and npm release workflows, `CONTRIBUTING.md`, the PR
+template and issue forms. `scripts/sample-consumer.ts` fetches, matches, validates and fits, and a
+test runs it against the built data. Still to do, by the owner: make the repository public, enable
+Pages with "GitHub Actions" as the source, protect `main` (one approval, D28), add the `NPM_TOKEN`
+secret, and tag the first release. Then `/next/index.json` goes live and the exit criteria can be
+checked on the real site.
 
 ### Phase 4: Inspector v1 (T0, T1, T2, T4) and spec freeze · L (3–4 weeks)
 - `packages/device-bridge`: extract from modernGraphTool, keep behaviour, add identity extraction,
@@ -205,4 +214,8 @@ Every property runs on 10k random profiles in `npm test` and passed at 100k
 
 ## 7. Immediate next steps
 
-1. Phase 3: `packages/build` CLI, the seed importers, `packages/client`, CI deploy of `/next/`.
+1. Phase 3, owner steps: make the repository public, enable Pages (source: GitHub Actions),
+   protect `main`, add `NPM_TOKEN`, tag `v0.1.0`. Check the exit criteria on the live site.
+2. Answer Q11 (compact USB match entries), or leave it until the index grows.
+3. Phase 4: extract `packages/device-bridge`, start the inspector, hand-author the ≥ 10 verified
+   profiles the freeze needs.

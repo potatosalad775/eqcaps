@@ -16,10 +16,12 @@
 	],
 	"exports": {
 		".": {
+			"eqcaps:source": "./src/index.ts",
 			"types": "./dist/index.d.ts",
 			"default": "./dist/index.js"
 		},
 		"./node": {
+			"eqcaps:source": "./src/node.ts",
 			"types": "./dist/node.d.ts",
 			"default": "./dist/node.js"
 		}

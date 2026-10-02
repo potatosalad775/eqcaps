@@ -1,0 +1,32 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-5-band-12db-full-shelves",
+	"id": "fiio-ls-tc2",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "FiiO", "model": "LS-TC2" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x2972", "productName": "FIIO LS-TC2" },
+			{ "vendorId": "0x2972", "productName": "LS-TC2" },
+			{ "vendorId": "0x0a12", "productName": "FIIO LS-TC2" },
+			{ "vendorId": "0x0a12", "productName": "LS-TC2" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/potatosalad775/modernGraphTool/blob/fd55b9f8fdf6ac2c080aaf6fb59dab584c5dfe93/src/lib/device-peq/handlers/walkplay-hid.ts",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ marks this device experimental."
+	}
+}

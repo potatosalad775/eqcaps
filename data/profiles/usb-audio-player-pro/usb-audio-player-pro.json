@@ -1,0 +1,26 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "usb-audio-player-pro",
+	"schemaVersion": "1.0",
+	"kind": "software",
+	"device": { "brand": "USB Audio Player PRO", "model": "Parametric EQ" },
+	"bandCount": 10,
+	"band": {
+		"types": ["PK", "LSC", "HSC"],
+		"freq": { "min": 20, "max": 20000 },
+		"q": { "min": 0.1, "max": 10 },
+		"gain": { "min": -20, "max": 20 }
+	},
+	"preamp": { "mode": "unknown" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "community",
+				"ref": "https://github.com/jaakkopasanen/AutoEq/blob/7ae0f56d53074872b028649617a22bbb4232feb7/autoeq/constants.py",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from AutoEQ by scripts/import/seed.ts. Band count, gain range and peaking Q range from AutoEQ's PEQ_CONFIGS USB_AUDIO_PLAYER_PRO, which is an optimizer setting: the engine may allow more bands. The frequency range and the shelves' Q range are assumptions."
+	}
+}

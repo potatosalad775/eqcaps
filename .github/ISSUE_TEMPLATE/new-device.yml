@@ -1,0 +1,42 @@
+name: New device
+description: Ask for a device or app EQ to be added, with what you know about it.
+title: 'New device: '
+labels: ['new device']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tell us what you know; partial information helps. Anything you write here may become
+        public-domain data (CC0-1.0), so don't paste vendor code.
+  - type: input
+    id: device
+    attributes:
+      label: Device or app
+      description: Brand and model, or the app name.
+      placeholder: FiiO KA17
+    validations:
+      required: true
+  - type: textarea
+    id: identity
+    attributes:
+      label: How it identifies itself
+      description: |
+        USB vendor id, product id and product name (WebHID or `lsusb` show them), or the
+        Bluetooth name prefix. Leave out names you gave the device yourself, and serial numbers.
+      placeholder: 'USB 0x2972:0x0093 "FIIO KA17"'
+  - type: textarea
+    id: eq
+    attributes:
+      label: What its EQ accepts
+      description: |
+        Number of bands, filter types per band, frequency / Q / gain ranges and their steps,
+        preamp. Say which bands differ, if any.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Where this comes from
+      description: Vendor docs, the vendor's app (screenshots welcome), a measurement, or your own testing.
+    validations:
+      required: true

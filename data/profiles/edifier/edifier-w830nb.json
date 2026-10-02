@@ -1,0 +1,36 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "edifier-w830nb",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Edifier", "model": "W830NB" },
+	"match": {
+		"bluetooth": [
+			{ "namePrefix": "EDIFIER W830NB", "serviceUuid": "00001101-0000-1000-8000-00805f9b34fb" }
+		]
+	},
+	"bandCount": 4,
+	"band": {
+		"types": ["PK"],
+		"freq": {
+			"values": [
+				20, 50, 75, 76, 77, 100, 150, 175, 200, 400, 500, 1000, 1500, 2000, 3000, 3078, 4000, 5000,
+				6000, 8000, 10000
+			]
+		},
+		"q": { "min": 0.5, "max": 5, "step": 0.07142857142857142 },
+		"gain": { "min": -6, "max": 6, "step": 0.25 }
+	},
+	"preamp": { "mode": "none" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbSerialDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. The Bluetooth name is a placeholder until confirmed: devicePEQ identifies this device only by its serial service class. Write-only: the device does not report its EQ back. The frequency list is the handler's lookup table of captured codes, not the device's set: the 16-bit frequency field follows no formula found so far (prior-art §2.2)."
+	}
+}

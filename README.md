@@ -4,7 +4,8 @@ A vendor-neutral database of **EQ constraint profiles**: what an EQ engine (a ha
 software EQ) actually accepts. Band count, filter types per slot, frequency/Q/gain domains with
 quantization, conditional domains, cross-band rules, preamp, device identity and provenance.
 
-> **Status: early development.** The format is a draft and not frozen. Nothing is published yet.
+> **Status: early development.** The format is a draft and not frozen. Data is built for the
+> pre-freeze channel `/next/`; most profiles are seeded drafts.
 
 ## What's here
 
@@ -16,7 +17,8 @@ quantization, conditional domains, cross-band rules, preamp, device identity and
 | [`schema/v1/`](schema/v1/) | JSON Schema for published profiles and authoring files |
 | [`conformance/v1/`](conformance/v1/) | Fixtures and vectors any implementation can test against |
 | [`packages/core`](packages/core/) | Types, semantic validator and the reference engine. Zero dependencies. |
-| [`packages/client`](packages/client/) | Fetching, caching and device matching (Phase 3) |
+| [`packages/client`](packages/client/) | Fetching, caching and device matching. Never throws into the host app. |
+| [`data/`](data/) | The profiles (`profiles/<brand>/<id>.json`) and shared bases. See [CONTRIBUTING.md](CONTRIBUTING.md). |
 | [`packages/build`](packages/build/) | Validation pipeline and data build used by CI |
 
 ## Development
@@ -31,6 +33,8 @@ npm test
 npm run build
 npm run codegen   # after editing schema/v1/profile.schema.json
 npm run conformance  # after changing engine behaviour or scripts/conformance.ts
+npm run data:validate  # check data/ as CI does
+npm run data:build     # publish /next/ into dist/site/next/
 ```
 
 ## License

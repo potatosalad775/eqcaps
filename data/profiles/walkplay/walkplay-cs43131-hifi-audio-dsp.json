@@ -1,0 +1,59 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-peq-8-band-10db-ls-lowpass",
+	"id": "walkplay-cs43131-hifi-audio-dsp",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Walkplay", "model": "CS43131 HiFi Audio DSP" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x3302", "productId": "0x51c0", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x0104", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x011b", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x011d", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x0661", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x0663", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x0666", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x0762", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x0909", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x0d8c", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x2fc6", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x3302", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x34be", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x35d8", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x36a7", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x373b", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x60c1", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0x60e1", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0xb445", "productName": "CS43131 HiFi Audio DSP" },
+			{ "vendorId": "0xb44d", "productName": "CS43131 HiFi Audio DSP" }
+		]
+	},
+	"band": { "freq": { "min": 20.5275, "max": 19999.65, "step": 0.9775 } },
+	"realization": {
+		"laws": [{ "law": "nyquistScaledQ", "types": ["PK", "LSC"], "designRate": 96000 }],
+		"sources": [
+			{
+				"kind": "community",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/compensation.js",
+				"date": "2026-10-02"
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/walkplay_schemeno11_cs43131_hifi_audio_dsp.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Its recorded capture's product id is in devicePEQ's \"SchemeNo11\" group, whose settings apply under the device's own. The engine realizes 0.9775 × the frequency on the wire, so frequencies are multiples of 0.9775 Hz; the codec divides by 0.9775. devicePEQ configures nyquistScaledQ with a design rate of 96000 Hz, while its own comments derive about 49152 Hz from measurements. Unresolved upstream."
+	}
+}

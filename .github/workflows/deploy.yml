@@ -1,0 +1,64 @@
+name: Deploy
+
+# Publishes the data to GitHub Pages on every push to main (DECISIONS D18):
+#   /next/   the pre-freeze channel: profiles/, index.json, bundle.json, schema/, conformance/
+#   /        a placeholder page until the inspector lands (PLAN Phase 4)
+# `/v1/` joins at the format freeze. Needs Pages enabled with "GitHub Actions" as its source.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; a newer push supersedes a queued one but never cancels a running one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Validates first and fails on any issue, so a broken main never reaches consumers.
+      - name: Build data (/next/)
+        run: npm run data:build
+
+      - name: Add landing page
+        run: cp .github/pages/index.html dist/site/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/site
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

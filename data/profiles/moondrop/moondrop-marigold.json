@@ -1,0 +1,74 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "moondrop-marigold",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Moondrop", "model": "Marigold" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x35d8", "productId": "0x011c", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x0104", "productName": "Marigold" },
+			{ "vendorId": "0x0104", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x011b", "productName": "Marigold" },
+			{ "vendorId": "0x011b", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x011d", "productName": "Marigold" },
+			{ "vendorId": "0x011d", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x0661", "productName": "Marigold" },
+			{ "vendorId": "0x0661", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x0663", "productName": "Marigold" },
+			{ "vendorId": "0x0663", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x0666", "productName": "Marigold" },
+			{ "vendorId": "0x0666", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x0762", "productName": "Marigold" },
+			{ "vendorId": "0x0762", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x0909", "productName": "Marigold" },
+			{ "vendorId": "0x0909", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x0d8c", "productName": "Marigold" },
+			{ "vendorId": "0x0d8c", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x2fc6", "productName": "Marigold" },
+			{ "vendorId": "0x2fc6", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x3302", "productName": "Marigold" },
+			{ "vendorId": "0x3302", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x34be", "productName": "Marigold" },
+			{ "vendorId": "0x34be", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x35d8", "productName": "Marigold" },
+			{ "vendorId": "0x35d8", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x36a7", "productName": "Marigold" },
+			{ "vendorId": "0x36a7", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x373b", "productName": "Marigold" },
+			{ "vendorId": "0x373b", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x60c1", "productName": "Marigold" },
+			{ "vendorId": "0x60c1", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0x60e1", "productName": "Marigold" },
+			{ "vendorId": "0x60e1", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0xb445", "productName": "Marigold" },
+			{ "vendorId": "0xb445", "productName": "MOONDROP Marigold" },
+			{ "vendorId": "0xb44d", "productName": "Marigold" },
+			{ "vendorId": "0xb44d", "productName": "MOONDROP Marigold" }
+		]
+	},
+	"bandCount": 8,
+	"band": {
+		"types": ["PK"],
+		"freq": { "min": 20, "max": 20000, "step": 1 },
+		"q": { "min": 0.1015625, "max": 10, "step": 0.00390625 },
+		"gain": { "min": -12, "max": 6, "step": 0.00390625 }
+	},
+	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127.99609375, "step": 0.00390625 } },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/walkplay_default_moondrop_marigold.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+	}
+}

@@ -451,11 +451,92 @@ AutoEQ hasn't been updated in years, and devicePEQ's maintainer is focused on ot
 - devicePEQ and AutoEQ stay *potential* consumers. The format is public and CC0 (D25), so either
   can adopt it without coordination. Nothing in the plan depends on that.
 
+### D31. Seed import: what was taken and how (accepted, 2026-10-02)
+`scripts/import/seed.ts` ran once against devicePEQ `0617f38` (2026-08-26), with facts from
+modernGraphTool `fd55b9f8` and AutoEQ `7ae0f56` transcribed in `scripts/import/tables.ts`. It
+wrote 98 `draft` profiles and 15 bases. From now on `data/` is edited by hand (D26); the script
+refuses to overwrite it without `--force`.
+- **Bases** are per codec family and devicePEQ shape (`walkplay-peq-8-band-10db-pk-only`), because
+  wire grids differ per handler even where devicePEQ shares a shape. A base is written only when
+  two or more profiles use it; otherwise its content goes into the profile.
+  `peqConstraintsRef` + `peqConstraintsOverride` become `extends` + overridden keys (D3, D23).
+  devicePEQ's inline constraint fields next to a ref are ignored, as devicePEQ itself ignores them.
+- **Domains** are devicePEQ's ranges on the handler's wire grid, bounds moved inward onto it.
+  Frequency is 20 Hz–20 kHz, which devicePEQ assumes but doesn't record. Constant frequency
+  factors are folded in (Walkplay SchemeNo11 ×0.9775 gives a 0.9775 Hz grid, KTMicro
+  `compensate2X` a 2 Hz grid), per D29.
+- **Preamp:** `manual` with the handler's wire range where the handler writes one, `auto` where
+  `deviceHandlesPregain` is set and the handler honours it, `none` where the handler never sends
+  one, otherwise `unknown`.
+- **Realization:** `rbjGain` → `gainScaledQ` (peaking only for FiiO, as devicePEQ scopes it),
+  `cosNyquist` → `nyquistScaledQ`, `shelfSqrtA` → `shelfFrequencyShift`, each with a `community`
+  source citing `compensation.js`. A named device gets its group's laws only when a recorded
+  capture puts its product id in that group; otherwise its realization stays unknown.
+- **Identity:** a named HID device matches `productName` under every vendor id of its devicePEQ
+  vendor block, as devicePEQ does. A recorded capture adds its exact (vid, pid, name), so the
+  device wins over its product-id group (specificity 4 vs 3). Product-id groups become one
+  profile each (`walkplay-schemeno11-devices`), matching every (vendor id, product id) pair of
+  the block, because devicePEQ doesn't record which vendor id goes with which product id. A
+  product id in two groups stays with the first, which devicePEQ checks first. Bluetooth SPP
+  devices get a name prefix marked as a placeholder (SPEC example A did the same).
+- **Names and ids** are curated in `tables.ts`. Name variants of one device (`FIIO BTR17`,
+  `BTR17`) become one profile. Where they disagree, the narrower constraints win and the notes say
+  so. Products with generic USB names (`CS43131 HiFi Audio DSP`) get the brand Walkplay.
+- **modernGraphTool** contributes names only: product-name variants of upstream devices, and three
+  devices upstream lacks, with the constraints of the upstream group their capture falls in.
+  Its constraint values are older than upstream's and are not used.
+- **AutoEQ's `PEQ_CONFIGS`** are optimizer settings, not engine limits. Only band count, gain
+  range, peaking Q range and fixed bands are taken, for Spotify, Poweramp, Neutron, USB Audio
+  Player Pro and Qudelix 5K (identity from a devicePEQ capture).
+- **Not imported**, with reasons in `tables.ts` `NOT_IMPORTED`: network devices (WiiM, Luxsin;
+  the format has no network identity), EarFun Tune Pro (fixed Q of unknown value), KT Micro's
+  "Space Gaming IEM" (protocol unconfirmed upstream), devices of unknown brand, miniDSP (no
+  identity), AutoEQ's generic presets.
+
+**Consequence:** the Walkplay groups hold 6,536 of the 7,524 match entries, most of them pairs that
+don't exist. `index.json` is 357 KB, 32 KB gzipped. See Q11.
+**Rejected:** shape-named published profiles (D3); skipping the product-id groups, which would
+drop most Walkplay devices; restricting groups to one vendor id, which drops real devices
+(Moondrop and others ship under their own ids); copying modernGraphTool's constraint values.
+
+### D32. Data pipeline and client (accepted, 2026-10-02)
+- **Build:** `packages/build` validates `data/` (repository layout, schemas, semantic and
+  cross-profile rules) and publishes a channel: flat profiles, `index.json`, `bundle.json`,
+  schema and conformance (SPEC §14). Layout rules have their own codes (`LAYOUT_CODES`), apart
+  from the format's `ISSUE_CODES`, because they are about this repository, not the format.
+  Reports give file and line, and in GitHub Actions also annotate the line in the PR diff. The CLI
+  runs from TypeScript sources through a custom export condition (`eqcaps:source`), so nothing
+  needs building first.
+- **Index additions:** entries also carry `aliases` (search) and `replacedBy` (so a client can
+  follow a deprecated id without fetching the profile). Both optional (SPEC §14).
+- **Channels:** `/next/` profiles point `$schema` at `/next/schema/`, since `/v1/` doesn't exist
+  until the freeze.
+- **Client:** `createClient()` with TTL + ETag revalidation for the index and bundle,
+  content-addressed profile cache (index `sha256`), a pluggable store, an embedded `snapshot`
+  for offline use, and `onError` as the only way failures surface. `matchDevice` is also a pure
+  export, so a consumer can match against an embedded bundle without the client. The client
+  reads `fetch` and timers from `globalThis` and declares only the types it uses, so it has no
+  DOM or Node types.
+- **Releases:** a `v*` tag publishes `core` and `client` to npm with provenance (versions are set
+  from the tag) and attaches `bundle.json` to a GitHub Release. The data package
+  `@potatosalad775/eqcaps` (D24) waits for the freeze, when its contents become stable.
+
 ---
 
 ## Open questions for the owner
 
-None open. A new question gets a number, a recommendation and an entry here.
+A new question gets a number, a recommendation and an entry here.
+
+### Q11. Compact USB match entries? (open, 2026-10-02)
+devicePEQ identifies Walkplay-chip devices as "vendor id in this list, product id in that list".
+The format can only spell that as one entry per pair, which makes the index about 5× larger than it
+needs to be and claims thousands of pairs that don't exist (D31).
+**Recommendation:** leave the format as it is for now. 32 KB gzipped is acceptable, and the right
+fix is data: as devices get identified, give them their real (vendor id, product id) and drop
+pairs from the group profiles. If the index grows past ~100 KB gzipped, allow `productId` to be
+an array in a `usb` entry (a v1 minor, additive). Alternatives: allow both `vendorId` and
+`productId` arrays (more compact, but keeps encoding the non-existent pairs), or drop the group
+profiles (loses most Walkplay devices).
 
 ### Answered 2026-10-02
 

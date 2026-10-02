@@ -1,0 +1,68 @@
+name: Release
+
+# On a version tag (v1.2.3): publish @potatosalad775/eqcaps-core and -client to npm with
+# provenance, and attach the current bundle.json to a GitHub Release (DECISIONS D18).
+# Needs the NPM_TOKEN secret (an npm automation token with publish rights on the scope).
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # the GitHub Release
+      id-token: write # npm provenance
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check
+        run: |
+          npm run data:validate
+          npm run lint
+          npm run check
+          npm test
+
+      - name: Set version from tag
+        run: node scripts/set-version.ts "${GITHUB_REF_NAME}"
+
+      - name: Build
+        run: |
+          npm run build
+          npm run data:build
+          cp LICENSE packages/core/LICENSE
+          cp LICENSE packages/client/LICENSE
+
+      # Pre-release tags (v1.2.3-beta.1) publish under the "next" dist-tag.
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          tag=latest
+          case "${GITHUB_REF_NAME}" in *-*) tag=next ;; esac
+          npm publish -w packages/core -w packages/client --provenance --access public --tag "$tag"
+
+      - name: GitHub Release with bundle.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/site/next/bundle.json \
+            --title "${GITHUB_REF_NAME}" --generate-notes \
+            $(case "${GITHUB_REF_NAME}" in *-*) echo --prerelease ;; esac)

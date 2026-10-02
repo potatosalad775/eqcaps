@@ -1,5 +1,6 @@
 import { Ajv2020, type ErrorObject } from 'ajv/dist/2020.js';
 import type { Issue } from '@potatosalad775/eqcaps-core';
+import { pointerSegment } from './locate.ts';
 
 export interface Schemas {
 	/** schema/v1/profile.schema.json */
@@ -32,8 +33,6 @@ export function createSchemaValidator(schemas: Schemas): SchemaValidator {
 	return { published: run(published), authoring: run(authoring) };
 }
 
-const pointerSegment = (s: unknown) => String(s).replace(/~/g, '~0').replace(/\//g, '~1');
-
 /** Keys the schemas forbid in some contexts (`false` subschemas), explained. */
 const FORBIDDEN_KEYS: Record<string, string> = {
 	match: 'a software profile has no match; it is selected by id (SPEC §2)',
@@ -62,7 +61,8 @@ function toIssues(errors: ErrorObject[]): Issue[] {
 		}
 		const p = e.params as Record<string, unknown>;
 		const key = p.missingProperty ?? p.additionalProperty ?? p.unevaluatedProperty;
-		const path = key === undefined ? e.instancePath : `${e.instancePath}/${pointerSegment(key)}`;
+		const path =
+			key === undefined ? e.instancePath : `${e.instancePath}/${pointerSegment(String(key))}`;
 		let message = e.message ?? e.keyword;
 		if (e.keyword === 'false schema') {
 			message = FORBIDDEN_KEYS[path.split('/').pop() ?? ''] ?? 'not allowed here';

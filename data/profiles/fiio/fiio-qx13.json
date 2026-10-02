@@ -1,0 +1,41 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-10-band-12db-wide-all-filters",
+	"id": "fiio-qx13",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "FiiO", "model": "QX13" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x2972", "productId": "0x0128", "productName": "FIIO QX13" },
+			{ "vendorId": "0x2972", "productName": "FIIO QX13" },
+			{ "vendorId": "0x0a12", "productName": "FIIO QX13" }
+		]
+	},
+	"realization": {
+		"laws": [{ "law": "gainScaledQ", "types": ["PK"] }],
+		"sources": [
+			{
+				"kind": "community",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/compensation.js",
+				"date": "2026-10-02"
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/fiio_fiio_qx13.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ's peakingAlpha shelf setting is not a law here: it converts its own slope convention to the Q this engine takes, which is exact RBJ Q (prior-art §2.1)."
+	}
+}

@@ -1,0 +1,31 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
+	"id": "jcally-kt02h20",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "JCally", "model": "KT02H20" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x31b2", "productId": "0x0111", "productName": "KT02H20 HIFI Audio" },
+			{ "vendorId": "0x31b2", "productName": "KT02H20 HIFI Audio" }
+		]
+	},
+	"band": { "types": ["PK"], "freq": { "min": 20, "max": 20000, "step": 2 } },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/ktmicro_kt02h20_hifi_audio.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ overrides its shared constraints with {\"supportsLSFilter\":false,\"supportsHSFilter\":false}. The engine realizes 2 × the frequency on the wire, so frequencies are multiples of 2 Hz; the codec divides by 2."
+	}
+}

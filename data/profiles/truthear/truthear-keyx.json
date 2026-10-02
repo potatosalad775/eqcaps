@@ -1,0 +1,66 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-peq-8-band-10db-full-shelves",
+	"id": "truthear-keyx",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Truthear", "model": "KEYX" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x0104", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x0104", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x011b", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x011b", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x011d", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x011d", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x0661", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x0661", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x0663", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x0663", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x0666", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x0666", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x0762", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x0762", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x0909", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x0909", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x0d8c", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x0d8c", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x2fc6", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x2fc6", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x3302", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x3302", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x34be", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x34be", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x35d8", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x35d8", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x36a7", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x36a7", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x373b", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x373b", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x60c1", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x60c1", "productName": "Truthear KEYX" },
+			{ "vendorId": "0x60e1", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0x60e1", "productName": "Truthear KEYX" },
+			{ "vendorId": "0xb445", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0xb445", "productName": "Truthear KEYX" },
+			{ "vendorId": "0xb44d", "productName": "TRUTHEAR KEYX" },
+			{ "vendorId": "0xb44d", "productName": "Truthear KEYX" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/potatosalad775/modernGraphTool/blob/fd55b9f8fdf6ac2c080aaf6fb59dab584c5dfe93/src/lib/device-peq/handlers/walkplay-hid.ts",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+	}
+}

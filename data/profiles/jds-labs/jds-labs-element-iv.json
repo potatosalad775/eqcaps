@@ -1,0 +1,31 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "jds-labs-element-iv",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "JDS Labs", "model": "Element IV" },
+	"match": { "usb": [{ "vendorId": "0x152a", "productId": "0x88fa" }] },
+	"bandCount": 12,
+	"band": {
+		"types": ["PK"],
+		"freq": { "min": 20, "max": 20000 },
+		"q": { "min": 0.1, "max": 10 },
+		"gain": { "min": -12, "max": 12 }
+	},
+	"bands": [
+		{ "index": [0, 1], "types": ["LSC"], "label": "Lowshelf" },
+		{ "index": [10, 11], "types": ["HSC"], "label": "Highshelf" }
+	],
+	"preamp": { "mode": "unknown" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbSerialDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. The handler writes 12 filters by type: slots 0-1 low shelves, 2-9 peaking, 10-11 high shelves. devicePEQ's shared 10-filter constraints are wrong for this device. Its preamp is sent with Mode \"AUTO\", so how the device treats it is unclear."
+	}
+}

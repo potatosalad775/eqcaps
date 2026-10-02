@@ -1,0 +1,49 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "moondrop-old-fashioned",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Moondrop", "model": "Old Fashioned" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x0104", "productName": "Old Fashioned" },
+			{ "vendorId": "0x011b", "productName": "Old Fashioned" },
+			{ "vendorId": "0x011d", "productName": "Old Fashioned" },
+			{ "vendorId": "0x0661", "productName": "Old Fashioned" },
+			{ "vendorId": "0x0663", "productName": "Old Fashioned" },
+			{ "vendorId": "0x0666", "productName": "Old Fashioned" },
+			{ "vendorId": "0x0762", "productName": "Old Fashioned" },
+			{ "vendorId": "0x0909", "productName": "Old Fashioned" },
+			{ "vendorId": "0x0d8c", "productName": "Old Fashioned" },
+			{ "vendorId": "0x2fc6", "productName": "Old Fashioned" },
+			{ "vendorId": "0x3302", "productName": "Old Fashioned" },
+			{ "vendorId": "0x34be", "productName": "Old Fashioned" },
+			{ "vendorId": "0x35d8", "productName": "Old Fashioned" },
+			{ "vendorId": "0x36a7", "productName": "Old Fashioned" },
+			{ "vendorId": "0x373b", "productName": "Old Fashioned" },
+			{ "vendorId": "0x60c1", "productName": "Old Fashioned" },
+			{ "vendorId": "0x60e1", "productName": "Old Fashioned" },
+			{ "vendorId": "0xb445", "productName": "Old Fashioned" },
+			{ "vendorId": "0xb44d", "productName": "Old Fashioned" }
+		]
+	},
+	"bandCount": 5,
+	"band": {
+		"types": ["PK"],
+		"freq": { "min": 20, "max": 20000, "step": 1 },
+		"q": { "min": 0.1, "max": 10, "step": 0.001 },
+		"gain": { "min": -12, "max": 3, "step": 0.1 }
+	},
+	"preamp": { "mode": "none" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+	}
+}

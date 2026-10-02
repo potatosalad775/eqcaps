@@ -1,0 +1,36 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "qudelix-5k",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Qudelix", "model": "5K" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x0a12", "productId": "0x4005", "productName": "Qudelix-5K USB DAC 48KHz" }
+		]
+	},
+	"bandCount": 10,
+	"band": {
+		"types": ["PK", "LSC", "HSC"],
+		"freq": { "min": 20, "max": 20000 },
+		"q": { "min": 0.1, "max": 7 },
+		"gain": { "min": -12, "max": 12 }
+	},
+	"preamp": { "mode": "unknown" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "community",
+				"ref": "https://github.com/jaakkopasanen/AutoEq/blob/7ae0f56d53074872b028649617a22bbb4232feb7/autoeq/constants.py",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/qudelix_qudelix_5k.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from AutoEQ by scripts/import/seed.ts. Band count, gain range and peaking Q range from AutoEQ's PEQ_CONFIGS QUDELIX_5K, which is an optimizer setting: the engine may allow more bands. The frequency range and the shelves' Q range are assumptions. USB identity from a devicePEQ recorded capture."
+	}
+}

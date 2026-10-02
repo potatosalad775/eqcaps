@@ -1,0 +1,67 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "conexant-peq-9-band-12db-full-shelves",
+	"id": "moondrop-freedsp",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Moondrop", "model": "FreeDSP" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x35d8", "productId": "0x1496", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x0104", "productName": "FreeDSP" },
+			{ "vendorId": "0x0104", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x011b", "productName": "FreeDSP" },
+			{ "vendorId": "0x011b", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x011d", "productName": "FreeDSP" },
+			{ "vendorId": "0x011d", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x0661", "productName": "FreeDSP" },
+			{ "vendorId": "0x0661", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x0663", "productName": "FreeDSP" },
+			{ "vendorId": "0x0663", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x0666", "productName": "FreeDSP" },
+			{ "vendorId": "0x0666", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x0762", "productName": "FreeDSP" },
+			{ "vendorId": "0x0762", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x0909", "productName": "FreeDSP" },
+			{ "vendorId": "0x0909", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x0d8c", "productName": "FreeDSP" },
+			{ "vendorId": "0x0d8c", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x2fc6", "productName": "FreeDSP" },
+			{ "vendorId": "0x2fc6", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x3302", "productName": "FreeDSP" },
+			{ "vendorId": "0x3302", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x34be", "productName": "FreeDSP" },
+			{ "vendorId": "0x34be", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x35d8", "productName": "FreeDSP" },
+			{ "vendorId": "0x35d8", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x36a7", "productName": "FreeDSP" },
+			{ "vendorId": "0x36a7", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x373b", "productName": "FreeDSP" },
+			{ "vendorId": "0x373b", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x60c1", "productName": "FreeDSP" },
+			{ "vendorId": "0x60c1", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0x60e1", "productName": "FreeDSP" },
+			{ "vendorId": "0x60e1", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0xb445", "productName": "FreeDSP" },
+			{ "vendorId": "0xb445", "productName": "Moondrop FreeDSP" },
+			{ "vendorId": "0xb44d", "productName": "FreeDSP" },
+			{ "vendorId": "0xb44d", "productName": "Moondrop FreeDSP" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/moondrop_freedsp_conexant.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. AutoEQ optimizes for this device with 9 peaking filters, Q 0.5-6, 40 Hz-10 kHz and -12/+3 dB (PEQ_CONFIGS MOONDROP_FREE_DSP), which may be the vendor app limits."
+	}
+}

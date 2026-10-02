@@ -7,6 +7,7 @@ import {
 	type Issue,
 	type Profile
 } from '@potatosalad775/eqcaps-core';
+import type { LayoutCode } from './layout.ts';
 import type { SchemaValidator } from './schema.ts';
 
 export interface AuthoringFile {
@@ -15,13 +16,22 @@ export interface AuthoringFile {
 	data: unknown;
 }
 
-export interface FileIssue extends Issue {
+/** A format issue (ISSUE_CODES in core) found through an authoring file. */
+export interface SourceIssue extends Issue {
 	/** The authoring file the issue was found through. */
 	file: string;
 }
 
+/** Any issue about a file under data/: a format rule or a repository layout rule (LAYOUT_CODES). */
+export interface FileIssue extends Omit<Issue, 'code'> {
+	code: Issue['code'] | LayoutCode;
+	file: string;
+	/** 1-based line in that file, when known. */
+	line?: number;
+}
+
 export interface SourcesReport {
-	issues: FileIssue[];
+	issues: SourceIssue[];
 	/** Flattened profiles that passed every check, keyed by id. */
 	profiles: Map<string, Profile>;
 }
@@ -40,7 +50,7 @@ export function validateSources(
 	files: readonly AuthoringFile[],
 	options: ValidateSourcesOptions
 ): SourcesReport {
-	const issues: FileIssue[] = [];
+	const issues: SourceIssue[] = [];
 	const add = (file: string, list: Issue[], profileId?: string) => {
 		for (const issue of list) {
 			issues.push({ ...issue, file, ...(profileId && !issue.profileId ? { profileId } : {}) });

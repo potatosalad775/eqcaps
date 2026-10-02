@@ -1,0 +1,67 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "conexant-peq-9-band-12db-full-shelves",
+	"id": "moondrop-echo-b",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Moondrop", "model": "ECHO-B" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x35d8", "productId": "0x149b", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x0104", "productName": "ECHO-B" },
+			{ "vendorId": "0x0104", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x011b", "productName": "ECHO-B" },
+			{ "vendorId": "0x011b", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x011d", "productName": "ECHO-B" },
+			{ "vendorId": "0x011d", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x0661", "productName": "ECHO-B" },
+			{ "vendorId": "0x0661", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x0663", "productName": "ECHO-B" },
+			{ "vendorId": "0x0663", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x0666", "productName": "ECHO-B" },
+			{ "vendorId": "0x0666", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x0762", "productName": "ECHO-B" },
+			{ "vendorId": "0x0762", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x0909", "productName": "ECHO-B" },
+			{ "vendorId": "0x0909", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x0d8c", "productName": "ECHO-B" },
+			{ "vendorId": "0x0d8c", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x2fc6", "productName": "ECHO-B" },
+			{ "vendorId": "0x2fc6", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x3302", "productName": "ECHO-B" },
+			{ "vendorId": "0x3302", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x34be", "productName": "ECHO-B" },
+			{ "vendorId": "0x34be", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x35d8", "productName": "ECHO-B" },
+			{ "vendorId": "0x35d8", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x36a7", "productName": "ECHO-B" },
+			{ "vendorId": "0x36a7", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x373b", "productName": "ECHO-B" },
+			{ "vendorId": "0x373b", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x60c1", "productName": "ECHO-B" },
+			{ "vendorId": "0x60c1", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0x60e1", "productName": "ECHO-B" },
+			{ "vendorId": "0x60e1", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0xb445", "productName": "ECHO-B" },
+			{ "vendorId": "0xb445", "productName": "Moondrop ECHO-B" },
+			{ "vendorId": "0xb44d", "productName": "ECHO-B" },
+			{ "vendorId": "0xb44d", "productName": "Moondrop ECHO-B" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/moondrop_echob_conexant.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+	}
+}

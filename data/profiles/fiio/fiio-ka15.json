@@ -1,0 +1,38 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "fiio-ka15",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "FiiO", "model": "KA15" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x2972", "productId": "0x0104", "productName": "FIIO KA15" },
+			{ "vendorId": "0x2972", "productName": "FIIO KA15" },
+			{ "vendorId": "0x0a12", "productName": "FIIO KA15" }
+		]
+	},
+	"bandCount": 10,
+	"band": {
+		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "AP"],
+		"freq": { "min": 20, "max": 20000, "step": 1 },
+		"q": { "min": 0.1015625, "max": 10, "step": 0.00390625 },
+		"gain": { "min": -12, "max": 12, "step": 0.00390625 }
+	},
+	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127, "step": 1 } },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/fiio_fiio_ka15.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Its recorded capture's product id is in devicePEQ's \"WalkPlay-SchemeNo10\" group, whose settings apply under the device's own."
+	}
+}

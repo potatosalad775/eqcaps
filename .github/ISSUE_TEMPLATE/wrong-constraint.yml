@@ -1,0 +1,37 @@
+name: Wrong constraint
+description: A profile says a device accepts something it doesn't, or rejects something it accepts.
+title: 'Wrong constraint: '
+labels: ['wrong constraint']
+body:
+  - type: input
+    id: profile
+    attributes:
+      label: Profile id
+      placeholder: fiio-ka17
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Device firmware version
+      description: If you know it. Limits can change between firmware versions.
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What's wrong
+      description: The field and slot, what the profile says, and what the device actually does.
+      placeholder: 'Slot 0 gain: the profile allows +12 dB, but the device stops at +6 dB.'
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: How you know
+      description: What you tried and what happened, vendor docs, or the vendor app's limits.
+    validations:
+      required: true
+  - type: textarea
+    id: app
+    attributes:
+      label: App you saw it in
+      description: Which app wrote the EQ (modernGraphTool, the vendor app, …), and its version.

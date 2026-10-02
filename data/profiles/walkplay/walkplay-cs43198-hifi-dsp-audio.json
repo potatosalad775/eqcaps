@@ -1,0 +1,42 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-peq-8-band-10db-ls-lowpass",
+	"id": "walkplay-cs43198-hifi-dsp-audio",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Walkplay", "model": "CS43198 HiFi DSP Audio" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x0104", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x011b", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x011d", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x0661", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x0663", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x0666", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x0762", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x0909", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x0d8c", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x2fc6", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x3302", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x34be", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x35d8", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x36a7", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x373b", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x60c1", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0x60e1", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0xb445", "productName": "CS43198 HiFi DSP Audio" },
+			{ "vendorId": "0xb44d", "productName": "CS43198 HiFi DSP Audio" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+	}
+}

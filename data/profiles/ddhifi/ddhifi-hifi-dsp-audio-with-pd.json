@@ -1,0 +1,47 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-peq-10-band-10db-full-shelves",
+	"id": "ddhifi-hifi-dsp-audio-with-pd",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "ddHiFi", "model": "HiFi DSP Audio with PD" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x0104", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x011b", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x011d", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x0661", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x0663", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x0666", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x0762", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x0909", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x0d8c", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x2fc6", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x3302", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x34be", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x35d8", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x36a7", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x373b", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x60c1", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0x60e1", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0xb445", "productName": "HiFi DSP Audio with PD" },
+			{ "vendorId": "0xb44d", "productName": "HiFi DSP Audio with PD" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/potatosalad775/modernGraphTool/blob/fd55b9f8fdf6ac2c080aaf6fb59dab584c5dfe93/src/lib/device-peq/handlers/walkplay-hid.ts",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Registered by modernGraphTool only. Constraints are devicePEQ's \"SchemeNo16\" group, which its recorded capture's product id belongs to."
+	}
+}

@@ -7,12 +7,13 @@ identity and provenance. The repo also holds the tooling to author, verify, vali
 profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor), and anyone else
 who adopts the format.
 
-**Status: Phases 0–2 done (format as code, reference engine); Phase 3 (data pipeline) next.** Read
-`docs/PLAN.md` first.
+**Status: Phases 0–2 done; Phase 3 (data pipeline, seed data, client) built, waiting on the owner's
+GitHub/npm steps (PLAN §5).** Read `docs/PLAN.md` first.
 
 Commands: `npm run lint` · `npm run check` (codegen and vector drift + typecheck) · `npm test` ·
 `npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json` ·
-`npm run conformance` after changing engine behaviour. Never edit `schema/v1/source.schema.json`,
+`npm run conformance` after changing engine behaviour · `npm run data:validate` · `npm run data:build`
+(writes `dist/site/next/`). Never edit `schema/v1/source.schema.json`,
 `*.generated.ts` or `conformance/v1/*.json` (engine vectors) by hand.
 
 ## Docs
@@ -61,7 +62,11 @@ in the same change. Don't define format details anywhere except SPEC-DRAFT.md.
 - Every semantic validation rule has an issue code in `ISSUE_CODES` (`packages/core/src/issues.ts`)
   and at least one case in `conformance/v1/profiles/cases/` that triggers it. A test enforces it.
 - One JSON file per profile: `data/profiles/<brand>/<id>.json`, starting with `"$schema"` so editors
-  validate it.
+  validate it. `<brand>` is `brandSlug(device.brand)`. Abstract bases: `data/bases/<id>.json`.
+- `data/` was seeded once by `scripts/import/seed.ts` (D31) and is now edited by hand. Don't re-run
+  the importer over it.
+- Workspace packages import each other by package name. Node scripts that need sources run with
+  `--conditions=eqcaps:source`; `scripts/*.ts` import sources by relative path.
 - USB ids are lowercase 4-digit hex strings (`"0x2972"`). HID `productName` matches exactly,
   trailing spaces included.
 - Name is **eqcaps** (D24): repo `potatosalad775/eqcaps`, Pages `potatosalad775.github.io/eqcaps`,

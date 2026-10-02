@@ -18,11 +18,15 @@
 	],
 	"exports": {
 		".": {
+			"eqcaps:source": "./src/index.ts",
 			"types": "./dist/index.d.ts",
 			"default": "./dist/index.js"
 		}
 	},
 	"scripts": {
 		"build": "tsc -p tsconfig.build.json"
+	},
+	"dependencies": {
+		"@potatosalad775/eqcaps-core": "0.0.0"
 	}
 }

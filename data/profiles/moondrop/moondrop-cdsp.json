@@ -1,0 +1,20 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
+	"id": "moondrop-cdsp",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Moondrop", "model": "CDSP" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productName": "CDSP" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+	}
+}
