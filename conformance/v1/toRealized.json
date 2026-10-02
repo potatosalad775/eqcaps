@@ -1,0 +1,85 @@
+{
+	"description": "toRealized(profile, filter) (SPEC §13.3).",
+	"vectors": [
+		{
+			"description": "no realization: identity",
+			"profile": {},
+			"op": "toRealized",
+			"input": { "filter": { "type": "PK", "freq": 1000, "q": 4, "gain": -12 } },
+			"expect": { "type": "PK", "freq": 1000, "q": 4, "gain": -12 }
+		},
+		{
+			"description": "gainScaledQ: q / A",
+			"profile": "examples/h-realization-laws",
+			"op": "toRealized",
+			"input": { "filter": { "type": "PK", "freq": 1000, "q": 4, "gain": -12 } },
+			"expect": { "type": "PK", "freq": 1000, "q": 2.0047489345090894, "gain": -12 }
+		},
+		{
+			"description": "gainScaledQ uses |gain|",
+			"profile": "examples/h-realization-laws",
+			"op": "toRealized",
+			"input": { "filter": { "type": "PK", "freq": 1000, "q": 4, "gain": 12 } },
+			"expect": { "type": "PK", "freq": 1000, "q": 2.0047489345090894, "gain": 12 }
+		},
+		{
+			"description": "low shelf: both laws",
+			"profile": "examples/h-realization-laws",
+			"op": "toRealized",
+			"input": { "filter": { "type": "LSC", "freq": 100, "q": 0.7, "gain": 6 } },
+			"expect": { "type": "LSC", "freq": 118.84952265806157, "q": 0.4955620490688965, "gain": 6 }
+		},
+		{
+			"description": "high shelf: frequency moves down",
+			"profile": "examples/h-realization-laws",
+			"op": "toRealized",
+			"input": { "filter": { "type": "HSC", "freq": 8000, "q": 0.7, "gain": 6 } },
+			"expect": { "type": "HSC", "freq": 6909.210930173591, "q": 0.4955620490688965, "gain": 6 }
+		},
+		{
+			"description": "shelf at 0 dB: unchanged",
+			"profile": "examples/h-realization-laws",
+			"op": "toRealized",
+			"input": { "filter": { "type": "LSC", "freq": 100, "q": 0.7, "gain": 0 } },
+			"expect": { "type": "LSC", "freq": 100.00000000000001, "q": 0.7, "gain": 0 }
+		},
+		{
+			"description": "freq at or above designRate/2: law not applied",
+			"profile": "examples/h-realization-laws",
+			"op": "toRealized",
+			"input": { "filter": { "type": "LSC", "freq": 30000, "q": 0.7, "gain": 6 } },
+			"expect": { "type": "LSC", "freq": 30000, "q": 0.4955620490688965, "gain": 6 }
+		},
+		{
+			"description": "gainless type: gain is 0, no law applies",
+			"profile": "examples/h-realization-laws",
+			"op": "toRealized",
+			"input": { "filter": { "type": "BP", "freq": 1000, "q": 2, "gain": 9 } },
+			"expect": { "type": "BP", "freq": 1000, "q": 2, "gain": 0 }
+		},
+		{
+			"description": "nyquistScaledQ: q · cos(π·f / designRate)",
+			"profile": {
+				"realization": {
+					"laws": [{ "law": "nyquistScaledQ", "types": ["PK", "LPQ"], "designRate": 48000 }],
+					"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+				}
+			},
+			"op": "toRealized",
+			"input": { "filter": { "type": "PK", "freq": 12000, "q": 1, "gain": 3 } },
+			"expect": { "type": "PK", "freq": 12000, "q": 0.7071067811865476, "gain": 3 }
+		},
+		{
+			"description": "nyquistScaledQ on a gainless type",
+			"profile": {
+				"realization": {
+					"laws": [{ "law": "nyquistScaledQ", "types": ["PK", "LPQ"], "designRate": 48000 }],
+					"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+				}
+			},
+			"op": "toRealized",
+			"input": { "filter": { "type": "LPQ", "freq": 6000, "q": 0.707, "gain": 0 } },
+			"expect": { "type": "LPQ", "freq": 6000, "q": 0.6531828294854797, "gain": 0 }
+		}
+	]
+}

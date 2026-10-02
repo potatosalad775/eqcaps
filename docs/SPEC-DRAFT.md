@@ -207,7 +207,9 @@ such as fixed centers with adjustable Q, need nothing special.
 - `when` (required) maps fields (`type`, `freq`, `q`, `gain`) to conditions, and all of them must
   hold. Numeric conditions are `eq`, `gt`, `gte`, `lt`, `lte`; several in one object are AND-ed
   (`{ "gt": 0, "lte": 6 }`), and each condition object has at least one. `type` supports `eq` and
-  `in`. A condition on a null or missing field is false.
+  `in`. A condition on a null or missing field is false. Comparisons use the §4 tolerance: `eq`
+  holds if `near(x, c)`, `gt` if `x > c` and not `near(x, c)`, `gte` if `x > c` or `near(x, c)`
+  (`lt`, `lte` alike). A gainless type's `gain` counts as 0 (§5.3).
 - A variant may define `freq`, `q`, `gain`. It may not define `types`.
 - **Selection is per field, first match wins.** The effective domain of field F is the F of the
   first variant, in array order, whose `when` holds and which defines F. If there is none, it is
@@ -225,8 +227,8 @@ v1 has a closed set:
 | `ascendingFrequency` | `strict` (bool, default `true`) | On the **completed** slot array (§13.7, fillers included), `freq[i] < freq[i+1]` (`≤` when not strict). |
 | `minSpacing` | `octaves` (> 0) | Any two **active** filters are at least `octaves` apart: `abs(log2(f_a / f_b)) >= octaves`. |
 
-Rules apply to written values. A filter is **active** if its type uses gain and `gain ≠ 0`, or if
-its type is gainless.
+Rules apply to written values. A filter is **active** if its type uses gain and `gain ≠ 0` (not
+`near(gain, 0)`), or if its type is gainless.
 
 Unknown rule types: a consumer MUST tell the user that the profile has rules it cannot enforce. On
 the hardware write path it MUST NOT present the result as device-conformant, though it MAY write
@@ -266,7 +268,9 @@ Laws form a closed set. In each formula `f`, `q` and `gain` are the filter's **w
 | `shelfFrequencyShift` | `designRate` | `freq` | `(designRate/π) · atan(tan(π·f / designRate) · d)`, with `d = √A` for `LSC` and `1/√A` for `HSC` | `LSC`, `HSC` |
 
 `designRate` (Hz) is the sample rate the engine designs its filters at. It's a fixed property of
-the part, not the rate being streamed.
+the part, not the rate being streamed. A law with a `designRate` applies only where
+`0 < f < designRate/2`; elsewhere its formula is meaningless, and it is the identity. Written values
+always lie inside, because of the rule below.
 
 - Every law lists its `types` explicitly (non-empty) and applies only to filters of those types.
 - When several `q` laws apply to a type, their factors multiply. At most one `freq` law applies to
@@ -522,21 +526,42 @@ Apps hold filters that describe the response the user wants. The operations fit 
 - **Reading from an engine:** the bridge decodes written values → `toRealized` (§13.3).
 - **Editing:** `validateList` (§13.4) flags problems without changing anything.
 
-### 13.1 `resolveSlot(profile, i, filter?) → EffectiveSlot`
+Common to every operation:
 
-1. Merge `band` with the override for `i` (§5.2).
-2. If `filter` is given, select variants per §6 using the filter's current values.
-3. Return `{ types, freq, q, gain }` as domains, plus `locked` flags per field.
+- A filter is `{ type, freq, q, gain }` in canonical units (§1). Profiles are valid (§2–§11); on
+  anything else the result is unspecified.
+- **Normalized filters.** A gainless type's `gain` is 0 wherever an operation reads or returns
+  it, conditions on `gain` included (§5.3). Unknown types (§15) count as gain-using, so their gain
+  is kept and checked.
+- **Evaluation order.** A slot's fields are evaluated `type` first, then `freq`, `q` and `gain` in
+  topological order of the slot's dependency graph: the variant edges of §6 plus the law edges of
+  §8, taken per slot after merging. Fields with no path between them keep the order `freq`, `q`,
+  `gain`.
+- **Tolerance.** Every comparison uses `near` (§4): `a < b` means `a < b` and not `near(a, b)`, and
+  `a ≤ b` means `a < b` or `near(a, b)`.
+
+### 13.1 `resolveSlot(profile, i, filter?) → EffectiveSlot` (exact)
+
+1. Merge `band` with the override for `i` (§5.2). When `bandCount` is `null`, every `i ≥ 0` is the
+   template; otherwise `i < bandCount`.
+2. If `filter` is given, select variants per §6 using the filter's own values.
+3. Return `{ label?, types, freq, q, gain, locked }`: the domains, plus
+   `locked: { type, freq, q, gain }`, true where exactly one value is allowed (a single type, or a
+   freq-locked domain in the sense of §5.4).
 
 ### 13.2 `project(value, domain, field) → value` (exact)
 
 - **Range:** `clamp(x, min, max)`.
 - **Stepped:** `c = clamp(x, min, max)`, `k = floor(c/step + 0.5)`, `v = k·step`; if `v > max` then
-  `v -= step`; if `v < min` then `v += step`. Implementations SHOULD normalize output to 10 decimal
-  places. Write `floor(x + 0.5)`, not a language's `round`: their half-way behaviour differs.
-- **Set:** the nearest value. Distance is `|ln(a/b)|` for `freq` and `q` and `|a − b|` for `gain`
-  and `preamp`. Ties go to the lower value.
+  `v = (k−1)·step`, else if `v < min` then `v = (k+1)·step` (with tolerance, so a `v` that is
+  `near` a bound stays). Implementations SHOULD normalize output to 10 decimal places. Write
+  `floor(x + 0.5)`, not a language's `round`: their half-way behaviour differs.
+- **Set:** clamp to the first and last value, then take the nearest value. Distance is `|ln(a/b)|`
+  for `freq` and `q` and `|a − b|` for `gain` and `preamp`. Ties (within tolerance) go to the lower
+  value.
 - **Locked:** the value.
+- **NaN** projects as the field's neutral value would: 0 for `gain` and `preamp`, 1 for `q`, and
+  the geometric centre `√(min·max)` of the domain's bounds for `freq`. Infinities clamp.
 - **Type:** keep it if allowed, otherwise use the first entry of the slot's `types`.
 
 ### 13.3 `toRealized(profile, filter) → Filter`, `toWritten(profile, filter) → Filter` (exact)
@@ -550,41 +575,80 @@ when the profile has no `realization`, or when no law applies to the filter's ty
 - `toWritten`: `type` and `gain` are unchanged. Invert the `freq` law first, since it needs only
   `gain`: `f = (designRate/π) · atan(tan(π·f_r / designRate) / d)`. Then divide `q` by the product
   of the `q` factors, evaluated at the written `freq` just computed.
+- A law with a `designRate` is the identity where its frequency (the written one, or the realized
+  one when inverting the `freq` law) is outside `0 < f < designRate/2` (§8).
 
 Neither function projects, so results may fall outside the domains. `fit` (§13.6) handles that.
 
-### 13.4 `validate(profile, slots, preamp) → Violation[]` (normative, exact)
+### 13.4 `validate(profile, slots, preamp?) → Violation[]` (normative, exact)
 
-Input: an **already-assigned** array of **written** filters `(Filter | null)[]` of length
-`bandCount` (or any length when unbounded). Validation is exact and identical across implementations because it doesn't
-depend on assignment. For each non-null slot: type allowed; each field a member of its effective
-domain, with variants resolved against the filter's own values. Then rules, then preamp.
+Input: an **already-assigned** array of **written** filters `(Filter | null)[]`, where entry `i`
+is slot `i` and `null` is empty. Its length may differ from `bandCount`. `preamp` is in dB; it is
+left out when the app has none. Validation is exact and identical across implementations because it
+doesn't depend on assignment, so the output, order included, is normative:
+
+1. **Slots**, in slot order, for each entry `i < bandCount` (every entry when unbounded) that
+   holds a filter:
+   - type: `type-not-allowed` (with `allowed: types`) if the slot doesn't allow it; otherwise
+     `unknown-type` if it isn't a v1 code (§5.3, §15).
+   - then `freq`, `q` and `gain` (`gain` only for gain-using types), each against its effective
+     domain, with variants resolved against the filter's own values. Codes: `out-of-range`
+     (range or stepped, outside the bounds), `off-grid` (stepped, inside the bounds),
+     `not-in-set`, `locked`; `allowed` is the domain. A non-finite value fails its domain.
+2. `too-many-bands`, once, if an entry at index `≥ bandCount` holds a filter. Such entries aren't
+   checked otherwise.
+3. **Rules**, in profile order. A violation names the slot where the rule breaks, with
+   `field: 'freq'`, `code: 'rule-violated'` and `rule`, in slot order within each rule:
+   - `ascendingFrequency`: walk slots `0 … bandCount−1` with a lower bound, initially none. A
+     filter must lie above the bound (strictly, unless `strict` is false), and becomes the bound.
+     An empty slot gets the neutral filler of §13.7, whose `freq` domain is resolved against the
+     filler's fields evaluated before `freq`. The lowest value of that domain above the bound
+     becomes the new bound. For a range whose `min` is below the bound, that's the bound itself,
+     still exclusive when strict. If the domain has no value above the bound, the slot breaks and
+     the bound stays. When unbounded, empty entries are skipped: `complete` leaves them out.
+   - `minSpacing`: sort the active filters by `freq` (ties by slot). Each adjacent pair whose
+     `log2` ratio is less than `octaves` breaks at the higher of the two.
+   - An unknown rule type gives `unknown-rule` with its `rule`.
+4. **Preamp**, if given: in `manual` mode, against the `gain` domain; in `none` mode, anything but
+   0 is `locked` with `allowed: { value: 0 }`; in `auto` and `unknown` mode, it isn't checked.
 
 ```ts
 type Violation = {
-  slot: number | null;               // null = profile-level (rule, preamp, band count)
+  slot: number | null;               // the slot at fault; null for too-many-bands, unknown-rule, preamp
   field: 'type' | 'freq' | 'q' | 'gain' | 'preamp' | null;
-  code: 'type-not-allowed' | 'out-of-range' | 'off-grid' | 'not-in-set' | 'locked'
-      | 'too-many-bands' | 'rule-violated' | 'unknown-rule' | 'unknown-type';
-  rule?: string;                     // for rule codes
-  allowed?: Domain | string[];       // what would have been valid
+  code: 'type-not-allowed' | 'unknown-type' | 'out-of-range' | 'off-grid' | 'not-in-set' | 'locked'
+      | 'too-many-bands' | 'rule-violated' | 'unknown-rule';
+  rule?: string;                     // rule-violated, unknown-rule
+  allowed?: Domain | string[];       // type and domain codes: what would have been valid
+  filter?: number;                   // validateList only: index of the input filter
 };
 ```
 
-`validateList(profile, filters, preamp)` takes the app's filters and runs `toWritten` + `assign` +
-`validate`, adding `too-many-bands` for unassigned filters. It is the convenience API apps call
-while editing. Not normative, because it inherits `assign`.
+`validateList(profile, filters, preamp?)` takes the app's filters and runs `toWritten` + `assign` +
+`validate`. A violation about a slot also carries `filter`, the index of the input filter assigned
+to it, and each active filter that got no slot adds a `too-many-bands` violation with its `filter`.
+It is the convenience API apps call while editing. Not normative, because it inherits `assign`.
 
-### 13.5 `assign(profile, filters) → { slots, unassigned }`
+### 13.5 `assign(profile, filters) → { slots, unassigned, slotOf }`
 
-Maps a list of written filters onto slots. Inactive filters (§7) are dropped first.
+Maps a list of written filters onto slots. Inactive filters (§7) are dropped first. `slots` has
+`bandCount` entries (one per assigned filter when unbounded), `unassigned` lists the active
+filters that got no slot, and `slotOf[k]` is the slot of filter `k`, or `null`.
 
 - **Normative property:** if an assignment exists in which every filter's type is allowed and all
   fields are in-domain, `assign` MUST return such an assignment.
-- **Reference algorithm:** if all slots are identical (the homogeneous fast path), keep list order.
-  Otherwise, min-cost bipartite matching (Hungarian, O(n³), fine up to the ~128 slots of large
-  graphic EQs). The cost is the sum of normalized projection distances per field, plus a large
-  penalty for a disallowed type. Ties break by (filter index, slot index).
+- **Reference algorithm:** if all slots are identical (the homogeneous fast path), keep list order,
+  or frequency order under `ascendingFrequency`. Otherwise, min-cost bipartite matching
+  (Hungarian, O(n³), fine up to the ~128 slots of large graphic EQs). The cost of a filter in a
+  slot is how far projecting it onto the slot moves it: `|log2|` of the `freq` and `q` ratios plus
+  `|Δgain| / 6`, plus a large penalty for a disallowed type. Ties are settled by moving filters to
+  lower free slots and restoring list order wherever that costs nothing. Under
+  `ascendingFrequency`, when the matched filters' projected frequencies don't ascend, a
+  frequency-ordered matching (dynamic programming over filters × slots) replaces it, unless only
+  the unordered one is valid.
+- **More filters than slots:** the least significant are left out: smallest `|gain|` first,
+  gainless filters last, later filters first on ties. A filter that fits only by changing its type
+  is left out before one that fits.
 - Exact output is **informative**: other implementations may pick a different valid assignment.
 
 ### 13.6 `fit(profile, filters, preamp) → FitResult`
@@ -593,58 +657,96 @@ Maps a list of written filters onto slots. Inactive filters (§7) are dropped fi
 type FitResult = {
   slots: (Filter | null)[];      // written values: what to send to the engine
   realized: (Filter | null)[];   // toRealized(slots): what the listener gets
-  preamp: number; changes: Change[]; unassigned: Filter[]; feasible: boolean;
+  preamp: number;
+  changes: Change[];             // where the result differs from what was wanted
+  unassigned: Filter[];          // wanted filters that got no slot
+  feasible: boolean;             // validate(slots, preamp) = []
+};
+type Change = {
+  filter: number | null;         // index of the wanted filter; null for the preamp
+  slot: number | null;           // null for the preamp, and for a filter projected flat
+  field: 'type' | 'freq' | 'q' | 'gain' | 'preamp';
+  wanted: number | string; realized: number | string;
 };
 ```
 
-Input: the app's filters, i.e. the response the user wants.
+Input: the app's filters, i.e. the response the user wants, and its preamp.
 
 1. `toWritten` each filter, then `assign`.
 2. Per slot, starting again from the wanted filter: project the type. Then, for each field in
-   topological order (§6 variant edges plus §8 law edges), compute its written value from the
-   wanted value and the fields already final, and project it onto its domain resolved against those
-   fields.
-3. Rules, on written values. `minSpacing`: walk active filters by ascending freq; if a gap is too small, move the
-   higher filter up to `prev · 2^octaves` and re-project it; if it still violates, mark infeasible
-   and leave the filter as is. `ascendingFrequency`: re-run assignment with filters ordered by freq,
-   then check again.
-4. Project preamp.
+   evaluation order, compute its written value from the wanted value and the fields already final,
+   and project it onto its domain resolved against those fields. A filter whose gain projects to 0
+   is flat: its slot is left empty, and a `gain` change with `slot: null` reports it.
+3. Rules, on written values. `minSpacing`: walk the active filters by ascending freq; if a gap is
+   too small, move the higher filter to the lowest written freq its domain allows at or above
+   `prev · 2^octaves`, and re-evaluate the fields after `freq`. If that doesn't get it far
+   enough, leave the filter as it is; the result is infeasible. `ascendingFrequency`: if the result
+   breaks it, redo steps 2–3 with a frequency-ordered assignment, and take that one only if it keeps
+   at least as many filters and has fewer violations. Rule compliance is never bought by
+   silently dropping a filter.
+4. Project the preamp: `manual` projects onto its `gain` domain, `none` gives 0, and `auto` and
+   `unknown` keep the value.
 
-`changes` compares each wanted filter with its realized result.
+`changes` compares each wanted filter with its realized result, field by field, then the preamp.
 
 **Normative properties**, enforced by property tests and conformance vectors. With `F = fit(x)`:
 
-- Sound: `F.feasible ⇒ validate(F.slots) = []`.
-- Faithful: `validateList(x) = [] ⇒ F.realized = x` (within ε), with no changes.
-- Idempotent: `fit(F.realized) = F`.
+- Sound: `F.feasible ⇔ validate(F.slots, F.preamp) = []`.
+- Safe: every type and value in `F.slots`, and `F.preamp`, is in its domain. Only
+  `rule-violated`, `unknown-rule` and `unknown-type` violations can remain.
+- Faithful: `validateList(x) = [] ⇒ F.realized` holds exactly the active filters of `x` (within ε,
+  in slot order), with no changes and nothing unassigned.
+- Idempotent: `fit(F.realized)` has the same `slots`, `realized`, `preamp` and `feasible` as `F`,
+  and, when `F` is feasible, no changes.
 - `fit` never increases the number of active filters.
 
 Without `realization`, `toWritten` and `toRealized` are the identity, so valid input comes back
-unchanged and `fit(fit(x)) = fit(x)`.
+unchanged and `fit(fit(x).realized) = fit(x)`.
+
+Some choices above (which assignment wins under `ascendingFrequency`) depend on the input, so one
+pass over its own realized output can choose differently. The reference repeats steps 1–4 on its
+own realized output until the slots stop changing (at most 8 passes), and composes the mapping from
+wanted filters to slots. Idempotence then holds by construction.
 
 `fit` does **not** approximate curves. Folding a parametric curve onto a graphic EQ well means
 re-optimizing against the target response (AutoEQ's job), using the per-slot domains this format
 provides. Optimizers SHOULD evaluate candidates through `toRealized`, so they aim at the response
 the listener gets.
 
-### 13.7 `complete(profile, slots, preamp) → Filter[]` (hardware write path)
+### 13.7 `complete(profile, slots) → { filters, warnings }` (hardware write path)
 
-Returns exactly `bandCount` written filters, filling empty slots with a **neutral** filter:
+Returns exactly `bandCount` written filters (the non-null ones when unbounded). Filled slots pass
+through unchanged, and each empty slot gets a **neutral** filler, its fields in evaluation order:
 
-- type: the first gain-using type in `types` (prefer `PK`);
-- gain: `project(0, gain)` (if that isn't 0, the slot can't be neutral, so emit a warning);
-- freq: the locked value if locked; otherwise, under `ascendingFrequency`, a value strictly between
-  its neighbours within the domain; otherwise the geometric centre of the domain, projected;
-- q: `project(1.0, q)`.
+- type: `PK` if allowed, else the first gain-using v1 type in `types`, else `AP` (flat magnitude),
+  else the first type;
+- gain: `project(0, gain)`; 0 for a gainless type;
+- q: `project(1.0, q)`;
+- freq: the locked value if locked. Otherwise, under `ascendingFrequency`, a value between its
+  neighbours: each run of empty slots is spread evenly in log frequency between the filters around
+  it (or the domain bounds), within what the slot's domain and the slots after it allow.
+  Otherwise, the geometric centre of the domain, projected.
+
+`warnings` holds `{ slot, code }`: `not-neutral` when the filler is active (the slot can't take
+0 dB, or allows only gainless types), and `no-room` when no frequency satisfies
+`ascendingFrequency` (the filler then takes its default frequency).
+
+**Properties:** fillers are in their domains, neutral unless a warning says otherwise, and if
+`validate(slots)` reports no `ascendingFrequency` violation, neither does
+`validate(complete(slots).filters)`.
 
 ### 13.8 Conformance
 
-`conformance/v1/*.json`: `{ description, profile, op, input, expect }`.
+`conformance/v1/<op>.json`, one file per operation:
+`{ description, vectors: [{ description, profile, op, input, expect }] }`. `profile` is a path
+under `conformance/v1/profiles/` without `.json`, or an RFC 7386 merge patch over
+`profiles/base.json` (or over the file its `"$base"` names). `conformance/v1/README.md` defines
+`input` and `expect` per operation.
 
 - **Exact ops:** `resolveSlot`, `project`, `toRealized`, `toWritten`, `validate`. Output must match
-  within ε.
-- **Property ops:** `assign`, `fit`, `complete`. The vector gives the input; the check is the
-  properties above, not a fixed output.
+  within ε, the order of violations included.
+- **Property ops:** `assign`, `fit`, `complete`. The vector gives the input and a few facts about
+  it (`expect`); the check is the properties above plus those facts, not a fixed output.
 
 An implementation is conformant for a schema minor version if it passes every vector for it.
 
@@ -652,6 +754,13 @@ An implementation is conformant for a schema minor version if it passes every ve
 `examples/` (the §12 examples as complete profiles, all valid) and `cases/` (one or more per rule
 of §2–§11, each listing the issue codes it must produce, or none). Its `README.md` defines the
 case format. The issue codes are listed in `ISSUE_CODES` of `packages/core`.
+
+### 13.9 Helpers (informative)
+
+`packages/core` also exports `isGraphic(profile)` (§5.4), `describe(profile)` (English summaries
+of slots, preamp, rules and realization for UIs) and `unsupported(profile)`, which lists the rule
+types, laws and filter types this engine version doesn't know, so a consumer can meet §7, §8 and
+§15.
 
 ## 14. Published artifacts
 

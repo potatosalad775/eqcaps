@@ -13,3 +13,23 @@ export { COUNTING_SOURCE_KINDS, isCountingSource, validateProfile } from './vali
 export { MAX_EXTENDS_DEPTH, PROFILE_SCHEMA_URL, flattenProfile } from './flatten.ts';
 export type { FlattenResult } from './flatten.ts';
 export { checkDatabase } from './database.ts';
+
+// Engine (SPEC §13)
+export type { Field, NumericField } from './dependencies.ts';
+export { FILTER_TYPES, isActive, isKnownType, normalizeFilter, usesGain } from './filter.ts';
+export type { Filter, KnownFilterType } from './filter.ts';
+export { domainViolation, inDomain, project, projectType } from './project.ts';
+export type { DomainField, DomainViolation } from './project.ts';
+export { resolveSlot } from './resolve.ts';
+export type { EffectiveSlot } from './resolve.ts';
+export { toRealized, toWritten } from './realization.ts';
+export { validate, validateList } from './validate.ts';
+export type { Violation, ViolationCode } from './validate.ts';
+export { assign } from './assign.ts';
+export type { AssignResult } from './assign.ts';
+export { fit } from './fit.ts';
+export type { Change, FitResult } from './fit.ts';
+export { complete } from './complete.ts';
+export type { CompleteResult, CompleteWarning } from './complete.ts';
+export { describe, describeDomain, isGraphic, unsupported } from './describe.ts';
+export type { ProfileDescription, SlotGroupDescription } from './describe.ts';

@@ -1,0 +1,59 @@
+{
+	"description": "toWritten(profile, filter) (SPEC §13.3).",
+	"vectors": [
+		{
+			"description": "no realization: identity",
+			"profile": {},
+			"op": "toWritten",
+			"input": { "filter": { "type": "PK", "freq": 1000, "q": 4, "gain": -12 } },
+			"expect": { "type": "PK", "freq": 1000, "q": 4, "gain": -12 }
+		},
+		{
+			"description": "gainScaledQ: q · A",
+			"profile": "examples/h-realization-laws",
+			"op": "toWritten",
+			"input": { "filter": { "type": "PK", "freq": 1000, "q": 4, "gain": -12 } },
+			"expect": { "type": "PK", "freq": 1000, "q": 7.981049259875517, "gain": -12 }
+		},
+		{
+			"description": "low shelf: freq inverted first, then q",
+			"profile": "examples/h-realization-laws",
+			"op": "toWritten",
+			"input": { "filter": { "type": "LSC", "freq": 100, "q": 0.7, "gain": 6 } },
+			"expect": { "type": "LSC", "freq": 84.139865044859, "q": 0.988776281235928, "gain": 6 }
+		},
+		{
+			"description": "high shelf",
+			"profile": "examples/h-realization-laws",
+			"op": "toWritten",
+			"input": { "filter": { "type": "HSC", "freq": 8000, "q": 0.7, "gain": -6 } },
+			"expect": { "type": "HSC", "freq": 9188.590913195945, "q": 0.988776281235928, "gain": -6 }
+		},
+		{
+			"description": "freq at or above designRate/2: law not applied",
+			"profile": "examples/h-realization-laws",
+			"op": "toWritten",
+			"input": { "filter": { "type": "HSC", "freq": 24000, "q": 0.7, "gain": 6 } },
+			"expect": { "type": "HSC", "freq": 24000, "q": 0.988776281235928, "gain": 6 }
+		},
+		{
+			"description": "nyquistScaledQ: q factor at the written freq",
+			"profile": {
+				"realization": {
+					"laws": [{ "law": "nyquistScaledQ", "types": ["PK", "LPQ"], "designRate": 48000 }],
+					"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+				}
+			},
+			"op": "toWritten",
+			"input": { "filter": { "type": "PK", "freq": 12000, "q": 0.7071067811865476, "gain": 3 } },
+			"expect": { "type": "PK", "freq": 12000, "q": 1, "gain": 3 }
+		},
+		{
+			"description": "gainless type: gain becomes 0",
+			"profile": {},
+			"op": "toWritten",
+			"input": { "filter": { "type": "NO", "freq": 1000, "q": 5, "gain": 4 } },
+			"expect": { "type": "NO", "freq": 1000, "q": 5, "gain": 0 }
+		}
+	]
+}

@@ -1,0 +1,197 @@
+{
+	"description": "project(value, domain, field) (SPEC §13.2). For field \"type\", domain is the slot's types.",
+	"vectors": [
+		{
+			"description": "range: below min clamps",
+			"op": "project",
+			"input": { "value": 10, "domain": { "min": 20, "max": 20000 }, "field": "freq" },
+			"expect": 20
+		},
+		{
+			"description": "range: above max clamps",
+			"op": "project",
+			"input": { "value": 25000, "domain": { "min": 20, "max": 20000 }, "field": "freq" },
+			"expect": 20000
+		},
+		{
+			"description": "range: inside stays",
+			"op": "project",
+			"input": { "value": 1234.5, "domain": { "min": 20, "max": 20000 }, "field": "freq" },
+			"expect": 1234.5
+		},
+		{
+			"description": "stepped: half-way rounds up",
+			"op": "project",
+			"input": { "value": 0.25, "domain": { "min": -12, "max": 12, "step": 0.5 }, "field": "gain" },
+			"expect": 0.5
+		},
+		{
+			"description": "stepped: negative half-way rounds up, towards 0",
+			"op": "project",
+			"input": {
+				"value": -0.25,
+				"domain": { "min": -12, "max": 12, "step": 0.5 },
+				"field": "gain"
+			},
+			"expect": 0
+		},
+		{
+			"description": "stepped: -0.75 rounds up to -0.5",
+			"op": "project",
+			"input": {
+				"value": -0.75,
+				"domain": { "min": -12, "max": 12, "step": 0.5 },
+				"field": "gain"
+			},
+			"expect": -0.5
+		},
+		{
+			"description": "stepped: clamps first",
+			"op": "project",
+			"input": { "value": 12.3, "domain": { "min": -12, "max": 12, "step": 0.5 }, "field": "gain" },
+			"expect": 12
+		},
+		{
+			"description": "stepped 1/14: min stays on the grid",
+			"op": "project",
+			"input": {
+				"value": 0.5,
+				"domain": { "min": 0.5, "max": 5, "step": 0.07142857142857142 },
+				"field": "q"
+			},
+			"expect": 0.5
+		},
+		{
+			"description": "stepped 1/14: rounds to the grid, 10 decimals",
+			"op": "project",
+			"input": {
+				"value": 0.54,
+				"domain": { "min": 0.5, "max": 5, "step": 0.07142857142857142 },
+				"field": "q"
+			},
+			"expect": 0.5714285714
+		},
+		{
+			"description": "stepped 1/14: max stays on the grid",
+			"op": "project",
+			"input": {
+				"value": 5,
+				"domain": { "min": 0.5, "max": 5, "step": 0.07142857142857142 },
+				"field": "q"
+			},
+			"expect": 5
+		},
+		{
+			"description": "stepped: decimal step lands on a short decimal",
+			"op": "project",
+			"input": { "value": 0.123, "domain": { "min": 0.1, "max": 10, "step": 0.01 }, "field": "q" },
+			"expect": 0.12
+		},
+		{
+			"description": "set freq: log distance, 88 Hz is nearer 62",
+			"op": "project",
+			"input": { "value": 88, "domain": { "values": [31, 62, 125, 250] }, "field": "freq" },
+			"expect": 62
+		},
+		{
+			"description": "set freq: log distance, 89 Hz is nearer 125",
+			"op": "project",
+			"input": { "value": 89, "domain": { "values": [31, 62, 125, 250] }, "field": "freq" },
+			"expect": 125
+		},
+		{
+			"description": "set freq: below the first value",
+			"op": "project",
+			"input": { "value": 1, "domain": { "values": [31, 62, 125, 250] }, "field": "freq" },
+			"expect": 31
+		},
+		{
+			"description": "set freq: zero clamps to the first value",
+			"op": "project",
+			"input": { "value": 0, "domain": { "values": [31, 62] }, "field": "freq" },
+			"expect": 31
+		},
+		{
+			"description": "set q: log distance",
+			"op": "project",
+			"input": { "value": 0.6, "domain": { "values": [0.5, 0.707, 1] }, "field": "q" },
+			"expect": 0.707
+		},
+		{
+			"description": "set gain: a tie goes to the lower value",
+			"op": "project",
+			"input": { "value": 0, "domain": { "values": [-1, 1] }, "field": "gain" },
+			"expect": -1
+		},
+		{
+			"description": "set gain: linear distance",
+			"op": "project",
+			"input": { "value": 96, "domain": { "values": [90, 100] }, "field": "gain" },
+			"expect": 100
+		},
+		{
+			"description": "set preamp: linear distance",
+			"op": "project",
+			"input": { "value": -4.4, "domain": { "values": [-6, -3, 0] }, "field": "preamp" },
+			"expect": -3
+		},
+		{
+			"description": "locked",
+			"op": "project",
+			"input": { "value": 3, "domain": { "value": 1.41 }, "field": "q" },
+			"expect": 1.41
+		},
+		{
+			"description": "NaN gain is 0",
+			"op": "project",
+			"input": { "value": "NaN", "domain": { "min": -12, "max": 12 }, "field": "gain" },
+			"expect": 0
+		},
+		{
+			"description": "NaN q is 1, projected",
+			"op": "project",
+			"input": { "value": "NaN", "domain": { "min": 0.1, "max": 10, "step": 0.01 }, "field": "q" },
+			"expect": 1
+		},
+		{
+			"description": "NaN freq is the log centre",
+			"op": "project",
+			"input": { "value": "NaN", "domain": { "min": 20, "max": 20000 }, "field": "freq" },
+			"expect": 632.4555320336759
+		},
+		{
+			"description": "NaN preamp is 0, projected",
+			"op": "project",
+			"input": { "value": "NaN", "domain": { "min": -12, "max": -3 }, "field": "preamp" },
+			"expect": -3
+		},
+		{
+			"description": "+Infinity is max",
+			"op": "project",
+			"input": {
+				"value": "Infinity",
+				"domain": { "min": -12, "max": 12, "step": 0.5 },
+				"field": "gain"
+			},
+			"expect": 12
+		},
+		{
+			"description": "-Infinity is the first value",
+			"op": "project",
+			"input": { "value": "-Infinity", "domain": { "values": [1, 2] }, "field": "gain" },
+			"expect": 1
+		},
+		{
+			"description": "type: allowed stays",
+			"op": "project",
+			"input": { "value": "HSC", "domain": ["PK", "HSC"], "field": "type" },
+			"expect": "HSC"
+		},
+		{
+			"description": "type: otherwise the first type",
+			"op": "project",
+			"input": { "value": "LSC", "domain": ["PK", "HSC"], "field": "type" },
+			"expect": "PK"
+		}
+	]
+}

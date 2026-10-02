@@ -1,16 +1,17 @@
+import {
+	findCycle,
+	lawApplies,
+	lawEdges,
+	NUMERIC_FIELDS,
+	variantDefines,
+	variantReads,
+	type Field
+} from './dependencies.ts';
 import { domainBounds, domainForm, near, onGrid } from './domain.ts';
 import { compareFirmware } from './firmware.ts';
 import { error, type Issue } from './issues.ts';
 import { mergeSlotFields, overrideIndices, slotOverrides } from './slots.ts';
-import type {
-	Domain,
-	FilterType,
-	Law,
-	Profile,
-	SlotFields,
-	Source,
-	Variant
-} from './types/schema.generated.ts';
+import type { Domain, FilterType, Profile, SlotFields, Source } from './types/schema.generated.ts';
 
 /** Source kinds that count toward a verified status (SPEC §10). */
 export const COUNTING_SOURCE_KINDS: ReadonlySet<Source['kind']> = new Set([
@@ -25,9 +26,7 @@ export function isCountingSource(source: Source): boolean {
 	return COUNTING_SOURCE_KINDS.has(source.kind) && source.via === undefined;
 }
 
-type Field = 'type' | 'freq' | 'q' | 'gain';
 const SLOT_FIELDS = ['types', 'freq', 'q', 'gain'] as const;
-const DOMAIN_FIELDS = ['freq', 'q', 'gain'] as const;
 const EVIDENCE_REF = /^evidence\/[a-z0-9]+(-[a-z0-9]+)*\/[^/\\]+\.json$/;
 
 /**
@@ -99,12 +98,12 @@ function checkDomain(d: Domain, field: 'freq' | 'q' | 'gain' | 'preamp', path: s
 
 function checkSlotDomains(slot: SlotFields, path: string): Issue[] {
 	const issues: Issue[] = [];
-	for (const f of DOMAIN_FIELDS) {
+	for (const f of NUMERIC_FIELDS) {
 		const d = slot[f];
 		if (d) issues.push(...checkDomain(d, f, `${path}/${f}`));
 	}
 	(slot.variants ?? []).forEach((v, j) => {
-		for (const f of DOMAIN_FIELDS) {
+		for (const f of NUMERIC_FIELDS) {
 			const d = v[f];
 			if (d) issues.push(...checkDomain(d, f, `${path}/variants/${j}/${f}`));
 		}
@@ -197,60 +196,6 @@ function formatIndices(xs: number[]): string {
 }
 
 // §6, §8 --------------------------------------------------------------------------------------
-
-/** Fields a variant's `when` reads. */
-function variantReads(v: Variant): Field[] {
-	return (['type', 'freq', 'q', 'gain'] as const).filter((f) => v.when[f] !== undefined);
-}
-
-/** Fields a variant defines. */
-function variantDefines(v: Variant): Field[] {
-	return DOMAIN_FIELDS.filter((f) => v[f] !== undefined);
-}
-
-/** Dependency edges a law adds for filters of its types (SPEC §8). */
-function lawEdges(law: Law): [Field, Field][] {
-	switch (law.law) {
-		case 'gainScaledQ':
-			return [['gain', 'q']];
-		case 'nyquistScaledQ':
-			return [['freq', 'q']];
-		case 'shelfFrequencyShift':
-			return [['gain', 'freq']];
-	}
-}
-
-function lawApplies(law: Law, types: readonly FilterType[] | undefined): boolean {
-	return (types ?? []).some((t) => (law.types as readonly FilterType[]).includes(t));
-}
-
-function findCycle(edges: [Field, Field][]): Field[] | null {
-	const next = new Map<Field, Field[]>();
-	for (const [a, b] of edges) next.set(a, [...(next.get(a) ?? []), b]);
-	const state = new Map<Field, 'open' | 'done'>();
-	const stack: Field[] = [];
-	const visit = (n: Field): Field[] | null => {
-		state.set(n, 'open');
-		stack.push(n);
-		for (const m of next.get(n) ?? []) {
-			if (state.get(m) === 'open') return [...stack.slice(stack.indexOf(m)), m];
-			if (!state.has(m)) {
-				const c = visit(m);
-				if (c) return c;
-			}
-		}
-		stack.pop();
-		state.set(n, 'done');
-		return null;
-	};
-	for (const n of ['type', 'freq', 'q', 'gain'] as const) {
-		if (!state.has(n)) {
-			const c = visit(n);
-			if (c) return c;
-		}
-	}
-	return null;
-}
 
 function checkDependencies(profile: Profile): Issue[] {
 	const issues: Issue[] = [];

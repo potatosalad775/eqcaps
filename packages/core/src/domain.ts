@@ -33,3 +33,8 @@ export function domainBounds(d: Domain): { min: number; max: number } {
 export function isLockedDomain(d: Domain): boolean {
 	return 'value' in d || ('values' in d && d.values.length === 1);
 }
+
+/** Order of two numbers, with values within tolerance as ties: 0 if near, else a − b. */
+export function compareNear(a: number, b: number): number {
+	return a === b || near(a, b) ? 0 : a - b;
+}

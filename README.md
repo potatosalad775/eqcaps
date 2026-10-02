@@ -15,7 +15,7 @@ quantization, conditional domains, cross-band rules, preamp, device identity and
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Every design decision, with rationale |
 | [`schema/v1/`](schema/v1/) | JSON Schema for published profiles and authoring files |
 | [`conformance/v1/`](conformance/v1/) | Fixtures and vectors any implementation can test against |
-| [`packages/core`](packages/core/) | Types, semantic validator and (soon) the reference engine. Zero dependencies. |
+| [`packages/core`](packages/core/) | Types, semantic validator and the reference engine. Zero dependencies. |
 | [`packages/client`](packages/client/) | Fetching, caching and device matching (Phase 3) |
 | [`packages/build`](packages/build/) | Validation pipeline and data build used by CI |
 
@@ -26,10 +26,11 @@ Requires Node 22.18 or later.
 ```sh
 npm install
 npm run lint      # Prettier + ESLint
-npm run check     # generated files up to date + typecheck
+npm run check     # generated files and conformance vectors up to date + typecheck
 npm test
 npm run build
 npm run codegen   # after editing schema/v1/profile.schema.json
+npm run conformance  # after changing engine behaviour or scripts/conformance.ts
 ```
 
 ## License

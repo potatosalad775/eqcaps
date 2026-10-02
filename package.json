@@ -16,11 +16,12 @@
 	"scripts": {
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"check": "node scripts/codegen.ts --check && tsc -p tsconfig.json",
+		"check": "node scripts/codegen.ts --check && node scripts/conformance.ts --check && tsc -p tsconfig.json",
 		"test": "vitest --run",
 		"test:watch": "vitest",
 		"build": "npm run build --workspaces --if-present",
-		"codegen": "node scripts/codegen.ts"
+		"codegen": "node scripts/codegen.ts",
+		"conformance": "node scripts/conformance.ts"
 	},
 	"engines": {
 		"node": ">=22.18"

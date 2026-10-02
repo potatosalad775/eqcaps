@@ -1,0 +1,158 @@
+{
+	"description": "fit(profile, filters, preamp) (SPEC §13.6). Property op: runners check sound, faithful, idempotent and no added filters on every vector; expect.feasible is what this input must give.",
+	"vectors": [
+		{
+			"description": "valid input comes back unchanged",
+			"profile": "examples/b-jds-labs-element-iv",
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 1000, "q": 2, "gain": 3 },
+					{ "type": "LSC", "freq": 105, "q": 0.7, "gain": 4 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "every field out of its domain",
+			"profile": {},
+			"op": "fit",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 30000, "q": 0.123, "gain": 15 }],
+				"preamp": 0
+			},
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "realization: written q that realizes the wanted q",
+			"profile": "examples/h-realization-laws",
+			"op": "fit",
+			"input": { "filters": [{ "type": "PK", "freq": 1000, "q": 4, "gain": -12 }], "preamp": 0 },
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "realization: written q capped by its domain",
+			"profile": "examples/h-realization-laws",
+			"op": "fit",
+			"input": { "filters": [{ "type": "PK", "freq": 1000, "q": 6, "gain": -12 }], "preamp": 0 },
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "realization: shifted shelf rounded onto the written grid",
+			"profile": "examples/h-realization-laws",
+			"op": "fit",
+			"input": { "filters": [{ "type": "LSC", "freq": 100, "q": 0.7, "gain": 6 }], "preamp": 0 },
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "preamp projected",
+			"profile": "examples/h-realization-laws",
+			"op": "fit",
+			"input": { "filters": [], "preamp": 3 },
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "minSpacing moves a filter up",
+			"profile": { "rules": [{ "type": "minSpacing", "octaves": 1 }] },
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 3 },
+					{ "type": "PK", "freq": 150, "q": 1, "gain": 2 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "minSpacing that cannot be fixed",
+			"profile": {
+				"band": { "freq": { "min": 20, "max": 160 } },
+				"rules": [{ "type": "minSpacing", "octaves": 1 }]
+			},
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 3 },
+					{ "type": "PK", "freq": 150, "q": 1, "gain": 2 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": false }
+		},
+		{
+			"description": "partitioned engine ordered by frequency",
+			"profile": "examples/c-partitioned-windows",
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 5000, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 2000, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 500, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "more filters than slots",
+			"profile": {},
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 3 },
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 0.5 },
+					{ "type": "PK", "freq": 400, "q": 1, "gain": -6 },
+					{ "type": "PK", "freq": 800, "q": 1, "gain": 2 },
+					{ "type": "PK", "freq": 1600, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 3200, "q": 1, "gain": 0 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "gain projected to 0 leaves the slot empty",
+			"profile": {},
+			"op": "fit",
+			"input": { "filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 0.04 }], "preamp": 0 },
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "type projected",
+			"profile": {},
+			"op": "fit",
+			"input": { "filters": [{ "type": "HSC", "freq": 8000, "q": 0.7, "gain": 3 }], "preamp": 0 },
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "graphic EQ: frequencies snap to the centres",
+			"profile": "examples/e-graphic-10",
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 40, "q": 2, "gain": 3 },
+					{ "type": "PK", "freq": 900, "q": 0.7, "gain": -2 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": true }
+		},
+		{
+			"description": "unbounded",
+			"profile": "examples/g-equalizer-apo",
+			"op": "fit",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					{ "type": "HPQ", "freq": 0.5, "q": 0.707, "gain": 0 },
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 40 }
+				],
+				"preamp": 0
+			},
+			"expect": { "feasible": true }
+		}
+	]
+}

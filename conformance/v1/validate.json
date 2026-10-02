@@ -1,0 +1,392 @@
+{
+	"description": "validate(profile, slots, preamp?) (SPEC §13.4). Exact, including the order of violations.",
+	"vectors": [
+		{
+			"description": "valid slots, empty ones included",
+			"profile": {},
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 },
+					null,
+					{ "type": "PK", "freq": 4000, "q": 0.71, "gain": -2.5 }
+				]
+			},
+			"expect": []
+		},
+		{
+			"description": "per slot: type, then freq, q, gain",
+			"profile": {},
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 },
+					null,
+					{ "type": "LSC", "freq": 100, "q": 0.7, "gain": 3 },
+					{ "type": "PK", "freq": 30000, "q": 0.105, "gain": 0.15 }
+				]
+			},
+			"expect": [
+				{ "slot": 2, "field": "type", "code": "type-not-allowed", "allowed": ["PK"] },
+				{
+					"slot": 3,
+					"field": "freq",
+					"code": "out-of-range",
+					"allowed": { "min": 20, "max": 20000 }
+				},
+				{
+					"slot": 3,
+					"field": "q",
+					"code": "off-grid",
+					"allowed": { "min": 0.1, "max": 10, "step": 0.01 }
+				},
+				{
+					"slot": 3,
+					"field": "gain",
+					"code": "off-grid",
+					"allowed": { "min": -12, "max": 12, "step": 0.1 }
+				}
+			]
+		},
+		{
+			"description": "gainless type: gain not checked",
+			"profile": { "band": { "types": ["PK", "LPQ"] } },
+			"op": "validate",
+			"input": { "slots": [{ "type": "LPQ", "freq": 5000, "q": 0.7, "gain": 99 }] },
+			"expect": []
+		},
+		{
+			"description": "not in set: a lookup-table frequency",
+			"profile": "examples/a-edifier-w830nb",
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 76, "q": 0.5, "gain": 1.25 },
+					{ "type": "PK", "freq": 80, "q": 0.5, "gain": 1.25 }
+				]
+			},
+			"expect": [
+				{
+					"slot": 1,
+					"field": "freq",
+					"code": "not-in-set",
+					"allowed": {
+						"values": [
+							20, 50, 75, 76, 77, 100, 150, 175, 200, 400, 500, 1000, 1500, 2000, 3000, 3078, 4000,
+							5000, 6000, 8000, 10000
+						]
+					}
+				}
+			]
+		},
+		{
+			"description": "locked frequency and q",
+			"profile": "examples/e-graphic-10",
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 31, "q": 1.41, "gain": 3 },
+					{ "type": "PK", "freq": 63, "q": 1.41, "gain": 3 },
+					{ "type": "PK", "freq": 125, "q": 1.4, "gain": 3 }
+				]
+			},
+			"expect": [
+				{ "slot": 1, "field": "freq", "code": "locked", "allowed": { "value": 62 } },
+				{ "slot": 2, "field": "q", "code": "locked", "allowed": { "value": 1.41 } }
+			]
+		},
+		{
+			"description": "values within tolerance are members",
+			"profile": "examples/e-graphic-10",
+			"op": "validate",
+			"input": { "slots": [{ "type": "PK", "freq": 31.0000000000001, "q": 1.41, "gain": 3 }] },
+			"expect": []
+		},
+		{
+			"description": "domain bounds are members",
+			"profile": {},
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 20, "q": 10, "gain": 12 },
+					{ "type": "PK", "freq": 20000, "q": 0.1, "gain": -12 }
+				]
+			},
+			"expect": []
+		},
+		{
+			"description": "variants resolved against the filter itself",
+			"profile": "examples/d-gain-dependent-window",
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": -3 },
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 3 }
+				]
+			},
+			"expect": [
+				{
+					"slot": 1,
+					"field": "freq",
+					"code": "out-of-range",
+					"allowed": { "min": 200, "max": 8000 }
+				}
+			]
+		},
+		{
+			"description": "too many bands, reported once",
+			"profile": {},
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 400, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 800, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 1600, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 3200, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": [{ "slot": null, "field": null, "code": "too-many-bands" }]
+		},
+		{
+			"description": "preamp none: must be 0",
+			"profile": {},
+			"op": "validate",
+			"input": { "slots": [], "preamp": -3 },
+			"expect": [{ "slot": null, "field": "preamp", "code": "locked", "allowed": { "value": 0 } }]
+		},
+		{
+			"description": "preamp manual: domain",
+			"profile": "examples/h-realization-laws",
+			"op": "validate",
+			"input": { "slots": [], "preamp": 0.5 },
+			"expect": [
+				{
+					"slot": null,
+					"field": "preamp",
+					"code": "out-of-range",
+					"allowed": { "min": -12, "max": 0, "step": 0.1 }
+				}
+			]
+		},
+		{
+			"description": "preamp manual: off grid",
+			"profile": "examples/h-realization-laws",
+			"op": "validate",
+			"input": { "slots": [], "preamp": -0.05 },
+			"expect": [
+				{
+					"slot": null,
+					"field": "preamp",
+					"code": "off-grid",
+					"allowed": { "min": -12, "max": 0, "step": 0.1 }
+				}
+			]
+		},
+		{
+			"description": "preamp auto: not checked",
+			"profile": "examples/d-gain-dependent-window",
+			"op": "validate",
+			"input": { "slots": [], "preamp": 5 },
+			"expect": []
+		},
+		{
+			"description": "preamp left out: not checked",
+			"profile": {},
+			"op": "validate",
+			"input": { "slots": [] },
+			"expect": []
+		},
+		{
+			"description": "ascendingFrequency: a filter out of order",
+			"profile": { "rules": [{ "type": "ascendingFrequency" }] },
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 500, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": [
+				{ "slot": 1, "field": "freq", "code": "rule-violated", "rule": "ascendingFrequency" }
+			]
+		},
+		{
+			"description": "ascendingFrequency: strict rejects equal",
+			"profile": { "rules": [{ "type": "ascendingFrequency" }] },
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": [
+				{ "slot": 1, "field": "freq", "code": "rule-violated", "rule": "ascendingFrequency" }
+			]
+		},
+		{
+			"description": "ascendingFrequency: non-strict allows equal",
+			"profile": { "rules": [{ "type": "ascendingFrequency", "strict": false }] },
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": []
+		},
+		{
+			"description": "ascendingFrequency: a locked filler with no room",
+			"profile": {
+				"bandCount": 3,
+				"bands": [{ "index": 1, "freq": { "value": 1000 } }],
+				"rules": [{ "type": "ascendingFrequency" }]
+			},
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 2000, "q": 1, "gain": 1 },
+					null,
+					{ "type": "PK", "freq": 5000, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": [
+				{ "slot": 1, "field": "freq", "code": "rule-violated", "rule": "ascendingFrequency" }
+			]
+		},
+		{
+			"description": "ascendingFrequency: a locked filler that fits",
+			"profile": {
+				"bandCount": 3,
+				"bands": [{ "index": 1, "freq": { "value": 1000 } }],
+				"rules": [{ "type": "ascendingFrequency" }]
+			},
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 500, "q": 1, "gain": 1 },
+					null,
+					{ "type": "PK", "freq": 5000, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": []
+		},
+		{
+			"description": "ascendingFrequency: a range filler needs a value strictly above its neighbour",
+			"profile": {
+				"bandCount": 3,
+				"bands": [{ "index": 1, "freq": { "min": 1000, "max": 4000 } }],
+				"rules": [{ "type": "ascendingFrequency" }]
+			},
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 4000, "q": 1, "gain": 1 },
+					null,
+					{ "type": "PK", "freq": 5000, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": [
+				{ "slot": 1, "field": "freq", "code": "rule-violated", "rule": "ascendingFrequency" }
+			]
+		},
+		{
+			"description": "ascendingFrequency: partitioned windows",
+			"profile": "examples/c-partitioned-windows",
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 1 },
+					null,
+					{ "type": "PK", "freq": 5000, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": []
+		},
+		{
+			"description": "ascendingFrequency on an unbounded profile skips empty slots",
+			"profile": {
+				"$base": "examples/g-equalizer-apo",
+				"rules": [{ "type": "ascendingFrequency" }]
+			},
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					null,
+					{ "type": "PK", "freq": 500, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 50, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": [
+				{ "slot": 3, "field": "freq", "code": "rule-violated", "rule": "ascendingFrequency" }
+			]
+		},
+		{
+			"description": "minSpacing: active filters only, higher slot reported",
+			"profile": { "rules": [{ "type": "minSpacing", "octaves": 1 }] },
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 150, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 400, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 160, "q": 1, "gain": 0 }
+				]
+			},
+			"expect": [{ "slot": 1, "field": "freq", "code": "rule-violated", "rule": "minSpacing" }]
+		},
+		{
+			"description": "minSpacing: exactly the spacing is enough",
+			"profile": { "rules": [{ "type": "minSpacing", "octaves": 1 }] },
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": []
+		},
+		{
+			"description": "unknown rule and an allowed unknown type",
+			"profile": {
+				"band": { "types": ["PK", "x-tilt"] },
+				"rules": [{ "type": "maxResponse", "db": 6 }]
+			},
+			"op": "validate",
+			"input": { "slots": [{ "type": "x-tilt", "freq": 1000, "q": 1, "gain": 2 }] },
+			"expect": [
+				{ "slot": 0, "field": "type", "code": "unknown-type" },
+				{ "slot": null, "field": null, "code": "unknown-rule", "rule": "maxResponse" }
+			]
+		},
+		{
+			"description": "unbounded profile: any number of slots",
+			"profile": "examples/g-equalizer-apo",
+			"op": "validate",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 400, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 800, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 1600, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 30000, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": [
+				{
+					"slot": 5,
+					"field": "freq",
+					"code": "out-of-range",
+					"allowed": { "min": 1, "max": 24000 }
+				}
+			]
+		}
+	]
+}

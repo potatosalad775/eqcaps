@@ -1,0 +1,77 @@
+{
+	"description": "complete(profile, slots) (SPEC §13.7). Property op: runners check its properties on every vector; expect.warnings lists the warning codes per slot this input must give.",
+	"vectors": [
+		{
+			"description": "fillers at the log centre",
+			"profile": {},
+			"op": "complete",
+			"input": { "slots": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }, null] },
+			"expect": { "warnings": [] }
+		},
+		{
+			"description": "fillers spread between neighbours under ascendingFrequency",
+			"profile": { "rules": [{ "type": "ascendingFrequency" }] },
+			"op": "complete",
+			"input": { "slots": [null, { "type": "PK", "freq": 1000, "q": 1, "gain": 3 }, null, null] },
+			"expect": { "warnings": [] }
+		},
+		{
+			"description": "graphic: locked frequencies",
+			"profile": "examples/e-graphic-10",
+			"op": "complete",
+			"input": { "slots": [] },
+			"expect": { "warnings": [] }
+		},
+		{
+			"description": "a slot that cannot take 0 dB",
+			"profile": { "bandCount": 2, "bands": [{ "index": 1, "gain": { "min": 1, "max": 6 } }] },
+			"op": "complete",
+			"input": { "slots": [] },
+			"expect": { "warnings": [{ "slot": 1, "code": "not-neutral" }] }
+		},
+		{
+			"description": "gainless types only",
+			"profile": { "bandCount": 1, "band": { "types": ["HPQ", "AP"] } },
+			"op": "complete",
+			"input": { "slots": [] },
+			"expect": { "warnings": [{ "slot": 0, "code": "not-neutral" }] }
+		},
+		{
+			"description": "no room for a filler",
+			"profile": {
+				"bandCount": 3,
+				"bands": [{ "index": 1, "freq": { "value": 1000 } }],
+				"rules": [{ "type": "ascendingFrequency" }]
+			},
+			"op": "complete",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 2000, "q": 1, "gain": 1 },
+					null,
+					{ "type": "PK", "freq": 5000, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": { "warnings": [{ "slot": 1, "code": "no-room" }] }
+		},
+		{
+			"description": "partitioned windows",
+			"profile": "examples/c-partitioned-windows",
+			"op": "complete",
+			"input": { "slots": [null, { "type": "PK", "freq": 300, "q": 1, "gain": 1 }, null, null] },
+			"expect": { "warnings": [] }
+		},
+		{
+			"description": "unbounded: only the filters",
+			"profile": "examples/g-equalizer-apo",
+			"op": "complete",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					null,
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": { "warnings": [] }
+		}
+	]
+}

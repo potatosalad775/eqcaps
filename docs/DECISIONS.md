@@ -288,6 +288,50 @@ rejection of a WASM or embedded-JS engine on Android assumed a native Kotlin app
 while the app is a WebView app.
 *2026-10-02:* `toRealized`/`toWritten` added to the exact ops, and `realize` renamed `complete`
 (D29).
+*2026-10-02:* vectors exist for all eight ops, one file per op; property ops carry asserted facts
+(D30).
+
+### D30. Engine semantics pinned down by the reference implementation (accepted, 2026-10-02)
+Phase 2 implemented SPEC §13 and ran its properties over 100k random profiles per property. Where
+the draft left room, these choices were made (all now in SPEC §6–§8 and §13):
+- **Exact outputs are fully specified.** `validate` fixes the order of its violations and names
+  the slot where a rule breaks (the draft's `slot: null` for rules gave UIs nothing to point at).
+  `too-many-bands` is reported once. Variant conditions, activity and every comparison use the §4
+  tolerance. A gainless type's gain counts as 0 everywhere, conditions included. Unknown types
+  count as gain-using, so their gain is kept rather than silently zeroed.
+- **ascendingFrequency on the completed array is checked exactly, without running `complete`.**
+  Each empty slot takes the lowest frequency its filler's domain allows, which is optimal for
+  every later slot. `validate` therefore stays exact, and `complete` is guaranteed to keep the
+  order whenever `validate` found room.
+- **`project(NaN)` is the field's neutral value.** A NaN otherwise reaches the device as written
+  data. Laws with a `designRate` are the identity outside `0 < f < designRate/2`, which keeps
+  `toRealized`/`toWritten` total and mutually inverse. In-domain values are never affected.
+- **`fit` never trades a filter for a rule, and is a fixpoint.** A wanted filter whose gain
+  projects to 0 leaves its slot empty (a flat filter is no filter). `minSpacing` moves a filter to
+  the lowest allowed frequency at or above the target, where projecting the target could round it
+  back down. The frequency-ordered assignment replaces the min-cost one only if it keeps as many
+  filters. The reference repeats its pass on its own realized output until the slots stop
+  changing, because heuristic choices that depend on the input otherwise break idempotence (the
+  property tests found such cases on profiles whose rules can never be met).
+- **Idempotence is stated precisely:** same slots, realized filters, preamp and feasibility. On an
+  infeasible result, filters may come back paired with different inputs, so `changes` can differ.
+  A new normative property, *safe*, says every written value of `fit` is in its domain.
+- **`complete(profile, slots)` returns `{ filters, warnings }`.** The draft's `preamp` argument had
+  no use. Warnings (`not-neutral`, `no-room`) replace the draft's unspecified "emit a warning".
+  `assign` also returns `slotOf`, and `validateList` names the input filter of each violation,
+  because an editing UI holds a list, not slots.
+- **Engine vectors are generated** by `scripts/conformance.ts` from hand-written inputs, with the
+  reference engine supplying exact-op expectations. `npm run check` fails on drift, as it does for
+  codegen. Unit tests pin hand-computed values independently, so a generated vector can't simply
+  encode a bug.
+- **No profile caching.** Each operation prepares the profile it is given. Apps (the inspector
+  editor) mutate profiles in place, so a cache keyed by object identity would go stale.
+
+**Rejected:** a canonical sort by filter content inside `assign` (it loses list order, which
+`fit`'s second pass relies on to keep slots stable); relaxing idempotence to feasible results
+only (the fixpoint makes the full property cheap); a `rule-unsatisfiable` profile check for
+profiles whose ascendingFrequency can never hold (possible later, since `validate` already
+detects every instance).
 
 ---
 
