@@ -1,0 +1,11 @@
+{
+	"description": "A bluetooth entry needs name or namePrefix; serviceUuid alone is never sufficient.",
+	"spec": "§3",
+	"profile": {
+		"match": {
+			"usb": null,
+			"bluetooth": [{ "serviceUuid": "00001101-0000-1000-8000-00805f9b34fb" }]
+		}
+	},
+	"expect": [{ "code": "schema", "path": "/match/bluetooth/0/name" }]
+}

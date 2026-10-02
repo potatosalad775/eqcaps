@@ -1,0 +1,12 @@
+{
+	"description": "A probe source points to an evidence file under evidence/.",
+	"spec": "§10",
+	"profile": {
+		"meta": {
+			"sources": [
+				{ "kind": "probe", "ref": "https://example.com/probe.json", "date": "2026-10-02" }
+			]
+		}
+	},
+	"expect": [{ "code": "evidence-ref-invalid", "path": "/meta/sources/0/ref" }]
+}

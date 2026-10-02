@@ -1,0 +1,9 @@
+{
+	"description": "After merging, every slot defines types, freq, q and gain.",
+	"spec": "§2, §5",
+	"profile": {
+		"band": { "gain": null },
+		"bands": [{ "index": [0, 1], "gain": { "min": -6, "max": 6 } }]
+	},
+	"expect": [{ "code": "slot-incomplete", "path": "/band" }]
+}

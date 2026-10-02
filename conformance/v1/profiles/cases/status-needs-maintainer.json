@@ -1,0 +1,19 @@
+{
+	"description": "maintainer-verified needs a counting source whose by is in MAINTAINERS.",
+	"spec": "§10",
+	"maintainers": ["maintainer-a"],
+	"profile": {
+		"meta": {
+			"status": "maintainer-verified",
+			"sources": [
+				{
+					"kind": "vendor-docs",
+					"ref": "https://example.com/manual.pdf",
+					"date": "2026-10-02",
+					"by": "someone-else"
+				}
+			]
+		}
+	},
+	"expect": [{ "code": "status-needs-maintainer", "path": "/meta/status" }]
+}

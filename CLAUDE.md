@@ -1,0 +1,86 @@
+# eqcaps
+
+A vendor-neutral database of **EQ constraint profiles**. Each profile says what an EQ engine (a
+hardware DSP or a software EQ) actually accepts: band count, filter types per slot,
+frequency/Q/gain domains with quantization, conditional domains, cross-band rules, preamp, device
+identity and provenance. The repo also holds the tooling to author, verify, validate and publish
+profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor), and anyone else
+who adopts the format.
+
+**Status: Phases 0–1 done (format as code); Phase 2 (engine) next.** Read `docs/PLAN.md` first.
+
+Commands: `npm run lint` · `npm run check` (codegen drift + typecheck) · `npm test` ·
+`npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json`. Never edit
+`schema/v1/source.schema.json` or `*.generated.ts` by hand.
+
+## Docs
+
+| File | Contents |
+| --- | --- |
+| `docs/PLAN.md` | goal, consumers, architecture, repo layout, phased roadmap with exit criteria, risks |
+| `docs/SPEC-DRAFT.md` | **the** format definition (v1 draft) and engine semantics. Single source of truth. |
+| `docs/INSPECTOR.md` | inspector web app: capability tiers, device probing methodology, safety, privacy |
+| `docs/DECISIONS.md` | every design decision with rationale, review of the original concept draft, **open questions for the owner** |
+| `docs/research/prior-art.md` | evidence: existing constraint models + what real device handlers encode |
+
+When a decision changes, edit its entry in DECISIONS.md with a dated note, and update SPEC-DRAFT.md
+in the same change. Don't define format details anywhere except SPEC-DRAFT.md.
+
+## Invariants (changing one needs a DECISIONS entry)
+
+1. **Vendor-neutral format.** Nothing app-specific in profiles: no measurement names, no
+   modernGraphTool store ids, no UI concepts.
+2. **Constraint data ≠ protocol data.** Profiles say which values are accepted, never how to talk
+   to a device (report ids, baud rates, scheme numbers, slot ids). Protocol lives in
+   `packages/device-bridge`, which references profiles by id. `schema/`, `data/`, `core` and
+   `client` never depend on the bridge.
+3. **Canonical units, written values:** Hz, dB, RBJ-cookbook Q. Domains describe the values the
+   engine takes; authors fold in every conversion that depends only on the value itself.
+   Deviations that depend on another field are `realization` laws, never folded into domains (D29).
+4. **Profile ids are permanent public API.** Rename = `deprecated` + `replacedBy`.
+5. **Published files are flat.** `extends`/`abstract` exist only in authoring files and are resolved
+   by the build.
+6. **JSON Schema is the structural source of truth.** TS types are generated from it. Rules JSON
+   Schema can't express live in the semantic validator and are written down in SPEC.
+7. `project` / `resolveSlot` / `toRealized` / `toWritten` / `validate` are exact and normative
+   across languages; `assign` / `fit` / `complete` are normative only through their properties
+   (SPEC §13).
+8. **Consumers must work without the CDN.** The database enhances an app and never blocks it.
+9. **Probing writes to user hardware:** opt-in, hearing-safety gate, backup → probe → verified
+   restore, EQ commands only.
+
+## Conventions
+
+- npm workspaces · TypeScript strict · Vitest + fast-check · Ajv · Svelte 5 + Vite (inspector) ·
+  Prettier + ESLint configured like modernGraphTool. Markdown is not run through Prettier (D21).
+- Scripts are `.ts` files run directly by Node (type stripping, Node ≥ 22.18). Relative imports
+  carry the `.ts` extension.
+- `core` has zero dependencies and no environment types (no DOM, no Node). Ajv lives in `build`.
+- Every semantic validation rule has an issue code in `ISSUE_CODES` (`packages/core/src/issues.ts`)
+  and at least one case in `conformance/v1/profiles/cases/` that triggers it. A test enforces it.
+- One JSON file per profile: `data/profiles/<brand>/<id>.json`, starting with `"$schema"` so editors
+  validate it.
+- USB ids are lowercase 4-digit hex strings (`"0x2972"`). HID `productName` matches exactly,
+  trailing spaces included.
+- Name is **eqcaps** (D24): repo `potatosalad775/eqcaps`, Pages `potatosalad775.github.io/eqcaps`,
+  npm `@potatosalad775/eqcaps` (data) and `@potatosalad775/eqcaps-{core,client,device-bridge}`.
+  The local folder is still named `eqDeviceInfo`.
+- Filter type codes are Equalizer APO's: `PK LSC HSC LPQ HPQ BP NO AP` (D22). modernGraphTool and
+  devicePEQ write `LSQ`/`HSQ`; convert at the boundary, never in profiles.
+- Licenses (D25): code MIT; `data/`, `schema/`, `conformance/` and all published JSON CC0-1.0.
+- Status levels: `draft` · `community-verified` · `maintainer-verified` · `deprecated` (SPEC §10).
+
+## Related code
+
+- `../modernGraphTool` is the first consumer, and its `src/lib/device-peq/` is the TS device bridge
+  (MIT) to be extracted into `packages/device-bridge`. Its `src/lib/types/eq-constraint.ts` is the
+  flat model this project replaces. Read it for reference; don't edit it from this repo's tasks.
+  Its bridge is behind upstream devicePEQ (no Conexant handler, no recorded captures).
+- `../devicePEQ` is a local clone of `jeromeof/devicePEQ` (0BSD), upstream of that bridge. Seed data:
+  `devicePEQ/peqConstraintsConfig.json` (36 shape-named profiles) + `devicePEQ/*DeviceConfig.js`.
+  Also worth reading: `devicePEQ/compensation.js` (source of the realization laws, D29) and
+  `tests/captures/` (recorded device exchanges). **Don't copy anything** from `fiio-js-capture/`,
+  `walkplayJS/`, `walkplayPreprocessor/walkplay.js`, `Q5K/` or `bluetooth_tools/`. They are vendor
+  code or reverse-engineered vendor material, not 0BSD (D25). No upstream coordination (D26).
+- `jaakkopasanen/AutoEq` (MIT) `autoeq/constants.py` `PEQ_CONFIGS` holds per-filter app/device configs:
+  one-off seed data for `kind: software` profiles. AutoEQ is no longer actively maintained.

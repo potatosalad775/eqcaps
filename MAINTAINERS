@@ -1,0 +1,8 @@
+# eqcaps maintainers (docs/DECISIONS.md D28)
+#
+# One maintainer per line: GitHub handle, then an optional "former" marker. A `maintainer-verified`
+# profile needs a counting source whose `by` is listed here (docs/SPEC-DRAFT.md §10). Former
+# maintainers stay listed so their past verifications stay valid. Never delete a line; mark it
+# former instead. Lines starting with # are comments.
+
+potatosalad775

@@ -1,0 +1,9 @@
+{
+	"description": "Disjoint firmware ranges may share a match entry (max is exclusive).",
+	"spec": "§3",
+	"profiles": [
+		{ "id": "device-a", "match": { "firmware": { "max": "2.0" } } },
+		{ "id": "device-b", "match": { "firmware": { "min": "2" } } }
+	],
+	"expect": []
+}

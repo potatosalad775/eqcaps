@@ -1,0 +1,41 @@
+{
+	"name": "eqcaps-monorepo",
+	"private": true,
+	"type": "module",
+	"description": "Vendor-neutral database of EQ constraint profiles, with the tooling to author, verify and publish them.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/potatosalad775/eqcaps.git"
+	},
+	"workspaces": [
+		"packages/core",
+		"packages/client",
+		"packages/build"
+	],
+	"scripts": {
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write .",
+		"check": "node scripts/codegen.ts --check && tsc -p tsconfig.json",
+		"test": "vitest --run",
+		"test:watch": "vitest",
+		"build": "npm run build --workspaces --if-present",
+		"codegen": "node scripts/codegen.ts"
+	},
+	"engines": {
+		"node": ">=22.18"
+	},
+	"devDependencies": {
+		"@eslint/compat": "^2.1.1",
+		"@eslint/js": "^10.0.1",
+		"@types/node": "^24.19.1",
+		"eslint": "^10.11.0",
+		"eslint-config-prettier": "^10.1.8",
+		"fast-check": "^4.10.2",
+		"globals": "^17.13.0",
+		"prettier": "^3.9.9",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.71.0",
+		"vitest": "^4.1.11"
+	}
+}

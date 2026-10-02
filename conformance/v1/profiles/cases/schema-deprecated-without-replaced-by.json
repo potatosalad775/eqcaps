@@ -1,0 +1,6 @@
+{
+	"description": "replacedBy is required iff deprecated.",
+	"spec": "§10",
+	"profile": { "meta": { "status": "deprecated" } },
+	"expect": [{ "code": "schema", "path": "/meta/replacedBy" }]
+}

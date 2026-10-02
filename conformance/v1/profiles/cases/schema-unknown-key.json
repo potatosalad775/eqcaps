@@ -1,0 +1,6 @@
+{
+	"description": "Unknown keys outside x- fail CI validation.",
+	"spec": "§2",
+	"profile": { "foo": 1 },
+	"expect": [{ "code": "schema", "path": "/foo" }]
+}

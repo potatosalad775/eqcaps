@@ -1,0 +1,9 @@
+{
+	"description": "A stepped range has min and max on its grid, which is anchored at 0.",
+	"spec": "§4",
+	"profile": { "band": { "gain": { "min": -12.05, "max": 11.95 } } },
+	"expect": [
+		{ "code": "domain-off-grid", "path": "/band/gain/min" },
+		{ "code": "domain-off-grid", "path": "/band/gain/max" }
+	]
+}

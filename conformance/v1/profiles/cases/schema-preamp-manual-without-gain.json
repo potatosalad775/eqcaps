@@ -1,0 +1,6 @@
+{
+	"description": "A manual preamp has a gain domain.",
+	"spec": "§9",
+	"profile": { "preamp": { "mode": "manual" } },
+	"expect": [{ "code": "schema", "path": "/preamp/gain" }]
+}

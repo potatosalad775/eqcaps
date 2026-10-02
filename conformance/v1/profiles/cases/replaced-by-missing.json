@@ -1,0 +1,6 @@
+{
+	"description": "replacedBy names an existing profile.",
+	"spec": "§10",
+	"profiles": [{ "meta": { "status": "deprecated", "replacedBy": "no-such-profile" } }],
+	"expect": [{ "code": "replaced-by-missing", "path": "/meta/replacedBy", "profileId": "base" }]
+}

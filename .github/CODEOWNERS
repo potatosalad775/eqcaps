@@ -1,0 +1,7 @@
+# Every merge needs one maintainer approval (branch protection). These paths also need a
+# code owner, because they change the format or its reference implementation (DECISIONS D28).
+/schema/              @potatosalad775
+/docs/SPEC-DRAFT.md   @potatosalad775
+/packages/core/       @potatosalad775
+/MAINTAINERS          @potatosalad775
+/.github/             @potatosalad775

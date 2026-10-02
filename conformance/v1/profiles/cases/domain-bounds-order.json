@@ -1,0 +1,6 @@
+{
+	"description": "min ≤ max.",
+	"spec": "§4",
+	"profile": { "band": { "freq": { "min": 20000, "max": 20 } } },
+	"expect": [{ "code": "domain-bounds-order", "path": "/band/freq" }]
+}

@@ -1,0 +1,6 @@
+{
+	"description": "USB ids are lowercase 4-digit hex strings.",
+	"spec": "§3",
+	"profile": { "match": { "usb": [{ "vendorId": "0x00AB", "productId": "0x0001" }] } },
+	"expect": [{ "code": "schema", "path": "/match/usb/0/vendorId" }]
+}

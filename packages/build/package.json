@@ -1,0 +1,34 @@
+{
+	"name": "@potatosalad775/eqcaps-build",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Validates source profiles and builds the published eqcaps data (CI tooling).",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/potatosalad775/eqcaps.git",
+		"directory": "packages/build"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./node": {
+			"types": "./dist/node.d.ts",
+			"default": "./dist/node.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json"
+	},
+	"dependencies": {
+		"@potatosalad775/eqcaps-core": "0.0.0",
+		"ajv": "^8.20.0"
+	}
+}

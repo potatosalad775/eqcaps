@@ -1,0 +1,11 @@
+{
+	"description": "gainScaledQ applies to PK, LSC and HSC only.",
+	"spec": "§8",
+	"profile": {
+		"realization": {
+			"laws": [{ "law": "gainScaledQ", "types": ["LPQ"] }],
+			"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+		}
+	},
+	"expect": [{ "code": "schema", "path": "/realization/laws/0/types/0" }]
+}

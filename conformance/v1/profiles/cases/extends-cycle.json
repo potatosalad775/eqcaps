@@ -1,0 +1,34 @@
+{
+	"description": "extends chains have no cycles.",
+	"spec": "§11",
+	"files": [
+		{
+			"schemaVersion": "1.0",
+			"id": "device-a",
+			"kind": "hardware",
+			"device": { "brand": "Example", "model": "device-a" },
+			"match": { "usb": [{ "vendorId": "0x0001", "productName": "device-a" }] },
+			"meta": {
+				"status": "draft",
+				"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+			},
+			"extends": "device-b"
+		},
+		{
+			"schemaVersion": "1.0",
+			"id": "device-b",
+			"kind": "hardware",
+			"device": { "brand": "Example", "model": "device-b" },
+			"match": { "usb": [{ "vendorId": "0x0001", "productName": "device-b" }] },
+			"meta": {
+				"status": "draft",
+				"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+			},
+			"extends": "device-a"
+		}
+	],
+	"expect": [
+		{ "code": "extends-cycle", "path": "/extends", "profileId": "device-a" },
+		{ "code": "extends-cycle", "path": "/extends", "profileId": "device-b" }
+	]
+}

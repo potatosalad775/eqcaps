@@ -1,0 +1,21 @@
+{
+	"$schema": "../../../../../schema/v1/source.schema.json",
+	"abstract": true,
+	"id": "walkplay-scheme16",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"bandCount": 10,
+	"band": {
+		"types": ["PK", "LSC", "HSC"],
+		"freq": { "min": 20, "max": 20000, "step": 1 },
+		"q": { "min": 0.1, "max": 10 },
+		"gain": { "min": -10, "max": 10 }
+	},
+	"preamp": { "mode": "manual", "gain": { "min": -12, "max": 0 } },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "handler-code", "ref": "devicePEQ walkplayUsbHid.js", "date": "2026-10-02" }
+		]
+	}
+}

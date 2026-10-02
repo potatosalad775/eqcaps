@@ -1,0 +1,6 @@
+{
+	"description": "The preamp gain domain follows the domain rules.",
+	"spec": "§4, §9",
+	"profile": { "preamp": { "mode": "manual", "gain": { "min": 0, "max": -12 } } },
+	"expect": [{ "code": "domain-bounds-order", "path": "/preamp/gain" }]
+}

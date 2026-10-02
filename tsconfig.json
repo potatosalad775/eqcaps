@@ -1,0 +1,17 @@
+{
+	// Typecheck for the whole repo (`npm run check`), tests included. Workspace packages resolve
+	// to their sources here, so nothing has to be built before checking. Each package's
+	// tsconfig.build.json emits its own dist/ against the other packages' published types.
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"types": ["node"],
+		"paths": {
+			"@potatosalad775/eqcaps-core": ["./packages/core/src/index.ts"],
+			"@potatosalad775/eqcaps-client": ["./packages/client/src/index.ts"],
+			"@potatosalad775/eqcaps-build": ["./packages/build/src/index.ts"]
+		}
+	},
+	"include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts", "scripts/**/*.ts", "*.ts"],
+	"exclude": ["node_modules", "**/dist"]
+}

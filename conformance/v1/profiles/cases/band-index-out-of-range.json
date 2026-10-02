@@ -1,0 +1,6 @@
+{
+	"description": "Override indices are < bandCount.",
+	"spec": "§5.2",
+	"profile": { "bands": [{ "index": 4, "label": "Fifth" }] },
+	"expect": [{ "code": "band-index-out-of-range", "path": "/bands/0/index" }]
+}

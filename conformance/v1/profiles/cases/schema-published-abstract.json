@@ -1,0 +1,6 @@
+{
+	"description": "Published profiles never contain abstract.",
+	"spec": "§11",
+	"profile": { "abstract": true },
+	"expect": [{ "code": "schema", "path": "/abstract" }]
+}

@@ -1,0 +1,6 @@
+{
+	"description": "step > 0.",
+	"spec": "§4",
+	"profile": { "band": { "gain": { "step": 0 } } },
+	"expect": [{ "code": "schema", "path": "/band/gain/step" }]
+}

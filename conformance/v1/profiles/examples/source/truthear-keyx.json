@@ -1,0 +1,16 @@
+{
+	"$schema": "../../../../../schema/v1/source.schema.json",
+	"extends": "walkplay-scheme16",
+	"id": "truthear-keyx",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "Truthear", "model": "KEYX" },
+	"match": { "usb": [{ "vendorId": "0x3302", "productName": "KEYX" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "handler-code", "ref": "devicePEQ usbDeviceConfig.js", "date": "2026-10-02" }
+		],
+		"notes": "SPEC §12 example F (authoring form). Vendor id and model string are placeholders."
+	}
+}

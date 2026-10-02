@@ -1,0 +1,6 @@
+{
+	"description": "A hardware profile needs match.",
+	"spec": "§2",
+	"profile": { "match": null },
+	"expect": [{ "code": "schema", "path": "/match" }]
+}

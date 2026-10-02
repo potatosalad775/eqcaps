@@ -1,0 +1,13 @@
+# Package Managers
+package-lock.json
+
+# Build output. Prettier does not read .gitignore.
+/dist/
+/coverage/
+packages/*/dist/
+apps/*/dist/
+
+# Markdown is hand-wrapped at 100 columns with compact tables and column-aligned jsonc comments
+# in code blocks. Prettier pads every table to its widest cell and reindents the examples, which
+# makes the docs harder to diff and to edit.
+*.md

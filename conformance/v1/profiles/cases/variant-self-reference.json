@@ -1,0 +1,10 @@
+{
+	"description": "No variant references a field it defines.",
+	"spec": "§6",
+	"profile": {
+		"band": {
+			"variants": [{ "when": { "gain": { "gt": 0 } }, "gain": { "min": 0, "max": 6, "step": 0.1 } }]
+		}
+	},
+	"expect": [{ "code": "variant-self-reference", "path": "/band/variants/0" }]
+}

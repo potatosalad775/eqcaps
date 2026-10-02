@@ -1,0 +1,6 @@
+{
+	"description": "types is non-empty.",
+	"spec": "§5.1",
+	"profile": { "band": { "types": [] } },
+	"expect": [{ "code": "schema", "path": "/band/types" }]
+}

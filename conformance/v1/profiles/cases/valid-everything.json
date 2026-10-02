@@ -1,0 +1,73 @@
+{
+	"description": "Extension keys, firmware scoping, type-conditioned variants, rules, measured realization and maintainer verification together.",
+	"spec": "§2–§10",
+	"maintainers": ["maintainer-a"],
+	"profile": {
+		"x-note": "extension keys are allowed anywhere",
+		"device": { "aliases": ["Base Mk II"], "x-sku": "B-2" },
+		"engine": "PEQ",
+		"match": {
+			"usb": null,
+			"bluetooth": [
+				{ "namePrefix": "Example", "serviceUuid": "00001101-0000-1000-8000-00805f9b34fb" }
+			],
+			"firmware": { "min": "1.2", "max": "2.0" }
+		},
+		"bandCount": 5,
+		"band": {
+			"types": ["PK", "LSC", "HSC"],
+			"label": "Band",
+			"variants": [
+				{ "when": { "type": { "in": ["LSC", "HSC"] } }, "q": { "value": 0.707 } },
+				{
+					"when": { "type": { "eq": "PK" }, "gain": { "gt": 0, "lte": 6 } },
+					"freq": { "min": 100, "max": 10000 }
+				}
+			]
+		},
+		"bands": [
+			{ "index": 0, "types": ["LSC"], "label": "Bass" },
+			{
+				"index": [4],
+				"types": ["HSC"],
+				"label": "Treble",
+				"freq": { "values": [4000, 8000, 12000] }
+			}
+		],
+		"rules": [
+			{ "type": "ascendingFrequency", "strict": false },
+			{ "type": "minSpacing", "octaves": 0.25 }
+		],
+		"realization": {
+			"laws": [
+				{ "law": "gainScaledQ", "types": ["PK"] },
+				{ "law": "nyquistScaledQ", "types": ["PK", "LSC", "HSC"], "designRate": 96000 }
+			],
+			"sources": [
+				{
+					"kind": "measurement",
+					"ref": "evidence/base/2026-10-02-9f3e.json",
+					"date": "2026-10-02",
+					"by": "someone"
+				}
+			]
+		},
+		"preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.5 } },
+		"channels": "linked",
+		"meta": {
+			"status": "maintainer-verified",
+			"sources": [
+				{
+					"kind": "probe",
+					"ref": "evidence/base/2026-10-02-a1b2c3.json",
+					"date": "2026-10-02",
+					"firmware": "1.4",
+					"by": "maintainer-a"
+				}
+			],
+			"contributors": ["maintainer-a", "someone"],
+			"notes": "Everything optional, at once."
+		}
+	},
+	"expect": []
+}

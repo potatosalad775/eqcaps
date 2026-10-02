@@ -1,0 +1,28 @@
+{
+	"name": "@potatosalad775/eqcaps-core",
+	"version": "0.0.0",
+	"publishConfig": {
+		"access": "public"
+	},
+	"description": "Types, semantic validator and reference engine for eqcaps EQ constraint profiles.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/potatosalad775/eqcaps.git",
+		"directory": "packages/core"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json"
+	}
+}

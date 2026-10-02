@@ -1,0 +1,13 @@
+{
+	"description": "One counting source is enough for community-verified.",
+	"spec": "§10",
+	"profile": {
+		"meta": {
+			"status": "community-verified",
+			"sources": [
+				{ "kind": "vendor-docs", "ref": "https://example.com/manual.pdf", "date": "2026-10-02" }
+			]
+		}
+	},
+	"expect": []
+}

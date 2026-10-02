@@ -1,0 +1,6 @@
+{
+	"description": "A set is non-empty.",
+	"spec": "§4",
+	"profile": { "band": { "freq": { "min": null, "max": null, "values": [] } } },
+	"expect": [{ "code": "schema", "path": "/band/freq/values" }]
+}

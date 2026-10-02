@@ -1,0 +1,14 @@
+{
+	"description": "Law dependencies (gainScaledQ: q depends on gain) count toward the cycle check.",
+	"spec": "§8",
+	"profile": {
+		"band": {
+			"variants": [{ "when": { "q": { "gt": 2 } }, "gain": { "min": -6, "max": 6, "step": 0.1 } }]
+		},
+		"realization": {
+			"laws": [{ "law": "gainScaledQ", "types": ["PK"] }],
+			"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+		}
+	},
+	"expect": [{ "code": "dependency-cycle", "path": "/band/variants" }]
+}

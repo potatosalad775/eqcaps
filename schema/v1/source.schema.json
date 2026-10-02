@@ -1,0 +1,532 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://potatosalad775.github.io/eqcaps/v1/schema/source.schema.json",
+	"title": "eqcaps authoring file (data/profiles, data/bases)",
+	"description": "A profile as written in this repository, before the build flattens `extends` (SPEC §11). Generated from profile.schema.json by scripts/codegen.ts; do not edit by hand.",
+	"type": "object",
+	"properties": {
+		"$schema": { "type": "string" },
+		"schemaVersion": { "$ref": "#/$defs/schemaVersion" },
+		"id": { "$ref": "#/$defs/profileId" },
+		"kind": {
+			"description": "hardware: a device's EQ engine. software: an app's EQ, selected by id (SPEC §2).",
+			"enum": ["hardware", "software"]
+		},
+		"device": { "$ref": "#/$defs/device" },
+		"engine": {
+			"description": "Free label (\"PEQ\", \"Graphic EQ\"). Required when several profiles share a match (SPEC §3).",
+			"type": "string",
+			"minLength": 1
+		},
+		"match": { "$ref": "#/$defs/match" },
+		"bandCount": {
+			"description": "Number of slots. null = unbounded, software only (SPEC §2).",
+			"type": ["integer", "null"],
+			"minimum": 1
+		},
+		"band": { "$ref": "#/$defs/slot" },
+		"bands": {
+			"description": "Per-slot overrides of the band template, merged per key, replace (SPEC §5.2).",
+			"type": "array",
+			"items": { "$ref": "#/$defs/bandOverride" }
+		},
+		"rules": { "type": "array", "items": { "$ref": "#/$defs/rule" } },
+		"realization": { "$ref": "#/$defs/authoringRealization" },
+		"preamp": { "$ref": "#/$defs/preamp" },
+		"channels": {
+			"description": "Only \"linked\" in v1; \"independent\" is reserved (SPEC §9).",
+			"const": "linked"
+		},
+		"meta": { "$ref": "#/$defs/authoringMeta" },
+		"abstract": {
+			"description": "A base only: never published, needs no match or device (SPEC §11).",
+			"type": "boolean"
+		},
+		"extends": {
+			"description": "Start from this profile and apply this file on top. match, device, meta and id are never inherited (SPEC §11).",
+			"$ref": "#/$defs/profileId"
+		}
+	},
+	"patternProperties": { "^x-": true },
+	"additionalProperties": false,
+	"required": ["id", "meta"],
+	"allOf": [{ "$ref": "#/$defs/authoringRules" }],
+	"$defs": {
+		"schemaVersion": {
+			"description": "Minimum format version this profile needs: \"1.<minor>\" (SPEC §15).",
+			"type": "string",
+			"pattern": "^1\\.(0|[1-9][0-9]*)$"
+		},
+		"profileId": {
+			"description": "Permanent public API. Conventionally <brand>-<model>[-<engine>] (SPEC §2).",
+			"type": "string",
+			"pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+			"maxLength": 64
+		},
+		"kindRules": {
+			"description": "Hardware profiles carry a match and a finite bandCount; software profiles have no match (SPEC §2).",
+			"if": {
+				"type": "object",
+				"properties": { "kind": { "const": "software" } },
+				"required": ["kind"]
+			},
+			"then": { "type": "object", "properties": { "match": false } },
+			"else": {
+				"type": "object",
+				"properties": { "bandCount": { "type": "integer" } },
+				"required": ["match"]
+			}
+		},
+		"device": {
+			"type": "object",
+			"properties": {
+				"brand": { "type": "string", "minLength": 1 },
+				"model": { "type": "string", "minLength": 1 },
+				"aliases": {
+					"description": "Marketing and regional names. Search only, never matching.",
+					"type": "array",
+					"items": { "type": "string", "minLength": 1 },
+					"uniqueItems": true
+				}
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["brand", "model"]
+		},
+		"match": {
+			"description": "Lists are OR-ed; fields within one entry are AND-ed (SPEC §3).",
+			"type": "object",
+			"properties": {
+				"usb": { "type": "array", "items": { "$ref": "#/$defs/usbMatch" }, "minItems": 1 },
+				"bluetooth": {
+					"type": "array",
+					"items": { "$ref": "#/$defs/bluetoothMatch" },
+					"minItems": 1
+				},
+				"firmware": { "$ref": "#/$defs/firmwareRange" }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"anyOf": [{ "required": ["usb"] }, { "required": ["bluetooth"] }]
+		},
+		"usbId": {
+			"description": "Lowercase 4-digit hex string.",
+			"type": "string",
+			"pattern": "^0x[0-9a-f]{4}$"
+		},
+		"usbMatch": {
+			"description": "vendorId plus productId and/or productName. Vendor-only matching is too broad (SPEC §3).",
+			"type": "object",
+			"properties": {
+				"vendorId": { "$ref": "#/$defs/usbId" },
+				"productId": { "$ref": "#/$defs/usbId" },
+				"productName": {
+					"description": "Compared exactly, case and whitespace included.",
+					"type": "string",
+					"minLength": 1
+				}
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["vendorId"],
+			"anyOf": [{ "required": ["productId"] }, { "required": ["productName"] }]
+		},
+		"bluetoothMatch": {
+			"description": "name or namePrefix is required; serviceUuid alone is never sufficient (SPEC §3).",
+			"type": "object",
+			"properties": {
+				"name": { "type": "string", "minLength": 1 },
+				"namePrefix": { "type": "string", "minLength": 1 },
+				"serviceUuid": {
+					"type": "string",
+					"pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+				}
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"anyOf": [{ "required": ["name"] }, { "required": ["namePrefix"] }]
+		},
+		"firmwareRange": {
+			"description": "min inclusive, max exclusive, dotted-numeric order (SPEC §3).",
+			"type": "object",
+			"properties": {
+				"min": { "type": "string", "minLength": 1 },
+				"max": { "type": "string", "minLength": 1 }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"minProperties": 1
+		},
+		"domain": {
+			"description": "Allowed values of one numeric field: range, stepped range, set or locked (SPEC §4).",
+			"oneOf": [
+				{ "$ref": "#/$defs/rangeDomain" },
+				{ "$ref": "#/$defs/steppedDomain" },
+				{ "$ref": "#/$defs/setDomain" },
+				{ "$ref": "#/$defs/lockedDomain" }
+			]
+		},
+		"rangeDomain": {
+			"description": "Closed interval [min, max].",
+			"type": "object",
+			"properties": { "min": { "type": "number" }, "max": { "type": "number" } },
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["min", "max"]
+		},
+		"steppedDomain": {
+			"description": "{ k·step : k ∈ ℤ } ∩ [min, max], grid anchored at 0. min and max lie on the grid.",
+			"type": "object",
+			"properties": {
+				"min": { "type": "number" },
+				"max": { "type": "number" },
+				"step": { "type": "number", "exclusiveMinimum": 0 }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["min", "max", "step"]
+		},
+		"setDomain": {
+			"description": "Listed values: ascending, unique, non-empty.",
+			"type": "object",
+			"properties": { "values": { "type": "array", "items": { "type": "number" }, "minItems": 1 } },
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["values"]
+		},
+		"lockedDomain": {
+			"description": "Exactly one value; UIs render the field read-only.",
+			"type": "object",
+			"properties": { "value": { "type": "number" } },
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["value"]
+		},
+		"filterType": {
+			"description": "Equalizer APO codes with RBJ cookbook semantics (SPEC §5.3), or a vendor-specific x-<name>.",
+			"anyOf": [
+				{ "enum": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "NO", "AP"] },
+				{ "type": "string", "pattern": "^x-[a-z0-9]+(-[a-z0-9]+)*$" }
+			]
+		},
+		"filterTypes": {
+			"description": "Allowed filter types, non-empty, in preference order.",
+			"type": "array",
+			"items": { "$ref": "#/$defs/filterType" },
+			"minItems": 1,
+			"uniqueItems": true
+		},
+		"slotFields": {
+			"type": "object",
+			"properties": {
+				"label": { "description": "Optional UI hint.", "type": "string", "minLength": 1 },
+				"types": { "$ref": "#/$defs/filterTypes" },
+				"freq": { "$ref": "#/$defs/domain" },
+				"q": { "$ref": "#/$defs/domain" },
+				"gain": { "$ref": "#/$defs/domain" },
+				"variants": {
+					"description": "Conditional domains; per field, first match wins (SPEC §6).",
+					"type": "array",
+					"items": { "$ref": "#/$defs/variant" }
+				}
+			},
+			"patternProperties": { "^x-": true }
+		},
+		"slot": {
+			"description": "Slot template. After merging with bands, every slot MUST define types, freq, q and gain (SPEC §5).",
+			"type": "object",
+			"$ref": "#/$defs/slotFields",
+			"unevaluatedProperties": false
+		},
+		"bandOverride": {
+			"description": "Overrides the template for one or more slots (SPEC §5.2).",
+			"type": "object",
+			"$ref": "#/$defs/slotFields",
+			"properties": {
+				"index": {
+					"oneOf": [
+						{ "type": "integer", "minimum": 0 },
+						{
+							"type": "array",
+							"items": { "type": "integer", "minimum": 0 },
+							"minItems": 1,
+							"uniqueItems": true
+						}
+					]
+				}
+			},
+			"required": ["index"],
+			"unevaluatedProperties": false
+		},
+		"variant": {
+			"description": "A conditional override of freq, q or gain. Never types (SPEC §6).",
+			"type": "object",
+			"properties": {
+				"when": { "$ref": "#/$defs/when" },
+				"freq": { "$ref": "#/$defs/domain" },
+				"q": { "$ref": "#/$defs/domain" },
+				"gain": { "$ref": "#/$defs/domain" }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["when"]
+		},
+		"when": {
+			"description": "All conditions must hold. A condition on a null or missing field is false.",
+			"type": "object",
+			"properties": {
+				"type": { "$ref": "#/$defs/typeCondition" },
+				"freq": { "$ref": "#/$defs/numericCondition" },
+				"q": { "$ref": "#/$defs/numericCondition" },
+				"gain": { "$ref": "#/$defs/numericCondition" }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false
+		},
+		"typeCondition": {
+			"type": "object",
+			"properties": {
+				"eq": { "$ref": "#/$defs/filterType" },
+				"in": { "$ref": "#/$defs/filterTypes" }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"anyOf": [{ "required": ["eq"] }, { "required": ["in"] }]
+		},
+		"numericCondition": {
+			"description": "Several comparisons in one object are AND-ed.",
+			"type": "object",
+			"properties": {
+				"eq": { "type": "number" },
+				"gt": { "type": "number" },
+				"gte": { "type": "number" },
+				"lt": { "type": "number" },
+				"lte": { "type": "number" }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"anyOf": [
+				{ "required": ["eq"] },
+				{ "required": ["gt"] },
+				{ "required": ["gte"] },
+				{ "required": ["lt"] },
+				{ "required": ["lte"] }
+			]
+		},
+		"rule": {
+			"description": "Cross-slot rules, a closed set in v1 (SPEC §7).",
+			"oneOf": [{ "$ref": "#/$defs/ascendingFrequencyRule" }, { "$ref": "#/$defs/minSpacingRule" }]
+		},
+		"ascendingFrequencyRule": {
+			"description": "On the completed slot array, freq[i] < freq[i+1] (<= when not strict).",
+			"type": "object",
+			"properties": {
+				"type": { "const": "ascendingFrequency" },
+				"strict": { "type": "boolean", "default": true }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["type"]
+		},
+		"minSpacingRule": {
+			"description": "Any two active filters are at least `octaves` apart.",
+			"type": "object",
+			"properties": {
+				"type": { "const": "minSpacing" },
+				"octaves": { "type": "number", "exclusiveMinimum": 0 }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["type", "octaves"]
+		},
+		"law": {
+			"oneOf": [
+				{ "$ref": "#/$defs/gainScaledQLaw" },
+				{ "$ref": "#/$defs/nyquistScaledQLaw" },
+				{ "$ref": "#/$defs/shelfFrequencyShiftLaw" }
+			]
+		},
+		"designRate": {
+			"description": "Sample rate (Hz) the engine designs its filters at. A fixed property of the part.",
+			"type": "number",
+			"exclusiveMinimum": 0
+		},
+		"gainScaledQLaw": {
+			"description": "Realized q = q / A, A = 10^(|gain|/40).",
+			"type": "object",
+			"properties": {
+				"law": { "const": "gainScaledQ" },
+				"types": {
+					"type": "array",
+					"items": { "enum": ["PK", "LSC", "HSC"] },
+					"minItems": 1,
+					"uniqueItems": true
+				}
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["law", "types"]
+		},
+		"nyquistScaledQLaw": {
+			"description": "Realized q = q · cos(π·f / designRate).",
+			"type": "object",
+			"properties": {
+				"law": { "const": "nyquistScaledQ" },
+				"types": { "$ref": "#/$defs/filterTypes" },
+				"designRate": { "$ref": "#/$defs/designRate" }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["law", "types", "designRate"]
+		},
+		"shelfFrequencyShiftLaw": {
+			"description": "Realized freq = (designRate/π) · atan(tan(π·f / designRate) · d), d = √A for LSC, 1/√A for HSC.",
+			"type": "object",
+			"properties": {
+				"law": { "const": "shelfFrequencyShift" },
+				"types": {
+					"type": "array",
+					"items": { "enum": ["LSC", "HSC"] },
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"designRate": { "$ref": "#/$defs/designRate" }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["law", "types", "designRate"]
+		},
+		"preamp": {
+			"description": "manual: adjustable within gain. auto: the device computes its own headroom. none: no control. unknown: e.g. seeded data (SPEC §9).",
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": { "mode": { "const": "manual" }, "gain": { "$ref": "#/$defs/domain" } },
+					"patternProperties": { "^x-": true },
+					"additionalProperties": false,
+					"required": ["mode", "gain"]
+				},
+				{
+					"type": "object",
+					"properties": { "mode": { "enum": ["auto", "none", "unknown"] } },
+					"patternProperties": { "^x-": true },
+					"additionalProperties": false,
+					"required": ["mode"]
+				}
+			]
+		},
+		"githubHandle": {
+			"type": "string",
+			"pattern": "^[A-Za-z0-9](-?[A-Za-z0-9])*$",
+			"maxLength": 39
+		},
+		"sourceFields": {
+			"description": "Provenance of a claim (SPEC §10).",
+			"type": "object",
+			"properties": {
+				"kind": {
+					"description": "probe, vendor-docs, vendor-app and measurement count toward verification; handler-code and community don't.",
+					"enum": ["probe", "vendor-docs", "vendor-app", "measurement", "handler-code", "community"]
+				},
+				"ref": {
+					"description": "URL, citation, or for probe and measurement a path under evidence/.",
+					"type": "string",
+					"minLength": 1
+				},
+				"date": {
+					"type": "string",
+					"pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
+				},
+				"firmware": { "type": "string", "minLength": 1 },
+				"by": { "$ref": "#/$defs/githubHandle" }
+			},
+			"patternProperties": { "^x-": true },
+			"required": ["kind", "ref", "date"]
+		},
+		"metaFields": {
+			"type": "object",
+			"properties": {
+				"status": { "enum": ["draft", "community-verified", "maintainer-verified", "deprecated"] },
+				"replacedBy": { "$ref": "#/$defs/profileId" },
+				"contributors": {
+					"type": "array",
+					"items": { "$ref": "#/$defs/githubHandle" },
+					"uniqueItems": true
+				},
+				"notes": { "type": "string" }
+			},
+			"patternProperties": { "^x-": true },
+			"required": ["status"],
+			"description": "replacedBy is required iff status is deprecated (SPEC §10).",
+			"if": {
+				"type": "object",
+				"properties": { "status": { "const": "deprecated" } },
+				"required": ["status"]
+			},
+			"then": { "type": "object", "required": ["replacedBy"] },
+			"else": { "type": "object", "properties": { "replacedBy": false } }
+		},
+		"authoringSource": {
+			"type": "object",
+			"$ref": "#/$defs/sourceFields",
+			"properties": {},
+			"unevaluatedProperties": false,
+			"description": "Provenance of a claim. `via` is set only by the build (SPEC §10)."
+		},
+		"authoringMeta": {
+			"type": "object",
+			"$ref": "#/$defs/metaFields",
+			"properties": {
+				"sources": {
+					"type": "array",
+					"items": { "$ref": "#/$defs/authoringSource" },
+					"minItems": 1
+				}
+			},
+			"required": ["sources"],
+			"unevaluatedProperties": false
+		},
+		"authoringRealization": {
+			"description": "Laws by which the engine's filters deviate from the written values. Absent = unknown (SPEC §8).",
+			"type": "object",
+			"properties": {
+				"laws": { "type": "array", "items": { "$ref": "#/$defs/law" } },
+				"sources": {
+					"description": "Realization is measured iff a measurement source without via is listed.",
+					"type": "array",
+					"items": { "$ref": "#/$defs/authoringSource" },
+					"minItems": 1
+				}
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["laws", "sources"]
+		},
+		"authoringRules": {
+			"description": "Abstract bases may be partial. A file with `extends` needs a device; everything else is inherited and checked after flattening. A standalone file is a complete profile.",
+			"if": {
+				"type": "object",
+				"properties": { "abstract": { "const": true } },
+				"required": ["abstract"]
+			},
+			"else": {
+				"if": { "type": "object", "required": ["extends"] },
+				"then": { "type": "object", "required": ["device"] },
+				"else": {
+					"type": "object",
+					"required": [
+						"schemaVersion",
+						"id",
+						"kind",
+						"device",
+						"bandCount",
+						"band",
+						"preamp",
+						"meta"
+					],
+					"allOf": [{ "$ref": "#/$defs/kindRules" }]
+				}
+			}
+		}
+	}
+}

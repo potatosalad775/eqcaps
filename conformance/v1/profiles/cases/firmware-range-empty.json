@@ -1,0 +1,6 @@
+{
+	"description": "match.firmware matches something: min (inclusive) < max (exclusive), dotted-numeric.",
+	"spec": "§3",
+	"profile": { "match": { "firmware": { "min": "2.0", "max": "2" } } },
+	"expect": [{ "code": "firmware-range-empty", "path": "/match/firmware" }]
+}

@@ -1,0 +1,73 @@
+name: CI
+
+# Lint, typecheck, test and build on every PR and every push to main.
+#
+# Runs on Windows as well as Linux on purpose: line-ending drift only shows up on a Windows
+# checkout (Git for Windows rewrites line endings unless .gitattributes pins them), and the
+# maintainer works on Windows.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the run still in flight for it.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (Prettier + ESLint)
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run check
+
+      - name: Test
+        run: npm run test
+
+      - name: Build packages
+        run: npm run build
+
+      # After a clean checkout, an install, a type generation check and a build, nothing tracked
+      # may have changed. If .gitattributes ever stops pinning LF, this fails on Windows only.
+      - name: Working tree must be clean
+        shell: bash
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Working tree is dirty after install + lint + test + build."
+            git status --porcelain
+            git diff
+            exit 1
+          fi
+          if git ls-files --eol | grep -qE 'i/crlf|w/crlf'; then
+            echo "::error::CRLF line endings found. See .gitattributes."
+            git ls-files --eol | grep -E 'i/crlf|w/crlf'
+            exit 1
+          fi

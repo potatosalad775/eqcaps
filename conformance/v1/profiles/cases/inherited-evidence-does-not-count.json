@@ -1,0 +1,45 @@
+{
+	"description": "Sources inherited through extends never count toward status.",
+	"spec": "§10, §11",
+	"maintainers": ["maintainer-a"],
+	"files": [
+		{
+			"abstract": true,
+			"schemaVersion": "1.0",
+			"id": "chip-base",
+			"kind": "hardware",
+			"bandCount": 4,
+			"band": {
+				"types": ["PK"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.1, "max": 10, "step": 0.01 },
+				"gain": { "min": -12, "max": 12, "step": 0.1 }
+			},
+			"preamp": { "mode": "none" },
+			"meta": {
+				"status": "draft",
+				"sources": [
+					{
+						"kind": "probe",
+						"ref": "evidence/chip-base/2026-10-02-a1b2c3.json",
+						"date": "2026-10-02",
+						"by": "maintainer-a"
+					}
+				]
+			}
+		},
+		{
+			"schemaVersion": "1.0",
+			"id": "device-a",
+			"kind": "hardware",
+			"device": { "brand": "Example", "model": "device-a" },
+			"match": { "usb": [{ "vendorId": "0x0001", "productName": "device-a" }] },
+			"meta": {
+				"status": "community-verified",
+				"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+			},
+			"extends": "chip-base"
+		}
+	],
+	"expect": [{ "code": "status-needs-evidence", "path": "/meta/status", "profileId": "device-a" }]
+}
