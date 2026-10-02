@@ -27,7 +27,7 @@
 		}
 	},
 	"scripts": {
-		"build": "tsc -p tsconfig.build.json"
+		"build": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json"
 	},
 	"dependencies": {
 		"@potatosalad775/eqcaps-core": "0.0.0",
