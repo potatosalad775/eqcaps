@@ -20,7 +20,7 @@ export const ISSUE_CODES = {
 	'firmware-range-empty': '§3: match.firmware has min ≥ max, so no firmware matches.',
 	'status-needs-evidence': '§10: a verified status without a counting source.',
 	'status-needs-maintainer':
-		'§10: maintainer-verified without a counting source by a listed maintainer.',
+		'§10: maintainer-verified without a counting source whose `by` names who checked it.',
 	'evidence-ref-invalid':
 		'§10: a probe or measurement source whose ref is not an evidence file path.',
 	'replaced-by-self': '§10: a deprecated profile replaced by itself.',

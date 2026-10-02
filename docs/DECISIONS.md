@@ -203,10 +203,16 @@ Governance: anyone may open a PR, including for `draft` profiles. Merging needs 
 approval (branch protection), which covers status raises too: CI checks the evidence rule for each
 level, and the reviewer checks the evidence content. Changes to `schema/`, `docs/SPEC-DRAFT.md`
 and `packages/core/` also need a CODEOWNER. Those rules are path-based, so CODEOWNERS can enforce
-them. Maintainers are listed in `MAINTAINERS`. Former maintainers stay listed, marked as former, so
-their past verifications stay valid.
-*2026-10-02 (Phase 0):* CODEOWNERS also covers `MAINTAINERS` (it decides who can make a profile
-`maintainer-verified`) and `.github/` (it holds the CI that enforces the evidence rules).
+them. There is no maintainer list. For `maintainer-verified`, CI requires a counting source with
+`by`, and the approving maintainer confirms that `by` names a maintainer, just as they check the
+evidence itself.
+*2026-10-02 (Phase 0):* CODEOWNERS also covers `.github/` (it holds the CI that enforces the
+evidence rules).
+*2026-10-02 (after Phase 1):* the `MAINTAINERS` file is dropped (owner: too much upkeep for what it
+buys). It existed only so CI could check `by` against a list, and it had to keep former
+maintainers forever so their old verifications stayed valid. Every merge already needs a
+maintainer's approval, and that approval is the actual guarantee. Also rejected: checking `by`
+against CODEOWNERS, which would invalidate a former maintainer's verifications once they leave it.
 **Rejected:** a single `verified` level. With few maintainers and many devices, it would either
 stay empty or mean different things on different profiles. Also rejected: counting confirmations
 ("N reports make it verified"), because that's easy to game and one probe file outweighs several

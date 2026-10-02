@@ -1,7 +1,6 @@
 {
 	"description": "Extension keys, firmware scoping, type-conditioned variants, rules, measured realization and maintainer verification together.",
 	"spec": "§2–§10",
-	"maintainers": ["maintainer-a"],
 	"profile": {
 		"x-note": "extension keys are allowed anywhere",
 		"device": { "aliases": ["Base Mk II"], "x-sku": "B-2" },

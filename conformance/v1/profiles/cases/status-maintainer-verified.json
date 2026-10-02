@@ -1,7 +1,6 @@
 {
-	"description": "A counting source by a listed maintainer (any case) satisfies maintainer-verified.",
+	"description": "A counting source with by satisfies maintainer-verified; the approving maintainer confirms who by is.",
 	"spec": "§10",
-	"maintainers": ["maintainer-a"],
 	"profile": {
 		"meta": {
 			"status": "maintainer-verified",

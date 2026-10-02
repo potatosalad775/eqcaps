@@ -12,14 +12,6 @@ import type {
 	Variant
 } from './types/schema.generated.ts';
 
-export interface ValidateProfileOptions {
-	/**
-	 * GitHub handles from MAINTAINERS, former maintainers included. Required to check
-	 * `maintainer-verified` (SPEC §10); when omitted, that check is skipped.
-	 */
-	maintainers?: readonly string[];
-}
-
 /** Source kinds that count toward a verified status (SPEC §10). */
 export const COUNTING_SOURCE_KINDS: ReadonlySet<Source['kind']> = new Set([
 	'probe',
@@ -43,14 +35,14 @@ const EVIDENCE_REF = /^evidence\/[a-z0-9]+(-[a-z0-9]+)*\/[^/\\]+\.json$/;
  * can't express. Expects a profile that already passed `profile.schema.json`; on anything else
  * the result is unspecified. Cross-profile rules live in `checkDatabase`.
  */
-export function validateProfile(profile: Profile, options: ValidateProfileOptions = {}): Issue[] {
+export function validateProfile(profile: Profile): Issue[] {
 	return [
 		...checkDomains(profile),
 		...checkBands(profile),
 		...checkDependencies(profile),
 		...checkRealization(profile),
 		...checkMatch(profile),
-		...checkMeta(profile, options)
+		...checkMeta(profile)
 	];
 }
 
@@ -395,7 +387,7 @@ function checkEvidenceRef(source: Source, path: string): Issue[] {
 	return [];
 }
 
-function checkMeta(profile: Profile, options: ValidateProfileOptions): Issue[] {
+function checkMeta(profile: Profile): Issue[] {
 	const { meta } = profile;
 	const issues: Issue[] = [];
 	meta.sources.forEach((s, k) => issues.push(...checkEvidenceRef(s, `/meta/sources/${k}`)));
@@ -412,17 +404,15 @@ function checkMeta(profile: Profile, options: ValidateProfileOptions): Issue[] {
 				`${meta.status} needs a probe, vendor-docs, vendor-app or measurement source of its own (inherited sources don't count)`
 			)
 		);
-	} else if (meta.status === 'maintainer-verified' && options.maintainers) {
-		const maintainers = new Set(options.maintainers.map((h) => h.toLowerCase()));
-		if (!counting.some((s) => s.by !== undefined && maintainers.has(s.by.toLowerCase()))) {
-			issues.push(
-				error(
-					'status-needs-maintainer',
-					'/meta/status',
-					'maintainer-verified needs a counting source whose "by" is listed in MAINTAINERS'
-				)
-			);
-		}
+	} else if (meta.status === 'maintainer-verified' && !counting.some((s) => s.by !== undefined)) {
+		// Whether `by` is a maintainer is checked by the maintainer approving the merge (D28).
+		issues.push(
+			error(
+				'status-needs-maintainer',
+				'/meta/status',
+				'maintainer-verified needs a counting source whose "by" names the maintainer who checked it'
+			)
+		);
 	}
 	if (meta.status === 'deprecated' && meta.replacedBy === profile.id) {
 		issues.push(error('replaced-by-self', '/meta/replacedBy', 'a profile cannot replace itself'));

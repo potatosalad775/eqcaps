@@ -346,7 +346,7 @@ sibling device doesn't verify this one.
 | --- | --- | --- |
 | `draft` | Not checked against the device or vendor material: seeded, inferred from handler code, or reported without evidence | — |
 | `community-verified` | A contributor checked it and supplied evidence. A maintainer reviewed the evidence but didn't reproduce it. | ≥ 1 counting source |
-| `maintainer-verified` | A maintainer checked it personally, on their own hardware or against vendor docs | ≥ 1 counting source whose `by` is listed in `MAINTAINERS` |
+| `maintainer-verified` | A maintainer checked it personally, on their own hardware or against vendor docs | ≥ 1 counting source with `by`. The maintainer approving the change confirms that `by` is a maintainer. |
 | `deprecated` | Superseded. Still served, so the id keeps resolving. | `replacedBy` |
 
 `sources` is always non-empty. The verification levels are ordered

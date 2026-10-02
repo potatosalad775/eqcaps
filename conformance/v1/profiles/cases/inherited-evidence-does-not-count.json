@@ -1,7 +1,6 @@
 {
 	"description": "Sources inherited through extends never count toward status.",
 	"spec": "§10, §11",
-	"maintainers": ["maintainer-a"],
 	"files": [
 		{
 			"abstract": true,

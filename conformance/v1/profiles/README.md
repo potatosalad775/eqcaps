@@ -17,7 +17,6 @@ One file per rule, or several when a rule has edge cases worth pinning down. A c
 {
   "description": "What the case shows.",
   "spec": "§4",                             // the SPEC section it tests
-  "maintainers": ["maintainer-a"],          // optional: handles listed in MAINTAINERS; default none
   "profile": { },                           // one of profile | profiles | files, see below
   "expect": [                               // issues the validator must report; [] = valid
     { "code": "domain-off-grid", "path": "/band/gain/min", "profileId": "device-a" }

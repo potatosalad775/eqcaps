@@ -82,7 +82,6 @@ eqcaps/
 ├── LICENSE                       MIT: packages/, apps/, scripts/
 ├── LICENSE-DATA                  CC0-1.0: data/, schema/, conformance/ and all published JSON (D25)
 ├── THIRD-PARTY-NOTICES.md        devicePEQ (0BSD), modernGraphTool (MIT), AutoEQ (MIT)
-├── MAINTAINERS                   current and former maintainers (D28)
 └── .github/                      workflows, CODEOWNERS, PR template, issue forms
 ```
 
@@ -95,14 +94,17 @@ plus external apps (modernGraphTool, the Android app). **Nothing in `schema/`, `
 Sizes are rough focused-effort estimates for one developer. Each phase lists the exit criteria
 that must hold before the next phase relies on it.
 
-### Phase 0: Bootstrap · S (1–2 days) · done locally 2026-10-02; GitHub steps pending
+### Phase 0: Bootstrap · S (1–2 days) · done 2026-10-02
 - `git init`, npm workspaces, TS strict, Vitest, Prettier, ESLint, CI (lint, typecheck, test).
 - `LICENSE` (MIT), `LICENSE-DATA` (CC0-1.0), `THIRD-PARTY-NOTICES.md` (D25); README stub;
-  CODEOWNERS and `MAINTAINERS` (D28).
+  CODEOWNERS (D28).
 - Create `potatosalad775/eqcaps` on GitHub and enable Pages (D24).
 - **Exit:** CI green on empty packages.
 
-### Phase 1: Format as code · M (1–2 weeks) · done 2026-10-02, except the VS Code check by hand
+The repo is private for now. Pages and branch protection need it public (or GitHub Pro), so both
+move to Phase 3, where the `/next/` deploy and outside PRs first need them.
+
+### Phase 1: Format as code · M (1–2 weeks) · done 2026-10-02
 - `schema/v1/*.schema.json` written from SPEC §2–§11.
 - `packages/core`: generated types, `validateProfile()` semantic validator (merged slots complete,
   on-grid bounds, acyclic variants and realization laws, status gating per SPEC §10, `extends`
@@ -133,6 +135,7 @@ that must hold before the next phase relies on it.
   throws into the host app.
 - CI on PRs: format check, schema + semantic validation, collisions, build. On `main`: deploy
   `/next/` to Pages.
+- Make the repo public, enable Pages, and protect `main` (one maintainer approval, D28).
 - `CONTRIBUTING.md` and PR template, both stating the inbound licenses (D25); issue forms ("new
   device", "wrong constraint").
 - Publish `core` and `client` to npm on tagged releases (D18). The Android app and modernGraphTool
@@ -197,8 +200,4 @@ that must hold before the next phase relies on it.
 
 ## 7. Immediate next steps
 
-1. Finish Phase 0 on GitHub: create `potatosalad775/eqcaps`, push, confirm CI is green on both
-   OSes, enable Pages, and set branch protection (one maintainer approval, D28).
-2. Close Phase 1 by hand: open a profile in VS Code and confirm `$schema` gives autocompletion and
-   errors.
-3. Phase 2: the reference engine and the conformance vectors.
+1. Phase 2: the reference engine and the conformance vectors.

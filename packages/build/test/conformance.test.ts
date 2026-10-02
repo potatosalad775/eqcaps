@@ -38,15 +38,14 @@ function mergePatch(target: unknown, patch: unknown): unknown {
 }
 
 /** Structural, then (if clean) semantic validation of one published profile. */
-function checkPublished(profile: unknown, maintainers: string[]): Issue[] {
+function checkPublished(profile: unknown): Issue[] {
 	const structural = schema.published(profile);
-	return structural.length > 0 ? structural : validateProfile(profile as Profile, { maintainers });
+	return structural.length > 0 ? structural : validateProfile(profile as Profile);
 }
 
 interface Case {
 	description: string;
 	spec: string;
-	maintainers?: string[];
 	profile?: object;
 	profiles?: object[];
 	files?: { id: string }[];
@@ -54,16 +53,15 @@ interface Case {
 }
 
 function runCase(c: Case): Issue[] {
-	const maintainers = c.maintainers ?? [];
-	if (c.profile) return checkPublished(mergePatch(base, c.profile), maintainers);
+	if (c.profile) return checkPublished(mergePatch(base, c.profile));
 	if (c.profiles) {
 		const profiles = c.profiles.map((p) => mergePatch(base, p) as Profile);
-		const own = profiles.flatMap((p) => checkPublished(p, maintainers));
+		const own = profiles.flatMap((p) => checkPublished(p));
 		return own.length > 0 ? own : checkDatabase(profiles);
 	}
 	if (c.files) {
 		const files = c.files.map((data) => ({ path: data.id, data }));
-		return validateSources(files, { schema, maintainers }).issues;
+		return validateSources(files, { schema }).issues;
 	}
 	throw new Error('a case has profile, profiles or files');
 }
@@ -75,7 +73,7 @@ describe('examples (SPEC §12)', () => {
 	const examples = jsonFiles('examples/').map((f) => readJson(new URL(`examples/${f}`, dir)));
 
 	it.each(jsonFiles('examples/'))('%s is valid', (f) => {
-		expect(show(checkPublished(readJson(new URL(`examples/${f}`, dir)), []))).toEqual([]);
+		expect(show(checkPublished(readJson(new URL(`examples/${f}`, dir))))).toEqual([]);
 	});
 
 	it('examples form a valid database together', () => {
@@ -87,7 +85,7 @@ describe('examples (SPEC §12)', () => {
 			path: f,
 			data: readJson(new URL(`examples/source/${f}`, dir))
 		}));
-		const report = validateSources(files, { schema, maintainers: [] });
+		const report = validateSources(files, { schema });
 		expect(show(report.issues)).toEqual([]);
 		expect([...report.profiles.keys()]).toEqual(['truthear-keyx']);
 	});

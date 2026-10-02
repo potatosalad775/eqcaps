@@ -28,8 +28,6 @@ export interface SourcesReport {
 
 export interface ValidateSourcesOptions {
 	schema: SchemaValidator;
-	/** Handles from MAINTAINERS (former included). */
-	maintainers: readonly string[];
 }
 
 /**
@@ -93,7 +91,7 @@ export function validateSources(
 		const schemaIssues = options.schema.published(flat.profile);
 		add(file.path, schemaIssues, id);
 		if (schemaIssues.length > 0) continue;
-		const semantic = validateProfile(flat.profile, { maintainers: options.maintainers });
+		const semantic = validateProfile(flat.profile);
 		add(file.path, semantic, id);
 		if (semantic.length > 0) continue;
 		profiles.set(id, flat.profile);
