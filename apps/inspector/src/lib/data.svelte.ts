@@ -1,5 +1,5 @@
 // The database as the app sees it: index.json for search and identity, bundle.json for the
-// profiles themselves. Both come from the same origin (/next/ on Pages, the local build in dev),
+// profiles themselves. Both come from the same origin (/v1/ on Pages, the local build in dev),
 // through the client, so the cache, ETag revalidation and failure handling are the consumer's.
 
 import {

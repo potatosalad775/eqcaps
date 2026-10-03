@@ -4,7 +4,7 @@ A static web app where users, contributors and developers can browse the databas
 own PEQ hardware, see what the database says about it, check that against the device itself, and
 contribute the result back. It is the main *authoring and verification* tool for the database.
 
-Format semantics referenced here are defined in [SPEC-DRAFT.md](SPEC-DRAFT.md).
+Format semantics referenced here are defined in [SPEC.md](SPEC.md).
 
 ## 1. Who it's for
 
@@ -69,6 +69,12 @@ output a draft profile plus an evidence report. Details in §3.
 - Both routes are subject to URL length (~8 KB practical). The profile goes in the URL and evidence
   is always attached separately.
 - The submit screen states that data contributions are CC0-1.0 (DECISIONS D25).
+
+*2026-10-03:* built (DECISIONS D35) except "start from a probe result", which comes with T3. The
+editor works on authoring files, read from the repository (bases aren't published), and runs
+CI's own checks as the user types. A read from the connect page arrives with its evidence file
+cited and is re-checked against every edit. Evidence files are attached to the pull request,
+since one link can only create one file.
 
 ## 3. Probe methodology (T3)
 
@@ -211,6 +217,29 @@ apps/inspector (Svelte 5 + Vite, static SPA)
 }
 ```
 
+A read (T2) is recorded as one experiment without pushes:
+
+```jsonc
+{
+  "evidenceVersion": 1,
+  "tool": { "name": "eqcaps inspector", "commit": "da24539", "userAgent": "…" },
+  "device": { "transport": "hid", "vendorId": "0x31b2", "productId": "0x0113",
+              "productName": "Chu2 DSP", "firmware": "…" },   // firmware only if the user gives it
+  "handler": "ktmicro-usb-hid",                                // "experimental": true when guessed
+  "profile": "moondrop-chu-2-dsp",                             // the profile it was checked against
+  "date": "2026-10-03",
+  "experiments": [
+    { "id": "read",
+      "readBack": { "filters": [{ "type": "PK", "freq": 1400, "q": 7, "gain": 0 }, null], "preamp": 0 },
+      "findings": ["Slot 3: q 7 is out of range (allowed: 0.1 – 5 in 0.001 steps)"] }
+  ],
+  "caveats": ["Read-back only: …", "Realization not verified: …"]
+}
+```
+
+A profile cites it as a `community` source: it shows values the device holds, not its limits
+(SPEC §10, DECISIONS D35). The file is named `<date>-<first 6 hex of its SHA-256>.json`.
+
 - **Never collected:** serial numbers, Bluetooth MAC addresses, IP addresses of network devices.
 - **Reviewed before export:** Bluetooth names, which are often personal ("Alex's EH13"). The export
   screen shows every string field and lets the user redact it.
@@ -231,3 +260,5 @@ Stored at `data/evidence/<profile-id>/<date>-<short hash>.json`, referenced from
 
 *2026-10-02:* built so far (DECISIONS D34): `/`, `/p/<id>`, `/playground`, and `/connect` with T1
 and T2 (no probing yet). `/edit` and `/docs` are next.
+*2026-10-03:* `/edit/<id?>` and `/docs` are built (D35); `/connect` exports evidence. Probing (T3)
+is Phase 5.

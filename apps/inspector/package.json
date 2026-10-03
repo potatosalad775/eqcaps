@@ -16,7 +16,8 @@
 		"@potatosalad775/eqcaps-build": "0.0.0",
 		"@potatosalad775/eqcaps-client": "0.0.0",
 		"@potatosalad775/eqcaps-core": "0.0.0",
-		"@potatosalad775/eqcaps-device-bridge": "0.0.0"
+		"@potatosalad775/eqcaps-device-bridge": "0.0.0",
+		"prettier": "^3.9.9"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.10",

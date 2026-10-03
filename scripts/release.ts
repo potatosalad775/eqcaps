@@ -3,13 +3,18 @@
 // from a clean, pushed main; npm asks for your 2FA code as it publishes.
 //
 // Usage: npm run release -- <version> [--dry-run] [--otp <code>]
+//        npm run release -- <version> --pack
+//
+// --pack builds the packages and writes their tarballs to dist/pack/ instead of publishing, from
+// any working tree, to try them in another app before a release:
+// `npm install <eqcaps>/dist/pack/*.tgz` there.
 //
 // package.json files in the repository stay at 0.0.0: the version, and the packages' dependencies
 // on each other, are set only for the publish and restored afterwards. A pre-release version
 // (1.2.3-beta.1) publishes under the npm dist-tag "next" and makes a GitHub pre-release.
 
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
@@ -39,11 +44,16 @@ function fail(message: string): never {
 	process.exit(1);
 }
 
+/** package.json texts as they were before setVersions, for restoreVersions. */
+const saved = new Map<string, string>();
+
 function setVersions(version: string) {
 	const names = new Set(PUBLISHED.map((p) => `@potatosalad775/eqcaps-${p}`));
 	for (const pkg of PUBLISHED) {
 		const path = `${root}packages/${pkg}/package.json`;
-		const json = JSON.parse(readFileSync(path, 'utf8')) as {
+		const text = readFileSync(path, 'utf8');
+		saved.set(path, text);
+		const json = JSON.parse(text) as {
 			version: string;
 			dependencies?: Record<string, string>;
 		};
@@ -57,18 +67,50 @@ function setVersions(version: string) {
 }
 
 function restoreVersions() {
-	git('checkout', '--', ...PUBLISHED.map((p) => `packages/${p}/package.json`));
+	// Written back rather than checked out, so uncommitted edits survive a --pack.
+	for (const [path, text] of saved) writeFileSync(path, text);
 	for (const pkg of PUBLISHED) rmSync(`${root}packages/${pkg}/LICENSE`, { force: true });
+}
+
+/** Tarballs of the packages at `version` in dist/pack/, built from the working tree as it is. */
+function pack(version: string) {
+	console.log(`\n== Build`);
+	run('npm', ['run', 'build']);
+	const out = `${root}dist/pack`;
+	rmSync(out, { recursive: true, force: true });
+	mkdirSync(out, { recursive: true });
+	console.log(`\n== Pack ${version}`);
+	setVersions(version);
+	try {
+		run('npm', [
+			'pack',
+			...PUBLISHED.flatMap((p) => ['-w', `packages/${p}`]),
+			'--pack-destination',
+			out
+		]);
+	} finally {
+		restoreVersions();
+	}
+	console.log(`\nTarballs in dist/pack/. In the app that should use them:`);
+	console.log(`  npm install ${out}/*.tgz`);
 }
 
 function main() {
 	const { positionals, values } = parseArgs({
 		allowPositionals: true,
-		options: { 'dry-run': { type: 'boolean' }, otp: { type: 'string' } }
+		options: {
+			'dry-run': { type: 'boolean' },
+			otp: { type: 'string' },
+			pack: { type: 'boolean' }
+		}
 	});
 	const version = positionals[0]?.replace(/^v/, '');
 	if (!version || !/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(version)) {
-		fail('usage: npm run release -- <version> [--dry-run] [--otp <code>]');
+		fail('usage: npm run release -- <version> [--dry-run] [--otp <code>] [--pack]');
+	}
+	if (values.pack) {
+		pack(version);
+		return;
 	}
 	const dryRun = values['dry-run'] ?? false;
 	const tag = `v${version}`;
@@ -136,7 +178,7 @@ function main() {
 		'release',
 		'create',
 		tag,
-		'dist/site/next/bundle.json',
+		'dist/site/v1/bundle.json',
 		'--verify-tag',
 		'--title',
 		tag,

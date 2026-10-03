@@ -11,7 +11,7 @@ export const LAYOUT_CODES = {
 	'file-location':
 		'Profiles live in data/profiles/<brand>/ (brand slug of device.brand), abstract bases in data/bases/.',
 	'schema-ref': '`$schema` must be the first key and point at schema/v1/source.schema.json.',
-	'evidence-missing': 'A probe or measurement source refers to a file missing from data/evidence/.'
+	'evidence-missing': 'A source refers to a file missing from data/evidence/.'
 } as const;
 
 export type LayoutCode = keyof typeof LAYOUT_CODES;
@@ -101,7 +101,6 @@ export function checkLayout(
 			)
 		];
 		for (const [source, pointer] of sources) {
-			if (source.kind !== 'probe' && source.kind !== 'measurement') continue;
 			if (source.ref?.startsWith('evidence/') && !evidence.has(source.ref)) {
 				add(file, 'evidence-missing', pointer, `data/${source.ref} does not exist`);
 			}

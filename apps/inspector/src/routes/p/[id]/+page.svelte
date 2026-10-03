@@ -86,6 +86,10 @@
 				<a href="{resolve('/playground')}?profile={encodeURIComponent(p.id)}"
 					>Try in the playground</a
 				>
+				<a href={resolve('/edit/[[id]]', { id: p.id })}>Edit this profile</a>
+				<a href="{resolve('/edit/[[id]]', {})}?copy={encodeURIComponent(p.id)}"
+					>New profile from this one</a
+				>
 				<!-- eslint-disable svelte/no-navigation-without-resolve -- links out of the app -->
 				<a href={profileSourceUrl(p)}>Source on GitHub</a>
 				<a href="{dataUrl()}profiles/{p.id}.json">Published JSON</a>

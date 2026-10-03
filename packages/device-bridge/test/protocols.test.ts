@@ -32,11 +32,18 @@ test('every key is a profile id', () => {
 	expect(table.filter(([id]) => !profiles.has(id)).map(([id]) => id)).toEqual([]);
 });
 
-test('every hardware profile has a protocol', () => {
+/**
+ * Hardware the bridge doesn't drive, listed so a missing protocol is always a decision. The RME
+ * ADI-2 series is controlled over MIDI SysEx, which no handler speaks.
+ */
+const WITHOUT_PROTOCOL = new Set(['rme-adi-2-dac-fs', 'rme-adi-2-dac-fs-bass-treble']);
+
+test('every hardware profile has a protocol, or is listed as having none', () => {
 	const missing = [...profiles.values()].filter(
-		(p) => p.kind === 'hardware' && !(p.id in PROTOCOLS)
+		(p) => p.kind === 'hardware' && !(p.id in PROTOCOLS) && !WITHOUT_PROTOCOL.has(p.id)
 	);
 	expect(missing.map((p) => p.id)).toEqual([]);
+	expect([...WITHOUT_PROTOCOL].filter((id) => id in PROTOCOLS || !profiles.has(id))).toEqual([]);
 });
 
 test('protocolFor only answers for table keys', () => {

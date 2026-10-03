@@ -32,7 +32,7 @@ function report(issues: FileIssue[], ok: string): boolean {
 		if (process.env.GITHUB_ACTIONS === 'true') console.log(formatGithub(issues));
 	}
 	if (errors > 0) {
-		console.error(`\n${errors} error${errors === 1 ? '' : 's'}. Rules: docs/SPEC-DRAFT.md`);
+		console.error(`\n${errors} error${errors === 1 ? '' : 's'}. Rules: docs/SPEC.md`);
 		return false;
 	}
 	console.log(ok);

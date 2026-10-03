@@ -72,6 +72,10 @@
 			Search the database by brand, model, alias or USB id (<code>0x2972</code>,
 			<code>2972:0047</code>).
 		</p>
+		<p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+			Not listed, or wrong? <a href={resolve('/connect')}>Connect your device</a> to check it, or
+			<a href={resolve('/edit/[[id]]', {})}>write a profile</a> for it.
+		</p>
 	</div>
 
 	<div class="flex flex-wrap items-center gap-2">

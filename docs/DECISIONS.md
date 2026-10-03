@@ -201,7 +201,7 @@ of one Walkplay device doesn't verify another.
 
 Governance: anyone may open a PR, including for `draft` profiles. Merging needs one maintainer
 approval (branch protection), which covers status raises too: CI checks the evidence rule for each
-level, and the reviewer checks the evidence content. Changes to `schema/`, `docs/SPEC-DRAFT.md`
+level, and the reviewer checks the evidence content. Changes to `schema/`, `docs/SPEC.md`
 and `packages/core/` also need a CODEOWNER. Those rules are path-based, so CODEOWNERS can enforce
 them. There is no maintainer list. For `maintainer-verified`, CI requires a counting source with
 `by`, and the approving maintainer confirms that `by` names a maintainer, just as they check the
@@ -538,6 +538,7 @@ where its USB write is quantized.
   of `core` and `client`, a git tag, and a GitHub Release with `bundle.json`. Versions are set
   only for the publish; `package.json` files stay at 0.0.0. The data package
   `@potatosalad775/eqcaps` (D24) waits for the freeze, when its contents become stable.
+  *2026-10-03:* the format is frozen (D36); the data package is the next release task.
   *2026-10-02:* first done by a tag-triggered workflow with an npm token, which failed on the
   account's 2FA. Releases are rare, so a local script that lets npm prompt for 2FA beats managing
   an automation token. Lost: npm provenance attestations, which need a CI publish. Revisit with
@@ -617,6 +618,9 @@ write; all four are corrected (D31). Left open, kept visible by the tests: FiiO 
 HPQ, BP and AP, which no FiiO codec has codes for; recorded devices hold values outside their
 draft ranges (KT Micro Chu 2, Bunny and One DSP with Q up to 8 against 5, Kiwi Ears Allegro Pro
 at 18 Hz, EPZ TP13 at 19.55 Hz).
+*2026-10-03:* not every hardware profile has a protocol any more. The RME ADI-2 DAC FS profiles
+(from RME's manual) describe a device controlled over MIDI SysEx, which no handler speaks. The
+protocol test lists such profiles by id, so a missing protocol is always a decision.
 **Rejected:** keeping devicePEQ's `normalizeFiltersForDevice` in the bridge (constraint logic that
 duplicates core's `fit`); passing profiles to the bridge for writes; a Kotlin bridge (D27); a
 registry in the bridge that matches device identities to handlers, hand-written or generated from
@@ -667,6 +671,71 @@ prerendering a page per profile at build time (couples the app's deploy to the d
 SPA reads the data anyway); a UI component library (plain Svelte and Tailwind are enough so
 far); fetching profiles one by one for search (the bundle is small, and feature filters need the
 profiles).
+*2026-10-03:* `/edit/<id?>` (T4, D35) and `/docs` (the consumer guide) are built. The connect page
+gained the evidence export with its PII review, and hands a reviewed read-back to the editor.
+
+### D35. Inspector editor, submission and evidence files (accepted, 2026-10-03)
+The T4 tier of INSPECTOR §2, and the evidence files of INSPECTOR §6 for what T2 can observe.
+- **The editor edits authoring files**, not published profiles: what a pull request changes is
+  `data/profiles/<brand>/<id>.json`, with its `extends`. Bases are never published, so the editor
+  reads authoring files from the repository itself: from the local checkout through the dev
+  server (`/data/`), and from `main` on `raw.githubusercontent.com` in production. Which bases
+  exist comes from the published profiles' inherited sources (`via`), so no listing API is needed.
+- **Checks are CI's.** The editor runs `packages/build`'s layout check and `validateSources` (Ajv
+  over the bundled schemas, flatten, semantic rules) on the file and the files it extends, and
+  `checkDatabase` against the bundle, as the user types. Issues carry lines, and a click selects
+  the line.
+- **Files are formatted like the repository's.** The form writes through Prettier (standalone,
+  loaded on demand) with the repository's options, in the repository's key order, so a submitted
+  file passes `npm run lint`; the test suite checks that this reproduces every file in `data/`
+  byte for byte.
+- **Submission is a link** (D19). A new file opens GitHub's "new file" page with the text in the
+  URL; GitHub forks for people without write access. An existing file, or one too long for a
+  URL (~8 KB), opens the edit or new-file page with the text on the clipboard. An issue with the
+  file in it is the fallback. The app never calls GitHub's API.
+- **Evidence files** record what the inspector saw, in the format of INSPECTOR §6. A read (T2)
+  records the read-back and its findings. Before export, every string in the file is shown and
+  can be changed or removed (the PII review); serial numbers and Bluetooth addresses are never
+  read. Files are named `<date>-<6 hex of their SHA-256>.json` under `evidence/<profile id>/`.
+  A pull request carries the profile; the evidence file is attached to it and committed by a
+  maintainer (or both go in one commit, with git).
+- **A read-back is `community` evidence.** It shows values the device holds, not the limits of
+  what it accepts, so it supports widening a domain but can't verify one. SPEC §10's `community`
+  row now says "without counting evidence" and names it. `evidence-missing` (a repository layout
+  rule) now covers every source whose ref is under `evidence/`, not only probes and measurements.
+- **Connect → editor.** The connect page hands the reviewed evidence file and the read-back to the
+  editor in `sessionStorage`. The editor cites the file in `meta.sources` and re-checks the
+  read-back against the profile as it changes. For a device the database lacks, it starts a
+  profile with the device's USB identity as its `match` and the band count it returned.
+
+**Rejected:** calling the GitHub API to open pull requests (needs a token or a backend, D19);
+publishing authoring files and bases in the data channel (they aren't part of the format, and
+consumers would see them); counting a read-back toward `community-verified` (one read says
+nothing about bounds); a new source kind for read-backs (a format change that buys nothing over
+`community` with an evidence file); a full schema-driven form (per-slot overrides, variants, rules
+and laws are clearer in JSON, which stays the source of truth).
+
+### D36. Format v1 frozen (accepted, 2026-10-03)
+The owner froze the format as v1 (format `1.0`) at the end of Phase 4. SPEC.md (renamed from
+SPEC-DRAFT.md) is now the v1 definition; it changes only by additive minors (SPEC §15), and
+anything else needs v2 under a new prefix.
+- **Exit criteria waived in part, by the owner.** PLAN's Phase 4 exit asked for ≥ 10 profiles at
+  `community-verified` or better across every hard case, and a real HID device going connect →
+  read → validate → prefilled PR. At the freeze, two profiles were verified (RME ADI-2 DAC FS,
+  PEQ and Bass/Treble), and real devices (several Walkplay units) were identified and read, while
+  the full flow ran only against a replayed capture. The owner judged that no further format
+  change was needed. What the gate was meant to catch, a format gap found in real use, can still
+  be fixed by a minor if it is additive.
+- **Channels.** `/v1/` is built from `main` beside `/next/`. `/next/` keeps being served with the
+  same data, so client 0.1.x (which defaults to it) keeps working; its profiles point at its own
+  schema copy. The client defaults to `/v1/` from 0.2.0, the inspector reads `/v1/`, and releases
+  attach `/v1/`'s `bundle.json`.
+- **Still to do after the freeze:** the npm data package `@potatosalad775/eqcaps` (D32), and the
+  verified profiles and real-hardware runs that Phase 4 carried (PLAN §7).
+
+**Rejected:** dropping `/next/` at the freeze (breaks every 0.1.x client's default); keeping the
+file name SPEC-DRAFT.md (a frozen definition called a draft misleads readers; links inside the
+repository were updated, and old links to the file on GitHub break).
 
 ---
 

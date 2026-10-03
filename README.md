@@ -4,14 +4,14 @@ A vendor-neutral database of **EQ constraint profiles**: what an EQ engine (a ha
 software EQ) actually accepts. Band count, filter types per slot, frequency/Q/gain domains with
 quantization, conditional domains, cross-band rules, preamp, device identity and provenance.
 
-> **Status: early development.** The format is a draft and not frozen. Data is built for the
-> pre-freeze channel `/next/`; most profiles are seeded drafts.
+> **Status:** format v1 is frozen (2026-10-03) and published under `/v1/`. Most profiles are
+> seeded drafts; checking them against real devices is the most useful contribution.
 
 ## What's here
 
 | Path | Contents |
 | --- | --- |
-| [`docs/SPEC-DRAFT.md`](docs/SPEC-DRAFT.md) | The format definition (v1 draft) and engine semantics |
+| [`docs/SPEC.md`](docs/SPEC.md) | The format definition (v1) and engine semantics |
 | [`docs/PLAN.md`](docs/PLAN.md) | Goals, architecture and roadmap |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Every design decision, with rationale |
 | [`schema/v1/`](schema/v1/) | JSON Schema for published profiles and authoring files |
@@ -21,7 +21,7 @@ quantization, conditional domains, cross-band rules, preamp, device identity and
 | [`packages/device-bridge`](packages/device-bridge/) | Reads and writes EQ on every hardware device in the database over HID, serial and Bluetooth, behind transport interfaces with no browser types. |
 | [`data/`](data/) | The profiles (`profiles/<brand>/<id>.json`) and shared bases. See [CONTRIBUTING.md](CONTRIBUTING.md). |
 | [`packages/build`](packages/build/) | Validation pipeline and data build used by CI |
-| [`apps/inspector`](apps/inspector/) | The web app at [potatosalad775.github.io/eqcaps](https://potatosalad775.github.io/eqcaps/): browse profiles, try the engine on your filters, read a connected device and check it against its profile |
+| [`apps/inspector`](apps/inspector/) | The web app at [potatosalad775.github.io/eqcaps](https://potatosalad775.github.io/eqcaps/): browse profiles, try the engine on your filters, read a connected device and check it against its profile, edit a profile and submit it as a pull request |
 
 ## Development
 
@@ -36,8 +36,9 @@ npm run build
 npm run codegen   # after editing schema/v1/profile.schema.json
 npm run conformance  # after changing engine behaviour or scripts/conformance.ts
 npm run data:validate  # check data/ as CI does
-npm run data:build     # publish /next/ into dist/site/next/
-npm run inspector:dev  # the inspector, reading the local dist/site/next/
+npm run data:build     # publish /v1/ and /next/ into dist/site/
+npm run inspector:dev  # the inspector, reading the local dist/site/v1/ and data/
+npm run release -- 0.2.0-rc.1 --pack  # package tarballs in dist/pack/, to try in another app
 ```
 
 `@potatosalad775/eqcaps-core` and `@potatosalad775/eqcaps-client` are on npm; the device bridge

@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { execFileSync } from 'node:child_process';
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,22 +13,25 @@ import {
 } from 'vite';
 
 const siteDir = fileURLToPath(new URL('../../dist/site/', import.meta.url));
+const repoDir = fileURLToPath(new URL('../../', import.meta.url));
 
 /**
- * Serves the locally built channels (`npm run data:build` writes dist/site/next/) at /next/ in
+ * Serves the locally built channels (`npm run data:build` writes dist/site/v1/ and next/) in
  * dev and preview, where Pages serves them in production: the app always reads its data from
- * the same origin.
+ * the same origin. Also serves the repository's data/ at /data/, so the editor starts from the
+ * local authoring files (in production it reads them from GitHub).
  */
 function localData(): Plugin {
 	const serve: Connect.NextHandleFunction = (req, res, next) => {
 		const url = new URL(req.url ?? '/', 'http://localhost');
-		const match = /^\/(next|v1)\/(.*)$/.exec(url.pathname);
+		const match = /^\/(next|v1|data)\/(.*)$/.exec(url.pathname);
 		if (!match) return next();
-		const file = path.join(siteDir, match[1] as string, decodeURIComponent(match[2] as string));
-		if (!file.startsWith(siteDir) || !existsSync(file) || !statSync(file).isFile()) {
+		const dir = path.join(match[1] === 'data' ? repoDir : siteDir, match[1] as string);
+		const file = path.join(dir, decodeURIComponent(match[2] as string));
+		if (!file.startsWith(dir + path.sep) || !existsSync(file) || !statSync(file).isFile()) {
 			res.statusCode = 404;
 			res.end(
-				existsSync(siteDir)
+				existsSync(siteDir) || match[1] === 'data'
 					? 'Not found'
 					: 'No local data: run `npm run data:build` at the repo root'
 			);
@@ -43,6 +47,15 @@ function localData(): Plugin {
 		configurePreviewServer: (server) => void server.middlewares.use(serve)
 	};
 }
+
+// The commit the app is built from, for the evidence files it writes (INSPECTOR §6).
+process.env.VITE_EQCAPS_COMMIT ??= (() => {
+	try {
+		return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim();
+	} catch {
+		return 'unknown';
+	}
+})();
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit(), localData()],

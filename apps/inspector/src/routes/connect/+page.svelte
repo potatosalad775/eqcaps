@@ -41,6 +41,9 @@
 		wrongConstraintIssueUrl
 	} from '$lib/connect';
 	import { catalog } from '$lib/data.svelte';
+	import { APP_COMMIT } from '$lib/channel';
+	import { readEvidence, today } from '$lib/evidence';
+	import EvidenceReview from '$lib/components/EvidenceReview.svelte';
 	import { formatApo } from '$lib/filters-text';
 	import { formatField } from '$lib/format';
 	import { violationText } from '$lib/violations';
@@ -94,6 +97,19 @@
 			return guessProtocol(parseInt(chosen.identity.usb.vendorId, 16));
 		}
 		return undefined;
+	});
+
+	/**
+	 * A HID protocol's capabilities are known without any I/O: say up front when it can't read,
+	 * rather than failing on "Read the EQ". (Serial and BLE ports are opened first.)
+	 */
+	const writeOnly = $derived.by(() => {
+		if (chosen?.kind !== 'hid' || !protocol) return false;
+		try {
+			return !openDevice(chosen.transport, protocol).capabilities.canRead;
+		} catch {
+			return false;
+		}
 	});
 
 	$effect(() => {
@@ -214,6 +230,35 @@
 		for (const v of findings.violations) lines.push(violationText(v, pulled.filters));
 		return lines.join('\n');
 	}
+
+	const evidence = $derived.by(() => {
+		if (!pulled || !chosen || !protocol) return null;
+		const date = today();
+		const lines = findingsText();
+		const report = readEvidence({
+			transport: chosen.kind,
+			identity: chosen.identity,
+			handler: protocol.handler,
+			experimental: protocol.experimental === true,
+			...(profileId && profile ? { profile: profileId } : {}),
+			pull: pulled,
+			findings: lines ? lines.split('\n') : [],
+			commit: APP_COMMIT,
+			userAgent: navigator.userAgent,
+			date
+		});
+		const handoff = {
+			...(profileId && profile ? { profileId } : {}),
+			date,
+			identity: chosen.identity,
+			readBack: {
+				filters: pulled.filters,
+				...(pulled.preamp !== undefined ? { preamp: pulled.preamp } : {})
+			},
+			needsBandCount: device?.capabilities.needsBandCount ?? true
+		};
+		return { report, handoff };
+	});
 
 	function readBackText(): string {
 		if (!pulled) return '';
@@ -418,12 +463,20 @@
 						/>
 					</label>
 				{/if}
-				<button
-					type="button"
-					class="rounded bg-teal-700 px-3 py-2 text-sm text-white disabled:opacity-40"
-					disabled={!!busy}
-					onclick={read}>Read the EQ</button
-				>
+				{#if writeOnly || (device && !device.capabilities.canRead)}
+					<p class="rounded bg-zinc-100 px-3 py-2 text-sm dark:bg-zinc-900">
+						This protocol can only write to the device: it has no way to read the EQ back. This page
+						only reads, so it can identify the device but not check its EQ. Apps that drive the
+						device bridge can still write to it.
+					</p>
+				{:else}
+					<button
+						type="button"
+						class="rounded bg-teal-700 px-3 py-2 text-sm text-white disabled:opacity-40"
+						disabled={!!busy}
+						onclick={read}>Read the EQ</button
+					>
+				{/if}
 			{/if}
 
 			{#if device}
@@ -549,6 +602,12 @@
 					<button type="button" class="text-sm underline" onclick={openInPlayground}
 						>Open this EQ in the playground</button
 					>
+				{/if}
+
+				{#if evidence}
+					{#key evidence.report}
+						<EvidenceReview report={evidence.report} handoff={evidence.handoff} />
+					{/key}
 				{/if}
 			{/if}
 		</section>

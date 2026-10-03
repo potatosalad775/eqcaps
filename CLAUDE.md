@@ -7,15 +7,16 @@ identity and provenance. The repo also holds the tooling to author, verify, vali
 profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor), and anyone else
 who adopts the format.
 
-**Status: Phases 0–3 done (`/next/` live, `core` and `client` 0.1.0 on npm); Phase 4 in progress:
-`packages/device-bridge` built; `apps/inspector` has browse, playground and connect (T0–T2), editor
-next (PLAN §5).** Read `docs/PLAN.md` first.
+**Status: Phases 0–4 done; format v1 frozen 2026-10-03 (D36), published under `/v1/` beside
+`/next/`. `core` and `client` 0.1.0 on npm; the bridge and 0.2.0 are next (PLAN §7). Phase 5
+(probe mode) is the next phase.** Read `docs/PLAN.md` first.
 
 Commands: `npm run lint` · `npm run check` (codegen and vector drift + typecheck) · `npm test` ·
 `npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json` ·
 `npm run conformance` after changing engine behaviour · `npm run data:validate` · `npm run data:build`
-(writes `dist/site/next/`) · `npm run inspector:dev` (serves the local `dist/site/next/`; run
-`data:build` first) · `npm run release -- <version>` (owner only, run locally for npm 2FA).
+(writes `dist/site/v1/` and `next/`) · `npm run inspector:dev` (serves the local `dist/site/v1/`; run
+`data:build` first) · `npm run release -- <version>` (owner only, run locally for npm 2FA) · `npm run release --
+<version> --pack` (tarballs in `dist/pack/`, to try the packages in another app).
 Never edit `schema/v1/source.schema.json`,
 `*.generated.ts` or `conformance/v1/*.json` (engine vectors) by hand.
 
@@ -24,13 +25,14 @@ Never edit `schema/v1/source.schema.json`,
 | File | Contents |
 | --- | --- |
 | `docs/PLAN.md` | goal, consumers, architecture, repo layout, phased roadmap with exit criteria, risks |
-| `docs/SPEC-DRAFT.md` | **the** format definition (v1 draft) and engine semantics. Single source of truth. |
+| `docs/SPEC.md` | **the** format definition (v1, frozen) and engine semantics. Single source of truth. |
 | `docs/INSPECTOR.md` | inspector web app: capability tiers, device probing methodology, safety, privacy |
 | `docs/DECISIONS.md` | every design decision with rationale, review of the original concept draft, **open questions for the owner** |
 | `docs/research/prior-art.md` | evidence: existing constraint models + what real device handlers encode |
 
-When a decision changes, edit its entry in DECISIONS.md with a dated note, and update SPEC-DRAFT.md
-in the same change. Don't define format details anywhere except SPEC-DRAFT.md.
+When a decision changes, edit its entry in DECISIONS.md with a dated note, and update SPEC.md
+in the same change. v1 is frozen: a format change must be an additive minor (SPEC §15) or wait
+for v2. Don't define format details anywhere except SPEC.md.
 
 ## Invariants (changing one needs a DECISIONS entry)
 
@@ -79,6 +81,8 @@ in the same change. Don't define format details anywhere except SPEC-DRAFT.md.
 - Inspector (D34): SvelteKit SPA with adapter-static and Tailwind, never server-rendered. Logic
   that can be tested lives in plain `.ts` modules under `src/lib/` (tested by the root Vitest run);
   routes and components stay thin. T0–T2 pages never call the bridge's `push` or `setEnabled`.
+  The editor (D35) edits authoring files, read from the repository (`/data/` in dev, GitHub
+  `main` in production), and checks them with `packages/build`, as CI does.
 - Workspace packages import each other by package name. Node scripts that need sources run with
   `--conditions=eqcaps:source`; `scripts/*.ts` import sources by relative path.
 - USB ids are lowercase 4-digit hex strings (`"0x2972"`). HID `productName` matches exactly,

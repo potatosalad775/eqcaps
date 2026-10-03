@@ -1,6 +1,6 @@
 /**
  * Every issue code with the rule it reports. `schema` comes from structural (JSON Schema)
- * validation; every other code is a semantic rule from docs/SPEC-DRAFT.md.
+ * validation; every other code is a semantic rule from docs/SPEC.md.
  */
 export const ISSUE_CODES = {
 	schema: 'Structural: the file fails profile.schema.json or source.schema.json.',

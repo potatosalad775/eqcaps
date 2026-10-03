@@ -22,6 +22,16 @@
 			href: resolve('/connect'),
 			label: 'Connect',
 			active: (p: string) => p === '/connect'
+		},
+		{
+			href: resolve('/edit/[[id]]', {}),
+			label: 'Edit',
+			active: (p: string) => p.startsWith('/edit')
+		},
+		{
+			href: resolve('/docs'),
+			label: 'Use the data',
+			active: (p: string) => p === '/docs'
 		}
 	];
 
@@ -72,8 +82,8 @@
 	<footer class="border-t border-zinc-200 text-xs text-zinc-500 dark:border-zinc-800">
 		<div class="mx-auto flex max-w-6xl flex-wrap gap-x-4 gap-y-1 px-4 py-3">
 			<span
-				>Data {catalog.index?.dataVersion ?? '…'} · format {catalog.index?.schemaVersion ?? '…'} (pre-freeze
-				/next/)</span
+				>Data {catalog.index?.dataVersion ?? '…'} · format {catalog.index?.schemaVersion ??
+					'…'}</span
 			>
 			<!-- eslint-disable svelte/no-navigation-without-resolve -- data files, not routes -->
 			<span class="flex gap-3">

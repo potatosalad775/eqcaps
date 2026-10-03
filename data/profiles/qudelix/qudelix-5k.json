@@ -6,7 +6,8 @@
 	"device": { "brand": "Qudelix", "model": "5K" },
 	"match": {
 		"usb": [
-			{ "vendorId": "0x0a12", "productId": "0x4005", "productName": "Qudelix-5K USB DAC 48KHz" }
+			{ "vendorId": "0x0a12", "productId": "0x4005", "productName": "Qudelix-5K USB DAC 48KHz" },
+			{ "vendorId": "0x0a12", "productId": "0x4007", "productName": "Qudelix-5K USB DAC" }
 		]
 	},
 	"bandCount": 10,
@@ -29,8 +30,14 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/qudelix_qudelix_5k.json",
 				"date": "2026-10-02"
+			},
+			{
+				"kind": "community",
+				"ref": "WebHID identity of a Qudelix-5K, read with the eqcaps inspector",
+				"date": "2026-10-03",
+				"by": "potatosalad775"
 			}
 		],
-		"notes": "Seeded from AutoEQ by scripts/import/seed.ts. Band count, gain range and peaking Q range from AutoEQ's PEQ_CONFIGS QUDELIX_5K, which is an optimizer setting: the engine may allow more bands. The frequency range and the shelves' Q range are assumptions. USB identity from a devicePEQ recorded capture. Steps are the USB write's resolution (freq 1 Hz, gain 0.1 dB, Q 1/1024), with Q's minimum moved onto that grid (corrected 2026-10-02)."
+		"notes": "Seeded from AutoEQ by scripts/import/seed.ts. Band count, gain range and peaking Q range from AutoEQ's PEQ_CONFIGS QUDELIX_5K, which is an optimizer setting: the engine may allow more bands. The frequency range and the shelves' Q range are assumptions. USB identity from a devicePEQ recorded capture. Steps are the USB write's resolution (freq 1 Hz, gain 0.1 dB, Q 1/1024), with Q's minimum moved onto that grid (corrected 2026-10-02). The second USB identity (0x4007, \"Qudelix-5K USB DAC\") is a maintainer's unit, added 2026-10-03; devicePEQ's capture has 0x4005 \"... 48KHz\". 0x0a12 is the Bluetooth chip vendor's id, shared with other devices (FiiO's among them), so the vendor alone says nothing."
 	}
 }

@@ -11,7 +11,7 @@ It covers band count, filter types per slot, frequency/Q/gain domains including 
 value sets, conditional domains, cross-band rules, preamp, device identity and provenance. It
 consists of:
 
-1. **A format**: [SPEC-DRAFT.md](SPEC-DRAFT.md), JSON Schema, conformance vectors.
+1. **A format**: [SPEC.md](SPEC.md), JSON Schema, conformance vectors.
 2. **A database**: community-maintained profiles, CI-validated, published as static JSON.
 3. **A reference engine**: resolve / validate / fit / assign / complete, plus written ↔ realized
    conversion, in TypeScript, portable by spec.
@@ -56,7 +56,7 @@ filters, mic gain…).
 ```
 eqcaps/
 ├── CLAUDE.md                     project guide for agents
-├── docs/                         PLAN, SPEC-DRAFT, INSPECTOR, DECISIONS, research/
+├── docs/                         PLAN, SPEC, INSPECTOR, DECISIONS, research/
 ├── schema/v1/
 │   ├── profile.schema.json       published (flat) profiles
 │   └── source.schema.json        authoring files (adds extends / abstract)
@@ -156,7 +156,7 @@ validates and fits, and a test runs it against the built data. The repository is
 is live on Pages, and `main` is protected (one approval, CI required, D28). `core` and `client`
 0.1.0 are on npm.
 
-### Phase 4: Inspector v1 (T0, T1, T2, T4) and spec freeze · L (3–4 weeks) · in progress
+### Phase 4: Inspector v1 (T0, T1, T2, T4) and spec freeze · L (3–4 weeks) · done 2026-10-03
 - `packages/device-bridge`: extract from modernGraphTool, keep behaviour, add identity extraction,
   "any device" connect, capability flags, `profileId` linkage for migrated handlers.
   - Define the transport interface with no browser types in handlers, so the Android app can plug
@@ -188,6 +188,24 @@ identity, HID descriptor dump, matching, T2 read and validate, prefilled issues)
 beside `/next/`. Left: publish the bridge, confirm connect → read on real hardware, the editor and
 PR submission (T4), the evidence export with its PII review, the hand-authored profiles, and the
 freeze.
+
+*2026-10-03:* the editor and submission (T4), the evidence export with its PII review and `/docs`
+are built (D35). Connect → match → read → validate → prefilled PR runs end to end in the
+inspector; it was exercised against a fake WebHID device replaying the KT Micro Chu 2 capture
+(only read commands were sent, and the Q 7 finding arrived in the editor), not yet on real
+hardware. `npm run release -- <version> --pack` writes tarballs of `core`, `client` and the
+bridge to `dist/pack/` for trying them in another app before publishing. The first hand-authored
+profiles are in: RME ADI-2 DAC FS (PEQ, type- and frequency-partitioned) and its Bass/Treble
+engine (stepped), both `community-verified` from RME's manual. Left for the exit: publish the
+bridge, the real-hardware run, eight more verified profiles covering the value-set, graphic and
+conditional cases (these need vendor apps or the devices themselves), and the freeze.
+
+*2026-10-03, later:* **format v1 is frozen** (D36), by the owner's decision, with the exit
+criteria waived in part: two verified profiles rather than ten, and real devices identified and
+read (Walkplay units) but the full flow only on a replayed capture. `/v1/` is built beside
+`/next/`, and the client and inspector default to it. The Qudelix 5K is write-only over USB (D33),
+so the inspector, which only reads, identifies it and says so; its profile now also matches the
+`0x4007` identity a maintainer's unit reports.
 
 ### Phase 5: Probe mode (T3) · L (3–4 weeks)
 - Bridge: offline codec analysis (the codecs' `wire()` and `types`, D33) that produces
@@ -228,12 +246,17 @@ freeze.
 
 ## 7. Immediate next steps
 
-1. Owner: publish the bridge with `core` and `client` as 0.2.0 (`npm run release -- 0.2.0`). The
-   captures prove the bytes, not that a write lands: the first real-hardware check comes with the
-   inspector's connect → read flow, or modernGraphTool switching over to the package.
-2. Run the inspector's connect → read against real devices (one per handler family the owner
-   has), and record what differs in D33.
-3. Phase 4: the inspector's editor and submission (T4), then the evidence report (INSPECTOR §6).
-4. Hand-author the ≥ 10 verified profiles the freeze needs. Candidates from D33's findings: the
-   FiiO filter types and the KT Micro Q ranges, settled from vendor apps or docs.
-5. Answer Q11 (compact USB match entries), or leave it until the index grows.
+1. Owner: push, so `/v1/` and the new inspector deploy. Then publish `core`, `client` and the
+   bridge as 0.2.0 (`npm run release -- 0.2.0`); the client then defaults to `/v1/`. Before that,
+   the bridge can be tried in another app from `npm run release -- 0.2.0-rc.1 --pack`.
+2. Publish the data package `@potatosalad775/eqcaps` (D32): decide its contents (the `/v1/` files)
+   and add it to the release script.
+3. Carried from Phase 4: real-hardware runs (one device per handler family; a write test through
+   modernGraphTool, since the inspector only reads) recorded in D33, and more verified profiles,
+   with the value-set, graphic and conditional cases among them. Review the two RME profiles' open
+   point (which way the band 1 and band 5 shelves face).
+4. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
+   A capture of the vendor app's USB traffic, made by the owner, would show whether the device
+   answers reads and what a reliable write looks like.
+5. Answer Q11 (compact USB match entries), or leave it until the index grows. It is additive, so it
+   fits a v1 minor.

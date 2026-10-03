@@ -8,10 +8,10 @@ import {
 import { memoryStore, type CacheEntry, type CacheStore } from './cache.ts';
 import { matchDevice, type DeviceIdentity, type MatchResult } from './match.ts';
 
-/** Pre-freeze channel (SPEC §14). Becomes the default until v1 is published. */
-export const NEXT_URL = 'https://potatosalad775.github.io/eqcaps/next/';
-/** Frozen v1 channel, published from the format freeze on (PLAN Phase 4). */
+/** The format's channel (SPEC §14), the default. */
 export const V1_URL = 'https://potatosalad775.github.io/eqcaps/v1/';
+/** The pre-freeze channel: same data, kept for clients that default to it (before 0.2.0). */
+export const NEXT_URL = 'https://potatosalad775.github.io/eqcaps/next/';
 
 /** The subset of `fetch` the client uses. */
 export type FetchLike = (
@@ -25,7 +25,7 @@ export type FetchLike = (
 }>;
 
 export interface ClientOptions {
-	/** Channel URL, ending in `/`. Default NEXT_URL. */
+	/** Channel URL, ending in `/`. Default V1_URL. */
 	baseUrl?: string;
 	/** Default `globalThis.fetch`. */
 	fetch?: FetchLike;
@@ -118,7 +118,7 @@ function indexOfBundle(bundle: DataBundle): DataIndex {
 
 export function createClient(options: ClientOptions = {}): EqcapsClient {
 	const platform = globalThis as Platform;
-	const baseUrl = options.baseUrl ?? NEXT_URL;
+	const baseUrl = options.baseUrl ?? V1_URL;
 	const doFetch = options.fetch ?? platform.fetch?.bind(globalThis);
 	const store = options.store ?? memoryStore();
 	const ttl = options.ttl ?? 24 * 60 * 60 * 1000;

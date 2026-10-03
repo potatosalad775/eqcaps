@@ -33,7 +33,8 @@ if (profile) {
 - **Matching** follows the format's specificity rules: `best` is set only for a unique top match.
   On a tie (`ambiguous`), let the user choose. Deprecated profiles never match.
 
-The default `baseUrl` is the pre-freeze channel `NEXT_URL`
-(`https://potatosalad775.github.io/eqcaps/next/`). The format is a draft until it is frozen as v1.
+The default `baseUrl` is the format's channel `V1_URL`
+(`https://potatosalad775.github.io/eqcaps/v1/`). Versions before 0.2.0 defaulted to the pre-freeze
+channel `NEXT_URL`, which is still served.
 
 License: MIT. The data it fetches is CC0-1.0.

@@ -17,7 +17,7 @@ learned from a vendor app can go into a profile, with a source that says where i
 
 ## Adding or fixing a device
 
-The format is defined in [docs/SPEC-DRAFT.md](docs/SPEC-DRAFT.md). In short:
+The format is defined in [docs/SPEC.md](docs/SPEC.md). In short:
 
 1. One file per EQ engine: `data/profiles/<brand>/<id>.json`, where `<brand>` is the brand in
    lowercase with dashes (`jds-labs`) and `<id>` is `<brand>-<model>` (`jds-labs-element-iv`).
@@ -33,10 +33,18 @@ The format is defined in [docs/SPEC-DRAFT.md](docs/SPEC-DRAFT.md). In short:
    - `community-verified`: you supplied counting evidence (a probe file, vendor docs, a vendor-app
      capture or a measurement);
    - `maintainer-verified`: a maintainer checked it on their own hardware or against vendor docs.
-5. Put probe or measurement files in `data/evidence/<id>/`. Remove anything personal first:
+5. Put evidence files (probes, measurements, read-backs) in `data/evidence/<id>/`. Remove anything personal first:
    Bluetooth names people gave their devices, serial numbers, MAC addresses.
 
 Devices that share a chip can share a base in `data/bases/` through `extends` (SPEC §11).
+
+No git needed: the [inspector](https://potatosalad775.github.io/eqcaps/) edits a profile as a form
+or as JSON, checks it as CI will, and opens the pull request on GitHub for you ("Edit this
+profile" on a profile's page, or "Edit" for a new one). With a supported device, **Connect** reads
+its EQ, checks it against its profile, and turns what it read into an evidence file you review
+before it leaves the page. Attach that file to the pull request; a maintainer commits it to
+`data/evidence/`. A read-back is cited as a `community` source: it shows values the device holds,
+not its limits, so it supports a fix but doesn't verify a profile.
 
 Most profiles were seeded from devicePEQ, modernGraphTool and AutoEQ by
 [`scripts/import/seed.ts`](scripts/import/seed.ts) and are `draft`. Their notes say what is known
@@ -69,7 +77,7 @@ CI runs the same checks on every pull request and marks each problem on its line
 ## Review
 
 Every merge needs one maintainer's approval. The reviewer checks your evidence against the status
-you chose. Changes to `schema/`, `docs/SPEC-DRAFT.md`, `packages/core/` and `.github/` also need
+you chose. Changes to `schema/`, `docs/SPEC.md`, `packages/core/` and `.github/` also need
 a code owner. Decisions behind the format are in [docs/DECISIONS.md](docs/DECISIONS.md); a
 change to one needs a new or amended entry there.
 

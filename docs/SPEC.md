@@ -1,7 +1,8 @@
-# EQ Constraint Profile Format: v1 draft
+# EQ Constraint Profile Format: v1
 
-> **Status: draft, not frozen.** This file is the single place the format is defined. Until the
-> freeze (end of Phase 4, see [PLAN.md](PLAN.md)) it is published under `/next/`, not `/v1/`.
+> **Status: frozen as v1 (format 1.0) on 2026-10-03** ([DECISIONS D36](DECISIONS.md)). This file is
+> the single place the format is defined. From here on it changes only by minors that add
+> (§15); anything else needs v2. Published under `/v1/`.
 > MUST / SHOULD / MAY are used as in RFC 2119. Rationale for each choice is in
 > [DECISIONS.md](DECISIONS.md), and the evidence is in [research/prior-art.md](research/prior-art.md).
 
@@ -336,7 +337,7 @@ file's path relative to `data/`: `evidence/<profile id>/<file>.json`.
 | `vendor-app` | Observed in the vendor's own app (UI limits, captured traffic) | ✔ |
 | `measurement` | Acoustic measurement of the realized response. `ref` points to the measurement data in `data/evidence/`. | ✔ |
 | `handler-code` | Inferred from a device-bridge encoder (wire limits only) | ✘ |
-| `community` | Reported without evidence | ✘ |
+| `community` | Reported without counting evidence, such as a device's read-back of the values it holds (INSPECTOR §2 T2), which says nothing about limits | ✘ |
 
 A vendor app's UI limits can be narrower than what the firmware accepts. Edifier's app restricts
 each band to a frequency window the device doesn't enforce, for example. `vendor-app` evidence
@@ -770,7 +771,9 @@ types, laws and filter types this engine version doesn't know, so a consumer can
 
 ## 14. Published artifacts
 
-Each channel (`/v1/`, and `/next/` before the freeze) holds:
+Each channel holds the files below. `/v1/` is the format's channel. `/next/`, the channel before
+the freeze, is still built from the same data for clients that default to it (client 0.1.x), with
+profiles whose `$schema` points at its own copy of the schema; new consumers use `/v1/`.
 
 | Path | Content |
 | --- | --- |

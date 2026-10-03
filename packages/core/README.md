@@ -17,7 +17,6 @@ Writing to a device: `fit` → `complete` → encode the written values. Reading
 
 To load profiles, use [`@potatosalad775/eqcaps-client`](https://www.npmjs.com/package/@potatosalad775/eqcaps-client).
 The format definition is
-[docs/SPEC-DRAFT.md](https://github.com/potatosalad775/eqcaps/blob/main/docs/SPEC-DRAFT.md); it is
-a draft until frozen as v1.
+[docs/SPEC.md](https://github.com/potatosalad775/eqcaps/blob/main/docs/SPEC.md) (v1, frozen).
 
 License: MIT.
