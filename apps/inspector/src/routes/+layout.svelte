@@ -24,11 +24,6 @@
 			active: (p: string) => p === '/connect'
 		},
 		{
-			href: resolve('/edit/[[id]]', {}),
-			label: 'Edit',
-			active: (p: string) => p.startsWith('/edit')
-		},
-		{
 			href: resolve('/docs'),
 			label: 'Use the data',
 			active: (p: string) => p === '/docs'
