@@ -1,4 +1,4 @@
-import type { BluetoothMatch, Match, UsbMatch } from './types/schema.generated.ts';
+import type { BluetoothMatch, UsbMatch } from './types/schema.generated.ts';
 
 /** The values a match field lists: one, or several of which any matches (SPEC §3). */
 export function matchValues<T>(field: T | readonly T[] | undefined): readonly T[] {
@@ -56,16 +56,5 @@ export function expandBluetoothMatch(e: BluetoothMatch): ScalarBluetoothMatch[] 
 			});
 		}
 	}
-	return out;
-}
-
-/**
- * The same match with every entry single-valued, as format 1.0 drafts before list-valued fields
- * wrote it. Extension keys of an entry are dropped.
- */
-export function expandMatch(match: Match): Match {
-	const out: Match = { ...match };
-	if (match.usb) out.usb = match.usb.flatMap(expandUsbMatch);
-	if (match.bluetooth) out.bluetooth = match.bluetooth.flatMap(expandBluetoothMatch);
 	return out;
 }

@@ -1,4 +1,4 @@
-export { createClient, NEXT_URL, V1_URL } from './client.ts';
+export { createClient, V1_URL } from './client.ts';
 export type { ClientOptions, EqcapsClient, FetchLike } from './client.ts';
 export { memoryStore, webStorageStore } from './cache.ts';
 export type { CacheEntry, CacheStore, WebStorageLike } from './cache.ts';

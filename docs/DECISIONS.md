@@ -788,9 +788,13 @@ same reason.
 *2026-10-03, amended before first publication:* the evidence-ref rule covers every `ref` that
 starts with `evidence/` (D41), for the same reason.
 *2026-10-04, amended before first publication:* match fields take lists, and group profiles yield
-at equal specificity (D43); presets may be marked `bypass` (D44). Same reason. Lists are not
-additive (a 1.0 consumer reading one would match nothing), so `/next/`, which client 0.1.x
-reads, publishes them expanded into single-valued entries.
+at equal specificity (D43); presets may be marked `bypass` (D44). Same reason.
+*2026-10-04, later:* **`/next/` is dropped.** Nobody uses client 0.1.x, the only reader of
+`/next/`, and keeping it meant a second build with match lists expanded (D43) for no one. The
+build writes `/v1/` only, the next deploy stops serving `/next/`, `NEXT_URL` leaves the client
+(0.2.0), and 0.1.0 of `core` and `client` is deprecated on npm. A 0.1.x client still running
+finds no data and matches nothing, which it handles like being offline (invariant 8). This
+reverses the rejection below.
 **Rejected:** dropping `/next/` at the freeze (breaks every 0.1.x client's default); keeping the
 file name SPEC-DRAFT.md (a frozen definition called a draft misleads readers; links inside the
 repository were updated, and old links to the file on GitHub break).
@@ -1127,7 +1131,7 @@ match data was 334 KB of the 376 KB `index.json` every app downloads. Q11 deferr
   non-empty list of distinct values (SPEC §3). A field holds if any listed value matches, and an
   entry stands for every combination of its fields' values: lists are notation, not new
   semantics. Specificity counts the fields an entry has, as before. The collision check expands
-  entries and compares combinations. `expandMatch` in core gives the single-valued form.
+  entries and compares combinations (`expandUsbMatch`, `expandBluetoothMatch` in core).
 - **The data.** Every profile's entries were regrouped by product key and vendor set and checked to
   expand to exactly the pairs they replace: 7,521 entries became 117, the index 376 KB → 61 KB and
   the bundle 488 KB → 161 KB.
@@ -1139,6 +1143,7 @@ match data was 334 KB of the 376 KB `index.json` every app downloads. Q11 deferr
 - **`/next/` stays single-valued.** Client 0.1.x reads `/next/` and compares fields with `===`, so a
   list would silently match nothing. The build writes that channel with `--single-valued-match`.
   The bridge's chooser and the inspector read lists.
+  *2026-10-04, later:* `/next/` is dropped instead (D36), and the flag with it.
 **Why:** the pairs a list claims are the same pairs the expanded entries claimed (most of which
 don't exist, D31); the format just stops making that cost 5× the index. Lists in every field,
 not only `productId` as Q11 suggested, because name variants (`"FIIO BTR17"`, `"BTR17"`) under

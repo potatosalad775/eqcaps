@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { expandBluetoothMatch, expandMatch, expandUsbMatch, matchValues } from './match.ts';
+import { expandBluetoothMatch, expandUsbMatch, matchValues } from './match.ts';
 
 describe('listed match values', () => {
 	it('reads one value or a list', () => {
@@ -29,20 +29,5 @@ describe('listed match values', () => {
 			{ namePrefix: 'A', serviceUuid: uuid },
 			{ namePrefix: 'B', serviceUuid: uuid }
 		]);
-	});
-
-	it('keeps the rest of the match', () => {
-		const match = {
-			usb: [{ vendorId: ['0x0001', '0x0002'], productId: '0x0010' }],
-			firmware: { min: '1.0' }
-		};
-		expect(expandMatch(match)).toEqual({
-			usb: [
-				{ vendorId: '0x0001', productId: '0x0010' },
-				{ vendorId: '0x0002', productId: '0x0010' }
-			],
-			firmware: { min: '1.0' }
-		});
-		expect(match.usb[0]!.vendorId).toHaveLength(2);
 	});
 });

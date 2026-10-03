@@ -16,7 +16,7 @@ const siteDir = fileURLToPath(new URL('../../dist/site/', import.meta.url));
 const repoDir = fileURLToPath(new URL('../../', import.meta.url));
 
 /**
- * Serves the locally built channels (`npm run data:build` writes dist/site/v1/ and next/) in
+ * Serves the locally built channels (`npm run data:build` writes dist/site/v1/) in
  * dev and preview, where Pages serves them in production: the app always reads its data from
  * the same origin. Also serves the repository's data/ at /data/, so the editor starts from the
  * local authoring files (in production it reads them from GitHub).
@@ -24,7 +24,7 @@ const repoDir = fileURLToPath(new URL('../../', import.meta.url));
 function localData(): Plugin {
 	const serve: Connect.NextHandleFunction = (req, res, next) => {
 		const url = new URL(req.url ?? '/', 'http://localhost');
-		const match = /^\/(next|v1|data)\/(.*)$/.exec(url.pathname);
+		const match = /^\/(v1|data)\/(.*)$/.exec(url.pathname);
 		if (!match) return next();
 		const dir = path.join(match[1] === 'data' ? repoDir : siteDir, match[1] as string);
 		const file = path.join(dir, decodeURIComponent(match[2] as string));

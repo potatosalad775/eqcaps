@@ -36,7 +36,7 @@ npm run build
 npm run codegen   # after editing schema/v1/profile.schema.json
 npm run conformance  # after changing engine behaviour or scripts/conformance.ts
 npm run data:validate  # check data/ as CI does
-npm run data:build     # publish /v1/ and /next/ into dist/site/
+npm run data:build     # publish /v1/ into dist/site/
 npm run inspector:dev  # the inspector, reading the local dist/site/v1/ and data/
 npm run release -- 0.2.0-rc.1 --pack  # package tarballs in dist/pack/, to try in another app
 ```

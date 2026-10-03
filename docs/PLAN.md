@@ -47,7 +47,7 @@ filters, mic gain…).
                   ▲                       ┌──────────────────────┴─┐
                   └───── same origin ─────│ GitHub Pages            │──▶ npm (+ jsDelivr)
                                           │  /          inspector   │──▶ GitHub Release bundle
-                                          │  /v1/ (/next/) data     │
+                                          │  /v1/ data              │
                                           └─────────────────────────┘
 ```
 
@@ -280,9 +280,10 @@ is sent, so probes there couldn't learn ranges anyway.
 
 ## 7. Immediate next steps
 
-1. Owner: push, so `/v1/` and the new inspector deploy. Then publish `core`, `client` and the
-   bridge as 0.2.0 (`npm run release -- 0.2.0`); the client then defaults to `/v1/`. Before that,
-   the bridge can be tried in another app from `npm run release -- 0.2.0-rc.1 --pack`.
+1. Owner: push, so `/v1/` and the new inspector deploy, and `/next/` stops being served (D36).
+   Then publish `core`, `client` and the bridge as 0.2.0 (`npm run release -- 0.2.0`), and
+   deprecate 0.1.0 of `core` and `client` on npm (`npm deprecate`). Before that, the bridge can be
+   tried in another app from `npm run release -- 0.2.0-rc.1 --pack`.
 2. Next session: guided reads (Phase 5, INSPECTOR §3). The decisions are settled (D41); the
    build is next.
 3. Next session: profiles for the PureAural (its own device, not a Walkplay variant) and the

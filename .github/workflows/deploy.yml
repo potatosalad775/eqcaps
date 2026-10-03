@@ -2,7 +2,6 @@ name: Deploy
 
 # Publishes the data to GitHub Pages on every push to main (DECISIONS D18):
 #   /v1/     the format's channel: profiles/, index.json, bundle.json, schema/, conformance/
-#   /next/   the pre-freeze channel, same data, kept for clients that default to it (0.1.x)
 #   /        the inspector (apps/inspector), reading /v1/ from the same origin
 # Needs Pages enabled with "GitHub Actions" as its source.
 
@@ -38,7 +37,7 @@ jobs:
         run: npm ci
 
       # Validates first and fails on any issue, so a broken main never reaches consumers.
-      - name: Build data (/v1/ and /next/)
+      - name: Build data (/v1/)
         run: npm run data:build
 
       # Pages serves the repository's site under /eqcaps/ (DECISIONS D24).

@@ -60,7 +60,7 @@ jobs:
       - name: Build packages
         run: npm run build
 
-      - name: Build data (/v1/ and /next/)
+      - name: Build data (/v1/)
         run: npm run data:build
 
       # After a clean checkout, an install, a type generation check and a build, nothing tracked

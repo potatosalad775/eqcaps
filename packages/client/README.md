@@ -32,11 +32,10 @@ if (profile) {
   nor the cache can.
 - **Matching** follows the format's specificity rules: `best` is set only for a unique top match,
   and at equal specificity a device profile beats a group profile. On a tie (`ambiguous`), let the
-  user choose. Deprecated profiles never match. Match fields may list several values; 0.1.x
-  predates that and reads the `/next/` channel, which writes them out one per entry.
+  user choose. Deprecated profiles never match. Match fields may list several values (SPEC §3).
 
 The default `baseUrl` is the format's channel `V1_URL`
 (`https://potatosalad775.github.io/eqcaps/v1/`). Versions before 0.2.0 defaulted to the pre-freeze
-channel `NEXT_URL`, which is still served.
+channel `/next/`, which is no longer served: they find no data, and match nothing.
 
 License: MIT. The data it fetches is CC0-1.0.

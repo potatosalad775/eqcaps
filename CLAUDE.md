@@ -7,14 +7,15 @@ identity and provenance. The repo also holds the tooling to author, verify, vali
 profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor), and anyone else
 who adopts the format.
 
-**Status: Phases 0–4 done; format v1 frozen 2026-10-03 (D36), published under `/v1/` beside
-`/next/`. `core` and `client` 0.1.0 on npm; the bridge and 0.2.0 are next (PLAN §7). Phase 5 is
+**Status: Phases 0–4 done; format v1 frozen 2026-10-03 (D36), published under `/v1/` (the
+pre-freeze `/next/` channel is dropped). `core` and `client` 0.1.0 on npm, to be deprecated; the
+bridge and 0.2.0 are next (PLAN §7). Phase 5 is
 guided reads (planned, INSPECTOR §3); the probe was removed (D40).** Read `docs/PLAN.md` first.
 
 Commands: `npm run lint` · `npm run check` (codegen and vector drift + typecheck) · `npm test` ·
 `npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json` ·
 `npm run conformance` after changing engine behaviour · `npm run data:validate` · `npm run data:build`
-(writes `dist/site/v1/` and `next/`) · `npm run inspector:dev` (serves the local `dist/site/v1/`; run
+(writes `dist/site/v1/`) · `npm run inspector:dev` (serves the local `dist/site/v1/`; run
 `data:build` first) · `npm run release -- <version>` (owner only, run locally for npm 2FA) · `npm run release --
 <version> --pack` (tarballs in `dist/pack/`, to try the packages in another app).
 Never edit `schema/v1/source.schema.json`,

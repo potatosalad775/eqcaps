@@ -736,11 +736,8 @@ filter types this engine version doesn't know, so a consumer can meet §7 and §
 
 ## 14. Published artifacts
 
-Each channel holds the files below. `/v1/` is the format's channel. `/next/`, the channel before
-the freeze, is still built from the same data for clients that default to it (client 0.1.x), with
-profiles whose `$schema` points at its own copy of the schema, and with every match entry written
-single-valued (one entry per combination, §3), since 0.1.x predates lists. New consumers use
-`/v1/`.
+Each channel holds the files below. `/v1/` is the format's channel, and the only one served. A
+future major gets its own (§15).
 
 | Path | Content |
 | --- | --- |

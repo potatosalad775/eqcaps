@@ -10,8 +10,6 @@ import { matchDevice, type DeviceIdentity, type MatchResult } from './match.ts';
 
 /** The format's channel (SPEC §14), the default. */
 export const V1_URL = 'https://potatosalad775.github.io/eqcaps/v1/';
-/** The pre-freeze channel: same data, kept for clients that default to it (before 0.2.0). */
-export const NEXT_URL = 'https://potatosalad775.github.io/eqcaps/next/';
 
 /** The subset of `fetch` the client uses. */
 export type FetchLike = (
