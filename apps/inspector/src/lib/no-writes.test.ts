@@ -3,11 +3,12 @@
 // a way to write: the bridge's openDevice, its handlers (codecs encode writes) or raw transports.
 
 import { readdirSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { openReadOnly } from './device.ts';
 
-const SRC = new URL('..', import.meta.url).pathname;
+const SRC = fileURLToPath(new URL('..', import.meta.url));
 
 function files(dir: string): string[] {
 	return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
@@ -45,7 +46,7 @@ const strip = (text: string) => text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^
 
 describe('the inspector never writes to a device', () => {
 	const sources = files(SRC).map((path) => ({
-		path: relative(SRC, path),
+		path: relative(SRC, path).split(sep).join('/'),
 		text: readFileSync(path, 'utf8')
 	}));
 

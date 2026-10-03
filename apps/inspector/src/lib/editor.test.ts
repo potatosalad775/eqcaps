@@ -1,4 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import type { AuthoringProfile, IndexEntry, Profile } from '@potatosalad775/eqcaps-core';
 import { authoringPath, baseIds, extendsPath, loadChain } from './authoring.ts';
@@ -23,7 +25,7 @@ const read = (path: string) => readFileSync(new URL(path, root), 'utf8');
 function dataFiles(dir: string): string[] {
 	return readdirSync(new URL(dir, root), { withFileTypes: true, recursive: true })
 		.filter((d) => d.isFile() && d.name.endsWith('.json'))
-		.map((d) => `${d.parentPath.slice(new URL(root).pathname.length)}/${d.name}`)
+		.map((d) => relative(fileURLToPath(root), join(d.parentPath, d.name)).split(sep).join('/'))
 		.sort();
 }
 
