@@ -5,7 +5,7 @@ import type { EvidenceReport, GuidedExperiment } from '../evidence.ts';
 import type { Derived } from './constraints.ts';
 import { conclude, type Inference } from './infer.ts';
 import { instruction } from './plan.ts';
-import type { Entry, GuidedContext } from './types.ts';
+import type { Entry } from './types.ts';
 
 export const GUIDED_CAVEATS = [
 	'Guided read: the user set every value in the vendor app, and the inspector only read the device back. The limits found are the vendor app’s, which may be narrower than what the firmware accepts.',
@@ -17,17 +17,16 @@ export function guidedEvidence(input: {
 	/** The evidence of the first read (`readEvidence`), which the guided read extends. */
 	first: EvidenceReport;
 	vendorApp: NonNullable<EvidenceReport['vendorApp']>;
-	ctx: GuidedContext;
 	entries: readonly Entry[];
 	inference: Inference;
 	derived: Derived;
 }): EvidenceReport {
-	const { first, vendorApp, ctx, entries, inference, derived } = input;
+	const { first, vendorApp, entries, inference, derived } = input;
 	const experiments: GuidedExperiment[] = entries.map((e) => {
 		const s = e.step;
 		if (e.kind === 'skip') return { id: s.id, skipped: true };
 		if (e.kind === 'done') return { id: s.id, done: true };
-		const outcome = conclude(e, ctx);
+		const outcome = conclude(e);
 		const readBack: NonNullable<GuidedExperiment['readBack']> = { filters: [...e.read.filters] };
 		if (e.read.preamp !== undefined) readBack.preamp = e.read.preamp;
 		if (e.read.slot !== undefined) readBack.slot = e.read.slot;

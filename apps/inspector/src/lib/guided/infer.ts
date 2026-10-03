@@ -42,7 +42,7 @@ const whose = (step: Step) =>
  * What one read entry establishes for its step, or why it doesn't. Values are as the device holds
  * them: `infer` decides what the app sent.
  */
-export function conclude(entry: Extract<Entry, { kind: 'read' }>, ctx: GuidedContext): Outcome {
+export function conclude(entry: Extract<Entry, { kind: 'read' }>): Outcome {
 	const { step, read, changed } = entry;
 	const band = step.band;
 	switch (step.ask) {
@@ -170,7 +170,7 @@ export function infer(ctx: GuidedContext, entries: readonly Entry[]): Inference 
 			const done = list.some((e) => e.kind === 'done');
 			const types: FilterType[] = [];
 			for (const e of list) {
-				const t = e.kind === 'read' ? conclude(e, ctx).conclusion?.type : undefined;
+				const t = e.kind === 'read' ? conclude(e).conclusion?.type : undefined;
 				if (t && !types.includes(t)) types.push(t);
 			}
 			if (done && types.length > 0) band(step.band!).types = types;
@@ -178,7 +178,7 @@ export function infer(ctx: GuidedContext, entries: readonly Entry[]): Inference 
 		}
 		const e = list[0]!;
 		if (e.kind !== 'read') continue;
-		const c = conclude(e, ctx).conclusion;
+		const c = conclude(e).conclusion;
 		if (!c) continue;
 		if (c.field === 'bands') inf.bandCount = c.bands!;
 		else if (c.field === 'restore') inf.restored = c.matchesFirst!;

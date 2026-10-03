@@ -16,14 +16,14 @@ export function step(field: StepField, ask: StepAsk, band?: number): Step {
 /** Where a step stands: not answered yet, answered, or skipped by the user. */
 export type StepState = 'open' | 'done' | 'skipped';
 
-export function stepState(s: Step, entries: readonly Entry[], ctx: GuidedContext): StepState {
+export function stepState(s: Step, entries: readonly Entry[]): StepState {
 	const list = effective(entries).get(s.id);
 	const last = list?.[list.length - 1];
 	if (!last) return 'open';
 	if (last.kind === 'skip') return 'skipped';
 	if (last.kind === 'done') return 'done';
 	if (s.ask === 'each') return 'open';
-	return conclude(last, ctx).conclusion ? 'done' : 'open';
+	return conclude(last).conclusion ? 'done' : 'open';
 }
 
 /** The numeric fields a band step asks about: Q only when the protocol carries one. */
@@ -67,10 +67,8 @@ export function plannedSteps(ctx: GuidedContext, entries: readonly Entry[]): Ste
 	if (n > 1) {
 		const lastSteps = boundSteps(ctx, n, false);
 		steps.push(...lastSteps);
-		const firstSettled = boundSteps(ctx, 1, false).every(
-			(s) => stepState(s, entries, ctx) !== 'open'
-		);
-		const lastSettled = lastSteps.every((s) => stepState(s, entries, ctx) !== 'open');
+		const firstSettled = boundSteps(ctx, 1, false).every((s) => stepState(s, entries) !== 'open');
+		const lastSettled = lastSteps.every((s) => stepState(s, entries) !== 'open');
 		if (firstSettled && lastSettled) {
 			const differ = disagreements(inf.bands.get(1), inf.bands.get(n));
 			for (let b = 2; b < n; b++) {
@@ -92,7 +90,7 @@ export function plannedSteps(ctx: GuidedContext, entries: readonly Entry[]): Ste
 
 /** The first step not yet answered or skipped, or undefined when the guided read is complete. */
 export function nextStep(ctx: GuidedContext, entries: readonly Entry[]): Step | undefined {
-	return plannedSteps(ctx, entries).find((s) => stepState(s, entries, ctx) === 'open');
+	return plannedSteps(ctx, entries).find((s) => stepState(s, entries) === 'open');
 }
 
 /** What the page tells the user to do for a step. */

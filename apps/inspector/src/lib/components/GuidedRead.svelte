@@ -79,7 +79,7 @@
 	const bands = $derived(inference.bandCount ?? profile?.bandCount ?? first.filters.length);
 	const last = $derived.by(() => {
 		const e = entries[entries.length - 1];
-		return e?.kind === 'read' ? { entry: e, outcome: conclude(e, ctx) } : null;
+		return e?.kind === 'read' ? { entry: e, outcome: conclude(e) } : null;
 	});
 	/** Types listed so far for the current `each` step. */
 	const listed = $derived.by(() => {
@@ -103,7 +103,6 @@
 		const guidedReport = guidedEvidence({
 			first: report,
 			vendorApp,
-			ctx,
 			entries,
 			inference,
 			derived: found
@@ -250,7 +249,7 @@
 	{:else}
 		<ol class="flex flex-wrap gap-x-3 gap-y-1 text-xs">
 			{#each planned as s (s.id)}
-				{@const state = stepState(s, entries, ctx)}
+				{@const state = stepState(s, entries)}
 				<li>
 					<button
 						type="button"

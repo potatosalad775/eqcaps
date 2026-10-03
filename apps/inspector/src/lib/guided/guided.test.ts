@@ -295,7 +295,7 @@ describe('a guided read', () => {
 		const u = new User(ctx());
 		u.answer();
 		const e = u.read(); // gain-max-1, but nothing was set
-		expect(e.kind === 'read' && conclude(e, u.ctx).problem).toMatch(/Nothing changed/);
+		expect(e.kind === 'read' && conclude(e).problem).toMatch(/Nothing changed/);
 		expect(u.step!.id).toBe('gain-max-1');
 		u.set(1, 'gain', 10);
 		u.read();
@@ -307,10 +307,10 @@ describe('a guided read', () => {
 		u.answer();
 		u.set(2, 'gain', 10);
 		const e = u.read();
-		expect(e.kind === 'read' && conclude(e, u.ctx).problem).toBe(
+		expect(e.kind === 'read' && conclude(e).problem).toBe(
 			"Changed: band 2 gain 0 → 10. This step asks for band 1's gain."
 		);
-		expect(stepState(e.step, u.entries, u.ctx)).toBe('open');
+		expect(stepState(e.step, u.entries)).toBe('open');
 	});
 
 	it('takes a value that already was at the extreme when the user says so', () => {
@@ -483,7 +483,6 @@ describe('the evidence file', () => {
 		const report = guidedEvidence({
 			first,
 			vendorApp: { name: 'Walkplay EQ web app', platform: 'web' },
-			ctx: u.ctx,
 			entries: u.entries,
 			inference: inf,
 			derived
