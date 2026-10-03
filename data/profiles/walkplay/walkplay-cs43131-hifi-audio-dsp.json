@@ -4,7 +4,7 @@
 	"id": "walkplay-cs43131-hifi-audio-dsp",
 	"schemaVersion": "1.0",
 	"kind": "hardware",
-	"device": { "brand": "Walkplay", "model": "CS43131 HiFi Audio DSP" },
+	"device": { "brand": "Walkplay", "model": "CS43131 HiFi Audio DSP", "group": true },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x3302", "productId": "0x51c0", "productName": "CS43131 HiFi Audio DSP" },

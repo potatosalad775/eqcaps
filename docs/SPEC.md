@@ -53,7 +53,7 @@ isn't a unit; it's a realization law (§8, DECISIONS D29).
 | `schemaVersion` | ✔ | `"1.<minor>"` |
 | `id` | ✔ | `^[a-z0-9]+(-[a-z0-9]+)*$`, ≤ 64 chars, conventionally `<brand>-<model>[-<engine>]`. **Permanent public API.** |
 | `kind` | ✔ | `software` profiles describe app EQs (Equalizer APO, Wavelet, Poweramp…). They have no `match` and are selected by id. |
-| `device` | ✔ | `brand`, `model` required; `aliases` (marketing names, regional names) optional, used for search only. |
+| `device` | ✔ | `brand`, `model` required; `aliases` (marketing names, regional names) optional, used for search only. `group: true` marks a group profile (§3); hardware only, default `false`. |
 | `engine` | – | Free label ("PEQ", "Graphic EQ", "Line out"). |
 | `match` | hw | §3 |
 | `bandCount` | ✔ | `null` only for `kind: software`. |
@@ -107,6 +107,15 @@ Lists are OR-ed; fields within one entry are AND-ed.
   than `max`; otherwise no firmware matches.
 - CI rejects two non-deprecated profiles with an identical match entry and overlapping firmware
   ranges, unless their `engine` labels differ.
+
+**Group profiles.** A profile with `device.group: true` stands for several products that its match
+can't tell apart: devices sharing a chipset's firmware scheme, or a default product name that many
+brands ship. Its `brand` and `model` name the group ("Walkplay", "SchemeNo16 devices"), not a
+product. Matching is unchanged: a profile for one of those products, matched by a more specific
+entry (typically adding the product name), wins by specificity. A consumer MAY tell the user that
+the matched profile is generic and that their exact model isn't listed. A device profile for a
+group member SHOULD extend the base the group extends rather than the group itself, since a group
+shrinks or is deprecated as its members get their own profiles. `group` is never inherited (§11).
 
 Measurement or graph names (e.g. a phone_book entry) are **not** part of matching. Binding a
 measurement to a profile is the consuming app's concern (DECISIONS D9).
@@ -777,7 +786,7 @@ profiles whose `$schema` points at its own copy of the schema; new consumers use
 
 | Path | Content |
 | --- | --- |
-| `index.json` | `{ schemaVersion, dataVersion, generatedAt, profiles: [{ id, kind, brand, model, aliases?, engine?, status, replacedBy?, match?, path, sha256, bytes }] }`, one entry per profile, deprecated ones included, sorted by id. It includes `match`, so clients can identify a device without fetching every profile. `path` is relative to the index. |
+| `index.json` | `{ schemaVersion, dataVersion, generatedAt, profiles: [{ id, kind, brand, model, aliases?, group?, engine?, status, replacedBy?, match?, path, sha256, bytes }] }`, one entry per profile, deprecated ones included, sorted by id. It includes `match`, so clients can identify a device without fetching every profile. `path` is relative to the index. |
 | `profiles/<id>.json` | One flattened profile. |
 | `bundle.json` | `{ schemaVersion, dataVersion, generatedAt, profiles: [...] }`: every non-deprecated profile in one file, for apps that embed a snapshot (Android). |
 | `schema/profile.schema.json` | The JSON Schema. |

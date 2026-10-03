@@ -4,7 +4,7 @@
 	"id": "kiwi-ears-kt0211l-devices",
 	"schemaVersion": "1.0",
 	"kind": "hardware",
-	"device": { "brand": "Kiwi Ears", "model": "KT0211L devices" },
+	"device": { "brand": "Kiwi Ears", "model": "KT0211L devices", "group": true },
 	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x0113" }] },
 	"meta": {
 		"status": "draft",

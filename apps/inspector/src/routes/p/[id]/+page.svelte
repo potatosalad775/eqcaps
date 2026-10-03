@@ -74,6 +74,13 @@
 					<a href={resolve('/p/[id]', { id: p.meta.replacedBy })}>{p.meta.replacedBy}</a>.
 				</p>
 			{/if}
+			{#if p.device.group}
+				<p class="rounded bg-sky-50 px-3 py-2 text-sm dark:bg-sky-950">
+					Group profile: it stands for several products that can't be told apart by how they
+					identify themselves, such as dongles sharing a chipset's firmware. A device with its own
+					profile is matched by that instead.
+				</p>
+			{/if}
 			{#if p.meta.status === 'draft'}
 				<p
 					class="rounded bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200"

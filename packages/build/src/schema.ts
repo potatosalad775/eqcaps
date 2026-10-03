@@ -36,6 +36,7 @@ export function createSchemaValidator(schemas: Schemas): SchemaValidator {
 /** Keys the schemas forbid in some contexts (`false` subschemas), explained. */
 const FORBIDDEN_KEYS: Record<string, string> = {
 	match: 'a software profile has no match; it is selected by id (SPEC §2)',
+	group: 'only hardware profiles are groups; a software profile has no match (SPEC §2)',
 	replacedBy: 'replacedBy is only allowed when status is deprecated (SPEC §10)'
 };
 

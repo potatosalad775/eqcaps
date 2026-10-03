@@ -63,6 +63,8 @@ export interface Device {
 	model: string;
 	/** Marketing and regional names. Search only, never matching. */
 	aliases?: string[];
+	/** The profile stands for several products its match can't tell apart (a chipset family, a firmware scheme). Hardware only; default false (SPEC §2). */
+	group?: boolean;
 }
 
 /** Lists are OR-ed; fields within one entry are AND-ed (SPEC §3). */

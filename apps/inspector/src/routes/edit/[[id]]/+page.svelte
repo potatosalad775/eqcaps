@@ -422,6 +422,23 @@
 							onchange={(e) =>
 								apply((d) => (d.device = { ...d.device!, model: e.currentTarget.value }))}
 						/>
+						{#if parsed.kind === 'hardware'}
+							<label for="f-group">Group</label>
+							<label class="flex items-center gap-2 text-xs text-zinc-500">
+								<input
+									id="f-group"
+									type="checkbox"
+									checked={parsed.device?.group === true}
+									onchange={(e) =>
+										apply((d) => {
+											const device = { ...d.device! };
+											setOptional(device, 'group', e.currentTarget.checked || undefined);
+											d.device = device;
+										})}
+								/>
+								Stands for several products its match can't tell apart (SPEC §3)
+							</label>
+						{/if}
 						<label for="f-aliases">Aliases</label>
 						<input
 							id="f-aliases"

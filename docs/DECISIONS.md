@@ -736,9 +736,37 @@ anything else needs v2 under a new prefix.
 - **Still to do after the freeze:** the npm data package `@potatosalad775/eqcaps` (D32), and the
   verified profiles and real-hardware runs that Phase 4 carried (PLAN §7).
 
+*2026-10-03, amended before first publication:* `device.group` (D37) joined format 1.0 rather
+than a 1.1 minor. Nothing had been published under `/v1/` yet, and a new format's first profiles
+declaring 1.1 would only confuse.
 **Rejected:** dropping `/next/` at the freeze (breaks every 0.1.x client's default); keeping the
 file name SPEC-DRAFT.md (a frozen definition called a draft misleads readers; links inside the
 repository were updated, and old links to the file on GitHub break).
+
+### D37. Group profiles are marked in the data (accepted, 2026-10-03)
+Some profiles stand for many products their match can't tell apart: Walkplay's per-scheme
+profiles (vendor/product id pairs from devicePEQ, D31), the chip-named Walkplay profiles whose
+product names ("CS43131 HiFi Audio DSP", "ES9039 ") are firmware defaults that white-label
+dongles of many brands report, and KT Micro's KT0211L group. `device.group: true` says so (SPEC §2,
+§3), and the index carries it.
+- **Why data, not a guess.** "The device reports a product name and the matched entry has none"
+  also fires on device profiles that must match by ids (RME's product name carries the serial
+  number), and misses groups matched by a shared name. Every consumer would re-derive it
+  differently.
+- **Matching doesn't change.** A device profile with a more specific entry wins by specificity.
+  The flag lets apps tell the user the match is generic, and lets the inspector offer to add the
+  device rather than only to fix the group.
+- **Device profiles extend the group's base**, not the group: groups shrink as devices get their
+  own profiles (Q11) and may be deprecated.
+- **Hardware only** (the schema forbids it on software profiles, which are selected by id), and
+  never inherited, like the rest of `device`.
+- 17 seeded profiles are marked: the ten `walkplay-schemeno*-devices`, the six chip-named Walkplay
+  profiles, and `kiwi-ears-kt0211l-devices`.
+
+**Rejected:** inferring groups from match shape (above); a top-level field or a `kind` value (a
+group is still one hardware engine, and `kind` already means hardware vs software); the names
+`generic` (sounds like a quality judgement) and `family` (suggests a chipset family, while some
+groups are a firmware scheme or a shared product name).
 
 ---
 
@@ -756,6 +784,8 @@ pairs from the group profiles. If the index grows past ~100 KB gzipped, allow `p
 an array in a `usb` entry (a v1 minor, additive). Alternatives: allow both `vendorId` and
 `productId` arrays (more compact, but keeps encoding the non-existent pairs), or drop the group
 profiles (loses most Walkplay devices).
+*2026-10-03:* group profiles are now marked (`device.group`, D37), which makes the ones to shrink
+easy to find.
 
 ### Answered 2026-10-02
 

@@ -4,7 +4,7 @@
 	"id": "walkplay-es9039-hifi-dsp-audio",
 	"schemaVersion": "1.0",
 	"kind": "hardware",
-	"device": { "brand": "Walkplay", "model": "ES9039 HiFi DSP Audio" },
+	"device": { "brand": "Walkplay", "model": "ES9039 HiFi DSP Audio", "group": true },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x0104", "productName": "ES9039 HiFi DSP Audio" },

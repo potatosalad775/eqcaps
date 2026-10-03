@@ -375,11 +375,21 @@
 								/>
 								<label for="match-{m.id}">{m.entry.brand} {m.entry.model}</label>
 								<StatusBadge status={m.entry.status} />
+								{#if m.entry.group}<span
+										class="text-xs text-sky-700 dark:text-sky-400"
+										title="Stands for several products that can't be told apart">group</span
+									>{/if}
 								<span class="text-xs text-zinc-500">specificity {m.specificity}</span>
 								<a class="text-xs" href={resolve('/p/[id]', { id: m.id })}>view</a>
 							</li>
 						{/each}
 					</ul>
+					{#if matches.find((m) => m.id === profileId)?.entry.group}
+						<p class="mt-1 text-xs text-sky-700 dark:text-sky-400">
+							This is a group profile: it covers your device's chipset or firmware, not your exact
+							model, which isn't in the database yet.
+						</p>
+					{/if}
 					{#if ambiguous}
 						<p class="mt-1 text-xs text-amber-700 dark:text-amber-400">
 							Several profiles match equally well. Pick the one that is your device.

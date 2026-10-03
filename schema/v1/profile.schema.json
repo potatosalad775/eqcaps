@@ -67,7 +67,10 @@
 			},
 			"then": {
 				"type": "object",
-				"properties": { "match": false }
+				"properties": {
+					"match": false,
+					"device": { "type": "object", "properties": { "group": false } }
+				}
 			},
 			"else": {
 				"type": "object",
@@ -85,6 +88,10 @@
 					"type": "array",
 					"items": { "type": "string", "minLength": 1 },
 					"uniqueItems": true
+				},
+				"group": {
+					"description": "The profile stands for several products its match can't tell apart (a chipset family, a firmware scheme). Hardware only; default false (SPEC §2).",
+					"type": "boolean"
 				}
 			},
 			"patternProperties": { "^x-": true },

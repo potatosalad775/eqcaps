@@ -1,0 +1,6 @@
+{
+	"description": "Only hardware profiles are groups: a software profile is selected by id, so it stands for one app.",
+	"spec": "§2",
+	"profile": { "kind": "software", "match": null, "device": { "group": true } },
+	"expect": [{ "code": "schema", "path": "/device/group" }]
+}

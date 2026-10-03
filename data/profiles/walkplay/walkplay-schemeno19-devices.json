@@ -3,7 +3,7 @@
 	"id": "walkplay-schemeno19-devices",
 	"schemaVersion": "1.0",
 	"kind": "hardware",
-	"device": { "brand": "Walkplay", "model": "SchemeNo19 devices" },
+	"device": { "brand": "Walkplay", "model": "SchemeNo19 devices", "group": true },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x0104", "productId": "0x231e" },

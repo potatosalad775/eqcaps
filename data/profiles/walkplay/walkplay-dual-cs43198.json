@@ -4,7 +4,7 @@
 	"id": "walkplay-dual-cs43198",
 	"schemaVersion": "1.0",
 	"kind": "hardware",
-	"device": { "brand": "Walkplay", "model": "Dual CS43198" },
+	"device": { "brand": "Walkplay", "model": "Dual CS43198", "group": true },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x0104", "productName": "Dual CS43198" },

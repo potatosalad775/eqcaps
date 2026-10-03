@@ -196,4 +196,22 @@ describe('publish', () => {
 		const bundle = JSON.parse(byPath.get('bundle.json')!) as { profiles: Profile[] };
 		expect(bundle.profiles.map((p) => p.id)).toEqual(['a']);
 	});
+
+	it('marks group profiles in the index', () => {
+		const g = flat('g');
+		const group = { ...g, device: { ...g.device, group: true } } as Profile;
+		const [entry] = (
+			JSON.parse(
+				publish({
+					profiles: [group],
+					schema: {},
+					conformance: [],
+					dataVersion: 'v',
+					generatedAt: 't'
+				}).find((x) => x.path === 'index.json')!.content
+			) as DataIndex
+		).profiles;
+		expect(entry).toMatchObject({ id: 'g', group: true });
+		expect(JSON.parse(byPath.get('index.json')!).profiles[0]).not.toHaveProperty('group');
+	});
 });

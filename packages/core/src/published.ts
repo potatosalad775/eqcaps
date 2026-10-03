@@ -7,6 +7,8 @@ export interface IndexEntry {
 	brand: string;
 	model: string;
 	aliases?: string[];
+	/** The profile stands for several products (SPEC §2); absent = false. */
+	group?: boolean;
 	engine?: string;
 	status: Meta['status'];
 	replacedBy?: string;
@@ -45,6 +47,7 @@ export function indexFields(p: Profile): Omit<IndexEntry, 'path' | 'sha256' | 'b
 		brand: p.device.brand,
 		model: p.device.model,
 		...(p.device.aliases ? { aliases: p.device.aliases } : {}),
+		...(p.device.group ? { group: true } : {}),
 		...(p.engine !== undefined ? { engine: p.engine } : {}),
 		status: p.meta.status,
 		...(p.meta.replacedBy !== undefined ? { replacedBy: p.meta.replacedBy } : {}),
