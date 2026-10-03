@@ -19,7 +19,7 @@
 				"status": "draft",
 				"sources": [
 					{
-						"kind": "probe",
+						"kind": "measurement",
 						"ref": "evidence/chip-base/2026-10-02-a1b2c3.json",
 						"date": "2026-10-02",
 						"by": "maintainer-a"

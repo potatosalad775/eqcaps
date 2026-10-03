@@ -14,7 +14,7 @@ import { featuresOf, type Feature } from './search.ts';
 
 function storage() {
 	try {
-		localStorage.getItem('eqcaps:probe');
+		localStorage.getItem('eqcaps:storage-check');
 		return webStorageStore(localStorage, 'eqcaps-inspector:');
 	} catch {
 		return memoryStore();

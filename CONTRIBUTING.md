@@ -31,10 +31,10 @@ The format is defined in [docs/SPEC.md](docs/SPEC.md). In short:
 4. Say where every claim comes from in `meta.sources`, and pick the `meta.status` your evidence
    supports (SPEC §10):
    - `draft`: no evidence beyond handler code or a report;
-   - `community-verified`: you supplied counting evidence (a probe file, vendor docs, a vendor-app
-     capture or a measurement);
+   - `community-verified`: you supplied counting evidence (vendor docs, what the vendor's app lets
+     you set, or a measurement);
    - `maintainer-verified`: a maintainer checked it on their own hardware or against vendor docs.
-5. Put evidence files (probes, measurements, read-backs) in `data/evidence/<id>/`. Remove anything personal first:
+5. Put evidence files (measurements, read-backs) in `data/evidence/<id>/`. Remove anything personal first:
    Bluetooth names people gave their devices, serial numbers, MAC addresses.
 
 Devices that share a chip can share a base in `data/bases/` through `extends` (SPEC §11).

@@ -97,47 +97,4 @@ describe('profileForDevice', () => {
 		);
 		expect(data.meta.notes).toMatch(/wire limits/);
 	});
-
-	it('takes a probe’s constraints and cites it as counting evidence', () => {
-		const probe = {
-			mode: 'full' as const,
-			constraints: {
-				bandCount: 8,
-				band: {
-					types: ['PK' as const],
-					freq: { min: 20, max: 20000, step: 1 },
-					q: { min: 0.25, max: 8, step: 0.00390625 },
-					gain: { min: -12, max: 12, step: 0.5 }
-				},
-				rules: [],
-				preamp: { mode: 'unknown' as const }
-			},
-			notes: ['Not probed: Q.']
-		};
-		const data = profileForDevice(
-			handoff({ probe, protocol: { handler: 'walkplay-hid', commit: 'c' } })
-		);
-		expect(data.bandCount).toBe(8);
-		expect(data.band?.gain).toEqual({ min: -12, max: 12, step: 0.5 });
-		expect(data.meta.sources.map((s) => s.kind)).toEqual(['probe']);
-		expect(data.meta.notes).toMatch(/\(full probe\)\. Not probed: Q\./);
-		// A fix keeps the file and its sources, and takes the probe's constraints over them.
-		const fixed = citeEvidence(
-			{ ...data, meta: { status: 'draft', sources: [] } },
-			handoff({ action: 'fix', probe })
-		);
-		expect(fixed.meta.sources[0]!.kind).toBe('probe');
-		expect(fixed).not.toHaveProperty('rules');
-	});
-
-	it('cites a probe that found no limits as community evidence', () => {
-		const probe = {
-			mode: 'full' as const,
-			constraints: { bandCount: 10, band: {}, rules: [], preamp: { mode: 'unknown' as const } },
-			notes: [],
-			counting: false
-		};
-		const data = profileForDevice(handoff({ probe }));
-		expect(data.meta.sources.map((s) => s.kind)).toEqual(['community']);
-	});
 });

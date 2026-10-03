@@ -43,7 +43,7 @@
 			"status": "maintainer-verified",
 			"sources": [
 				{
-					"kind": "probe",
+					"kind": "measurement",
 					"ref": "evidence/base/2026-10-02-a1b2c3.json",
 					"date": "2026-10-02",
 					"firmware": "1.4",

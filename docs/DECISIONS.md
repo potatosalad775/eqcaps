@@ -802,7 +802,9 @@ group is still one hardware engine, and `kind` already means hardware vs softwar
 `generic` (sounds like a quality judgement) and `family` (suggests a chipset family, while some
 groups are a firmware scheme or a shared product name).
 
-### D38. Probe mode: engine, strategy and evidence (accepted, 2026-10-03)
+### D38. Probe mode: engine, strategy and evidence (accepted, 2026-10-03; removed, D40)
+*2026-10-03:* removed the same day, with the `probe` source kind (D40). Kept as the record of what
+was built and why.
 T3 of INSPECTOR §3: experiments that push test values and read them back to learn what a device
 accepts, then restore the user's EQ and confirm it.
 - **Where it lives (owner's choice).** The engine is plain TypeScript in the inspector,
@@ -968,6 +970,44 @@ law-free profile that needs 9 passes, found by a random search.
 still firmware-dependent); keeping the laws in the format with no data using them (a feature
 nobody can fill honestly, and dead weight in every port); keeping the seeded laws marked
 unmeasured (a consumer that runs `fit` still changes what it sends).
+
+### D40. The inspector never writes to a device; guided reads replace the probe (accepted, 2026-10-03)
+The owner probed a CrinEar Protocol Micro (Walkplay SchemeNo11, 8 bands) with the D38 engine. The
+backup read 14 bands, since reads past the count answer, so the band-count experiment wrote 14,
+then 11 to 13. Every write past 8 bands corrupted what bands 1–10 read back (`x-wire-*` types,
+43557 Hz, ±90–120 dB), while a write of 8 read back exactly. The search counted a write as landed
+when any band kept its value, and bands 11–13 store whatever they're sent, so it was fooled. The
+restore then wrote 13 bands, the last size tried, and failed; the owner had to repair the EQ in the
+vendor app. Fixes were drafted (cap writes at the profile's count, require the first band, restore
+at a size seen to read back exactly) and dropped for this decision.
+- **No writes.** The inspector calls the bridge's `pull` only. The probe engine
+  (`src/lib/probe/`), `ProbeWizard.svelte`, the probe handoff and the probe evidence fields are
+  removed. The bridge keeps `push` for apps, and `analyzeCodec`, which the editor's wire-limit
+  drafts use.
+- **No `probe` source kind.** It named evidence only the probe made. v1 is not published yet, so
+  it leaves the format: SPEC §10, the schema, and `COUNTING_SOURCE_KINDS`; the evidence-ref rule
+  covers `measurement` only. Conformance cases that used it use `measurement`.
+- **Guided reads (T3), planned** (INSPECTOR §3, PLAN Phase 5): the user changes the EQ in the
+  vendor's app as the inspector asks, and the inspector reads back after each step. The vendor
+  app keeps every value inside its own limits, and those limits are `vendor-app` evidence.
+
+**Why:**
+- The risk falls on the user's hardware and hearing, and every firmware quirk is a new failure
+  mode. The tests could only cover the quirks already known.
+- What a probe learns is what firmware stores, not what it handles: Walkplay stores anything
+  (D38's own finding), so probes there learned band counts, which is what broke this device.
+- The vendor app's limits are the better evidence for a profile: they are what the vendor
+  supports, and they count already (SPEC §10).
+- It removes the largest piece of the inspector (about 3,900 lines) and its safety gate, and
+  invariant 9 becomes "the inspector never writes".
+
+**Open, for the guided-read session:** how a guided read is cited (`vendor-app` with an evidence
+file `ref`, which extends the evidence-ref rule, or a kind of its own; a format change to make
+before `/v1/` is published); its evidence file's shape; and whether the vendor's web app and the
+inspector can hold the same HID device at once (INSPECTOR §3.4).
+**Rejected:** keeping the probe with the drafted fixes (they close this failure, not the next
+firmware's); keeping it behind a developer flag (code nobody runs rots, and the risk is the same
+for whoever enables it); keeping the `probe` source kind for a future tool (nothing produces it).
 
 ---
 

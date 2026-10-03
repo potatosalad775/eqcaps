@@ -1,6 +1,6 @@
 /**
  * Why a bridge operation failed. Every error the bridge throws on purpose is a `BridgeError` with
- * one of these codes, so a UI can explain it and a probe can attribute it.
+ * one of these codes, so a UI can explain it.
  *
  * - `unsupported-type`: the handler has no wire code for the filter type.
  * - `unrepresentable`: a value doesn't fit the wire field (out of its integer range, or missing

@@ -1,8 +1,8 @@
-// Offline codec analysis (INSPECTOR §4, PLAN Phase 5): what a protocol's write frames can carry,
+// Offline codec analysis (INSPECTOR §4): what a protocol's write frames can carry,
 // learnt from its codec alone, with no device. It gives the band counts a write can hold, the
 // filter types with wire codes, and each field's wire range and resolution as an eqcaps domain:
 // the `handler-code` knowledge of a device (SPEC §10). Wire limits bound what a device can be
-// sent; they say nothing about what its firmware accepts, which only a probe or the vendor shows.
+// sent; they say nothing about what its firmware accepts, which only the vendor shows.
 
 import type { Domain, Filter, FilterType } from '@potatosalad775/eqcaps-core';
 import { isBridgeError } from './errors.ts';

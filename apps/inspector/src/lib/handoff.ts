@@ -11,8 +11,6 @@ import {
 } from '@potatosalad775/eqcaps-device-bridge';
 import { blankProfile } from './editor.ts';
 import { readSource } from './evidence.ts';
-import type { DerivedConstraints } from './probe/derive.ts';
-import { probeSource } from './probe/evidence.ts';
 
 export interface Handoff {
 	/**
@@ -33,22 +31,8 @@ export interface Handoff {
 	/** The protocol reads as many bands as it is asked for, so the count says nothing (D33). */
 	needsBandCount: boolean;
 	/**
-	 * A probe (T3) rather than a read: the evidence file is cited as a `probe` source, and the
-	 * constraints it derived go into the profile, with what it couldn't settle in the notes.
-	 */
-	probe?: {
-		mode: 'quick' | 'full';
-		constraints: DerivedConstraints;
-		notes: string[];
-		/**
-		 * False when the device took everything up to the search limits (`Derivation.unchecked`):
-		 * the file is then cited as `community`, since it says nothing about the ranges.
-		 */
-		counting?: boolean;
-	};
-	/**
 	 * The protocol that drove the device, and the commit of the bridge's code: a new profile
-	 * without a probe starts from what the protocol's wire can carry (`handler-code`).
+	 * starts from what the protocol's wire can carry (`handler-code`).
 	 */
 	protocol?: { handler: Protocol['handler']; options?: object; commit: string };
 }
@@ -72,34 +56,12 @@ export function loadHandoff(): Handoff | null {
 	}
 }
 
-/**
- * `data` citing the handoff's evidence, once: a read-back as `community`, a probe as `probe`
- * (SPEC §10). A probe's constraints replace the file's (they override what it extends).
- */
+/** `data` citing the handoff's evidence, once: a read-back, as `community` (SPEC §10). */
 export function citeEvidence(data: AuthoringProfile, handoff: Handoff, by?: string) {
 	const sources = data.meta?.sources ?? [];
 	if (sources.some((s) => s.ref === handoff.evidence.path)) return data;
-	const cite = handoff.probe && handoff.probe.counting !== false ? probeSource : readSource;
-	const source = cite(handoff.evidence.path, handoff.date, by, handoff.firmware);
-	const cited = { ...data, meta: { ...data.meta, sources: [...sources, source] } };
-	return handoff.probe ? withProbe(cited, handoff.probe, handoff.date) : cited;
-}
-
-/** `data` with a probe's constraints, and its notes appended to `meta.notes`. */
-export function withProbe(
-	data: AuthoringProfile,
-	probe: NonNullable<Handoff['probe']>,
-	date: string
-): AuthoringProfile {
-	const { bands, rules, ...rest } = probe.constraints;
-	const out = { ...data, ...rest } as AuthoringProfile;
-	if (bands) out.bands = bands;
-	else delete out.bands;
-	if (rules.length) out.rules = rules;
-	else delete out.rules;
-	const line = `Probed with the eqcaps inspector on ${date} (${probe.mode} probe).${probe.notes.length ? ` ${probe.notes.join(' ')}` : ''}`;
-	const notes = data.meta?.notes ? `${data.meta.notes}\n${line}` : line;
-	return { ...out, meta: { ...out.meta!, notes } };
+	const source = readSource(handoff.evidence.path, handoff.date, by, handoff.firmware);
+	return { ...data, meta: { ...data.meta, sources: [...sources, source] } };
 }
 
 /**
@@ -184,7 +146,7 @@ export function profileForDevice(handoff: Handoff): AuthoringProfile {
 	if (!handoff.extends && handoff.readBack.filters.length > 0) {
 		data.bandCount = handoff.readBack.filters.length;
 	}
-	if (!handoff.extends && !handoff.probe && handoff.protocol) {
+	if (!handoff.extends && handoff.protocol) {
 		const draft = codecDraft(handoff.protocol, data.bandCount ?? 10, handoff.date);
 		Object.assign(data, draft.constraints);
 		data.meta = { ...data.meta!, sources: [draft.source], notes: draft.notes };

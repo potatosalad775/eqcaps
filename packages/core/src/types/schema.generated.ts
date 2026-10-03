@@ -206,9 +206,9 @@ export type GithubHandle = string;
 
 /** Provenance of a claim (SPEC §10). */
 export interface SourceFields {
-	/** probe, vendor-docs, vendor-app and measurement count toward verification; handler-code and community don't. */
-	kind: 'probe' | 'vendor-docs' | 'vendor-app' | 'measurement' | 'handler-code' | 'community';
-	/** URL, citation, or for probe and measurement a path under evidence/. */
+	/** vendor-docs, vendor-app and measurement count toward verification; handler-code and community don't. */
+	kind: 'vendor-docs' | 'vendor-app' | 'measurement' | 'handler-code' | 'community';
+	/** URL, citation, or for measurement a path under evidence/. */
 	ref: string;
 	date: string;
 	firmware?: string;

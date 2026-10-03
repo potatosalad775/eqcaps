@@ -1,8 +1,7 @@
 <script lang="ts">
-	// T1 identify, T2 read and T3 probe (INSPECTOR §2): connect a device, show what it says about
-	// itself, match it against the database, and read its EQ back to check the profile. Only the
-	// probe wizard writes, through the probe engine, after its safety gate; this page itself calls
-	// the bridge's pull, never push or setEnabled.
+	// T1 identify and T2 read (INSPECTOR §2): connect a device, show what it says about itself,
+	// match it against the database, and read its EQ back to check the profile. The inspector
+	// never writes to a device: this page calls the bridge's pull, never push or setEnabled (D40).
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { Filter, IndexEntry, Profile } from '@potatosalad775/eqcaps-core';
@@ -47,7 +46,6 @@
 	import { violationText } from '$lib/violations';
 	import GroupBadge from '$lib/components/GroupBadge.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
-	import ProbeWizard from '$lib/components/ProbeWizard.svelte';
 
 	const apis = (() => {
 		try {
@@ -493,8 +491,8 @@
 				{#if writeOnly || (device && !device.capabilities.canRead)}
 					<p class="rounded bg-zinc-100 px-3 py-2 text-sm dark:bg-zinc-900">
 						This protocol can only write to the device: it has no way to read the EQ back. So this
-						page can identify the device, but neither check its EQ nor probe it (a probe learns from
-						what reads back). Apps that drive the device bridge can still write to it.
+						page can identify the device, but not check its EQ. Apps that drive the device bridge
+						can still write to it.
 					</p>
 				{:else}
 					<button
@@ -625,19 +623,6 @@
 						<EvidenceReview report={evidence.report} handoff={evidence.handoff} {groupBase} />
 					{/key}
 				{/if}
-			{/if}
-
-			{#if device && pulled && chosen}
-				{#key device}
-					<ProbeWizard
-						{device}
-						identity={chosen.identity}
-						transport={chosen.kind}
-						{profile}
-						{profileId}
-						{groupBase}
-					/>
-				{/key}
 			{/if}
 		</section>
 	</div>

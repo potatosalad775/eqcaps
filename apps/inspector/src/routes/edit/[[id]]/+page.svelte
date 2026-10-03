@@ -44,7 +44,6 @@
 	const SOURCE_KINDS: AuthoringSource['kind'][] = [
 		'vendor-docs',
 		'vendor-app',
-		'probe',
 		'measurement',
 		'community',
 		'handler-code'
@@ -373,29 +372,12 @@
 			{#if handoff.action === 'new' && handoff.extends}
 				A profile of its own for your device, extending <span class="font-mono"
 					>{handoff.extends}</span
-				>: fill in its brand, model and id;
-				{handoff.probe
-					? 'the constraints the probe found are written out, overriding what it inherits.'
-					: 'everything else is inherited.'}
+				>: fill in its brand, model and id; everything else is inherited.
 			{/if}
-			{#if handoff.probe}
-				Started from your device's probe ({handoff.probe.mode}): its band count, types, domains,
-				rules and preamp are in the file, and the evidence file
-				<span class="font-mono">{evidenceRef}</span> is cited in
-				<span class="font-mono">meta.sources</span>
-				{#if handoff.probe.counting === false}
-					as a community source: the device kept everything the probe sent, so the probe verifies
-					none of its ranges.
-				{:else}
-					as a probe, which counts toward a verified status once a maintainer has reviewed it.
-				{/if}
-				What the probe couldn't settle is in <span class="font-mono">meta.notes</span>.
-			{:else}
-				Started from your device's read-back: the evidence file
-				<span class="font-mono">{evidenceRef}</span> is cited in
-				<span class="font-mono">meta.sources</span>. Change the values the read-back shows are
-				wrong, and the check on the right updates as you type.
-			{/if}
+			Started from your device's read-back: the evidence file
+			<span class="font-mono">{evidenceRef}</span> is cited in
+			<span class="font-mono">meta.sources</span>. Change the values the read-back shows are wrong,
+			and the check on the right updates as you type.
 		</div>
 	{/if}
 
@@ -603,7 +585,7 @@
 							</select>
 						</label>
 						<p class="text-xs text-zinc-500">
-							Verified statuses need a source that counts: vendor docs, a vendor app, a probe or a
+							Verified statuses need a source that counts: vendor docs, a vendor app or a
 							measurement. handler-code and community sources don't count.
 						</p>
 						{#each parsed.meta?.sources ?? [] as s, i (i)}

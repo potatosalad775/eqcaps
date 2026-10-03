@@ -1,10 +1,14 @@
 {
-	"description": "A probe source points to an evidence file under evidence/.",
+	"description": "A measurement source points to an evidence file under evidence/.",
 	"spec": "§10",
 	"profile": {
 		"meta": {
 			"sources": [
-				{ "kind": "probe", "ref": "https://example.com/probe.json", "date": "2026-10-02" }
+				{
+					"kind": "measurement",
+					"ref": "https://example.com/measurement.json",
+					"date": "2026-10-02"
+				}
 			]
 		}
 	},

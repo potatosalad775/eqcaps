@@ -95,7 +95,7 @@ describe('checkLayout', () => {
 	});
 
 	it('requires evidence files to exist', () => {
-		const sources = [{ kind: 'probe', ref: 'evidence/x/a.json', date: '2026-10-02' }];
+		const sources = [{ kind: 'measurement', ref: 'evidence/x/a.json', date: '2026-10-02' }];
 		const p = profile('x', { meta: { status: 'draft', sources } });
 		const f = [file('data/profiles/acme-audio/x.json', p)];
 		expect(codes(f)).toEqual(['evidence-missing /meta/sources/0/ref']);

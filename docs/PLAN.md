@@ -15,7 +15,7 @@ consists of:
 2. **A database**: community-maintained profiles, CI-validated, published as static JSON.
 3. **A reference engine**: resolve / validate / fit / assign / complete, in TypeScript, portable
    by spec.
-4. **An inspector web app**: browse, connect a device, read, probe, author, submit.
+4. **An inspector web app**: browse, connect a device, read, guided reads, author, submit.
    See [INSPECTOR.md](INSPECTOR.md).
 
 Non-goals (v1): per-channel (L/R) EQ, protocol sharing for non-JS platforms, coefficient
@@ -29,7 +29,7 @@ filters, mic gain…).
 | modernGraphTool (browser) | client + core, npm or CDN; later device-bridge | lazy fetch, match by connected device, fit before push, per-slot UI hints |
 | Android hardware PEQ app (Ionic + Capacitor prototype, USB) | core + client + device-bridge from npm, `bundle.json` snapshot + periodic refresh, native USB transport plugin of its own | transport-agnostic bridge, offline bundle, stable ids, matching by USB identity (D27) |
 | devicePEQ, AutoEQ, others | data and schema, if they choose to (no outreach planned, D26) | neutral format, CC0 data, software targets |
-| Contributors | inspector | probe, author, one-click PR |
+| Contributors | inspector | read, guided read, author, one-click PR |
 
 ## 3. System overview
 
@@ -39,7 +39,7 @@ filters, mic gain…).
    ┌──────────────▼──────────────┐   PR    ┌──────────────────┐ │ fetch (CORS, static)
    │ Inspector (static SPA)      │────────▶│ GitHub repo      │ │
    │  T0 browse  T1 identify     │         │  data/  schema/  │ │
-   │  T2 read    T3 probe        │         │  evidence/       │ │
+   │  T2 read    T3 guided read  │         │  evidence/       │ │
    │  T4 author/submit           │         └────────┬─────────┘ │
    │   uses: core, client,       │                  │ CI: validate, collisions,
    │         device-bridge       │                  │     conformance, build
@@ -212,29 +212,46 @@ so the inspector, which only reads, identifies it and says so; its profile now a
 a device matched only by a group can be added as its own profile from Connect, driven by the
 group's protocol (D33), with no code change.
 
-### Phase 5: Probe mode (T3) · L (3–4 weeks) · built 2026-10-03, exit pending real hardware
-- Bridge: offline codec analysis (the codecs' `wire()` and `types`, D33) that produces
-  `handler-code` sources automatically.
-- Probe engine: planner, parallel per-slot search, step inference, whole-set-rejection fallback,
-  backup/restore, evidence writer, safety UX (INSPECTOR §3).
-- Fake-device tests for every failure path (disconnect mid-probe, rejected write, silent reset).
-- **Exit:** ≥ 3 handler families probed end to end on real hardware; derived profiles match the
-  hand-authored ones, or the difference is explained and fixed; restore is verified on every run,
-  including injected failures.
+### Phase 5: Guided reads (T3) · M (≈1–2 weeks) · planned (replaces probe mode, D40)
+The inspector never writes to a device. A guided read asks the user to change the EQ in the
+vendor's own app, one step at a time, and reads the device back after each step; what the app let
+them set becomes `vendor-app` evidence. Design: INSPECTOR §3.
 
-*2026-10-03:* built (D38). The bridge analyses codecs offline (`analyzeCodec`), and a new device
-taken to the editor starts from its protocol's wire limits as `handler-code`. The probe engine is
-in the inspector (`src/lib/probe/`): backup, band count, steps, bounds per band, grid check, types,
-conditional windows, band order and preamp, all bands per write, with whole-write rejection and
-silent resets detected and handled, and restore verified on every path. `/connect` offers it
-after a read, behind the hearing gate, and its result goes to the editor as a `probe` source.
-Tested against virtual devices (real codecs, simulated firmware): every hard case, every failure
-path (disconnect mid-probe, refused and NAKed writes, silent resets, a stop, a restore the device
-doesn't keep), and 2000 random devices, all derived exactly or with the difference explained in
-the notes, and restored. The connect page ran a full probe end to end in Chrome against a fake
-WebHID Walkplay device. Left for the exit: real hardware. The owner has Walkplay units, so one
-family can be run now; two more families (FiiO, KT Micro, Moondrop…) need devices, and KT Micro
-also needs reconnection after saves.
+Decide first (DECISIONS D40, open):
+- **How a guided read is cited.** `vendor-app` with `ref` pointing to the evidence file in
+  `data/evidence/`, which means the evidence-ref rule (SPEC §10, today `measurement` only) covers
+  `vendor-app` refs that start with `evidence/`; or a source kind of its own. Either is a format
+  change to settle before `/v1/` is first published.
+- **Evidence file shape:** one experiment per step, with the instruction, the read-back, what
+  changed since the last read, and the conclusion (a bound, a step, a type code).
+- **Sharing the device with the vendor app** (INSPECTOR §3.4): check on a Walkplay unit whether
+  Chrome lets the vendor web app and the inspector open the same HID device; build for the
+  worst case, one read per step with a reconnect, without the chooser.
+
+Build:
+- `src/lib/guided/` (plain TS, tested by the root Vitest run, D34): the step planner (what's
+  still unknown, first band then last band, every band only when they differ), inference from
+  reads (bounds, steps by difference and GCD, type codes), change detection between reads, and
+  the evidence writer. Tests feed it scripted read sequences, including a user who skips a step,
+  forgets to save, or sets the wrong band.
+- `GuidedRead.svelte` on `/connect`, offered after a read: the hearing notice, one step at a
+  time with a Read button, skip and redo, a final "put your EQ back" step checked against the
+  first read, then the evidence review and **Use in a profile**.
+- Editor handoff: the findings as constraints (as the probe handoff did, removed in D40), the
+  evidence cited per the decision above, unasked fields from the matched profile or the wire
+  limits (`handler-code`), and notes for what wasn't checked.
+- Docs: INSPECTOR §3 and §6 updated to what was built, SPEC §10 if the format changes, a
+  DECISIONS entry.
+
+**Exit:** a guided read of a real Walkplay unit with its vendor app produces a profile whose
+domains match the app's UI limits, cited as evidence that CI accepts; no code path in the
+inspector calls the bridge's `push` or `setEnabled` (a test checks the imports).
+
+*2026-10-03:* this phase was probe mode (D38): an engine that wrote test values and read back what
+the device kept. It was built and tested against virtual devices, then removed the same day (D40).
+On a CrinEar Protocol Micro, band-count writes past its 8 bands corrupted its stored EQ, and the
+restore, written at the wrong size, didn't repair it. Walkplay firmware also stores whatever it
+is sent, so probes there couldn't learn ranges anyway.
 
 ### Phase 6: Consumers (parallel once Phases 2–3 land)
 - **modernGraphTool** (the original draft's M3/M5/M6, done in that repo): replace
@@ -267,21 +284,19 @@ also needs reconnection after saves.
 1. Owner: push, so `/v1/` and the new inspector deploy. Then publish `core`, `client` and the
    bridge as 0.2.0 (`npm run release -- 0.2.0`); the client then defaults to `/v1/`. Before that,
    the bridge can be tried in another app from `npm run release -- 0.2.0-rc.1 --pack`.
-2. Phase 5 exit: first real runs done on a NiceHCK PureAural and an OSHUN DECO (D38). Restores
-   verified; Walkplay firmware stores what it is sent, so probes there settle band counts, not
-   ranges. Next: two more handler families on real hardware (devices the owner doesn't have).
+2. Next session: guided reads (Phase 5, INSPECTOR §3), starting with the decisions listed there.
 3. Next session: profiles for the PureAural (its own device, not a Walkplay variant) and the
    OSHUN DECO, with the protocol differences their vendor apps showed (D33 note) as protocol
    options, the captures as tests, and ranges from the apps' UIs (`vendor-app`). Whether the
    OSHUN's bands 11–16 do anything needs a measurement.
 4. Publish the data package `@potatosalad775/eqcaps` (D32): decide its contents (the `/v1/` files)
    and add it to the release script.
-5. Carried from Phase 4: verified profiles, with every hard case among them. A probe file is
-   counting evidence (SPEC §10), so probed profiles can now be raised to `community-verified`.
+5. Carried from Phase 4: verified profiles, with every hard case among them. Guided reads
+   (`vendor-app` evidence) are the way in for devices with read-back.
    The two RME drafts are the nearest by documents: their notes list what to check (shelf
    direction, frequency grid, Q step, the older ADI-2 DAC).
 6. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
    A capture of the vendor app's USB traffic, made by the owner, would show whether the device
-   answers reads and what a reliable write looks like. Until then it can't be probed.
+   answers reads and what a reliable write looks like. Until then it can't be read.
 7. Answer Q11 (compact USB match entries), or leave it until the index grows. It is additive, so it
    fits a v1 minor.

@@ -17,7 +17,7 @@ Format semantics referenced here are defined in [SPEC.md](SPEC.md).
 
 ## 2. Capability tiers
 
-Each tier works without the ones above it. Tiers T0–T2 and T4 **never write to a device**.
+Each tier works without the ones above it. The inspector **never writes to a device** (DECISIONS D40).
 
 ### T0: Browse (no device)
 
@@ -48,19 +48,21 @@ Each tier works without the ones above it. Tiers T0–T2 and T4 **never write to
 - Show what the handler's codec can represent (if the handler exposes a codec, §4), which explains
   read-back rounding.
 
-### T3: Probe (writes to the device; explicit opt-in)
+### T3: Guided read (read-only; planned, replaces the probe)
 
-Automated push → pull experiments that **derive** constraints from the device's own behaviour, and
-output a draft profile plus an evidence report. Details in §3.
+The user changes the EQ in the vendor's own app, step by step as the inspector asks, and the
+inspector reads the device back after each step. What the vendor app let the user set becomes
+`vendor-app` evidence for the profile. Details in §3.
 
-*2026-10-03:* built (DECISIONS D38): a probe section on `/connect`, offered after a read, with a
-quick and a full mode.
+*2026-10-03:* this tier was the probe, which wrote test values to the device itself (D38). It
+was built and removed the same day (D40): on a CrinEar Protocol Micro, writes past the device's
+8 bands corrupted its stored EQ, and the restore failed.
 
 ### T4: Author and submit
 
 - Schema-aware editor (form + JSON) with live semantic validation and a diff against the existing
   profile.
-- Start from: an existing profile, a probe result, a base (`extends`), or blank.
+- Start from: an existing profile, a read-back or guided read, a base (`extends`), or blank.
 - Submit without any backend:
   1. **Pull request:** open `https://github.com/potatosalad775/eqcaps/new/main?filename=data/profiles/<brand>/<id>.json&value=<urlencoded>`.
      GitHub forks automatically for non-collaborators and offers "Propose new file".
@@ -72,8 +74,8 @@ quick and a full mode.
 - The submit screen states that data contributions are CC0-1.0 (DECISIONS D25).
 
 *2026-10-03:* built (DECISIONS D35) except "start from a probe result", which comes with T3.
-*2026-10-03, later:* a probe result starts a profile too (D38): its constraints go into the file
-and its evidence is cited as `probe`. A device the database lacks, taken to the editor from a
+*2026-10-03, later:* a probe result started a profile too (D38), until the probe was removed
+(D40); a guided read's findings will take its place. A device the database lacks, taken to the editor from a
 read, starts from its protocol's wire limits, cited as `handler-code`.
 A device matched only by a group profile is offered "Add my device": a profile of its own that
 extends the group's base, prefilled from its identity and read-back. The
@@ -82,95 +84,83 @@ CI's own checks as the user types. A read from the connect page arrives with its
 cited and is re-checked against every edit. Evidence files are attached to the pull request,
 since one link can only create one file.
 
-## 3. Probe methodology (T3)
+## 3. Guided reads (T3, planned)
 
-### 3.1 Preconditions
+The probe learned limits by writing values and reading back what stuck. That needed the firmware
+to check what it is sent, and many don't (Walkplay stores anything), and every firmware bug became
+a risk to the user's device and hearing. Guided reads turn it around: **the vendor's app does the
+writing**, inside its own limits, and the inspector only reads. The limits found are the vendor's
+UI limits, which SPEC §10 already treats as `vendor-app` evidence: a safe subset of what the
+firmware accepts, not necessarily all of it.
 
-Probing is offered only when all of these hold. Otherwise the UI explains which one fails.
+### 3.1 Flow
 
-- The bridge handler supports **read-back** (`canRead`). Write-only devices can't be probed (EarFun,
-  Edifier).
-- The handler supports **raw push**: no `normalizeFiltersForDevice`, no clamping in the app layer,
-  and no `fit` (§4). Codec-level clamps are known separately (§4) so results
-  can be attributed.
-- The device does not `disconnectOnSave`, or the handler supports automatic reconnection.
-- The user has acknowledged the safety notice (§3.4).
+1. The device is connected and read (T2), and matched to a profile or not.
+2. The user picks **Guided read**. The page shows the steps it will ask for and a hearing notice:
+   steps ask for the vendor app's extreme values (its largest gain, its narrowest Q), so take the
+   headphones off or mute the output first.
+3. Each step is one instruction ("In the vendor app, set band 1's gain as high as it goes"), a
+   **Read** button, and what the read showed. The user may skip a step, and redo it.
+4. After a read, the page says what changed since the last read. A step whose read shows no change
+   says so and asks again: the user may not have saved in the vendor app, or the app may write
+   only when it closes.
+5. At the end: the findings, the evidence file to review (§6), and **Use in a profile**, which
+   opens the editor with the findings as constraints, as today's read-back handoff does (D35).
 
-### 3.2 Protocol
+### 3.2 Steps
 
-1. **Backup:** pull the current slot. Keep it in memory, offer it as a download, and show it on screen.
-2. **Pick the target slot.** Prefer an inactive custom slot if the device has several, so nothing
-   audible changes during the run.
-3. **Experiments.** Each one is a set of pushes followed by pulls and a diff. To keep write counts
-   low, each push tests **all slots in parallel**, with each slot carrying its own test value.
+Each step names one band and one field, and is chosen from what's still unknown. The first band
+always; the last band too, and every band only when the first and last disagree.
 
-| Question | Method | Inference |
-| --- | --- | --- |
-| Slot count | push N = max(64, codec limit) bands with distinct marker gains | bands returned; truncation point |
-| Gain range per slot | binary search each bound per slot, starting from ±30 dB | stored value clamps at bound, or write rejected |
-| Gain step | push non-grid values (0.01, 0.13, 0.26, 0.37, 0.49) | read-back values → largest step consistent with all observations |
-| Q range / step | same as gain, in log space | |
-| Freq range / step per slot | binary search per slot bound (finds partitions); non-grid values for step | per-slot windows → `bands[]` overrides |
-| Value sets | if read-back snaps to irregular values, sweep and collect distinct outputs | `values` |
-| Types per slot | push each type to each slot | type kept / coerced / gain zeroed |
-| Conditional domains | repeat freq-bound searches with gain > 0 and gain < 0, and per type | differing windows → `variants` |
-| Ordering | push descending frequencies | device reorders, rejects, or accepts → `ascendingFrequency` |
-| Preamp | same as gain on the preamp field, if the handler exposes it | `preamp` |
+- **Bands:** the user says how many bands the vendor app shows; the page reads that many and
+  confirms each read answers.
+- **Gain:** highest, then lowest, then "one step up from 0 dB" (the step).
+- **Frequency:** lowest, highest, and one step up from a value the user reads off the app.
+- **Q:** lowest and highest, and one step.
+- **Types:** "set band 1 to each type the app offers, one per read", which records the wire code of
+  each type the app uses, and which ones it offers.
+- **Preamp**, where the protocol reads it: lowest, highest, one step.
+- **Grid check:** two or three values the user types into the app, where the app allows typing,
+  to confirm the step found.
 
-4. **Restore** the backup, then pull and confirm the restore. If restoring fails, keep the backup
-   prominently on screen with instructions.
-5. **Emit** a draft profile (`meta.status: draft`, `source.kind: probe`, `by` set to the
-   contributor) and an evidence report. Submitted together, they let a maintainer raise the profile
-   to `community-verified` (SPEC §10).
+Not planned: conditional domains (a window that changes with gain or type) and rules. The notes say
+they weren't checked.
 
-Step inference: given observed pairs (sent → stored), the step is the largest `s` such that every
-stored value is on the `s` grid and every sent value projects to its stored value. Candidates come
-from a list of known steps (1/4096 … 1) plus the GCD of stored differences. Anything not cleanly
-explained is reported as "no uniform grid" and the profile falls back to `values`.
+### 3.3 Inference
 
-*2026-10-03:* built as DECISIONS D38 describes, which settles what this section leaves open: how a
-push tests every band at once and still tells a refused band from a whole refused write (a
-canary field per band), in which order steps and bounds are found and how the grid is checked
-afterwards, the search limits (±30 dB, Q 0.01–100, 1 Hz–40 kHz), the band-count codes, how the
-ordering rule is read from the windows, and that the backup is restored and verified on every
-path. Measured on virtual devices, a full probe takes about 50 writes on a device that clamps and
-90 on one that refuses, within §3.3's estimate; a device that refuses whole writes is probed band
-by band and takes up to a few hundred. Devices that disconnect on save aren't probed yet.
+From the reads only: a bound is the value read at the extreme step; a step is the difference of
+two reads one step apart, cross-checked by the GCD of every value read for that field; a type is
+the code read after the user chose it. A value that disagrees with the matched profile is a
+finding, as in T2. The result is a set of constraints (band count, per-band domains, types,
+preamp), with notes for what wasn't asked or didn't settle.
 
-### 3.3 Write budget
+### 3.4 Connection
 
-A full probe is about 15 binary-search rounds × (gain, Q, freq bounds) plus step, type and condition
-tests, roughly 80–120 writes. A **quick probe** (slot count, gain range and step only) is about 25.
-Flash endurance is typically ≥ 10k cycles, so this is safe, but the UI shows the planned count before
-starting, and the counter while it runs.
+The vendor app and the inspector may not share the device:
+- **Vendor web app in another tab** (Walkplay, NiceHCK): WebHID may let both open the device, or
+  not. To be checked on real devices.
+- **Vendor phone or desktop app:** the device moves to the phone for each step and back. The page
+  reconnects to a device it was already granted (`navigator.hid.getDevices()`) without the chooser,
+  and checks it's the same device by its identity.
 
-### 3.4 Safety
+The design must work in the second case: one read per step, the device reconnected for each.
 
-- **Hearing:** probes write large gains (up to +30 dB). The notice requires headphones off or
-  output muted, and the UI repeats it before the first write.
-- Never probe the active slot while audio could be playing, if a spare slot exists.
-- Abort cleanly on disconnect or error, and always attempt restore.
-- Rate-limit writes (default ≥ 100 ms apart; handler-specific overrides).
-- No firmware, DFU or non-EQ commands are ever sent. The bridge exposes only EQ push/pull/enable to
-  the probe engine.
+### 3.5 Safety
 
-### 3.5 What probing cannot tell you
+- The inspector never writes. No push, no `setEnabled`, nothing but reads.
+- The hearing notice stays: the steps ask for extreme values, which the user sets.
+- The last step asks the user to put their EQ back in the vendor app, and a final read confirms
+  it matches the first read.
 
-- **Read-back ≠ realized response.** Firmware may store 15 dB while the DSP clips at 12, or store a
-  Q it then ignores, or realize a Q or frequency that differs from what it stores
+### 3.6 What read-back can't tell you
+
+- **Read-back ≠ what you hear.** Firmware may store 15 dB while the DSP clips at 12, or store a Q
+  it then ignores, or place a filter off the frequency it stores
   ([research/prior-art.md §2.1](research/prior-art.md#21-realization-compensation-devicepeq-upstream)).
-  Only acoustic measurement (`source.kind: measurement`) shows how the device sounds, and the
-  format doesn't record that (SPEC §8, DECISIONS D39). The evidence report states this
-  explicitly. devicePEQ's REW-driven verification page and its browser-native sweep
-  capture are prior art for a later measurement tier
-  ([research/prior-art.md §5](research/prior-art.md#5-upstream-assets-worth-reusing)). That tier
-  isn't planned for v1.
-- **Whole-set rejection.** Some devices reject an entire write if one band is invalid, so the
-  parallel strategy degrades to per-slot searches (more writes). The probe engine detects this
-  ("nothing changed") and switches strategy.
-- **Silent resets.** Some devices reset to defaults on invalid input. Detected by markers in other
-  slots changing unexpectedly. Reported, not interpreted. *2026-10-03:* reported, and the value
-  that caused it is counted as refused, found by re-testing that write's bands one by one (D38).
+  Only acoustic measurement shows how the device sounds, and the format doesn't record that
+  (SPEC §8, DECISIONS D39). The evidence report says so.
+- **Vendor-app limits are a subset.** The firmware may accept more than the app allows. A profile
+  from a guided read describes what the vendor supports, which is what apps should send.
 
 ## 4. Device bridge requirements
 
@@ -180,21 +170,20 @@ The inspector uses `packages/device-bridge`, extracted from modernGraphTool's `s
 | Need | Change |
 | --- | --- |
 | Identify unknown devices | connectors accept "any device" mode; identity separated from handler lookup |
-| T2/T3 attribution | **split each handler into a pure codec** (`encode(bands) → bytes`, `decode(bytes) → bands`) and transport I/O. The codec alone can be probed offline (encode→decode) to learn wire-level limits with no hardware, which feeds `handler-code` sources automatically. It also gives a virtual device for tests and UI work. |
+| T2 attribution | **split each handler into a pure codec** (`encode(bands) → bytes`, `decode(bytes) → bands`) and transport I/O. The codec alone can be analysed offline (encode→decode) to learn wire-level limits with no hardware, which feeds `handler-code` sources automatically. |
 | Raw push | push sends written values straight to the codec: no `normalizeFiltersForDevice`, no clamping. Nothing corrects firmware quirks (DECISIONS D39), so the bridge has no compensation to bypass, unlike devicePEQ, which needed a verification-only switch. Every push is raw; consumers fit first (DECISIONS D33). |
 | Portable transports | handlers talk to a transport interface (open, send/receive reports or bytes, close) with no browser types. WebHID, Web Serial and Web Bluetooth are the browser implementations. The Android app supplies a native USB one (DECISIONS D27). |
 | Capability flags | `canRead`, `canWrite`, `slots`, `disconnectOnSave`, `supportsPreamp` exposed per handler |
 | Link to DB | registrations reference a profile **id** instead of carrying `minGain`/`maxGain`/`maxFilters`/`supportsLSHSFilters`. Protocol-only fields (`reportId`, `schemeNo`, `baudRate`, slots…) stay in the bridge. |
 
-Handlers are migrated incrementally: an unmigrated handler still supports T1/T2 and simply can't be
-probed. Upstream devicePEQ's recorded device captures (`tests/captures/`, real device exchanges
+Handlers are migrated incrementally: an unmigrated handler still supports T1. Upstream devicePEQ's recorded device captures (`tests/captures/`, real device exchanges
 per model) become codec regression tests and seed the virtual device.
 
 *2026-10-02:* the bridge exists (DECISIONS D33): portable transports with browser implementations,
 "any device" WebHID connect, identity extraction, the descriptor as `collections`, capability
 flags, raw push, and the captures as regression tests. Every handler is split into a pure codec
 (`encode`, `decode`, and `wire()`: the range and resolution each field can carry) and a session,
-so offline probing and a virtual device can start from the codecs. Protocols are keyed by profile
+so offline analysis can start from the codecs. Protocols are keyed by profile
 id rather than carried by registrations: the device is identified once, by the client against the
 database, and an unknown device gets its vendor's usual protocol, marked experimental.
 
@@ -204,8 +193,8 @@ database, and an unknown device gets its vendor's usual protocol, marked experim
 apps/inspector (Svelte 5 + Vite, static SPA)
   ├── uses packages/client       fetch index/profiles, cache, match identity → profiles
   ├── uses packages/core         resolveSlot / validate / fit / assign / complete
-  ├── uses packages/device-bridge  connectors + handlers (+ codecs)
-  └── probe engine (in-app module) experiment planner, inference, evidence writer
+  ├── uses packages/device-bridge  connectors + handlers (+ codecs), pull only
+  └── guided reads (planned)      step planner, inference, evidence writer
 ```
 
 - Deployed with the published data on the same origin (`/` = app, `/v1/…` = data).
@@ -216,24 +205,7 @@ apps/inspector (Svelte 5 + Vite, static SPA)
 
 ## 6. Evidence report and privacy
 
-```jsonc
-{
-  "evidenceVersion": 1,
-  "tool": { "name": "inspector", "version": "0.3.0", "bridge": "0.3.0", "userAgent": "…" },
-  "device": { "transport": "hid", "vendorId": "0x2972", "productId": "0x0047",
-              "productName": "…", "firmware": "1.4" },
-  "handler": "fiio-usb-hid",
-  "date": "2026-09-30",
-  "backupRestored": true,
-  "experiments": [
-    { "id": "gain-max-slot0", "pushes": [ { "sent": { }, "readBack": { }, "ms": 140 } ], "conclusion": { } }
-  ],
-  "derivedProfile": { },
-  "caveats": ["read-back only; how it sounds was not measured"]
-}
-```
-
-A read (T2) is recorded as one experiment without pushes:
+A read (T2) is recorded as one experiment:
 
 ```jsonc
 {
@@ -256,11 +228,9 @@ A read (T2) is recorded as one experiment without pushes:
 A profile cites it as a `community` source: it shows values the device holds, not its limits
 (SPEC §10, DECISIONS D35). The file is named `<date>-<first 6 hex of its SHA-256>.json`.
 
-*2026-10-03:* a probe's file (D38) has the shape above, plus `probe` (`mode`, `writes`, and
-`aborted` when it stopped early), `backup`, `backupRestored`, the experiments' `pushes` and
-`conclusion`s, `derivedProfile` (constraints only) and `notes`. In pushes and the backup a filter
-is a `[type, freq, q, gain]` tuple, `null` when off, and each push's filters sit on one line, since
-a probe writes hundreds. A profile cites it as a `probe` source, which counts (SPEC §10).
+*2026-10-03:* a probe's file (D38) had more fields (pushes, backup, derived constraints); the probe
+is gone (D40). A guided read (§3) will record one experiment per step, with its instruction and
+read-back; its shape is to be settled with it.
 
 - **Never collected:** serial numbers, Bluetooth MAC addresses, IP addresses of network devices.
 - **Reviewed before export:** Bluetooth names, which are often personal ("Alex's EH13"). The export
@@ -276,7 +246,7 @@ Stored at `data/evidence/<profile-id>/<date>-<short hash>.json`, referenced from
 | `/` | search + "Connect a device" |
 | `/p/<id>` | profile view (T0) |
 | `/playground` | validate/fit playground |
-| `/connect` | T1 identify → T2 read → T3 probe wizard |
+| `/connect` | T1 identify → T2 read → T3 guided read (planned) |
 | `/edit/<id?>` | T4 editor + submit |
 | `/docs` | consumer guide (how to use the CDN, client, engine) |
 
@@ -284,4 +254,5 @@ Stored at `data/evidence/<profile-id>/<date>-<short hash>.json`, referenced from
 and T2 (no probing yet). `/edit` and `/docs` are next.
 *2026-10-03:* `/edit/<id?>` and `/docs` are built (D35); `/connect` exports evidence. Probing (T3)
 is Phase 5.
-*2026-10-03, later:* `/connect` probes (T3, D38).
+*2026-10-03, later:* `/connect` probes (T3, D38). Removed again the same day (D40); guided reads
+(§3) are planned in its place.

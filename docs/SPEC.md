@@ -277,7 +277,7 @@ reserved for per-channel engines.
   "status": "community-verified",        // draft | community-verified | maintainer-verified | deprecated
   "replacedBy": "some-other-id",         // required iff deprecated
   "sources": [
-    { "kind": "probe", "ref": "evidence/jds-labs-element-iv/2026-09-30-a1b2c3.json",
+    { "kind": "vendor-app", "ref": "JDS Labs Core app 1.2, EQ page limits",
       "firmware": "1.4", "date": "2026-09-30", "by": "github-handle" },
     { "kind": "handler-code", "ref": "https://github.com/jeromeof/devicePEQ/blob/<sha>/…",
       "date": "2026-10-02" }
@@ -290,12 +290,11 @@ reserved for per-channel engines.
 A source has `kind`, `ref` and `date` (`YYYY-MM-DD`). `firmware` is optional. `by` is the GitHub
 handle of whoever produced the evidence; it's optional, except where `maintainer-verified` relies
 on it. Handles compare case-insensitively, as on GitHub. `via` is set only by the build (§11), and
-CI rejects it in authoring files. For `probe` and `measurement` sources, `ref` is the evidence
-file's path relative to `data/`: `evidence/<profile id>/<file>.json`.
+CI rejects it in authoring files. For `measurement` sources, `ref` is the evidence file's path
+relative to `data/`: `evidence/<profile id>/<file>.json`.
 
 | Source `kind` | Meaning | Counting |
 | --- | --- | --- |
-| `probe` | Inspector push → pull round-trip. `ref` points to an evidence file in `data/evidence/`. | ✔ |
 | `vendor-docs` | Published spec / manual / SDK | ✔ |
 | `vendor-app` | Observed in the vendor's own app (UI limits, captured traffic) | ✔ |
 | `measurement` | Acoustic measurement of the device's response, showing which values take effect. `ref` points to the measurement data in `data/evidence/`. | ✔ |

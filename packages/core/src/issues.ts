@@ -18,8 +18,7 @@ export const ISSUE_CODES = {
 	'status-needs-evidence': '§10: a verified status without a counting source.',
 	'status-needs-maintainer':
 		'§10: maintainer-verified without a counting source whose `by` names who checked it.',
-	'evidence-ref-invalid':
-		'§10: a probe or measurement source whose ref is not an evidence file path.',
+	'evidence-ref-invalid': '§10: a measurement source whose ref is not an evidence file path.',
 	'replaced-by-self': '§10: a deprecated profile replaced by itself.',
 	'extends-missing': '§11: `extends` names a file that does not exist.',
 	'extends-cycle': '§11: an `extends` chain loops.',

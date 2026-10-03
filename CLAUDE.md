@@ -8,8 +8,8 @@ profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor
 who adopts the format.
 
 **Status: Phases 0–4 done; format v1 frozen 2026-10-03 (D36), published under `/v1/` beside
-`/next/`. `core` and `client` 0.1.0 on npm; the bridge and 0.2.0 are next (PLAN §7). Phase 5
-(probe mode, D38) is built and tested against virtual devices; its exit needs real-hardware runs.** Read `docs/PLAN.md` first.
+`/next/`. `core` and `client` 0.1.0 on npm; the bridge and 0.2.0 are next (PLAN §7). Phase 5 is
+guided reads (planned, INSPECTOR §3); the probe was removed (D40).** Read `docs/PLAN.md` first.
 
 Commands: `npm run lint` · `npm run check` (codegen and vector drift + typecheck) · `npm test` ·
 `npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json` ·
@@ -54,8 +54,8 @@ for v2. Don't define format details anywhere except SPEC.md.
    across languages; `assign` / `fit` / `complete` are normative only through their properties
    (SPEC §13).
 8. **Consumers must work without the CDN.** The database enhances an app and never blocks it.
-9. **Probing writes to user hardware:** opt-in, hearing-safety gate, backup → probe → verified
-   restore, EQ commands only.
+9. **The inspector never writes to a device** (D40): it calls the bridge's `pull`, never `push` or
+   `setEnabled`. Writing is for apps, through `fit` + `complete`.
 
 ## Conventions
 
@@ -85,10 +85,8 @@ for v2. Don't define format details anywhere except SPEC.md.
   (`packages/device-bridge/test/captures/`) and codec round trips, not devicePEQ's bytes.
 - Inspector (D34): SvelteKit SPA with adapter-static and Tailwind, never server-rendered. Logic
   that can be tested lives in plain `.ts` modules under `src/lib/` (tested by the root Vitest run);
-  routes and components stay thin. Only the probe engine (`src/lib/probe/`, D38) calls the
-  bridge's `push`, behind the T3 gate in `ProbeWizard.svelte`; nothing calls `setEnabled`.
-  Probe changes are tested against `FakeDevice` (real codecs, simulated firmware), including the
-  random-firmware property (`EQCAPS_PROBE_RUNS` raises its run count).
+  routes and components stay thin. Nothing in the inspector calls the bridge's `push` or
+  `setEnabled` (invariant 9).
   The editor (D35) edits authoring files, read from the repository (`/data/` in dev, GitHub
   `main` in production), and checks them with `packages/build`, as CI does.
 - Workspace packages import each other by package name. Node scripts that need sources run with

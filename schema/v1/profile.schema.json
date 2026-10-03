@@ -396,11 +396,11 @@
 			"type": "object",
 			"properties": {
 				"kind": {
-					"description": "probe, vendor-docs, vendor-app and measurement count toward verification; handler-code and community don't.",
-					"enum": ["probe", "vendor-docs", "vendor-app", "measurement", "handler-code", "community"]
+					"description": "vendor-docs, vendor-app and measurement count toward verification; handler-code and community don't.",
+					"enum": ["vendor-docs", "vendor-app", "measurement", "handler-code", "community"]
 				},
 				"ref": {
-					"description": "URL, citation, or for probe and measurement a path under evidence/.",
+					"description": "URL, citation, or for measurement a path under evidence/.",
 					"type": "string",
 					"minLength": 1
 				},

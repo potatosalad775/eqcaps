@@ -85,8 +85,8 @@ export interface WriteState {
 }
 
 /**
- * The pure half of a protocol: write requests to frames and back, with no I/O. The inspector can
- * probe a codec offline (what does the wire round a value to, what does it refuse?), and tests
+ * The pure half of a protocol: write requests to frames and back, with no I/O. The inspector
+ * analyses a codec offline (what does the wire round a value to, what does it refuse?), and tests
  * check `decode(encode(x))` against the wire grid.
  */
 export interface Codec<O, F> {

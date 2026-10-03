@@ -6,7 +6,7 @@
 
 <!--
 For data changes: where do the values come from? Link vendor docs, describe the vendor app you
-checked, or point at the probe or measurement file in data/evidence/. The status you set must be
+checked, or point at the measurement or read-back file in data/evidence/. The status you set must be
 backed by it (CONTRIBUTING.md, SPEC §10).
 -->
 

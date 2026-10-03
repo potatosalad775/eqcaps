@@ -98,7 +98,7 @@ export class StreamReader {
 /**
  * Filter type ↔ wire code table of one protocol. A numeric code without a known meaning decodes
  * as the extension type `x-wire-<code>`, and that type encodes back to the same code, so a pull
- * never hides what the device holds and a probe can send any code (D33).
+ * never hides what the device holds (D33).
  */
 export interface TypeCodes {
 	types: FilterType[];

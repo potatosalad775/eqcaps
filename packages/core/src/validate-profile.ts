@@ -13,7 +13,6 @@ import type { Domain, Profile, SlotFields, Source } from './types/schema.generat
 
 /** Source kinds that count toward a verified status (SPEC §10). */
 export const COUNTING_SOURCE_KINDS: ReadonlySet<Source['kind']> = new Set([
-	'probe',
 	'vendor-docs',
 	'vendor-app',
 	'measurement'
@@ -261,10 +260,7 @@ function checkMatch(profile: Profile): Issue[] {
 // §10 -----------------------------------------------------------------------------------------
 
 function checkEvidenceRef(source: Source, path: string): Issue[] {
-	if (
-		(source.kind === 'probe' || source.kind === 'measurement') &&
-		!EVIDENCE_REF.test(source.ref)
-	) {
+	if (source.kind === 'measurement' && !EVIDENCE_REF.test(source.ref)) {
 		return [
 			error(
 				'evidence-ref-invalid',
@@ -290,7 +286,7 @@ function checkMeta(profile: Profile): Issue[] {
 			error(
 				'status-needs-evidence',
 				'/meta/status',
-				`${meta.status} needs a probe, vendor-docs, vendor-app or measurement source of its own (inherited sources don't count)`
+				`${meta.status} needs a vendor-docs, vendor-app or measurement source of its own (inherited sources don't count)`
 			)
 		);
 	} else if (meta.status === 'maintainer-verified' && !counting.some((s) => s.by !== undefined)) {
