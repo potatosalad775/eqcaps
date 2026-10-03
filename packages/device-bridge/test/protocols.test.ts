@@ -1,12 +1,15 @@
 // The protocol table against the database: every key is a profile, every hardware profile has a
-// protocol, and what the profile allows is what the codec can write.
+// protocol (its own, or a group's that matches its devices), and what the profile allows is what
+// the codec can write.
 
 import {
 	domainBounds,
 	resolveSlot,
 	type Domain,
+	type BluetoothMatch,
 	type FilterType,
-	type Profile
+	type Profile,
+	type UsbMatch
 } from '@potatosalad775/eqcaps-core';
 import { describe, expect, test } from 'vitest';
 import { validateRepository } from '../../build/src/node.ts';
@@ -17,15 +20,28 @@ import {
 	KNOWN_HID_VENDORS,
 	PROTOCOLS,
 	protocolFor,
+	protocolForMatches,
 	transportsOf,
 	type AnyHandler,
+	type Protocol,
 	type WireField,
 	type WireGrid
 } from '../src/index.ts';
 
 const profiles = validateRepository().profiles;
 const table = Object.entries(PROTOCOLS);
-const handlerOf = (id: string) => HANDLERS[PROTOCOLS[id]!.handler] as AnyHandler;
+/** The table plus device profiles driven through a group's protocol: what the codecs must carry. */
+const driven: [string, Protocol][] = [
+	...table,
+	...[...profiles.values()]
+		.filter((p) => p.kind === 'hardware' && !(p.id in PROTOCOLS))
+		.flatMap((p): [string, Protocol][] => {
+			const via = drivenThrough(p);
+			return via ? [[p.id, PROTOCOLS[via]!]] : [];
+		})
+];
+const handlerOf = (id: string) =>
+	HANDLERS[(PROTOCOLS[id] ?? driven.find(([d]) => d === id)![1]).handler] as AnyHandler;
 const profile = (id: string) => profiles.get(id) as Profile;
 
 test('every key is a profile id', () => {
@@ -38,12 +54,76 @@ test('every key is a profile id', () => {
  */
 const WITHOUT_PROTOCOL = new Set(['rme-adi-2-dac-fs', 'rme-adi-2-dac-fs-bass-treble']);
 
-test('every hardware profile has a protocol, or is listed as having none', () => {
+/** Every device `e` matches also matches `f`: `f` asks for a subset of what `e` asks for. */
+function usbCovers(f: UsbMatch, e: UsbMatch): boolean {
+	return (
+		f.vendorId === e.vendorId &&
+		(f.productId === undefined || f.productId === e.productId) &&
+		(f.productName === undefined || f.productName === e.productName)
+	);
+}
+
+function bluetoothCovers(f: BluetoothMatch, e: BluetoothMatch): boolean {
+	const name =
+		f.name !== undefined
+			? e.name === f.name
+			: (e.name ?? e.namePrefix ?? '').startsWith(f.namePrefix ?? '\u0000');
+	return name && (f.serviceUuid === undefined || f.serviceUuid === e.serviceUuid);
+}
+
+/**
+ * The profile with a protocol that drives `p`'s devices (protocolForMatches): one whose match
+ * covers every entry of `p`'s, so any device `p` matches also matches it.
+ */
+function drivenThrough(p: Profile): string | undefined {
+	const usb = p.match?.usb ?? [];
+	const bt = p.match?.bluetooth ?? [];
+	if (usb.length + bt.length === 0) return undefined;
+	const drivers = [...profiles.values()].filter(
+		(q) => q.id !== p.id && q.meta.status !== 'deprecated' && q.id in PROTOCOLS
+	);
+	const covered = (q: Profile) =>
+		usb.every((e) => (q.match?.usb ?? []).some((f) => usbCovers(f, e))) &&
+		bt.every((e) => (q.match?.bluetooth ?? []).some((f) => bluetoothCovers(f, e)));
+	return drivers.find(covered)?.id;
+}
+
+test('every hardware profile has a protocol, its own or one matching its devices', () => {
 	const missing = [...profiles.values()].filter(
-		(p) => p.kind === 'hardware' && !(p.id in PROTOCOLS) && !WITHOUT_PROTOCOL.has(p.id)
+		(p) =>
+			p.kind === 'hardware' &&
+			!(p.id in PROTOCOLS) &&
+			!WITHOUT_PROTOCOL.has(p.id) &&
+			drivenThrough(p) === undefined
 	);
 	expect(missing.map((p) => p.id)).toEqual([]);
 	expect([...WITHOUT_PROTOCOL].filter((id) => id in PROTOCOLS || !profiles.has(id))).toEqual([]);
+});
+
+test('a device profile under a group is driven by the group', () => {
+	const group = profile('walkplay-schemeno16-devices');
+	const member = {
+		...group,
+		id: 'nicehck-pureaural',
+		device: { brand: 'NiceHCK', model: 'PureAural' },
+		match: { usb: [{ vendorId: '0x3302', productId: '0x4322', productName: 'NICEHCK PureAural' }] }
+	} as Profile;
+	expect(drivenThrough(member)).toBe('walkplay-schemeno16-devices');
+	const other = { ...member, match: { usb: [{ vendorId: '0x9999', productName: 'X' }] } };
+	expect(drivenThrough(other as Profile)).toBeUndefined();
+});
+
+test('protocolForMatches takes the first match with a protocol', () => {
+	expect(
+		protocolForMatches([{ id: 'nicehck-pureaural' }, { id: 'walkplay-schemeno16-devices' }])
+	).toEqual({
+		profileId: 'walkplay-schemeno16-devices',
+		protocol: PROTOCOLS['walkplay-schemeno16-devices']
+	});
+	expect(
+		protocolForMatches([{ id: 'fiio-ka17' }, { id: 'walkplay-schemeno16-devices' }])?.profileId
+	).toBe('fiio-ka17');
+	expect(protocolForMatches([{ id: 'rme-adi-2-dac-fs' }])).toBeUndefined();
 });
 
 test('protocolFor only answers for table keys', () => {
@@ -53,7 +133,7 @@ test('protocolFor only answers for table keys', () => {
 });
 
 test("each handler runs over a transport the profile's identity implies", () => {
-	const wrong = table.filter(([id]) => {
+	const wrong = driven.filter(([id]) => {
 		const kinds = transportsOf(handlerOf(id));
 		const match = profile(id).match ?? {};
 		const usb = !!match.usb && (kinds.includes('hid') || kinds.includes('serial'));
@@ -64,7 +144,7 @@ test("each handler runs over a transport the profile's identity implies", () => 
 });
 
 test('a profile with a manual preamp has a protocol that writes it', () => {
-	const wrong = table.filter(([id, p]) => {
+	const wrong = driven.filter(([id, p]) => {
 		const h = handlerOf(id);
 		const caps = h.capabilities(
 			{ kind: transportsOf(h)[0], collections: [] } as never,
@@ -78,7 +158,7 @@ test('a profile with a manual preamp has a protocol that writes it', () => {
 const freqStep = (id: string) => (resolveSlot(profile(id), 0).freq as { step?: number }).step ?? 1;
 
 test("a constant frequency factor is the profile's frequency step (D29)", () => {
-	for (const [id, p] of table) {
+	for (const [id, p] of driven) {
 		if (p.handler !== 'walkplay-hid' && p.handler !== 'ktmicro-usb-hid') continue;
 		const scale = (p.options as { freqScale?: number } | undefined)?.freqScale ?? 1;
 		expect(scale, id).toBe(freqStep(id));
@@ -115,7 +195,7 @@ function outside(d: Domain, w: WireField | { values: readonly number[] } | undef
  */
 test('profile domains the wire cannot carry', () => {
 	const findings: Record<string, string[]> = {};
-	for (const [id, p] of table) {
+	for (const [id, p] of driven) {
 		const prof = profile(id);
 		const wire: WireGrid = handlerOf(id).codec.wire(p.options ?? {});
 		const codecTypes = handlerOf(id).codec.types;

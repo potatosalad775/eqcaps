@@ -76,6 +76,8 @@ for v2. Don't define format details anywhere except SPEC.md.
   wire can't carry is a `BridgeError`. A handler is a pure codec (`encode`/`decode`/`wire`) plus a
   session that does the I/O. `src/protocols.ts` maps profile ids to handler settings; constraints
   stay in profiles and identities in profile `match` (the client matches, the bridge doesn't).
+  A device profile under a group profile (`device.group`, D37) gets no entry: `protocolForMatches`
+  drives it with the group's protocol.
   Protocols come from devicePEQ `0617f38`; test against device answers
   (`packages/device-bridge/test/captures/`) and codec round trips, not devicePEQ's bytes.
 - Inspector (D34): SvelteKit SPA with adapter-static and Tailwind, never server-rendered. Logic

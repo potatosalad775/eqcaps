@@ -206,7 +206,9 @@ criteria waived in part: no verified profiles rather than ten, and real devices 
 read (Walkplay units) but the full flow only on a replayed capture. `/v1/` is built beside
 `/next/`, and the client and inspector default to it. The Qudelix 5K is write-only over USB (D33),
 so the inspector, which only reads, identifies it and says so; its profile now also matches the
-`0x4007` identity a maintainer's unit reports.
+`0x4007` identity a maintainer's unit reports. Group profiles are marked (`device.group`, D37), and
+a device matched only by a group can be added as its own profile from Connect, driven by the
+group's protocol (D33), with no code change.
 
 ### Phase 5: Probe mode (T3) · L (3–4 weeks)
 - Bridge: offline codec analysis (the codecs' `wire()` and `types`, D33) that produces

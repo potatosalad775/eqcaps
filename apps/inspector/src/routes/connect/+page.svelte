@@ -16,6 +16,7 @@
 		identityOf,
 		openDevice,
 		protocolFor,
+		protocolForMatches,
 		type BridgeDevice,
 		type DeviceIdentity,
 		type HidCollectionInfo,
@@ -43,10 +44,12 @@
 	import { catalog } from '$lib/data.svelte';
 	import { APP_COMMIT } from '$lib/channel';
 	import { readEvidence, today } from '$lib/evidence';
+	import { memberBase } from '$lib/handoff';
 	import EvidenceReview from '$lib/components/EvidenceReview.svelte';
 	import { formatApo } from '$lib/filters-text';
 	import { formatField } from '$lib/format';
 	import { violationText } from '$lib/violations';
+	import GroupBadge from '$lib/components/GroupBadge.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 
 	const apis = (() => {
@@ -87,17 +90,27 @@
 			.sort((a, b) => `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`))
 	);
 
-	/** The protocol: the profile's, else a vendor guess for HID (marked experimental, D33). */
-	const protocol: Protocol | undefined = $derived.by(() => {
+	/**
+	 * The protocol: the profile's; else that of the most specific matched profile that has one
+	 * (a device profile under a group is driven by the group's, D33); else a vendor guess for HID,
+	 * marked experimental. `via` names the profile it came from when that isn't the chosen one.
+	 */
+	const driver: { protocol: Protocol; via?: string } | undefined = $derived.by(() => {
 		if (profileId) {
 			const p = protocolFor(profileId);
-			if (p) return p;
+			if (p) return { protocol: p };
 		}
+		const matched = protocolForMatches(matches);
+		if (matched) return { protocol: matched.protocol, via: matched.profileId };
 		if (chosen?.kind === 'hid' && chosen.identity.usb) {
-			return guessProtocol(parseInt(chosen.identity.usb.vendorId, 16));
+			const guess = guessProtocol(parseInt(chosen.identity.usb.vendorId, 16));
+			if (guess) return { protocol: guess };
 		}
 		return undefined;
 	});
+	const protocol = $derived(driver?.protocol);
+	/** Set when the device was checked against a group profile: what a profile for it extends. */
+	const groupBase = $derived(profile?.device.group ? memberBase(profile) : undefined);
 
 	/**
 	 * A HID protocol's capabilities are known without any I/O: say up front when it can't read,
@@ -375,10 +388,7 @@
 								/>
 								<label for="match-{m.id}">{m.entry.brand} {m.entry.model}</label>
 								<StatusBadge status={m.entry.status} />
-								{#if m.entry.group}<span
-										class="text-xs text-sky-700 dark:text-sky-400"
-										title="Stands for several products that can't be told apart">group</span
-									>{/if}
+								{#if m.entry.group}<GroupBadge />{/if}
 								<span class="text-xs text-zinc-500">specificity {m.specificity}</span>
 								<a class="text-xs" href={resolve('/p/[id]', { id: m.id })}>view</a>
 							</li>
@@ -445,6 +455,9 @@
 				{#if protocol}
 					<p class="mt-1 text-sm">
 						<span class="font-mono">{protocol.handler}</span>
+						{#if driver?.via}
+							<span class="text-zinc-500">· from {driver.via}, which this device also matches</span>
+						{/if}
 						{#if protocol.experimental}
 							<span class="text-amber-700 dark:text-amber-400"
 								>· experimental: a guess from the USB vendor, unconfirmed for this device</span
@@ -616,7 +629,7 @@
 
 				{#if evidence}
 					{#key evidence.report}
-						<EvidenceReview report={evidence.report} handoff={evidence.handoff} />
+						<EvidenceReview report={evidence.report} handoff={evidence.handoff} {groupBase} />
 					{/key}
 				{/if}
 			{/if}

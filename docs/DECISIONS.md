@@ -618,6 +618,12 @@ write; all four are corrected (D31). Left open, kept visible by the tests: FiiO 
 HPQ, BP and AP, which no FiiO codec has codes for; recorded devices hold values outside their
 draft ranges (KT Micro Chu 2, Bunny and One DSP with Q up to 8 against 5, Kiwi Ears Allegro Pro
 at 18 Hz, EPZ TP13 at 19.55 Hz).
+*2026-10-03, later:* a device profile under a group (D37) has no protocol entry of its own: the
+device also matches the group, whose protocol drives it. `protocolForMatches(matches)` returns the
+protocol of the most specific matched profile that has one, so apps keep a single identity
+answer (the client's matches) and contributors add devices with a data file alone. CI checks that
+every hardware profile has a protocol, its own or one whose profile's match covers every entry of
+its match, and checks the profile against that protocol's codec as for table entries.
 *2026-10-03:* not every hardware profile has a protocol any more. The RME ADI-2 DAC FS profiles
 (from RME's manual) describe a device controlled over MIDI SysEx, which no handler speaks. The
 protocol test lists such profiles by id, so a missing protocol is always a decision.
@@ -673,6 +679,11 @@ far); fetching profiles one by one for search (the bundle is small, and feature 
 profiles).
 *2026-10-03:* `/edit/<id?>` (T4, D35) and `/docs` (the consumer guide) are built. The connect page
 gained the evidence export with its PII review, and hands a reviewed read-back to the editor.
+*2026-10-03, later:* Connect's outcome follows the match. Against a group profile (D37) it offers
+"Add my device" first: a new profile extending the group's base (SPEC §3), prefilled with the
+device's USB identity and the evidence, so only brand, model and id are left to write. The
+protocol comes from the matches (D33), so the new profile needs no code. Group profiles carry a
+badge in search, on their page and in the match list.
 
 ### D35. Inspector editor, submission and evidence files (accepted, 2026-10-03)
 The T4 tier of INSPECTOR §2, and the evidence files of INSPECTOR §6 for what T2 can observe.

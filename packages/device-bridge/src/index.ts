@@ -34,7 +34,13 @@ export type {
 export { SPP } from './handler.ts';
 export { HANDLERS } from './handlers/index.ts';
 export type { HandlerId, HandlerOptions } from './handlers/index.ts';
-export { guessProtocol, KNOWN_HID_VENDORS, PROTOCOLS, protocolFor } from './protocols.ts';
+export {
+	guessProtocol,
+	KNOWN_HID_VENDORS,
+	PROTOCOLS,
+	protocolFor,
+	protocolForMatches
+} from './protocols.ts';
 export type { Protocol } from './protocols.ts';
 export { chooserFilters } from './chooser.ts';
 export type { ChooserEntry, ChooserFilters } from './chooser.ts';

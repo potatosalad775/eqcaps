@@ -70,7 +70,9 @@ output a draft profile plus an evidence report. Details in §3.
   is always attached separately.
 - The submit screen states that data contributions are CC0-1.0 (DECISIONS D25).
 
-*2026-10-03:* built (DECISIONS D35) except "start from a probe result", which comes with T3. The
+*2026-10-03:* built (DECISIONS D35) except "start from a probe result", which comes with T3.
+A device matched only by a group profile is offered "Add my device": a profile of its own that
+extends the group's base, prefilled from its identity and read-back. The
 editor works on authoring files, read from the repository (bases aren't published), and runs
 CI's own checks as the user types. A read from the connect page arrives with its evidence file
 cited and is re-checked against every edit. Evidence files are attached to the pull request,

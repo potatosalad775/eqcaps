@@ -2,14 +2,21 @@
 // profile change can cite it and be checked against it (connect → read → validate → PR).
 // Kept in sessionStorage: it stays in this tab and is never sent anywhere.
 
-import type { AuthoringProfile, Filter } from '@potatosalad775/eqcaps-core';
+import type { AuthoringProfile, Filter, Profile } from '@potatosalad775/eqcaps-core';
 import type { DeviceIdentity } from '@potatosalad775/eqcaps-device-bridge';
 import { blankProfile } from './editor.ts';
 import { readSource } from './evidence.ts';
 
 export interface Handoff {
+	/**
+	 * What the editor should do: `fix` the profile the device was checked against, or start a
+	 * `new` profile for the device (one the database lacks, or a member of a group profile).
+	 */
+	action: 'fix' | 'new';
 	/** The profile the device was checked against; absent for a device the database lacks. */
 	profileId?: string;
+	/** For a new profile: what it extends (a group's base, SPEC §3). */
+	extends?: string;
 	/** The reviewed evidence file: its path under data/ and its text. */
 	evidence: { path: string; text: string };
 	date: string;
@@ -48,12 +55,26 @@ export function citeEvidence(data: AuthoringProfile, handoff: Handoff, by?: stri
 }
 
 /**
- * A new profile for a device the database doesn't know, from what it said about itself: the USB
- * identity as its match (exact product name, SPEC §3), and as many bands as it returned. Bluetooth
- * names are left out: people rename their devices, so the user writes the match by hand.
+ * What a device profile for a member of `group` extends: the base the group extends (the first
+ * file its inherited sources came from, SPEC §11), or the group itself when it extends nothing.
+ * SPEC §3: members extend the group's base, since groups shrink as members get profiles.
+ */
+export function memberBase(group: Profile): string {
+	const via = [...group.meta.sources, ...(group.realization?.sources ?? [])].find(
+		(s) => s.via !== undefined
+	)?.via;
+	return via ?? group.id;
+}
+
+/**
+ * A new profile for a device, from what it said about itself: the USB identity as its match
+ * (exact product name, SPEC §3). It extends `handoff.extends` when set, so only identity and
+ * provenance are written; otherwise it is a whole profile with as many bands as the device
+ * returned. Bluetooth names are left out: people rename their devices, so the user writes the
+ * match by hand.
  */
 export function profileForDevice(handoff: Handoff): AuthoringProfile {
-	const data = blankProfile();
+	const data = blankProfile(handoff.extends ? { extends: handoff.extends } : {});
 	const u = handoff.identity.usb;
 	const b = handoff.identity.bluetooth;
 	data.device = { brand: '', model: u?.productName?.trim() ?? '' };
@@ -70,6 +91,8 @@ export function profileForDevice(handoff: Handoff): AuthoringProfile {
 		: b
 			? { bluetooth: [{ namePrefix: '' }] }
 			: {};
-	if (handoff.readBack.filters.length > 0) data.bandCount = handoff.readBack.filters.length;
+	if (!handoff.extends && handoff.readBack.filters.length > 0) {
+		data.bandCount = handoff.readBack.filters.length;
+	}
 	return citeEvidence(data, handoff);
 }

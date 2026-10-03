@@ -327,6 +327,22 @@ export function protocolFor(profileId: string): Protocol | undefined {
 }
 
 /**
+ * How to drive a device, from the profiles it matches, most specific first (the order of the
+ * client's `matchDevice`): the protocol of the first one that has one, and which profile that
+ * was. A device profile added under a group profile (SPEC §3) usually has no protocol of its own;
+ * the device still matches the group, whose protocol drives it.
+ */
+export function protocolForMatches(
+	matches: Iterable<{ id: string }>
+): { profileId: string; protocol: Protocol } | undefined {
+	for (const { id } of matches) {
+		const protocol = protocolFor(id);
+		if (protocol) return { profileId: id, protocol };
+	}
+	return undefined;
+}
+
+/**
  * Vendors whose devices mostly speak one protocol. For a device the database doesn't know, this
  * is a guess: the protocol is marked experimental, and without a profile a pull needs `bands`.
  */

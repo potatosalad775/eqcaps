@@ -12,6 +12,7 @@
 	import { formatHz } from '$lib/format';
 	import { profileSourceUrl, sourceHref } from '$lib/repo';
 	import SlotChart from '$lib/components/SlotChart.svelte';
+	import GroupBadge from '$lib/components/GroupBadge.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 	import type { PageProps } from './$types';
 
@@ -60,6 +61,7 @@
 				<h1 class="text-2xl font-semibold">{p.device.brand} {p.device.model}</h1>
 				{#if p.engine}<span class="text-zinc-500">{p.engine}</span>{/if}
 				<StatusBadge status={p.meta.status} />
+				{#if p.device.group}<GroupBadge />{/if}
 				<span class="text-xs text-zinc-500 uppercase">{p.kind}</span>
 			</div>
 			<p class="font-mono text-sm text-zinc-500">{p.id}</p>

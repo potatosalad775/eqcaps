@@ -5,6 +5,7 @@
 	import type { IndexEntry, Meta, Profile } from '@potatosalad775/eqcaps-core';
 	import { catalog } from '$lib/data.svelte';
 	import { FEATURES, searchEntries, type Feature } from '$lib/search';
+	import GroupBadge from '$lib/components/GroupBadge.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 
 	const params = page.url.searchParams;
@@ -143,6 +144,7 @@
 						<span class="font-medium">{e.brand} {e.model}</span>
 						{#if e.engine}<span class="text-sm text-zinc-500">{e.engine}</span>{/if}
 						<StatusBadge status={e.status} />
+						{#if e.group}<GroupBadge />{/if}
 						{#if e.kind === 'software'}
 							<span class="text-xs text-zinc-500 uppercase">software</span>
 						{/if}

@@ -12,7 +12,9 @@ hardware device in the [eqcaps](https://github.com/potatosalad775/eqcaps) databa
 - **Driven by the database.** The bridge knows how to talk to a device, not what it accepts or
   which device it is. The client matches a connected device to its eqcaps profile; the profile
   says what the device accepts (fit and complete with `@potatosalad775/eqcaps-core` before
-  writing); `protocolFor(profileId)` says how to talk to it.
+  writing); `protocolForMatches(matches)` says how to talk to it: the protocol of the most
+  specific matched profile that has one. A device profile added under a group profile has none of
+  its own and is driven by the group's; `protocolFor(profileId)` looks up one profile.
 - **Writes exactly what it is given.** No clamping, padding, type conversion or compensation. A
   value the wire can't carry or a type the protocol has no code for is a `BridgeError`, before
   anything is sent.
@@ -24,7 +26,7 @@ import {
 	guessProtocol,
 	identityOf,
 	openDevice,
-	protocolFor
+	protocolForMatches
 } from '@potatosalad775/eqcaps-device-bridge';
 import { requestHidDevice } from '@potatosalad775/eqcaps-device-bridge/browser';
 
@@ -33,9 +35,10 @@ const index = await client.loadIndex();
 // The browser's chooser, offering the database's devices; null if cancelled.
 const transport = await requestHidDevice({ entries: index?.profiles ?? [] });
 if (transport) {
-	const { best } = await client.matchDevice(identityOf(transport));
+	const { best, matches } = await client.matchDevice(identityOf(transport));
 	const profile = best ? await client.loadProfile(best.id) : null;
-	const protocol = best ? protocolFor(best.id) : guessProtocol(transport.vendorId);
+	const protocol =
+		protocolForMatches(matches)?.protocol ?? guessProtocol(transport.vendorId);
 	if (protocol) {
 		const device = openDevice(transport, protocol, profile ? { profile } : {});
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	// The evidence export with its PII review (INSPECTOR §6): every string in the file is shown and
 	// can be changed or removed before the file leaves the page. Then: download it, or take it to
-	// the editor to propose the profile change it supports.
+	// the editor to fix the profile, add the device under its group, or start a new profile.
 	import { SvelteMap } from 'svelte/reactivity';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -16,11 +16,17 @@
 
 	let {
 		report,
-		handoff
+		handoff,
+		groupBase
 	}: {
 		report: EvidenceReport;
-		/** Everything the editor needs except the evidence file itself. */
-		handoff: Omit<Handoff, 'evidence' | 'firmware'>;
+		/** Everything the editor needs except the evidence file and what to do with it. */
+		handoff: Omit<Handoff, 'evidence' | 'firmware' | 'action' | 'extends'>;
+		/**
+		 * Set when the device was checked against a group profile (SPEC §3): what a profile for
+		 * this device extends. The device then gets "Add my device" before "fix the group".
+		 */
+		groupBase?: string | undefined;
 	} = $props();
 
 	const edits = new SvelteMap<string, string>();
@@ -35,18 +41,19 @@
 		stringFields(report).sort((a, b) => Number(b.personal) - Number(a.personal))
 	);
 	const text = $derived(evidenceText(reviewed));
-	const id = $derived(handoff.profileId ?? 'new-device');
 
 	function set(pointer: string, value: string) {
 		edits.set(pointer, value);
 	}
 
-	async function file() {
-		return { path: await evidencePath(id, handoff.date, text), text };
+	/** A fix's evidence lives with its profile; a new profile's moves there once it has an id. */
+	async function file(action: Handoff['action']) {
+		const dir = action === 'fix' && handoff.profileId ? handoff.profileId : 'new-device';
+		return { path: await evidencePath(dir, handoff.date, text), text };
 	}
 
 	async function download() {
-		const { path } = await file();
+		const { path } = await file(handoff.profileId && !groupBase ? 'fix' : 'new');
 		const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
 		const a = document.createElement('a');
 		a.href = url;
@@ -55,12 +62,19 @@
 		URL.revokeObjectURL(url);
 	}
 
-	async function propose() {
+	async function go(action: Handoff['action']) {
 		const fw = firmware.trim();
-		saveHandoff({ ...handoff, evidence: await file(), ...(fw ? { firmware: fw } : {}) });
-		const target = handoff.profileId
-			? resolve('/edit/[[id]]', { id: handoff.profileId })
-			: resolve('/edit/[[id]]', {});
+		saveHandoff({
+			...handoff,
+			action,
+			...(action === 'new' && groupBase ? { extends: groupBase } : {}),
+			evidence: await file(action),
+			...(fw ? { firmware: fw } : {})
+		});
+		const target =
+			action === 'fix' && handoff.profileId
+				? resolve('/edit/[[id]]', { id: handoff.profileId })
+				: resolve('/edit/[[id]]', {});
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- resolved, plus a query
 		await goto(`${target}?device=1`);
 	}
@@ -104,11 +118,31 @@
 			class="mt-1 max-h-64 overflow-auto rounded bg-zinc-100 p-2 font-mono text-xs dark:bg-zinc-900">{text}</pre>
 	</details>
 	<div class="flex flex-wrap gap-2">
-		<button type="button" class="rounded bg-teal-700 px-3 py-2 text-sm text-white" onclick={propose}
-			>{handoff.profileId
-				? `Propose a change to ${handoff.profileId}`
-				: 'Start a profile for this device'}</button
-		>
+		{#if groupBase}
+			<button
+				type="button"
+				class="rounded bg-teal-700 px-3 py-2 text-sm text-white"
+				title="A profile of its own for this model, extending {groupBase}"
+				onclick={() => go('new')}>Add my device</button
+			>
+			<button
+				type="button"
+				class="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700"
+				onclick={() => go('fix')}>Propose a change to the group</button
+			>
+		{:else if handoff.profileId}
+			<button
+				type="button"
+				class="rounded bg-teal-700 px-3 py-2 text-sm text-white"
+				onclick={() => go('fix')}>Propose a change to {handoff.profileId}</button
+			>
+		{:else}
+			<button
+				type="button"
+				class="rounded bg-teal-700 px-3 py-2 text-sm text-white"
+				onclick={() => go('new')}>Start a profile for this device</button
+			>
+		{/if}
 		<button
 			type="button"
 			class="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700"

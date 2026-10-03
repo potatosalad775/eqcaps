@@ -26,13 +26,14 @@ if (profile) {
   const heard = readBack.map((f) => toRealized(profile, f));
 }`;
 
-	const bridgeCode = `import { identityOf, openDevice, protocolFor } from '@potatosalad775/eqcaps-device-bridge';
+	const bridgeCode = `import { identityOf, openDevice, protocolForMatches } from '@potatosalad775/eqcaps-device-bridge';
 import { requestHidDevice } from '@potatosalad775/eqcaps-device-bridge/browser';
 
 const index = await client.loadIndex();
 const transport = await requestHidDevice({ entries: index?.profiles ?? [] });
-const { best } = await client.matchDevice(identityOf(transport));
-const device = openDevice(transport, protocolFor(best.id), { profile });
+const { best, matches } = await client.matchDevice(identityOf(transport));
+const { protocol } = protocolForMatches(matches);  // a group's, for a device added under a group
+const device = openDevice(transport, protocol, { profile });
 const state = await device.pull();                // written values, band order
 await device.push({ filters: bands });            // exactly what you give it: fit + complete first`;
 </script>

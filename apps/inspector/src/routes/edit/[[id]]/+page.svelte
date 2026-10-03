@@ -370,6 +370,11 @@
 
 	{#if handoff}
 		<div class="mt-4 rounded bg-teal-50 px-3 py-2 text-sm dark:bg-teal-950">
+			{#if handoff.action === 'new' && handoff.extends}
+				A profile of its own for your device, extending <span class="font-mono"
+					>{handoff.extends}</span
+				>: fill in its brand, model and id; everything else is inherited.
+			{/if}
 			Started from your device's read-back: the evidence file
 			<span class="font-mono">{evidenceRef}</span> is cited in
 			<span class="font-mono">meta.sources</span>. Change the values the read-back shows are wrong,
@@ -400,7 +405,7 @@
 									d.id = id;
 									// A new device's evidence file lives under the profile's id.
 									for (const src of d.meta?.sources ?? []) {
-										if (handoff && !handoff.profileId && src.ref === evidenceRef) {
+										if (handoff?.action === 'new' && src.ref === evidenceRef) {
 											src.ref = `evidence/${id || 'new-device'}/${evidenceName}`;
 										}
 									}
