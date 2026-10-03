@@ -1,6 +1,0 @@
-{
-	"description": "realization.sources is non-empty.",
-	"spec": "§8",
-	"profile": { "realization": { "laws": [], "sources": [] } },
-	"expect": [{ "code": "schema", "path": "/realization/sources" }]
-}

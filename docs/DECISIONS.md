@@ -61,8 +61,8 @@ is why `derive-constraint.ts` exists.
 *2026-10-02:* realization laws describe the engine's DSP, not how to talk to it, so they are
 profile data (D29), not bridge config. Constant wire factors such as `compensate2X` stay in the
 codec: they're unit conversions.
-*2026-10-03:* `compensate2X` turned out to correct a firmware quirk, not to convert a unit. The
-codec no longer applies it (D39).
+*2026-10-03:* neither: `compensate2X` corrects a firmware quirk, not a unit, and realization left
+the format. Nothing corrects quirks (D39).
 
 ### D3. Profiles are device-keyed; sharing through `extends` (accepted)
 One profile per device engine, with `abstract` bases for chip families and `extends`, flattened at
@@ -146,7 +146,7 @@ that takes the same parameters, so Equalizer APO / AutoEQ text maps 1:1.
 right filters: Equalizer APO's `LSC`/`HSC` are shelves defined by their *center* frequency, which is
 the RBJ cookbook's f0, while its fixed-slope `LS 6dB`/`LS 12dB` use a corner frequency.
 Realization differences that follow a known law are described by `realization` (D29).
-Coefficient quantization stays out of scope.
+Coefficient quantization stays out of scope. *2026-10-03:* realization is out of scope too (D39).
 *2026-10-02:* changed from modernGraphTool's `LSQ`/`HSQ`. Importers map modernGraphTool and
 devicePEQ `LSQ`/`HSQ` → `LSC`/`HSC`, and devicePEQ `LP`/`HP` → `LPQ`/`HPQ` (with `q` locked where
 the device fixes it). modernGraphTool's shelf `q` is RBJ Q, so its `LSQ` is exactly `LSC`.
@@ -252,8 +252,8 @@ engine's DSP, not how to talk to it, so invariant 2 holds.
 gain-dependent); laws in bridge config only (every consumer re-implements them, and nothing outside
 the bridge sees them); deferring the laws to a v1 minor (owner prefers them in v1).
 *2026-10-03:* part 1 no longer folds in constant factors such as KTMicro's ×2 or Walkplay's
-×0.9775: they are firmware quirks, not units. The repository ships no realization laws. Part 2
-stands as format: the laws stay in v1 and core keeps `toRealized`/`toWritten` (D39).
+×0.9775: they are firmware quirks, not units. Part 2 is withdrawn: `realization`, its laws,
+`toRealized` and `toWritten` are gone from the format, which v1 never published with (D39).
 
 ---
 
@@ -292,7 +292,8 @@ against the vectors in this repo's CI. The earlier "Kotlin first, for Android" p
 rejection of a WASM or embedded-JS engine on Android assumed a native Kotlin app. Both are moot
 while the app is a WebView app.
 *2026-10-02:* `toRealized`/`toWritten` added to the exact ops, and `realize` renamed `complete`
-(D29).
+(D29). *2026-10-03:* `toRealized`/`toWritten` removed again; the exact ops are `project`,
+`resolveSlot` and `validate` (D39).
 *2026-10-02:* vectors exist for all eight ops, one file per op; property ops carry asserted facts
 (D30).
 
@@ -483,7 +484,8 @@ refuses to overwrite it without `--force`.
   Frequency is 20 Hz–20 kHz, which devicePEQ assumes but doesn't record. Constant frequency
   factors are folded in (Walkplay SchemeNo11 ×0.9775 gives a 0.9775 Hz grid, KTMicro
   `compensate2X` a 2 Hz grid), per D29. *2026-10-03:* taken out again, along with the seeded
-  `realization` blocks (D39). The script still writes both; it isn't re-run.
+  `realization` blocks (D39). The script now writes the compensation settings as quirk warnings
+  in the notes; it isn't re-run.
 - **Preamp:** `manual` with the handler's wire range where the handler writes one, `auto` where
   `deviceHandlesPregain` is set and the handler honours it, `none` where the handler never sends
   one, otherwise `unknown`.
@@ -602,8 +604,8 @@ Edge, Edifier, Airoha (SPP and BLE).
   every option set the table uses, round-trips any request on its wire grid (end points
   included) and refuses values outside it (fast-check). Every hardware profile has a protocol,
   `freqScale` equals its frequency step, and what a profile allows beyond the codec's wire, in
-  range, grid or types, is listed. *2026-10-03:* the `freqScale` check is now one that no profile
-  in the repository has realization laws (D39).
+  range, grid or types, is listed. *2026-10-03:* the `freqScale` check is gone with `freqScale`
+  (D39).
 - **Differences from upstream:** the FIIO KA15 is driven by the FiiO handler (devicePEQ lets its
   product id group pick Walkplay; the capture is FiiO's); Moondrop Old Fashioned uses its register
   handler (upstream imports it under a name the module doesn't export); FiiO's "EQ off" selects
@@ -769,6 +771,8 @@ anything else needs v2 under a new prefix.
 *2026-10-03, amended before first publication:* `device.group` (D37) joined format 1.0 rather
 than a 1.1 minor. Nothing had been published under `/v1/` yet, and a new format's first profiles
 declaring 1.1 would only confuse.
+*2026-10-03, amended again before first publication:* `realization` left format 1.0 (D39), for the
+same reason.
 **Rejected:** dropping `/next/` at the freeze (breaks every 0.1.x client's default); keeping the
 file name SPEC-DRAFT.md (a frozen definition called a draft misleads readers; links inside the
 repository were updated, and old links to the file on GitHub break).
@@ -915,7 +919,7 @@ reconnection for devices that disconnect on save (KT Micro), conditional Q and g
 frequency windows are probed), and whether a group member's file should keep only the constraints
 that differ from its base.
 
-### D39. The database corrects no device quirks (accepted, 2026-10-03)
+### D39. No calibration: the format describes what a device is told, not how it sounds (accepted, 2026-10-03)
 The owner read a CrinEar Protocol Micro (USB `0x3302:0xc20f`, Walkplay SchemeNo11) with the
 inspector. It showed 48.88, 195.5, 488.75 … Hz where the official Walkplay app and CrinEar's own
 app show 50, 200, 500 …. The device stores 50, 200, 500 …; the profile had devicePEQ's ×0.9775
@@ -923,9 +927,13 @@ folded into its domains (D29 part 1), so the codec scaled every value it read an
 - **Domains hold the value the engine is told**, as its own software means it, in canonical
   units. Unit conversions (register value → dB, octaves → Q) are still folded in. A difference
   between the value sent and the filter heard is never folded in, constant or not (SPEC §1, §8).
-- **No calibration data in the repository.** No profile in `data/` has `realization`; a test
-  fails if one does. The format keeps the laws (v1 is frozen, and absent means unknown, SPEC §8),
-  and so do core, the client and the inspector.
+- **Realization leaves the format.** `realization` and its laws (`gainScaledQ`,
+  `nyquistScaledQ`, `shelfFrequencyShift`) are gone from the schema, and `toRealized`/`toWritten`
+  from core (SPEC §8 and §13.3 are kept as stubs, so section numbers don't move). `fit` returns
+  written slots only, and `Change.realized` is now `Change.written`. The issue codes
+  `law-conflict` and `design-rate-too-low` and their cases are gone; a case pins that
+  `realization` fails the schema. Nothing had been published under `/v1/` yet (D36); core 0.1.0
+  on npm has these exports, and its next release, 0.2.0, drops them.
 - **Quirks are warnings.** A reported quirk goes in `meta.notes`, starting "Reported quirk, not
   corrected (D39):", saying what was reported and by whom.
 - **Codecs write the value as given.** `freqScale` is gone from the Walkplay and KT Micro codecs.
@@ -941,7 +949,11 @@ folded into its domains (D29 part 1), so the codec scaled every value it read an
   never saw the factor.
 - Vendor apps don't correct. A correction applied to firmware that doesn't need it makes the
   sound worse, where the user can't see why.
-- The cost was real (codec options, fractional grids, provenance in two places, a "You hear"
+- The same holds for the laws that depend on another field: the evidence is devicePEQ's
+  configuration, never a measurement in this repository, and a consumer running `fit` would change
+  what it sends on their account.
+- The cost was real (a closed set of laws in the schema, two exact ops, written and realized
+  filters in `fit`, codec options, fractional grids, provenance in two places, a "You hear"
   column) and no consumer depended on it yet.
 
 **Changes:** `realization` removed from 7 profiles (FiiO KA17 and QX13 `gainScaledQ`; Fosi Audio
@@ -950,12 +962,12 @@ Moondrop Quark2 `nyquistScaledQ`). The last four lost their 0.9775 Hz grid and t
 2 Hz grid; all take their base's 20 Hz–20 kHz in 1 Hz. Their notes carry the reported quirks. The
 recorded SchemeNo11 captures now read round frequencies (1000, 10000, 20000 Hz, where they read
 977.5, 9775, 19550), and one capture's band no longer falls outside its profile.
-This narrows SPEC §1's authoring rule after the freeze (D36). Schema, engine and conformance
-vectors are unchanged, and no consumer behaves differently, so it is an edit to v1, not a minor.
-**Rejected:** a constant `freq` scale law (an additive minor: still a correction, still visible
-only to measurement, still firmware-dependent); keeping the seeded laws marked unmeasured (a
-consumer that runs `fit` still changes what it sends); removing `realization` from the format (v1
-is frozen; v2 can drop it if nobody ships measured laws).
+The fit vector for a long cycle of passes relied on `shelfFrequencyShift`; it was replaced by a
+law-free profile that needs 9 passes, found by a random search.
+**Rejected:** a constant `freq` scale law (still a correction, still visible only to measurement,
+still firmware-dependent); keeping the laws in the format with no data using them (a feature
+nobody can fill honestly, and dead weight in every port); keeping the seeded laws marked
+unmeasured (a consumer that runs `fit` still changes what it sends).
 
 ---
 
@@ -989,4 +1001,4 @@ easy to find.
 | Q7 Kotlin port | `packages/kotlin` if ever; not a priority | D15 |
 | Q8 Governance | as recommended, plus two verified levels | D28 |
 | Q9 Licenses | MIT code, CC0 data; checked against devicePEQ | D25 |
-| Q10 Written vs realized values | domains are written values; realization laws in profiles from v1 | D29 |
+| Q10 Written vs realized values | domains are written values; realization laws in profiles from v1 (removed again, D39) | D29, D39 |

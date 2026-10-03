@@ -9,7 +9,7 @@
 	const readme = (name: string) => `${REPO_URL}/tree/main/packages/${name}#readme`;
 
 	const clientCode = `import { createClient, webStorageStore } from '@potatosalad775/eqcaps-client';
-import { complete, fit, toRealized, validateList } from '@potatosalad775/eqcaps-core';
+import { complete, fit, validateList } from '@potatosalad775/eqcaps-core';
 
 const client = createClient({ store: webStorageStore(localStorage) });
 
@@ -22,8 +22,6 @@ if (profile) {
   validateList(profile, wanted, preamp);                // while editing: flag, don't rewrite
   const result = fit(profile, wanted, preamp);          // before writing: what to send
   const bands = complete(profile, result.slots).filters; // every slot, neutral fillers included
-  // After reading the device back: what the listener hears.
-  const heard = readBack.map((f) => toRealized(profile, f));
 }`;
 
 	const bridgeCode = `import { identityOf, openDevice, protocolForMatches } from '@potatosalad775/eqcaps-device-bridge';
@@ -90,8 +88,8 @@ await device.push({ filters: bands });            // exactly what you give it: f
 			<li>
 				<a href={pkg('eqcaps-core')}>@potatosalad775/eqcaps-core</a>: types, validation and the
 				engine (<span class="font-mono">validate</span>, <span class="font-mono">fit</span>,
-				<span class="font-mono">complete</span>, <span class="font-mono">toRealized</span>…). No
-				dependencies, synchronous. <a href={readme('core')}>README</a>
+				<span class="font-mono">complete</span>…). No dependencies, synchronous.
+				<a href={readme('core')}>README</a>
 			</li>
 			<li>
 				<a href={pkg('eqcaps-client')}>@potatosalad775/eqcaps-client</a>: fetching, caching and
@@ -108,9 +106,8 @@ await device.push({ filters: bands });            // exactly what you give it: f
 		<p class="text-sm">
 			Hold the filters the user <em>wants</em>. Write through <span class="font-mono">fit</span>
 			then
-			<span class="font-mono">complete</span>; show a device's read-back through
-			<span class="font-mono">toRealized</span>, since some engines play something other than the
-			values they store (<a href="{REPO_URL}/blob/main/docs/SPEC.md#8-realization">SPEC §8</a>).
+			<span class="font-mono">complete</span>. Profiles hold the values a device is told and correct
+			no firmware quirks, so what you write is what the device gets.
 		</p>
 		<pre
 			class="overflow-x-auto rounded bg-zinc-100 p-3 font-mono text-xs dark:bg-zinc-900">{bridgeCode}</pre>

@@ -1,5 +1,5 @@
 // The editor's form side: the common fields of an authoring file as form values, and back.
-// Everything the form doesn't cover (per-slot overrides, variants, rules, realization) is edited
+// Everything the form doesn't cover (per-slot overrides, variants, rules) is edited
 // in the JSON, which stays the source of truth: the form reads it and writes it.
 
 import type { AuthoringProfile, Domain } from '@potatosalad775/eqcaps-core';

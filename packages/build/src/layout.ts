@@ -95,10 +95,7 @@ export function checkLayout(
 		}
 
 		const sources = [
-			...(profile.meta?.sources ?? []).map((s, i) => [s, `/meta/sources/${i}/ref`] as const),
-			...(profile.realization?.sources ?? []).map(
-				(s, i) => [s, `/realization/sources/${i}/ref`] as const
-			)
+			...(profile.meta?.sources ?? []).map((s, i) => [s, `/meta/sources/${i}/ref`] as const)
 		];
 		for (const [source, pointer] of sources) {
 			if (source.ref?.startsWith('evidence/') && !evidence.has(source.ref)) {

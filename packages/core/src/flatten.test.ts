@@ -20,7 +20,6 @@ const chip: AuthoringProfile = {
 		{ index: [0, 1], types: ['LSC'], label: 'Low' },
 		{ index: 3, types: ['HSC'] }
 	],
-	realization: { laws: [{ law: 'gainScaledQ', types: ['PK'] }], sources: [src('chip laws')] },
 	preamp: { mode: 'unknown' },
 	meta: { status: 'draft', sources: [src('chip handler')] },
 	'x-chip': 'kept'
@@ -76,7 +75,6 @@ describe('flattenProfile (SPEC §11)', () => {
 			{ ...src('family handler'), via: 'family' },
 			{ ...src('chip handler'), via: 'chip' }
 		]);
-		expect(profile?.realization?.sources).toEqual([{ ...src('chip laws'), via: 'chip' }]);
 	});
 
 	it('takes the highest schemaVersion in the chain', () => {
@@ -94,7 +92,6 @@ describe('flattenProfile (SPEC §11)', () => {
 			'bandCount',
 			'band',
 			'bands',
-			'realization',
 			'preamp',
 			'meta',
 			'x-chip'

@@ -4,12 +4,10 @@
 		describe,
 		isCountingSource,
 		unsupported,
-		type Law,
 		type Profile
 	} from '@potatosalad775/eqcaps-core';
 	import { catalog } from '$lib/data.svelte';
 	import { dataUrl } from '$lib/channel';
-	import { formatHz } from '$lib/format';
 	import { profileSourceUrl, sourceHref } from '$lib/repo';
 	import SlotChart from '$lib/components/SlotChart.svelte';
 	import GroupBadge from '$lib/components/GroupBadge.svelte';
@@ -31,14 +29,6 @@
 	const description = $derived(profile ? describe(profile) : null);
 	const missing = $derived(profile ? unsupported(profile) : null);
 	const json = $derived(profile ? JSON.stringify(profile, null, '\t') : '');
-
-	const LAW_TEXT: Record<string, string> = {
-		gainScaledQ: 'Realized Q = Q / A, A = 10^(|gain|/40): Q narrows as |gain| grows',
-		nyquistScaledQ: 'Realized Q = Q · cos(π·f / designRate): Q narrows towards high frequencies',
-		shelfFrequencyShift: 'Realized shelf frequency moves with gain (bilinear warping)'
-	};
-	const lawName = (l: Law) => (l as { law: string }).law;
-	const lawRate = (l: Law) => ('designRate' in l ? l.designRate : undefined);
 </script>
 
 <svelte:head>
@@ -120,13 +110,11 @@
 					<dd>
 						{#each description.rules as rule, i (i)}<div>{rule}</div>{:else}None{/each}
 					</dd>
-					<dt class="text-zinc-500">Realization</dt>
-					<dd>{description.realization}</dd>
 				</dl>
-				{#if missing && (missing.rules.length || missing.laws.length || missing.types.length)}
+				{#if missing && (missing.rules.length || missing.types.length)}
 					<p class="mt-3 rounded bg-amber-50 px-3 py-2 text-sm dark:bg-amber-950">
 						This profile uses parts of the format this app doesn't know:
-						{[...missing.rules, ...missing.laws, ...missing.types].join(', ')}.
+						{[...missing.rules, ...missing.types].join(', ')}.
 					</p>
 				{/if}
 			</section>
@@ -178,33 +166,6 @@
 					Values are written values (SPEC §1): Hz, dB and cookbook Q, as the engine takes them.
 					Conditional domains apply when their condition holds; the first matching one wins per
 					field.
-				</p>
-			</section>
-		{/if}
-
-		{#if p.realization}
-			<section>
-				<h2 class="mb-2 text-lg font-semibold">Realization</h2>
-				{#if p.realization.laws.length === 0}
-					<p class="text-sm">The engine realizes exactly what is written.</p>
-				{/if}
-				<ul class="space-y-1 text-sm">
-					{#each p.realization.laws as law, i (i)}
-						<li>
-							<span class="font-mono">{lawName(law)}</span> on {law.types.join(', ')}
-							{#if lawRate(law)}at {formatHz(lawRate(law)!)}{/if}
-							<div class="text-zinc-500">{LAW_TEXT[lawName(law)] ?? 'Unknown law'}</div>
-						</li>
-					{/each}
-				</ul>
-				<p class="mt-2 text-sm">
-					{#if p.realization.sources.some((s) => s.kind === 'measurement' && s.via === undefined)}
-						Measured.
-					{:else}
-						<span class="text-amber-700 dark:text-amber-400">Not measured:</span> these laws come
-						from
-						{p.realization.sources.map((s) => s.kind).join(', ')} sources, not from an acoustic measurement.
-					{/if}
 				</p>
 			</section>
 		{/if}

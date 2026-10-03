@@ -34,7 +34,6 @@
 			"type": "array",
 			"items": { "$ref": "#/$defs/rule" }
 		},
-		"realization": { "$ref": "#/$defs/realization" },
 		"preamp": { "$ref": "#/$defs/preamp" },
 		"channels": {
 			"description": "Only \"linked\" in v1; \"independent\" is reserved (SPEC §9).",
@@ -362,82 +361,6 @@
 			"patternProperties": { "^x-": true },
 			"additionalProperties": false,
 			"required": ["type", "octaves"]
-		},
-		"realization": {
-			"description": "Laws by which the engine's filters deviate from the written values. Absent = unknown (SPEC §8).",
-			"type": "object",
-			"properties": {
-				"laws": {
-					"type": "array",
-					"items": { "$ref": "#/$defs/law" }
-				},
-				"sources": {
-					"description": "Realization is measured iff a measurement source without via is listed.",
-					"type": "array",
-					"items": { "$ref": "#/$defs/source" },
-					"minItems": 1
-				}
-			},
-			"patternProperties": { "^x-": true },
-			"additionalProperties": false,
-			"required": ["laws", "sources"]
-		},
-		"law": {
-			"oneOf": [
-				{ "$ref": "#/$defs/gainScaledQLaw" },
-				{ "$ref": "#/$defs/nyquistScaledQLaw" },
-				{ "$ref": "#/$defs/shelfFrequencyShiftLaw" }
-			]
-		},
-		"designRate": {
-			"description": "Sample rate (Hz) the engine designs its filters at. A fixed property of the part.",
-			"type": "number",
-			"exclusiveMinimum": 0
-		},
-		"gainScaledQLaw": {
-			"description": "Realized q = q / A, A = 10^(|gain|/40).",
-			"type": "object",
-			"properties": {
-				"law": { "const": "gainScaledQ" },
-				"types": {
-					"type": "array",
-					"items": { "enum": ["PK", "LSC", "HSC"] },
-					"minItems": 1,
-					"uniqueItems": true
-				}
-			},
-			"patternProperties": { "^x-": true },
-			"additionalProperties": false,
-			"required": ["law", "types"]
-		},
-		"nyquistScaledQLaw": {
-			"description": "Realized q = q · cos(π·f / designRate).",
-			"type": "object",
-			"properties": {
-				"law": { "const": "nyquistScaledQ" },
-				"types": { "$ref": "#/$defs/filterTypes" },
-				"designRate": { "$ref": "#/$defs/designRate" }
-			},
-			"patternProperties": { "^x-": true },
-			"additionalProperties": false,
-			"required": ["law", "types", "designRate"]
-		},
-		"shelfFrequencyShiftLaw": {
-			"description": "Realized freq = (designRate/π) · atan(tan(π·f / designRate) · d), d = √A for LSC, 1/√A for HSC.",
-			"type": "object",
-			"properties": {
-				"law": { "const": "shelfFrequencyShift" },
-				"types": {
-					"type": "array",
-					"items": { "enum": ["LSC", "HSC"] },
-					"minItems": 1,
-					"uniqueItems": true
-				},
-				"designRate": { "$ref": "#/$defs/designRate" }
-			},
-			"patternProperties": { "^x-": true },
-			"additionalProperties": false,
-			"required": ["law", "types", "designRate"]
 		},
 		"preamp": {
 			"description": "manual: adjustable within gain. auto: the device computes its own headroom. none: no control. unknown: e.g. seeded data (SPEC §9).",

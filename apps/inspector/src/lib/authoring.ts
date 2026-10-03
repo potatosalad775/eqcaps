@@ -35,7 +35,7 @@ export function baseIds(profiles: readonly Profile[]): string[] {
 	const ids = new Set(profiles.map((p) => p.id));
 	const bases = new Set<string>();
 	for (const p of profiles) {
-		for (const s of [...p.meta.sources, ...(p.realization?.sources ?? [])]) {
+		for (const s of p.meta.sources) {
 			if (s.via !== undefined && !ids.has(s.via)) bases.add(s.via);
 		}
 	}

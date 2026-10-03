@@ -31,7 +31,6 @@ const KEY_ORDER = [
 	'band',
 	'bands',
 	'rules',
-	'realization',
 	'preamp',
 	'channels',
 	'meta'
@@ -104,12 +103,6 @@ function merge(base: Resolved, file: Resolved): Resolved {
 	const out: Record<string, unknown> = {};
 	for (const [k, v] of Object.entries(base)) {
 		if (!NOT_INHERITED.has(k)) out[k] = JSON.parse(JSON.stringify(v)) as unknown;
-	}
-	if (base.realization) {
-		out.realization = {
-			...base.realization,
-			sources: base.realization.sources.map((s) => inherit(s, base.id))
-		};
 	}
 	for (const [k, v] of Object.entries(file)) {
 		if (k === 'extends' || k === 'abstract') continue;

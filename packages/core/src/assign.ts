@@ -46,7 +46,7 @@ const finite = (x: number) => (Number.isFinite(x) ? x : 1e3);
 const octaves = (a: number, b: number) => finite(Math.abs(Math.log2(a / b)));
 
 function cost(slot: EngineSlot, f: Filter): number {
-	const g = fitToSlot(slot, [], f);
+	const g = fitToSlot(slot, f);
 	return (
 		(g.type === f.type ? 0 : TYPE_PENALTY) +
 		octaves(f.freq, g.freq) +
@@ -326,7 +326,7 @@ function inOrder(
 ): boolean {
 	const freqs = [...slotOf]
 		.sort((a, b) => a[1] - b[1])
-		.map(([k, s]) => fitToSlot(p.slots[s] as EngineSlot, [], filters[k] as Filter).freq);
+		.map(([k, s]) => fitToSlot(p.slots[s] as EngineSlot, filters[k] as Filter).freq);
 	return freqs.every((f, i) => {
 		if (i === 0) return true;
 		const prev = freqs[i - 1] as number;

@@ -2,12 +2,10 @@ import fc from 'fast-check';
 import {
 	FILTER_TYPES,
 	isKnownType,
-	toRealized,
 	validateProfile,
 	type Domain,
 	type Filter,
 	type FilterType,
-	type Law,
 	type Profile,
 	type Rule,
 	type Variant,
@@ -90,35 +88,6 @@ const slotFields = fc.record(
 	{ requiredKeys: [] }
 );
 
-const laws: fc.Arbitrary<Law[]> = fc
-	.record(
-		{
-			gainScaledQ: fc.shuffledSubarray(['PK', 'LSC', 'HSC'] as ('PK' | 'LSC' | 'HSC')[], {
-				minLength: 1
-			}),
-			nyquistScaledQ: fc.tuple(
-				fc.shuffledSubarray([...FILTER_TYPES], { minLength: 1, maxLength: 3 }),
-				pick([48000, 96000])
-			),
-			shelfFrequencyShift: fc.shuffledSubarray(['LSC', 'HSC'] as ('LSC' | 'HSC')[], {
-				minLength: 1
-			})
-		},
-		{ requiredKeys: [] }
-	)
-	.map((r) => {
-		const out: Law[] = [];
-		if (r.gainScaledQ) out.push({ law: 'gainScaledQ', types: r.gainScaledQ });
-		if (r.nyquistScaledQ) {
-			const [t, designRate] = r.nyquistScaledQ;
-			out.push({ law: 'nyquistScaledQ', types: t, designRate });
-		}
-		if (r.shelfFrequencyShift) {
-			out.push({ law: 'shelfFrequencyShift', types: r.shelfFrequencyShift, designRate: 48000 });
-		}
-		return out;
-	});
-
 const rules: fc.Arbitrary<Rule[]> = fc.oneof(
 	{ weight: 3, arbitrary: fc.constant<Rule[]>([]) },
 	{ weight: 2, arbitrary: fc.constant<Rule[]>([{ type: 'ascendingFrequency' }]) },
@@ -151,7 +120,6 @@ export const profileArb: fc.Arbitrary<Profile> = fc
 			variants: fc.array(variant, { maxLength: 2 })
 		}),
 		overrides: fc.array(slotFields, { maxLength: 6 }),
-		laws: fc.option(laws, { nil: undefined }),
 		rules,
 		preamp
 	})
@@ -174,7 +142,6 @@ export const profileArb: fc.Arbitrary<Profile> = fc
 			band: r.band,
 			...(unique.length > 0 && { bands: unique }),
 			rules: r.rules,
-			...(r.laws && { realization: { laws: r.laws, sources: [source] } }),
 			preamp: r.preamp,
 			meta: { status: 'draft', sources: [source] }
 		};
@@ -233,11 +200,8 @@ export function slotMember(slot: EngineSlot): fc.Arbitrary<Filter> {
 	return arb as fc.Arbitrary<Filter>;
 }
 
-/**
- * Written filters that fit distinct slots, as a list in random order. `realized` turns them into
- * what the app would hold.
- */
-export function validListArb(profile: Profile, realized: boolean): fc.Arbitrary<Filter[]> {
+/** Written filters that fit distinct slots, as a list in random order. */
+export function validListArb(profile: Profile): fc.Arbitrary<Filter[]> {
 	const p = engineProfile(profile);
 	const n = p.bandCount ?? 4;
 	return fc
@@ -250,8 +214,7 @@ export function validListArb(profile: Profile, realized: boolean): fc.Arbitrary<
 				...indices.map((i) => slotMember(p.slots[p.bandCount === null ? 0 : i] as EngineSlot))
 			)
 		)
-		.chain((fs) => fc.shuffledSubarray(fs, { minLength: fs.length, maxLength: fs.length }))
-		.map((fs) => (realized ? fs.map((f) => toRealized(profile, f)) : fs));
+		.chain((fs) => fc.shuffledSubarray(fs, { minLength: fs.length, maxLength: fs.length }));
 }
 
 export interface Case {
@@ -266,9 +229,9 @@ export const caseArb: fc.Arbitrary<Case> = profileArb.chain((profile) =>
 		profile: fc.constant(profile),
 		filters: fc.oneof(
 			fc.array(filterArb(profile), { maxLength: (profile.bandCount ?? 4) + 2 }),
-			validListArb(profile, true),
+			validListArb(profile),
 			fc
-				.tuple(validListArb(profile, true), fc.array(filterArb(profile), { maxLength: 2 }))
+				.tuple(validListArb(profile), fc.array(filterArb(profile), { maxLength: 2 }))
 				.map(([a, b]) => [...a, ...b])
 		),
 		preamp: fc.oneof(

@@ -96,7 +96,6 @@ const KEY_ORDER = [
 	'band',
 	'bands',
 	'rules',
-	'realization',
 	'preamp',
 	'channels',
 	'meta'

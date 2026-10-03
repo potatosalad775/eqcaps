@@ -9,19 +9,13 @@ export function isGraphic(profile: Profile): boolean {
 }
 
 const KNOWN_RULES: ReadonlySet<string> = new Set(['ascendingFrequency', 'minSpacing']);
-const KNOWN_LAWS: ReadonlySet<string> = new Set([
-	'gainScaledQ',
-	'nyquistScaledQ',
-	'shelfFrequencyShift'
-]);
 
 /**
  * What this engine can't model in a profile written for a newer format minor (SPEC §15). A
- * consumer MUST tell the user about unknown rules (§7) and laws (§8), and SHOULD about types.
+ * consumer MUST tell the user about unknown rules (§7), and SHOULD about types.
  */
 export function unsupported(profile: Profile): {
 	rules: string[];
-	laws: string[];
 	types: FilterType[];
 } {
 	const p = engineProfile(profile);
@@ -30,7 +24,6 @@ export function unsupported(profile: Profile): {
 		rules: unique((profile.rules ?? []).map((r) => (r as { type: string }).type)).filter(
 			(t) => !KNOWN_RULES.has(t)
 		),
-		laws: unique(p.laws.map((l) => (l as { law: string }).law)).filter((l) => !KNOWN_LAWS.has(l)),
 		types: unique(p.slots.flatMap((s) => s.types)).filter((t) => !isKnownType(t))
 	};
 }
@@ -46,7 +39,6 @@ export interface ProfileDescription {
 	groups: SlotGroupDescription[];
 	preamp: string;
 	rules: string[];
-	realization: string;
 }
 
 export interface SlotGroupDescription {
@@ -172,28 +164,6 @@ export function describe(profile: Profile): ProfileDescription {
 		return `Unknown rule "${(r as { type: string }).type}": this app can't check it`;
 	});
 
-	const lawText: Record<string, string> = {
-		gainScaledQ: 'Q narrows as |gain| grows',
-		nyquistScaledQ: 'Q narrows towards high frequencies',
-		shelfFrequencyShift: 'shelf frequency shifts with gain'
-	};
-	const r = profile.realization;
-	let realization: string;
-	if (!r) realization = 'Realization unknown; treated as exact';
-	else {
-		const measured = r.sources.some((s) => s.kind === 'measurement' && s.via === undefined);
-		const laws = r.laws.map((l) => {
-			const name = (l as { law: string }).law;
-			return `${lawText[name] ?? `unknown law "${name}"`} (${l.types.join(', ')})`;
-		});
-		realization =
-			laws.length === 0
-				? measured
-					? 'Measured: the engine is exact'
-					: 'Exact (not measured)'
-				: `${laws.join('; ')}${measured ? '' : ' (not measured)'}`;
-	}
-
 	return {
 		bands:
 			p.bandCount === null
@@ -202,7 +172,6 @@ export function describe(profile: Profile): ProfileDescription {
 		graphic: p.slots.every((s) => isLockedDomain(s.freq)),
 		groups,
 		preamp,
-		rules,
-		realization
+		rules
 	};
 }

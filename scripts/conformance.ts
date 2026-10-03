@@ -17,8 +17,6 @@ import {
 	project,
 	projectType,
 	resolveSlot,
-	toRealized,
-	toWritten,
 	validate,
 	type Domain,
 	type Filter,
@@ -63,16 +61,9 @@ const PARTITIONED = 'examples/c-partitioned-windows';
 const GAIN_WINDOW = 'examples/d-gain-dependent-window';
 const GRAPHIC = 'examples/e-graphic-10';
 const APO = 'examples/g-equalizer-apo';
-const LAWS = 'examples/h-realization-laws';
 const BASE = {};
 
-const source = [{ kind: 'community', ref: 'conformance', date: '2026-10-02' }];
-const NYQUIST = {
-	realization: {
-		laws: [{ law: 'nyquistScaledQ', types: ['PK', 'LPQ'], designRate: 48000 }],
-		sources: source
-	}
-};
+const MANUAL_PREAMP = { preamp: { mode: 'manual', gain: { min: -12, max: 0, step: 0.1 } } };
 const ASCENDING = { rules: [{ type: 'ascendingFrequency' }] };
 const LOCKED_MIDDLE = {
 	bandCount: 3,
@@ -95,25 +86,26 @@ const UNORDERABLE = {
 	],
 	rules: [{ type: 'ascendingFrequency' }]
 };
-/** Slot 3 sits above every later slot; fit's passes repeat only after more than 8 of them. */
+/**
+ * Slot 2 sits above every later slot, so ascendingFrequency never holds; fit's passes repeat only
+ * after more than 8 of them.
+ */
 const LONG_CYCLE = {
 	bandCount: 8,
 	band: {
-		types: ['LSC', 'PK', 'HSC'],
-		freq: { min: 20, max: 1000, step: 0.5 },
-		q: { min: null, max: null, step: null, values: [1.41, 2] },
-		gain: { min: 1, max: 6, step: null }
+		types: ['HSC'],
+		freq: { min: null, max: null, value: 1000 },
+		q: { min: 0.5, max: 2, step: null },
+		gain: { min: 1, max: 6, step: null },
+		variants: [{ when: { type: { in: ['HSC'] } }, q: { min: 0.3, max: 10 } }]
 	},
 	bands: [
-		{ index: 2, types: ['NO', 'BP', 'LSC'] },
-		{ index: 3, freq: { min: 8000, max: 20000 } }
+		{ index: 0, freq: { values: [62, 1000] }, q: { min: 0.5, max: 5 }, gain: { min: -3, max: 3 } },
+		{ index: 1, types: ['PK'], freq: { values: [250] } },
+		{ index: 2, freq: { min: 4000, max: 20000 }, q: { min: 0.3, max: 2 }, variants: [] }
 	],
-	rules: [{ type: 'ascendingFrequency', strict: false }],
-	realization: {
-		laws: [{ law: 'shelfFrequencyShift', types: ['LSC', 'HSC'], designRate: 48000 }],
-		sources: source
-	},
-	preamp: { mode: 'auto' }
+	rules: [{ type: 'ascendingFrequency' }],
+	preamp: { mode: 'manual', gain: { min: -6, max: 6 } }
 };
 const CONDITIONS = {
 	band: {
@@ -172,7 +164,7 @@ function projectTypeVector(description: string, value: FilterType, types: Filter
 }
 
 const exact = (
-	op: 'resolveSlot' | 'toRealized' | 'toWritten' | 'validate',
+	op: 'resolveSlot' | 'validate',
 	description: string,
 	profile: ProfileRef,
 	input: Record<string, unknown>
@@ -189,11 +181,7 @@ const exact = (
 			? i.filter
 				? resolveSlot(p, i.slot, i.filter)
 				: resolveSlot(p, i.slot)
-			: op === 'toRealized'
-				? toRealized(p, i.filter)
-				: op === 'toWritten'
-					? toWritten(p, i.filter)
-					: validate(p, i.slots, i.preamp);
+			: validate(p, i.slots, i.preamp);
 	return { description, profile, op, input, expect: result };
 };
 
@@ -314,49 +302,6 @@ const files: Record<string, { description: string; vectors: Vector[] }> = {
 			exact('resolveSlot', 'unbounded: any slot is the template', APO, { slot: 99 })
 		]
 	},
-	toRealized: {
-		description: 'toRealized(profile, filter) (SPEC §13.3).',
-		vectors: [
-			exact('toRealized', 'no realization: identity', BASE, { filter: pk(1000, -12, 4) }),
-			exact('toRealized', 'gainScaledQ: q / A', LAWS, { filter: pk(1000, -12, 4) }),
-			exact('toRealized', 'gainScaledQ uses |gain|', LAWS, { filter: pk(1000, 12, 4) }),
-			exact('toRealized', 'low shelf: both laws', LAWS, { filter: f('LSC', 100, 0.7, 6) }),
-			exact('toRealized', 'high shelf: frequency moves down', LAWS, {
-				filter: f('HSC', 8000, 0.7, 6)
-			}),
-			exact('toRealized', 'shelf at 0 dB: unchanged', LAWS, { filter: f('LSC', 100, 0.7, 0) }),
-			exact('toRealized', 'freq at or above designRate/2: law not applied', LAWS, {
-				filter: f('LSC', 30000, 0.7, 6)
-			}),
-			exact('toRealized', 'gainless type: gain is 0, no law applies', LAWS, {
-				filter: f('BP', 1000, 2, 9)
-			}),
-			exact('toRealized', 'nyquistScaledQ: q · cos(π·f / designRate)', NYQUIST, {
-				filter: pk(12000, 3)
-			}),
-			exact('toRealized', 'nyquistScaledQ on a gainless type', NYQUIST, {
-				filter: f('LPQ', 6000, 0.707, 0)
-			})
-		]
-	},
-	toWritten: {
-		description: 'toWritten(profile, filter) (SPEC §13.3).',
-		vectors: [
-			exact('toWritten', 'no realization: identity', BASE, { filter: pk(1000, -12, 4) }),
-			exact('toWritten', 'gainScaledQ: q · A', LAWS, { filter: pk(1000, -12, 4) }),
-			exact('toWritten', 'low shelf: freq inverted first, then q', LAWS, {
-				filter: f('LSC', 100, 0.7, 6)
-			}),
-			exact('toWritten', 'high shelf', LAWS, { filter: f('HSC', 8000, 0.7, -6) }),
-			exact('toWritten', 'freq at or above designRate/2: law not applied', LAWS, {
-				filter: f('HSC', 24000, 0.7, 6)
-			}),
-			exact('toWritten', 'nyquistScaledQ: q factor at the written freq', NYQUIST, {
-				filter: pk(12000, 3, Math.SQRT1_2)
-			}),
-			exact('toWritten', 'gainless type: gain becomes 0', BASE, { filter: f('NO', 1000, 5, 4) })
-		]
-	},
 	validate: {
 		description:
 			'validate(profile, slots, preamp?) (SPEC §13.4). Exact, including the order of violations.',
@@ -394,8 +339,8 @@ const files: Record<string, { description: string; vectors: Vector[] }> = {
 				slots: [pk(100, 1), pk(200, 1), pk(400, 1), pk(800, 1), pk(1600, 1), pk(3200, 1)]
 			}),
 			exact('validate', 'preamp none: must be 0', BASE, { slots: [], preamp: -3 }),
-			exact('validate', 'preamp manual: domain', LAWS, { slots: [], preamp: 0.5 }),
-			exact('validate', 'preamp manual: off grid', LAWS, { slots: [], preamp: -0.05 }),
+			exact('validate', 'preamp manual: domain', MANUAL_PREAMP, { slots: [], preamp: 0.5 }),
+			exact('validate', 'preamp manual: off grid', MANUAL_PREAMP, { slots: [], preamp: -0.05 }),
 			exact('validate', 'preamp auto: not checked', GAIN_WINDOW, { slots: [], preamp: 5 }),
 			exact('validate', 'preamp left out: not checked', BASE, { slots: [] }),
 			exact('validate', 'ascendingFrequency: a filter out of order', ASCENDING, {
@@ -496,12 +441,7 @@ const files: Record<string, { description: string; vectors: Vector[] }> = {
 		vectors: [
 			fitVector('valid input comes back unchanged', JDS, [pk(1000, 3, 2), f('LSC', 105, 0.7, 4)]),
 			fitVector('every field out of its domain', BASE, [pk(30000, 15, 0.123)]),
-			fitVector('realization: written q that realizes the wanted q', LAWS, [pk(1000, -12, 4)]),
-			fitVector('realization: written q capped by its domain', LAWS, [pk(1000, -12, 6)]),
-			fitVector('realization: shifted shelf rounded onto the written grid', LAWS, [
-				f('LSC', 100, 0.7, 6)
-			]),
-			fitVector('preamp projected', LAWS, [], 3),
+			fitVector('preamp projected', MANUAL_PREAMP, [], 3),
 			fitVector('minSpacing moves a filter up', SPACING, [pk(100, 3), pk(150, 2)]),
 			fitVector(
 				'minSpacing that cannot be fixed',
@@ -520,14 +460,20 @@ const files: Record<string, { description: string; vectors: Vector[] }> = {
 				pk(4000, 1, 4),
 				pk(250, 1.1, 4)
 			]),
-			fitVector('ascendingFrequency that can never hold: a long cycle of passes', LONG_CYCLE, [
-				f('BP', 21, 1, 0),
-				f('BP', 17, 1, 0),
-				f('NO', 10, 1, 0),
-				pk(10, 1),
-				f('LSC', 21, 1, -7.5),
-				pk(20.25, -0.5)
-			]),
+			fitVector(
+				'ascendingFrequency that can never hold: a long cycle of passes',
+				LONG_CYCLE,
+				[
+					f('HSC', 1000, 1, 1),
+					f('HSC', 1000, 10, 1),
+					f('HSC', 1000, 7, 2),
+					f('HSC', 1000, 5, 0.2),
+					pk(250, 6, 7),
+					f('HSC', 4000, 0, 4),
+					f('HPQ', 1000, 1, 0)
+				],
+				1
+			),
 			fitVector('partitioned engine ordered by frequency', PARTITIONED, [
 				pk(5000, 1),
 				pk(2000, 1),

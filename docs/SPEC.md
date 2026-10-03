@@ -16,17 +16,15 @@
 | **Domain** | Allowed values of one numeric field (§4). |
 | **Variant** | A conditional override of a slot's domains, selected by a predicate on the filter's own fields (§6). |
 | **Rule** | A constraint spanning more than one slot (§7). |
-| **Written value** | A field's value as the engine takes it, in canonical units. Domains, rules and validation are about written values. |
-| **Realized filter** | The cookbook filter the engine actually produces from written values. It equals the written filter unless the profile has realization laws (§8). |
+| **Written value** | A field's value as the engine is told it, in canonical units. Domains, rules and validation are about written values. |
 
 **Units are fixed:** `freq` in Hz, `gain` and `preamp` in dB, and `q` dimensionless as defined by
 the RBJ Audio EQ Cookbook for the filter type. Profiles never carry device-native units. Authors
 fold in every conversion that depends only on the value itself: bandwidth in octaves → Q, raw
 register values → dB. If the native grid becomes non-uniform after conversion, enumerate it with
-`values`. A deviation that depends on another field isn't a unit; it's a realization law (§8,
-DECISIONS D29). A difference between the value the engine is told and the filter it produces is
-never folded in, even a constant one: domains hold what the engine is told, as its own software
-means it (DECISIONS D39).
+`values`. How the engine's filters sound is out of scope (§8): domains hold what the engine is
+told, as its own software means it, and a difference between that and the filter it produces is
+never folded in, even a constant one (DECISIONS D39).
 
 ## 2. Top level
 
@@ -43,7 +41,6 @@ means it (DECISIONS D39).
   "band": { },                           // §5 slot template
   "bands": [ ],                          // §5 per-slot overrides
   "rules": [ ],                          // §7
-  "realization": { },                    // §8
   "preamp": { },                         // §9
   "channels": "linked",                  // §9
   "meta": { }                            // §10
@@ -62,7 +59,6 @@ means it (DECISIONS D39).
 | `band` | ✔ | After merging with `bands`, every slot MUST define `types`, `freq`, `q`, `gain`. |
 | `bands` | – | §5.2 |
 | `rules` | – | default `[]` |
-| `realization` | – | §8; absent = unknown |
 | `preamp` | ✔ | §9; `{ "mode": "unknown" }` is allowed and honest. |
 | `channels` | – | default `"linked"` |
 | `meta` | ✔ | §10 |
@@ -197,9 +193,9 @@ shelves a slope S instead of a Q; convert with the cookbook's `1/Q = sqrt((A + 1
 For gainless types, `gain` is ignored by validation and treated as 0. Vendor-specific types use
 `x-<name>` and are treated as "unknown type" by consumers (§15).
 
-When an engine's filters deviate from these definitions by a known law, `realization` (§8)
-describes it. Out of scope for v1: coefficient quantization, and biquads computed by the bridge at
-an assumed sample rate. Both belong to the bridge.
+Whether an engine's filters match these definitions is out of scope (§8). So are coefficient
+quantization and biquads computed by the bridge at an assumed sample rate; both belong to the
+bridge.
 
 ### 5.4 Graphic EQs need no mode
 
@@ -250,61 +246,17 @@ Candidates for v1.x, not in v1: `maxResponse` (peak of the combined response plu
 which needs filter math in every engine) and a gain budget. There is deliberately no general
 expression language (DECISIONS D11).
 
-## 8. Realization
+## 8. Realization (not in v1)
 
-Domains describe written values (§1). Most engines then build exactly the cookbook filter those
-values describe. Some don't: their Q, or a shelf's frequency, comes out different by an amount
-that depends on another field
-([prior-art §2.1](research/prior-art.md#21-realization-compensation-devicepeq-upstream)).
-`realization` records that, so consumers can show what the listener actually gets and compensate
-before writing (§13.3).
-
-```jsonc
-"realization": {
-  "laws": [
-    { "law": "gainScaledQ", "types": ["PK", "LSC", "HSC"] },
-    { "law": "shelfFrequencyShift", "types": ["LSC", "HSC"], "designRate": 48000 }
-  ],
-  "sources": [{ "kind": "measurement", "ref": "evidence/fosi-audio-ds3/2026-10-12-9f3e.json",
-                "date": "2026-10-12", "by": "github-handle" }]
-}
-```
-
-Laws form a closed set. In each formula `f`, `q` and `gain` are the filter's **written** values,
-`A = 10^(|gain|/40)`, and gainless types count as `gain = 0`.
-
-| `law` | Parameters | Changes | Realized value | `types` allowed |
-| --- | --- | --- | --- | --- |
-| `gainScaledQ` | – | `q` | `q / A` | `PK`, `LSC`, `HSC` |
-| `nyquistScaledQ` | `designRate` | `q` | `q · cos(π·f / designRate)` | any |
-| `shelfFrequencyShift` | `designRate` | `freq` | `(designRate/π) · atan(tan(π·f / designRate) · d)`, with `d = √A` for `LSC` and `1/√A` for `HSC` | `LSC`, `HSC` |
-
-`designRate` (Hz) is the sample rate the engine designs its filters at. It's a fixed property of
-the part, not the rate being streamed. A law with a `designRate` applies only where
-`0 < f < designRate/2`; elsewhere its formula is meaningless, and it is the identity. Written values
-always lie inside, because of the rule below.
-
-- Every law lists its `types` explicitly (non-empty) and applies only to filters of those types.
-- When several `q` laws apply to a type, their factors multiply. At most one `freq` law applies to
-  a type.
-- `designRate` MUST be greater than twice the `freq` maximum of every slot the law can apply to.
-- Laws add dependencies: `gain → q` under `gainScaledQ`, `freq → q` under `nyquistScaledQ`, and
-  `gain → freq` under `shelfFrequencyShift`. Together with the variant edges of §6, the graph MUST
-  stay acyclic. The graph is checked per slot (after merging, §5.2), and a law adds its edge only
-  in slots whose `types` include one of the law's types.
-- A constant factor, such as a frequency the engine always realizes ×0.9775, is not a law, and
-  authors don't fold it into the domains either (§1). Profiles don't record it.
-
-**Provenance.** Probes and read-back see written values, so they can't show realization; only a
-measurement can. `realization` therefore carries its own `sources` (non-empty, source objects as in
-§10), and `meta.status` doesn't cover it. The realization is **measured** iff `sources` has a
-`measurement` source without `via`.
-
-- No `realization` key means *unknown*: consumers treat the engine as exact, and may say so.
-- `"laws": []` with a measurement source records an engine that was measured and found exact.
-
-A consumer that doesn't recognize a law MUST tell the user that the predicted response may be off.
-Written values stay valid either way, so an unknown law never blocks a device write.
+A profile says which values an engine accepts, not how the filters it builds from them sound. Some
+engines are reported to build a different filter from the cookbook meaning of the values they
+take, by a constant factor (a band placed ×0.9775 off the frequency sent) or by one that depends on
+another field (a Q that narrows as gain grows)
+([prior-art §2.1](research/prior-art.md#21-realization-compensation-devicepeq-upstream)). v1
+records neither: such behaviour changes with firmware and vendor customization, only acoustic
+measurement shows it, and vendor apps don't correct for it. Domains hold what the engine is told
+(§1), and consumers send the values the user asks for. A reported quirk may be noted in
+`meta.notes` (DECISIONS D39).
 
 ## 9. Preamp and channels
 
@@ -346,7 +298,7 @@ file's path relative to `data/`: `evidence/<profile id>/<file>.json`.
 | `probe` | Inspector push → pull round-trip. `ref` points to an evidence file in `data/evidence/`. | ✔ |
 | `vendor-docs` | Published spec / manual / SDK | ✔ |
 | `vendor-app` | Observed in the vendor's own app (UI limits, captured traffic) | ✔ |
-| `measurement` | Acoustic measurement of the realized response. `ref` points to the measurement data in `data/evidence/`. | ✔ |
+| `measurement` | Acoustic measurement of the device's response, showing which values take effect. `ref` points to the measurement data in `data/evidence/`. | ✔ |
 | `handler-code` | Inferred from a device-bridge encoder (wire limits only) | ✘ |
 | `community` | Reported without counting evidence, such as a device's read-back of the values it holds (INSPECTOR §2 T2), which says nothing about limits | ✘ |
 
@@ -367,8 +319,7 @@ sibling device doesn't verify this one.
 
 `sources` is always non-empty. The verification levels are ordered
 `draft` < `community-verified` < `maintainer-verified`. A consumer that only needs a yes/no treats
-both `*-verified` values as verified. `meta.status` covers everything except `realization`, which
-carries its own sources (§8).
+both `*-verified` values as verified.
 
 ## 11. Inheritance (authoring files only)
 
@@ -382,8 +333,6 @@ Source files under `data/` MAY use:
   because provenance of the base doesn't transfer silently. `meta.sources` of the base are copied
   into the published file, after the file's own, with `"via": "<id of the file that declared
   them>"`. They are shown for context and never count toward the profile's status (§10).
-- `realization` is inherited like any other top-level key. Its sources are marked `via` too, so an
-  inherited realization counts as unmeasured (§8).
 - `schemaVersion` of the published file is the highest one in the chain, because it states what
   the flat profile needs (§15).
 
@@ -504,28 +453,6 @@ handler does by hand today.
   "preamp": { "mode": "manual", "gain": { "min": -30, "max": 30 } } }
 ```
 
-### H. Realization laws (Fosi-style; values illustrative)
-
-```jsonc
-{
-  "bandCount": 10,
-  "band": { "types": ["PK", "LSC", "HSC"], "freq": { "min": 20, "max": 20000, "step": 1 },
-            "q": { "min": 0.1, "max": 10 }, "gain": { "min": -12, "max": 12, "step": 0.1 } },
-  "realization": {
-    "laws": [
-      { "law": "gainScaledQ", "types": ["PK", "LSC", "HSC"] },
-      { "law": "shelfFrequencyShift", "types": ["LSC", "HSC"], "designRate": 48000 }
-    ],
-    "sources": [{ "kind": "community", "ref": "devicePEQ compensation.js, Fosi Audio DS3 config",
-                  "date": "2026-10-02" }]
-  }
-}
-```
-
-A PK filter written as `q: 4, gain: -12` sounds like Q ≈ 2. To get a real Q of 4 at −12 dB, write
-Q ≈ 8 (`toWritten`). The domain allows at most 10, so the realized Q tops out at about 5 at ±12 dB.
-The only source is `community`, so the realization counts as unmeasured.
-
 ## 13. Engine semantics
 
 The reference implementation is `packages/core` (TypeScript, zero dependencies). Ports to other
@@ -535,7 +462,7 @@ Apps hold filters that describe the response the user wants. The operations fit 
 
 - **Writing to an engine:** `fit` (§13.6) → `complete` (§13.7) → the bridge encodes the written
   values.
-- **Reading from an engine:** the bridge decodes written values → `toRealized` (§13.3).
+- **Reading from an engine:** the bridge decodes written values.
 - **Editing:** `validateList` (§13.4) flags problems without changing anything.
 
 Common to every operation:
@@ -546,8 +473,8 @@ Common to every operation:
   it, conditions on `gain` included (§5.3). Unknown types (§15) count as gain-using, so their gain
   is kept and checked.
 - **Evaluation order.** A slot's fields are evaluated `type` first, then `freq`, `q` and `gain` in
-  topological order of the slot's dependency graph: the variant edges of §6 plus the law edges of
-  §8, taken per slot after merging. Fields with no path between them keep the order `freq`, `q`,
+  topological order of the slot's dependency graph: the variant edges of §6, taken per slot after
+  merging. Fields with no path between them keep the order `freq`, `q`,
   `gain`.
 - **Tolerance.** Every comparison uses `near` (§4): `a < b` means `a < b` and not `near(a, b)`, and
   `a ≤ b` means `a < b` or `near(a, b)`.
@@ -576,21 +503,10 @@ Common to every operation:
   the geometric centre `√(min·max)` of the domain's bounds for `freq`. Infinities clamp.
 - **Type:** keep it if allowed, otherwise use the first entry of the slot's `types`.
 
-### 13.3 `toRealized(profile, filter) → Filter`, `toWritten(profile, filter) → Filter` (exact)
+### 13.3 (not in v1)
 
-`toRealized` maps written values to the filter the engine actually produces. `toWritten` is its
-inverse: the values to write so that the engine produces the given filter. Both are the identity
-when the profile has no `realization`, or when no law applies to the filter's type.
-
-- `toRealized`: `type` and `gain` are unchanged. `freq` goes through the `freq` law, if any. `q` is
-  multiplied by every `q` law's factor, each evaluated on the written values.
-- `toWritten`: `type` and `gain` are unchanged. Invert the `freq` law first, since it needs only
-  `gain`: `f = (designRate/π) · atan(tan(π·f_r / designRate) / d)`. Then divide `q` by the product
-  of the `q` factors, evaluated at the written `freq` just computed.
-- A law with a `designRate` is the identity where its frequency (the written one, or the realized
-  one when inverting the `freq` law) is outside `0 < f < designRate/2` (§8).
-
-Neither function projects, so results may fall outside the domains. `fit` (§13.6) handles that.
+Reserved: v1 has no realization (§8), so there is nothing to map between written and realized
+values.
 
 ### 13.4 `validate(profile, slots, preamp?) → Violation[]` (normative, exact)
 
@@ -636,7 +552,7 @@ type Violation = {
 };
 ```
 
-`validateList(profile, filters, preamp?)` takes the app's filters and runs `toWritten` + `assign` +
+`validateList(profile, filters, preamp?)` takes the app's filters and runs `assign` +
 `validate`. A violation about a slot also carries `filter`, the index of the input filter assigned
 to it, and each active filter that got no slot adds a `too-many-bands` violation with its `filter`.
 It is the convenience API apps call while editing. Not normative, because it inherits `assign`.
@@ -668,7 +584,6 @@ filters that got no slot, and `slotOf[k]` is the slot of filter `k`, or `null`.
 ```ts
 type FitResult = {
   slots: (Filter | null)[];      // written values: what to send to the engine
-  realized: (Filter | null)[];   // toRealized(slots): what the listener gets
   preamp: number;
   changes: Change[];             // where the result differs from what was wanted
   unassigned: Filter[];          // wanted filters that got no slot
@@ -679,19 +594,18 @@ type Change = {
   filter: number | null;         // index of the wanted filter; null for the preamp
   slot: number | null;           // null for the preamp, and for a filter projected flat
   field: 'type' | 'freq' | 'q' | 'gain' | 'preamp';
-  wanted: number | string; realized: number | string;
+  wanted: number | string; written: number | string;
 };
 ```
 
 Input: the app's filters, i.e. the response the user wants, and its preamp.
 
-1. `toWritten` each filter, then `assign`.
-2. Per slot, starting again from the wanted filter: project the type. Then, for each field in
-   evaluation order, compute its written value from the wanted value and the fields already final,
-   and project it onto its domain resolved against those fields. A filter whose gain projects to 0
+1. `assign` the filters.
+2. Per slot, starting again from the wanted filter: project the type. Then project each field, in
+   evaluation order, onto its domain resolved against the fields already final. A filter whose gain projects to 0
    is flat: its slot is left empty, and a `gain` change with `slot: null` reports it.
-3. Rules, on written values. `minSpacing`: walk the active filters by ascending freq; if a gap is
-   too small, move the higher filter to the lowest written freq its domain allows at or above
+3. Rules. `minSpacing`: walk the active filters by ascending freq; if a gap is
+   too small, move the higher filter to the lowest freq its domain allows at or above
    `prev · 2^octaves`, and re-evaluate the fields after `freq`. If that doesn't get it far
    enough, leave the filter as it is; the result is infeasible. `ascendingFrequency`: if the result
    breaks it, redo steps 2–3 with a frequency-ordered assignment, and take that one only if it keeps
@@ -700,36 +614,32 @@ Input: the app's filters, i.e. the response the user wants, and its preamp.
 4. Project the preamp: `manual` projects onto its `gain` domain, `none` gives 0, and `auto` and
    `unknown` keep the value.
 
-`changes` compares each wanted filter with its realized result, field by field, then the preamp.
+`changes` compares each wanted filter with its written result, field by field, then the preamp.
 
 **Normative properties**, enforced by property tests and conformance vectors. With `F = fit(x)`:
 
 - Sound: `F.feasible ⇔ validate(F.slots, F.preamp) = []`.
 - Safe: every type and value in `F.slots`, and `F.preamp`, is in its domain. Only
   `rule-violated`, `unknown-rule` and `unknown-type` violations can remain.
-- Faithful: `validateList(x) = [] ⇒ F.realized` holds exactly the active filters of `x` (within ε,
+- Faithful: `validateList(x) = [] ⇒ F.slots` holds exactly the active filters of `x` (within ε,
   in slot order), with no changes and nothing unassigned.
-- Idempotent: `fit(F.realized)` has the same `slots`, `realized`, `preamp` and `feasible` as `F`,
-  and, when `F` is feasible, no changes.
+- Idempotent: `fit(F.slots)` (its non-empty slots) has the same `slots`, `preamp` and `feasible` as
+  `F`, and, when `F` is feasible, no changes.
 - `fit` never increases the number of active filters.
 
-Without `realization`, `toWritten` and `toRealized` are the identity, so valid input comes back
-unchanged and `fit(fit(x).realized) = fit(x)`.
-
 Some choices above (which assignment wins under `ascendingFrequency`) depend on the input, so one
-pass over its own realized output can choose differently. The reference repeats steps 1–4 on its
-own realized output until the slots repeat an earlier pass (at most 32 passes), and composes the
+pass over its own output can choose differently. The reference repeats steps 1–4 on its own
+output until the slots repeat an earlier pass (at most 32 passes), and composes the
 mapping from wanted filters to slots. Usually that is a fixpoint. On a profile whose rules can never
 be met it can be a cycle; the reference then takes the pass in the cycle with the fewest
-violations, then the one whose realized filters are closest to the wanted ones (a min-cost matching
+violations, then the one whose filters are closest to the wanted ones (a min-cost matching
 of the two as multisets), then the first in slot order. Idempotence holds by construction: fitting
-that result's realized filters walks the same cycle, the choice depends only on its members, and
+that result's filters walks the same cycle, the choice depends only on its members, and
 the result is at distance 0 from them.
 
 `fit` does **not** approximate curves. Folding a parametric curve onto a graphic EQ well means
 re-optimizing against the target response (AutoEQ's job), using the per-slot domains this format
-provides. Optimizers SHOULD evaluate candidates through `toRealized`, so they aim at the response
-the listener gets.
+provides.
 
 ### 13.7 `complete(profile, slots) → { filters, warnings }` (hardware write path)
 
@@ -761,7 +671,7 @@ under `conformance/v1/profiles/` without `.json`, or an RFC 7386 merge patch ove
 `profiles/base.json` (or over the file its `"$base"` names). `conformance/v1/README.md` defines
 `input` and `expect` per operation.
 
-- **Exact ops:** `resolveSlot`, `project`, `toRealized`, `toWritten`, `validate`. Output must match
+- **Exact ops:** `resolveSlot`, `project`, `validate`. Output must match
   within ε, the order of violations included.
 - **Property ops:** `assign`, `fit`, `complete`. The vector gives the input and a few facts about
   it (`expect`); the check is the properties above plus those facts, not a fixed output.
@@ -776,9 +686,8 @@ case format. The issue codes are listed in `ISSUE_CODES` of `packages/core`.
 ### 13.9 Helpers (informative)
 
 `packages/core` also exports `isGraphic(profile)` (§5.4), `describe(profile)` (English summaries
-of slots, preamp, rules and realization for UIs) and `unsupported(profile)`, which lists the rule
-types, laws and filter types this engine version doesn't know, so a consumer can meet §7, §8 and
-§15.
+of slots, preamp and rules for UIs) and `unsupported(profile)`, which lists the rule types and
+filter types this engine version doesn't know, so a consumer can meet §7 and §15.
 
 ## 14. Published artifacts
 
@@ -806,8 +715,7 @@ the host app: the database enhances an app and never blocks it. The reference cl
 ## 15. Versioning and compatibility
 
 - **Major** (`v1` → `v2`): new URL prefix. The old prefix stays frozen and served for ≥ 12 months.
-- **Minor** (`1.0` → `1.1`): additive only (new optional fields, rule types, filter types,
-  realization laws). Each profile's `schemaVersion` states the minimum it needs.
+- **Minor** (`1.0` → `1.1`): additive only (new optional fields, rule types, filter types). Each profile's `schemaVersion` states the minimum it needs.
 - Consumers run **lenient** structural checks at runtime, never the strict CI schema, so newer
-  minors don't break older apps. Unknown keys are ignored. Unknown **rule** types, **filter** types
-  and **realization laws** are surfaced to the user (§7, §8), never silently dropped.
+  minors don't break older apps. Unknown keys are ignored. Unknown **rule** types and **filter**
+  types are surfaced to the user (§7), never silently dropped.

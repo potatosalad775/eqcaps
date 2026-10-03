@@ -41,8 +41,8 @@ describe('validate (SPEC §13.4)', () => {
 			{ slot: null, field: null, code: 'too-many-bands' },
 			{ slot: null, field: 'preamp', code: 'locked', allowed: { value: 0 } }
 		]);
-		const h = example('h-realization-laws');
-		expect(validate(h, [], 0.5)).toEqual([
+		const manual = profile({ preamp: { mode: 'manual', gain: { min: -12, max: 0, step: 0.1 } } });
+		expect(validate(manual, [], 0.5)).toEqual([
 			{
 				slot: null,
 				field: 'preamp',

@@ -23,19 +23,15 @@ group('describe', () => {
 		expect(d.groups[0]?.freq).toBe('20 Hz – 20 kHz');
 		expect(d.groups[0]?.gain).toBe('−12 dB to +12 dB');
 		expect(d.preamp).toBe('Preamp unknown');
-		expect(d.realization).toBe('Realization unknown; treated as exact');
 	});
 
-	it('describes variants, rules and laws', () => {
+	it('describes variants and rules', () => {
 		expect(describe(example('d-gain-dependent-window')).groups[0]?.conditions).toEqual([
 			'when gain > 0 dB: freq 200 Hz – 8 kHz'
 		]);
 		expect(describe(example('c-partitioned-windows')).rules).toEqual([
 			'Band frequencies must increase from slot to slot'
 		]);
-		expect(describe(example('h-realization-laws')).realization).toBe(
-			'Q narrows as |gain| grows (PK, LSC, HSC); shelf frequency shifts with gain (LSC, HSC) (not measured)'
-		);
 		expect(describe(example('g-equalizer-apo')).bands).toBe('Unlimited bands');
 	});
 
@@ -54,11 +50,11 @@ group('describe', () => {
 });
 
 group('unsupported', () => {
-	it('lists rules, laws and types this engine does not know', () => {
+	it('lists rules and types this engine does not know', () => {
 		const p = profile({
 			band: { types: ['PK', 'x-tilt'] },
 			rules: [{ type: 'maxResponse' }, { type: 'ascendingFrequency' }]
 		}) as Profile;
-		expect(unsupported(p)).toEqual({ rules: ['maxResponse'], laws: [], types: ['x-tilt'] });
+		expect(unsupported(p)).toEqual({ rules: ['maxResponse'], types: ['x-tilt'] });
 	});
 });

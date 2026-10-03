@@ -1,7 +1,5 @@
 import {
 	findCycle,
-	lawApplies,
-	lawEdges,
 	NUMERIC_FIELDS,
 	variantDefines,
 	variantReads,
@@ -11,7 +9,7 @@ import { domainBounds, domainForm, near, onGrid } from './domain.ts';
 import { compareFirmware } from './firmware.ts';
 import { error, type Issue } from './issues.ts';
 import { mergeSlotFields, overrideIndices, slotOverrides } from './slots.ts';
-import type { Domain, FilterType, Profile, SlotFields, Source } from './types/schema.generated.ts';
+import type { Domain, Profile, SlotFields, Source } from './types/schema.generated.ts';
 
 /** Source kinds that count toward a verified status (SPEC §10). */
 export const COUNTING_SOURCE_KINDS: ReadonlySet<Source['kind']> = new Set([
@@ -39,7 +37,6 @@ export function validateProfile(profile: Profile): Issue[] {
 		...checkDomains(profile),
 		...checkBands(profile),
 		...checkDependencies(profile),
-		...checkRealization(profile),
 		...checkMatch(profile),
 		...checkMeta(profile)
 	];
@@ -207,7 +204,6 @@ function checkDependencies(profile: Profile): Issue[] {
 			issues.push(issue);
 		}
 	};
-	const laws = profile.realization?.laws ?? [];
 	const overrides = slotOverrides(profile);
 	for (let i = 0; i < (profile.bandCount ?? 1); i++) {
 		const override = overrides.get(i);
@@ -232,69 +228,17 @@ function checkDependencies(profile: Profile): Issue[] {
 				}
 			}
 		});
-		for (const law of laws) if (lawApplies(law, slot.types)) edges.push(...lawEdges(law));
 		const cycle = findCycle(edges);
 		if (cycle) {
 			report(
 				error(
 					'dependency-cycle',
 					variantsPath,
-					`fields depend on each other in a cycle: ${cycle.join(' → ')} (variants and realization laws together must be acyclic)`
+					`fields depend on each other in a cycle: ${cycle.join(' → ')} (variants must be acyclic)`
 				)
 			);
 		}
 	}
-	return issues;
-}
-
-function checkRealization(profile: Profile): Issue[] {
-	const realization = profile.realization;
-	if (!realization) return [];
-	const issues: Issue[] = [];
-
-	const freqLawFor = new Map<FilterType, number>();
-	realization.laws.forEach((law, j) => {
-		if (law.law !== 'shelfFrequencyShift') return;
-		for (const t of law.types) {
-			const first = freqLawFor.get(t);
-			if (first === undefined) {
-				freqLawFor.set(t, j);
-			} else {
-				issues.push(
-					error(
-						'law-conflict',
-						`/realization/laws/${j}`,
-						`${t} already has a frequency law (laws/${first}); at most one applies per type`
-					)
-				);
-			}
-		}
-	});
-
-	const overrides = slotOverrides(profile);
-	realization.laws.forEach((law, j) => {
-		if (!('designRate' in law)) return;
-		let fmax = 0;
-		for (let i = 0; i < (profile.bandCount ?? 1); i++) {
-			const slot = mergeSlotFields(profile.band, overrides.get(i)?.entry);
-			if (!lawApplies(law, slot.types)) continue;
-			const domains = [slot.freq, ...(slot.variants ?? []).map((v) => v.freq)];
-			for (const d of domains) if (d) fmax = Math.max(fmax, domainBounds(d).max);
-		}
-		if (fmax > 0 && !(law.designRate > 2 * fmax)) {
-			issues.push(
-				error(
-					'design-rate-too-low',
-					`/realization/laws/${j}/designRate`,
-					`designRate ${law.designRate} must be greater than twice the highest frequency the law applies to (${fmax} Hz)`
-				)
-			);
-		}
-	});
-
-	realization.sources.forEach((s, k) =>
-		issues.push(...checkEvidenceRef(s, `/realization/sources/${k}`))
-	);
 	return issues;
 }
 

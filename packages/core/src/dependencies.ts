@@ -1,4 +1,4 @@
-import type { FilterType, Law, SlotFields, Variant } from './types/schema.generated.ts';
+import type { SlotFields, Variant } from './types/schema.generated.ts';
 
 /** A filter field. */
 export type Field = 'type' | 'freq' | 'q' | 'gain';
@@ -17,34 +17,14 @@ export function variantDefines(v: Variant): NumericField[] {
 	return NUMERIC_FIELDS.filter((f) => v[f] !== undefined);
 }
 
-/** Dependency edges a law adds for filters of its types (SPEC §8). Unknown laws add none. */
-export function lawEdges(law: Law): [Field, NumericField][] {
-	switch (law.law) {
-		case 'gainScaledQ':
-			return [['gain', 'q']];
-		case 'nyquistScaledQ':
-			return [['freq', 'q']];
-		case 'shelfFrequencyShift':
-			return [['gain', 'freq']];
-		default:
-			return [];
-	}
-}
-
-/** Whether a law applies to a filter of one of these types. */
-export function lawApplies(law: Law, types: readonly FilterType[] | undefined): boolean {
-	return (types ?? []).some((t) => (law.types as readonly FilterType[]).includes(t));
-}
-
-/** Variant edges A → F and law edges of one merged slot. Self-references are left out. */
-export function slotEdges(slot: SlotFields, laws: readonly Law[]): [Field, NumericField][] {
+/** Variant edges A → F of one merged slot. Self-references are left out. */
+export function slotEdges(slot: SlotFields): [Field, NumericField][] {
 	const edges: [Field, NumericField][] = [];
 	for (const v of slot.variants ?? []) {
 		for (const a of variantReads(v)) {
 			for (const f of variantDefines(v)) if (a !== f) edges.push([a, f]);
 		}
 	}
-	for (const law of laws) if (lawApplies(law, slot.types)) edges.push(...lawEdges(law));
 	return edges;
 }
 
@@ -78,11 +58,11 @@ export function findCycle(edges: readonly [Field, Field][]): Field[] | null {
 
 /**
  * The order in which an engine evaluates a slot's numeric fields (SPEC §6, §13.1): topological
- * over the variant and law edges, ties broken freq, q, gain. `type` always comes first and is not
+ * over the variant edges, ties broken freq, q, gain. `type` always comes first and is not
  * listed. On a cyclic (invalid) profile the remaining fields follow in that same order.
  */
-export function fieldOrder(slot: SlotFields, laws: readonly Law[]): NumericField[] {
-	const edges = slotEdges(slot, laws).filter(([a]) => a !== 'type');
+export function fieldOrder(slot: SlotFields): NumericField[] {
+	const edges = slotEdges(slot).filter(([a]) => a !== 'type');
 	const order: NumericField[] = [];
 	let remaining: NumericField[] = [...NUMERIC_FIELDS];
 	while (remaining.length > 0) {

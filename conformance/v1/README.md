@@ -12,8 +12,8 @@ regenerate. A change to a vector is a change every port has to follow, so review
 
 ## Files
 
-One file per operation, named after it: `project.json`, `resolveSlot.json`, `toRealized.json`,
-`toWritten.json`, `validate.json`, `assign.json`, `fit.json`, `complete.json`.
+One file per operation, named after it: `project.json`, `resolveSlot.json`, `validate.json`,
+`assign.json`, `fit.json`, `complete.json`.
 
 ```jsonc
 {
@@ -32,7 +32,7 @@ One file per operation, named after it: `project.json`, `resolveSlot.json`, `toR
 
 `profile` is either:
 
-- a path under `profiles/` without `.json`, such as `"examples/h-realization-laws"`, or
+- a path under `profiles/` without `.json`, such as `"examples/b-jds-labs-element-iv"`, or
 - an [RFC 7386](https://www.rfc-editor.org/rfc/rfc7386) merge patch over
   [`profiles/base.json`](profiles/base.json) (4 PK slots, stepped `q` and `gain`, no preamp). A
   `"$base"` key names another file under `profiles/` to patch instead. Merge patches can't set a
@@ -49,7 +49,6 @@ Filters are `{ "type", "freq", "q", "gain" }`, and `slots` arrays use `null` for
 | --- | --- | --- |
 | `project` | `value`, `domain`, `field` (`freq` `q` `gain` `preamp`, or `type` with `domain` the slot's types) | the projected value |
 | `resolveSlot` | `slot`, optional `filter` | the `EffectiveSlot` |
-| `toRealized`, `toWritten` | `filter` | the filter |
 | `validate` | `slots`, optional `preamp` | the `Violation[]`, in order |
 | `assign` | `filters` | `{ "valid" }`: whether an assignment exists in which every active filter has a slot that accepts it as is |
 | `fit` | `filters`, `preamp` | `{ "feasible" }` |
@@ -60,7 +59,7 @@ JSON has no NaN or infinities, so `project` inputs spell them `"NaN"`, `"Infinit
 
 ## Checking
 
-- **Exact ops** (`project`, `resolveSlot`, `toRealized`, `toWritten`, `validate`): the output
+- **Exact ops** (`project`, `resolveSlot`, `validate`): the output
   must equal `expect`. Numbers compare with the SPEC §4 tolerance, `|a − b| ≤ 1e-9 · max(1, |a|,
   |b|)`, and everything else exactly, object keys included.
 - **Property ops**: the output isn't fixed. A runner checks the properties of SPEC §13.5–§13.7 on

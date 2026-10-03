@@ -24,9 +24,10 @@ The format is defined in [docs/SPEC.md](docs/SPEC.md). In short:
    Ids are permanent. To rename, deprecate the old profile with `replacedBy`.
 2. Start the file with `"$schema": "../../../schema/v1/source.schema.json"`, so your editor
    validates and autocompletes as you type.
-3. Write the values the engine **takes**, in Hz, dB and RBJ-cookbook Q. Fold in any conversion
-   that depends only on the value (register units, octaves → Q, a constant frequency factor).
-   Deviations that depend on another field are `realization` laws (SPEC §8).
+3. Write the values the engine is **told**, in Hz, dB and RBJ-cookbook Q, the way its own software
+   means them. Fold in unit conversions (register units, octaves → Q). Don't correct for how the
+   device sounds: if it's reported to place filters off what it's told, say so in `meta.notes`
+   (DECISIONS D39).
 4. Say where every claim comes from in `meta.sources`, and pick the `meta.status` your evidence
    supports (SPEC §10):
    - `draft`: no evidence beyond handler code or a report;

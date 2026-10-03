@@ -17,10 +17,7 @@ export interface PullRequest {
 	bands?: number;
 }
 
-/**
- * What the device holds, in canonical units: written values (D29). Constant wire factors are
- * undone; nothing else is. Apply core's `toRealized` for what the listener gets.
- */
+/** What the device holds, in canonical units: written values (D29, D39). */
 export interface PullResult {
 	/** One entry per band in band order; null for a band the device reports as off or unset. */
 	filters: (Filter | null)[];

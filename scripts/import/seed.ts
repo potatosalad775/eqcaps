@@ -22,7 +22,6 @@ import type {
 	Domain,
 	FilterType,
 	Preamp,
-	Realization,
 	Source,
 	UsbMatch
 } from '../../packages/core/src/index.ts';
@@ -142,7 +141,6 @@ interface Body {
 	bandCount: number;
 	band: Record<string, unknown>;
 	bands?: Record<string, unknown>[];
-	realization?: Realization;
 	preamp: Preamp;
 }
 
@@ -154,15 +152,7 @@ function body(
 	freqValues?: number[]
 ): Body {
 	const types = typesOf(c);
-	let freqStep = codec.freqStep;
-	const ratio = comp.freqCompensation?.model === 'ratio' ? comp.freqCompensation.factor : null;
-	const factor = ratio ?? (comp.compensate2X && !comp.freqCompensation ? 2 : 1);
-	if (factor !== 1) {
-		freqStep = (freqStep ?? 1) * factor;
-		notes.push(
-			`The engine realizes ${factor} × the frequency on the wire, so frequencies are multiples of ${tidy(freqStep)} Hz; the codec divides by ${factor}.`
-		);
-	}
+	const freqStep = codec.freqStep;
 	const [gMin, gMax] = codec.gain
 		? [Math.max(c.minGain, codec.gain[0]), Math.min(c.maxGain, codec.gain[1])]
 		: [c.minGain, c.maxGain];
@@ -186,57 +176,36 @@ function body(
 		preamp = { mode: 'manual', gain };
 	}
 
-	const laws: Realization['laws'] = [];
-	const within = <T extends string>(all: readonly T[]) =>
-		all.filter((t) => (types as string[]).includes(t));
+	quirks(comp, notes);
+	return { bandCount: c.maxFilters, band, preamp };
+}
+
+/**
+ * devicePEQ's compensation settings correct firmware quirks. Profiles hold the values the device
+ * is told and correct nothing, so each becomes a warning in the notes (D39).
+ */
+function quirks(comp: Compensation, notes: string[]): void {
+	const warn = (text: string) =>
+		notes.push(`Reported quirk, not corrected (D39): devicePEQ ${text}`);
 	const q = comp.qCompensation;
-	if (q?.model === 'rbjGain') {
-		// FiiO measured the law on peaking filters only and limits it to them.
-		const scope = codec.family === 'fiio' ? (['PK'] as const) : (['PK', 'LSC', 'HSC'] as const);
-		laws.push({ law: 'gainScaledQ', types: within(scope) });
-	} else if (q?.model === 'cosNyquist') {
-		laws.push({
-			law: 'nyquistScaledQ',
-			types: within(['PK', 'LSC', 'HSC']),
-			designRate: q.designFs
-		});
-		notes.push(
-			`devicePEQ configures nyquistScaledQ with a design rate of ${q.designFs} Hz, while its own comments derive about 49152 Hz from measurements. Unresolved upstream.`
-		);
-	} else if (q) throw new Error(`unmapped qCompensation ${JSON.stringify(q)}`);
+	if (q?.model === 'rbjGain')
+		warn('reports that filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40)).');
+	else if (q?.model === 'cosNyquist')
+		warn(`reports that Q comes out lower toward high frequencies (Q · cos(π·f / ${q.designFs})).`);
+	else if (q) throw new Error(`unmapped qCompensation ${JSON.stringify(q)}`);
 	const f = comp.freqCompensation;
-	if (f?.model === 'shelfSqrtA') {
-		laws.push({
-			law: 'shelfFrequencyShift',
-			types: within(['LSC', 'HSC']),
-			designRate: f.fs ?? 48000
-		});
-	} else if (f && f.model !== 'ratio') throw new Error(`unmapped freqCompensation ${f.model}`);
+	if (f?.model === 'ratio') warn(`reports that bands land at ${f.factor} × the frequency sent.`);
+	else if (f?.model === 'shelfSqrtA') warn('reports that shelf frequencies move with gain.');
+	else if (f) throw new Error(`unmapped freqCompensation ${f.model}`);
+	else if (comp.compensate2X)
+		warn(
+			'halves frequencies before sending them, because older firmware doubles the frequency it is given.'
+		);
 	if (comp.shelfCompensation?.model === 'peakingAlpha') {
 		notes.push(
-			"devicePEQ's peakingAlpha shelf setting is not a law here: it converts its own slope convention to the Q this engine takes, which is exact RBJ Q (prior-art §2.1)."
+			"devicePEQ's peakingAlpha shelf setting is not a quirk: it converts its own slope convention to the Q this engine takes, which is exact RBJ Q (prior-art §2.1)."
 		);
 	}
-	const kept = laws.filter((l) => l.types.length > 0);
-	return {
-		bandCount: c.maxFilters,
-		band,
-		preamp,
-		...(kept.length > 0
-			? {
-					realization: {
-						laws: kept,
-						sources: [
-							{
-								kind: 'community',
-								ref: `${dpqUrl}devicePEQ/compensation.js`,
-								date: DATE
-							}
-						]
-					} as Realization
-				}
-			: {})
-	};
 }
 
 // --- Specs ---------------------------------------------------------------------------------------
@@ -630,7 +599,6 @@ const KEY_ORDER = [
 	'band',
 	'bands',
 	'rules',
-	'realization',
 	'preamp',
 	'channels',
 	'meta'

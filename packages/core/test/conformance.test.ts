@@ -5,8 +5,6 @@ import {
 	project,
 	projectType,
 	resolveSlot,
-	toRealized,
-	toWritten,
 	validate,
 	type Domain,
 	type Filter,
@@ -61,7 +59,7 @@ function matches(actual: unknown, expected: unknown): boolean {
 	return actual === expected;
 }
 
-const EXACT = ['project', 'resolveSlot', 'toRealized', 'toWritten', 'validate'] as const;
+const EXACT = ['project', 'resolveSlot', 'validate'] as const;
 const PROPERTY = ['assign', 'fit', 'complete'] as const;
 
 function runExact(v: Vector): unknown {
@@ -78,8 +76,6 @@ function runExact(v: Vector): unknown {
 			? resolveSlot(p, i['slot'] as number, filter)
 			: resolveSlot(p, i['slot'] as number);
 	}
-	if (v.op === 'toRealized') return toRealized(p, i['filter'] as Filter);
-	if (v.op === 'toWritten') return toWritten(p, i['filter'] as Filter);
 	return validate(p, i['slots'] as (Filter | null)[], i['preamp'] as number | undefined);
 }
 

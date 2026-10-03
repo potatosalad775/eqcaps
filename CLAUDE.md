@@ -43,14 +43,14 @@ for v2. Don't define format details anywhere except SPEC.md.
    `packages/device-bridge`, which references profiles by id. `schema/`, `data/`, `core` and
    `client` never depend on the bridge.
 3. **Canonical units, written values:** Hz, dB, RBJ-cookbook Q. Domains describe the values the
-   engine takes; authors fold in every conversion that depends only on the value itself.
-   Deviations that depend on another field are `realization` laws, never folded into domains (D29).
+   engine is told; authors fold in unit conversions (register value → dB, octaves → Q). How the
+   engine's filters sound is out of scope: nothing models or corrects firmware quirks (D39).
 4. **Profile ids are permanent public API.** Rename = `deprecated` + `replacedBy`.
 5. **Published files are flat.** `extends`/`abstract` exist only in authoring files and are resolved
    by the build.
 6. **JSON Schema is the structural source of truth.** TS types are generated from it. Rules JSON
    Schema can't express live in the semantic validator and are written down in SPEC.
-7. `project` / `resolveSlot` / `toRealized` / `toWritten` / `validate` are exact and normative
+7. `project` / `resolveSlot` / `validate` are exact and normative
    across languages; `assign` / `fit` / `complete` are normative only through their properties
    (SPEC §13).
 8. **Consumers must work without the CDN.** The database enhances an app and never blocks it.
@@ -71,8 +71,8 @@ for v2. Don't define format details anywhere except SPEC.md.
 - `data/` was seeded once by `scripts/import/seed.ts` (D31) and is now edited by hand. Don't re-run
   the importer over it.
 - No calibration (D39): profiles hold the value the device is told, and nothing corrects firmware
-  quirks (no `realization` in `data/`, no factors folded into domains, no scaling in codecs). Put a
-  reported quirk in `meta.notes` as a warning.
+  quirks (no factors folded into domains, no scaling in codecs). Put a reported quirk in
+  `meta.notes` as a warning.
 - Device bridge (D33): handlers see only the transport interfaces in `src/transport.ts`, never
   browser APIs (those are in `src/browser/`, typed structurally). Codecs write exactly the written
   values they're given: round onto the wire grid, never clamp, pad or convert types; anything the
@@ -110,7 +110,8 @@ for v2. Don't define format details anywhere except SPEC.md.
   model this project replaces. Read it for reference; don't edit it from this repo's tasks.
 - `../devicePEQ` is a local clone of `jeromeof/devicePEQ` (0BSD), upstream of that bridge. Seed data:
   `devicePEQ/peqConstraintsConfig.json` (36 shape-named profiles) + `devicePEQ/*DeviceConfig.js`.
-  Also worth reading: `devicePEQ/compensation.js` (source of the realization laws, D29) and
+  Also worth reading: `devicePEQ/compensation.js` (the quirks devicePEQ corrects; D39 says why we
+  don't) and
   `tests/captures/` (recorded device exchanges). **Don't copy anything** from `fiio-js-capture/`,
   `walkplayJS/`, `walkplayPreprocessor/walkplay.js`, `Q5K/` or `bluetooth_tools/`. They are vendor
   code or reverse-engineered vendor material, not 0BSD (D25). No upstream coordination (D26).

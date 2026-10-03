@@ -16,7 +16,6 @@ export const FEATURES = {
 	conditional: 'Conditional domains',
 	graphic: 'Graphic EQ',
 	rules: 'Cross-band rules',
-	realization: 'Realization laws',
 	preamp: 'Adjustable preamp'
 } as const;
 
@@ -44,7 +43,6 @@ export function featuresOf(p: Profile): Set<Feature> {
 	}
 	if (p.bandCount !== 0 && isGraphic(p)) out.add('graphic');
 	if ((p.rules ?? []).length > 0) out.add('rules');
-	if ((p.realization?.laws ?? []).length > 0) out.add('realization');
 	if (p.preamp.mode === 'manual') out.add('preamp');
 	return out;
 }

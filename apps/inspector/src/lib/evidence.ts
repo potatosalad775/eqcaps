@@ -67,7 +67,7 @@ export interface EvidenceReport {
 
 export const READ_CAVEATS = [
 	'Read-back only: shows values the device holds, not the limits of what it accepts.',
-	'Realization not verified: the written values are what the device stores, not what it plays.'
+	'Read-back shows the values the device was told, not how they sound.'
 ];
 
 /** The evidence for one read. Serial numbers and Bluetooth addresses are never included. */

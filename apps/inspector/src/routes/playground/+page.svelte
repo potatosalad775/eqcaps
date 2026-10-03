@@ -8,7 +8,7 @@
 	import {
 		complete,
 		fit,
-		toWritten,
+		normalizeFilter,
 		validateList,
 		type Change,
 		type Filter,
@@ -93,7 +93,7 @@ Filter 11: ON PK Fc 19000 Hz Gain 0.8 dB Q 0.70`;
 			const fitted = fit(profile, filters, preamp);
 			return {
 				violations: validateList(profile, filters, preamp),
-				written: filters.map((f) => toWritten(profile as Profile, f)),
+				written: filters.map(normalizeFilter),
 				fitted,
 				completed: profile.kind === 'hardware' ? complete(profile, fitted.slots) : null
 			};
@@ -101,8 +101,6 @@ Filter 11: ON PK Fc 19000 Hz Gain 0.8 dB Q 0.70`;
 			return { error: e instanceof Error ? e.message : String(e) };
 		}
 	});
-
-	const hasLaws = $derived((profile?.realization?.laws.length ?? 0) > 0);
 
 	const options = $derived(
 		[...(catalog.index?.profiles ?? [])]
@@ -184,7 +182,7 @@ Filter 11: ON PK Fc 19000 Hz Gain 0.8 dB Q 0.70`;
 			<p class="flex items-center gap-2 text-xs text-zinc-500">
 				<StatusBadge status={profile.meta.status} />
 				{profile.bandCount === null ? 'unlimited bands' : `${profile.bandCount} bands`}, preamp {profile
-					.preamp.mode}{hasLaws ? ', realization laws' : ''}
+					.preamp.mode}
 			</p>
 		{:else if profile === null}
 			<p class="text-sm text-red-700 dark:text-red-400">No profile "{profileId}".</p>
@@ -236,9 +234,7 @@ Filter 11: ON PK Fc 19000 Hz Gain 0.8 dB Q 0.70`;
 					</p>
 				{:else}
 					<p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-						{r.violations.length} problem{r.violations.length === 1 ? '' : 's'}{hasLaws
-							? ' (values are written values, after the realization laws)'
-							: ''}:
+						{r.violations.length} problem{r.violations.length === 1 ? '' : 's'}:
 					</p>
 					<ul class="mt-1 list-disc space-y-0.5 pl-5 text-sm">
 						{#each r.violations as v, i (i)}<li>{violationText(v, r.written)}</li>{/each}
@@ -266,10 +262,7 @@ Filter 11: ON PK Fc 19000 Hz Gain 0.8 dB Q 0.70`;
 							<tr>
 								<th class="px-2 text-left font-normal">Slot</th>
 								<th class="px-2 text-left font-normal" colspan="4">Wanted</th>
-								<th class="px-2 text-left font-normal" colspan="4">
-									{hasLaws ? 'Realized (what you hear)' : 'Fitted'}
-								</th>
-								{#if hasLaws}<th class="px-2 text-left font-normal" colspan="2">Written</th>{/if}
+								<th class="px-2 text-left font-normal" colspan="4">Fitted</th>
 							</tr>
 							<tr class="border-b border-zinc-200 dark:border-zinc-800">
 								<th></th>
@@ -282,16 +275,12 @@ Filter 11: ON PK Fc 19000 Hz Gain 0.8 dB Q 0.70`;
 								<th class="px-2 text-right font-normal">dB</th><th
 									class="px-2 text-right font-normal">Q</th
 								>
-								{#if hasLaws}<th class="px-2 text-right font-normal">Hz</th><th
-										class="px-2 text-right font-normal">Q</th
-									>{/if}
 							</tr>
 						</thead>
 						<tbody>
 							{#each r.fitted.slots as s, i (i)}
 								{@const k = slots[i]}
 								{@const w = k !== undefined ? parsed.filters[k] : undefined}
-								{@const real = r.fitted.realized[i]}
 								<tr
 									class="border-b border-zinc-100 dark:border-zinc-900 {s ? '' : 'text-zinc-400'}"
 								>
@@ -304,21 +293,17 @@ Filter 11: ON PK Fc 19000 Hz Gain 0.8 dB Q 0.70`;
 									<td class="px-2 py-1 text-right font-mono whitespace-nowrap tabular-nums"
 										>{w ? `${formatField('gain', w.gain)} · ${formatField('q', w.q)}` : ''}</td
 									>
-									{#if s && real}
+									{#if s}
 										<td
 											class="px-2 py-1 font-mono {changed(r.fitted.changes, k, 'type')
 												? 'bg-amber-100 font-semibold dark:bg-amber-900/50'
-												: ''}">{real.type}</td
+												: ''}">{s.type}</td
 										>
-										{@render cell('freq', real, changed(r.fitted.changes, k, 'freq'))}
-										{@render cell('gain', real, changed(r.fitted.changes, k, 'gain'))}
-										{@render cell('q', real, changed(r.fitted.changes, k, 'q'))}
-										{#if hasLaws}
-											{@render cell('freq', s)}
-											{@render cell('q', s)}
-										{/if}
+										{@render cell('freq', s, changed(r.fitted.changes, k, 'freq'))}
+										{@render cell('gain', s, changed(r.fitted.changes, k, 'gain'))}
+										{@render cell('q', s, changed(r.fitted.changes, k, 'q'))}
 									{:else}
-										<td class="px-2 py-1 text-xs" colspan={hasLaws ? 6 : 4}>empty</td>
+										<td class="px-2 py-1 text-xs" colspan="4">empty</td>
 									{/if}
 								</tr>
 							{/each}
@@ -352,7 +337,7 @@ Filter 11: ON PK Fc 19000 Hz Gain 0.8 dB Q 0.70`;
 						type="button"
 						class="rounded border border-zinc-300 px-2 py-1 dark:border-zinc-700"
 						onclick={() =>
-							copy('Fitted filters copied', formatApo(present(r.fitted.realized), r.fitted.preamp))}
+							copy('Fitted filters copied', formatApo(present(r.fitted.slots), r.fitted.preamp))}
 						>Copy fitted filters (APO text)</button
 					>
 					<button

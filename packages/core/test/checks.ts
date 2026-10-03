@@ -6,7 +6,6 @@ import {
 	isActive,
 	near,
 	normalizeFilter,
-	toRealized,
 	validate,
 	validateList,
 	type Filter,
@@ -53,13 +52,9 @@ export function checkSound(profile: Profile, filters: Filter[], preamp: number):
 	const violations = validate(profile, r.slots, r.preamp);
 	expect(r.feasible).toBe(violations.length === 0);
 	expect(violations.filter((v) => !RESIDUAL.has(v.code))).toEqual([]);
-	expect(r.realized).toHaveLength(r.slots.length);
-	r.slots.forEach((s, i) =>
-		expect(same(r.realized[i], s ? toRealized(profile, s) : null)).toBe(true)
-	);
 }
 
-/** Faithful: validateList(x) = [] ⇒ realized = x, with no changes. Returns whether it applied. */
+/** Faithful: validateList(x) = [] ⇒ the slots hold x, with no changes. Returns whether it applied. */
 export function checkFaithful(profile: Profile, filters: Filter[], preamp: number): boolean {
 	if (validateList(profile, filters, preamp).length > 0) return false;
 	const r = fit(profile, filters, preamp);
@@ -67,18 +62,17 @@ export function checkFaithful(profile: Profile, filters: Filter[], preamp: numbe
 	expect(r.unassigned).toEqual([]);
 	expect(r.feasible).toBe(true);
 	const wanted = filters.map(normalizeFilter).filter(isActive);
-	expect(sameMultiset(present(r.realized), wanted), JSON.stringify({ r, wanted })).toBe(true);
+	expect(sameMultiset(present(r.slots), wanted), JSON.stringify({ r, wanted })).toBe(true);
 	return true;
 }
 
-/** Idempotent: fit(F.realized) has F's slots, realized filters, preamp and feasibility. */
+/** Idempotent: fit(F.slots) has F's slots, preamp and feasibility. */
 export function checkIdempotent(profile: Profile, filters: Filter[], preamp: number): void {
 	const f = fit(profile, filters, preamp);
-	const g = fit(profile, present(f.realized), f.preamp);
+	const g = fit(profile, present(f.slots), f.preamp);
 	const ctx = JSON.stringify({ f: f.slots, g: g.slots });
 	expect(g.slots.length, ctx).toBe(f.slots.length);
 	g.slots.forEach((s, i) => expect(same(s, f.slots[i]), ctx).toBe(true));
-	g.realized.forEach((s, i) => expect(same(s, f.realized[i]), ctx).toBe(true));
 	expect(g.preamp).toBe(f.preamp);
 	expect(g.feasible).toBe(f.feasible);
 	// A feasible result is valid input, so a second fit changes nothing (faithful). An infeasible

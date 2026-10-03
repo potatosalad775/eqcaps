@@ -21,7 +21,7 @@ hardware device in the [eqcaps](https://github.com/potatosalad775/eqcaps) databa
 
 ```ts
 import { createClient } from '@potatosalad775/eqcaps-client';
-import { complete, fit, toRealized } from '@potatosalad775/eqcaps-core';
+import { complete, fit } from '@potatosalad775/eqcaps-core';
 import {
 	guessProtocol,
 	identityOf,
@@ -42,9 +42,8 @@ if (transport) {
 	if (protocol) {
 		const device = openDevice(transport, protocol, profile ? { profile } : {});
 
-		// Read: written values, as the device holds them; toRealized gives what the listener hears.
+		// Read: written values, as the device holds them.
 		const state = await device.pull();
-		const heard = profile ? state.filters.map((f) => f && toRealized(profile, f)) : state.filters;
 
 		// Write: what the user wants, fitted to the device, every band filled.
 		if (profile) {

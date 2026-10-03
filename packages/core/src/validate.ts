@@ -3,7 +3,6 @@ import { compareNear, near } from './domain.ts';
 import { ascendingBreaks } from './filler.ts';
 import { isActive, isKnownType, normalizeFilter, usesGain, type Filter } from './filter.ts';
 import { domainViolation } from './project.ts';
-import { unrealize } from './realization.ts';
 import { engineProfile, resolveField, type EngineProfile } from './resolve.ts';
 import type { Domain, FilterType, Profile, Rule } from './types/schema.generated.ts';
 
@@ -139,7 +138,7 @@ export function spacingBreaks(
 }
 
 /**
- * The convenience check apps run while editing (SPEC §13.4): `toWritten` each filter, `assign`,
+ * The convenience check apps run while editing (SPEC §13.4): normalize each filter, `assign`,
  * `validate`, plus a too-many-bands violation for each filter that found no slot. Violations
  * about a slot also name the input filter in `filter`. Not normative, because assign isn't.
  */
@@ -149,7 +148,7 @@ export function validateList(
 	preamp?: number
 ): Violation[] {
 	const p = engineProfile(profile);
-	const written = filters.map((f) => unrealize(p.laws, f));
+	const written = filters.map(normalizeFilter);
 	const assigned = assignEngine(p, written);
 	const filterOf = new Map<number, number>();
 	assigned.slotOf.forEach((s, k) => {

@@ -155,11 +155,6 @@ test('a profile with a manual preamp has a protocol that writes it', () => {
 	expect(wrong.map(([id]) => id)).toEqual([]);
 });
 
-test('the database corrects no quirks: no profile has realization laws (D39)', () => {
-	const calibrated = [...profiles.values()].filter((p) => p.realization).map((p) => p.id);
-	expect(calibrated).toEqual([]);
-});
-
 /** Where a profile domain isn't inside the codec's wire field. */
 function outside(d: Domain, w: WireField | { values: readonly number[] } | undefined): string[] {
 	if (!w) return [];

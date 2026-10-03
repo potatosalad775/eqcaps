@@ -35,7 +35,6 @@ export function deriveSourceSchema(profile: Schema): Schema {
 	const defs = s.$defs;
 	const source = defs.source as { properties: Record<string, unknown> };
 	const meta = defs.meta as { properties: { sources: Schema } };
-	const realization = defs.realization as { properties: { sources: Schema } };
 
 	s.$id = (profile.$id as string).replace('profile.schema.json', 'source.schema.json');
 	s.title = 'eqcaps authoring file (data/profiles, data/bases)';
@@ -52,8 +51,7 @@ export function deriveSourceSchema(profile: Schema): Schema {
 				'Start from this profile and apply this file on top. match, device, meta and id are never inherited (SPEC §11).',
 			$ref: '#/$defs/profileId'
 		},
-		meta: { $ref: '#/$defs/authoringMeta' },
-		realization: { $ref: '#/$defs/authoringRealization' }
+		meta: { $ref: '#/$defs/authoringMeta' }
 	};
 	s.required = ['id', 'meta'];
 	s.allOf = [{ $ref: '#/$defs/authoringRules' }];
@@ -69,13 +67,6 @@ export function deriveSourceSchema(profile: Schema): Schema {
 		properties: {
 			...meta.properties,
 			sources: { ...meta.properties.sources, items: { $ref: '#/$defs/authoringSource' } }
-		}
-	};
-	defs.authoringRealization = {
-		...realization,
-		properties: {
-			...realization.properties,
-			sources: { ...realization.properties.sources, items: { $ref: '#/$defs/authoringSource' } }
 		}
 	};
 	defs.authoringRules = {
@@ -94,7 +85,6 @@ export function deriveSourceSchema(profile: Schema): Schema {
 	};
 	delete defs.source;
 	delete defs.meta;
-	delete defs.realization;
 	return s;
 }
 

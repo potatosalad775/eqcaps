@@ -25,29 +25,8 @@
 			"expect": { "feasible": true }
 		},
 		{
-			"description": "realization: written q that realizes the wanted q",
-			"profile": "examples/h-realization-laws",
-			"op": "fit",
-			"input": { "filters": [{ "type": "PK", "freq": 1000, "q": 4, "gain": -12 }], "preamp": 0 },
-			"expect": { "feasible": true }
-		},
-		{
-			"description": "realization: written q capped by its domain",
-			"profile": "examples/h-realization-laws",
-			"op": "fit",
-			"input": { "filters": [{ "type": "PK", "freq": 1000, "q": 6, "gain": -12 }], "preamp": 0 },
-			"expect": { "feasible": true }
-		},
-		{
-			"description": "realization: shifted shelf rounded onto the written grid",
-			"profile": "examples/h-realization-laws",
-			"op": "fit",
-			"input": { "filters": [{ "type": "LSC", "freq": 100, "q": 0.7, "gain": 6 }], "preamp": 0 },
-			"expect": { "feasible": true }
-		},
-		{
 			"description": "preamp projected",
-			"profile": "examples/h-realization-laws",
+			"profile": { "preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } } },
 			"op": "fit",
 			"input": { "filters": [], "preamp": 3 },
 			"expect": { "feasible": true }
@@ -134,33 +113,42 @@
 			"profile": {
 				"bandCount": 8,
 				"band": {
-					"types": ["LSC", "PK", "HSC"],
-					"freq": { "min": 20, "max": 1000, "step": 0.5 },
-					"q": { "min": null, "max": null, "step": null, "values": [1.41, 2] },
-					"gain": { "min": 1, "max": 6, "step": null }
+					"types": ["HSC"],
+					"freq": { "min": null, "max": null, "value": 1000 },
+					"q": { "min": 0.5, "max": 2, "step": null },
+					"gain": { "min": 1, "max": 6, "step": null },
+					"variants": [{ "when": { "type": { "in": ["HSC"] } }, "q": { "min": 0.3, "max": 10 } }]
 				},
 				"bands": [
-					{ "index": 2, "types": ["NO", "BP", "LSC"] },
-					{ "index": 3, "freq": { "min": 8000, "max": 20000 } }
+					{
+						"index": 0,
+						"freq": { "values": [62, 1000] },
+						"q": { "min": 0.5, "max": 5 },
+						"gain": { "min": -3, "max": 3 }
+					},
+					{ "index": 1, "types": ["PK"], "freq": { "values": [250] } },
+					{
+						"index": 2,
+						"freq": { "min": 4000, "max": 20000 },
+						"q": { "min": 0.3, "max": 2 },
+						"variants": []
+					}
 				],
-				"rules": [{ "type": "ascendingFrequency", "strict": false }],
-				"realization": {
-					"laws": [{ "law": "shelfFrequencyShift", "types": ["LSC", "HSC"], "designRate": 48000 }],
-					"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
-				},
-				"preamp": { "mode": "auto" }
+				"rules": [{ "type": "ascendingFrequency" }],
+				"preamp": { "mode": "manual", "gain": { "min": -6, "max": 6 } }
 			},
 			"op": "fit",
 			"input": {
 				"filters": [
-					{ "type": "BP", "freq": 21, "q": 1, "gain": 0 },
-					{ "type": "BP", "freq": 17, "q": 1, "gain": 0 },
-					{ "type": "NO", "freq": 10, "q": 1, "gain": 0 },
-					{ "type": "PK", "freq": 10, "q": 1, "gain": 1 },
-					{ "type": "LSC", "freq": 21, "q": 1, "gain": -7.5 },
-					{ "type": "PK", "freq": 20.25, "q": 1, "gain": -0.5 }
+					{ "type": "HSC", "freq": 1000, "q": 1, "gain": 1 },
+					{ "type": "HSC", "freq": 1000, "q": 10, "gain": 1 },
+					{ "type": "HSC", "freq": 1000, "q": 7, "gain": 2 },
+					{ "type": "HSC", "freq": 1000, "q": 5, "gain": 0.2 },
+					{ "type": "PK", "freq": 250, "q": 7, "gain": 6 },
+					{ "type": "HSC", "freq": 4000, "q": 0, "gain": 4 },
+					{ "type": "HPQ", "freq": 1000, "q": 1, "gain": 0 }
 				],
-				"preamp": 0
+				"preamp": 1
 			},
 			"expect": { "feasible": false }
 		},

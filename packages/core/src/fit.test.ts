@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { present } from '../test/checks.ts';
 import { example, pk, profile } from '../test/fixtures.ts';
 import { fit } from './fit.ts';
-import { toRealized } from './realization.ts';
 
 describe('fit (SPEC §13.6)', () => {
 	it('returns valid input unchanged', () => {
@@ -13,47 +12,24 @@ describe('fit (SPEC §13.6)', () => {
 		expect(r.changes).toEqual([]);
 		expect(r.slots[0]).toEqual(filters[1]);
 		expect(r.slots[2]).toEqual(filters[0]);
-		expect(r.realized).toEqual(r.slots);
 	});
 
 	it('projects each field and reports what changed', () => {
 		const r = fit(profile(), [pk(30000, 15, 0.123)]);
 		expect(r.slots[0]).toEqual(pk(20000, 12, 0.12));
 		expect(r.changes).toEqual([
-			{ filter: 0, slot: 0, field: 'freq', wanted: 30000, realized: 20000 },
-			{ filter: 0, slot: 0, field: 'q', wanted: 0.123, realized: 0.12 },
-			{ filter: 0, slot: 0, field: 'gain', wanted: 15, realized: 12 }
+			{ filter: 0, slot: 0, field: 'freq', wanted: 30000, written: 20000 },
+			{ filter: 0, slot: 0, field: 'q', wanted: 0.123, written: 0.12 },
+			{ filter: 0, slot: 0, field: 'gain', wanted: 15, written: 12 }
 		]);
 		expect(r.feasible).toBe(true);
 	});
 
-	it('writes what realizes the wanted filter (SPEC §12 H)', () => {
-		const h = example('h-realization-laws');
-		const exact = fit(h, [{ type: 'PK', freq: 1000, q: 4, gain: -12 }]);
-		expect(exact.slots[0]?.q).toBeCloseTo(7.98105, 5);
-		expect(exact.realized[0]?.q).toBeCloseTo(4, 9);
-		expect(exact.changes).toEqual([]);
-
-		// Written q tops out at 10, so the realized q tops out at about 5 at ±12 dB.
-		const capped = fit(h, [{ type: 'PK', freq: 1000, q: 6, gain: -12 }]);
-		expect(capped.slots[0]?.q).toBe(10);
-		expect(capped.realized[0]?.q).toBeCloseTo(10 / 10 ** 0.3, 9);
-		expect(capped.changes).toMatchObject([{ field: 'q', wanted: 6 }]);
-	});
-
-	it('rounds a shifted shelf frequency onto the written grid', () => {
-		const h = example('h-realization-laws');
-		const r = fit(h, [{ type: 'LSC', freq: 100, q: 0.7, gain: 6 }]);
-		expect(r.slots[0]?.freq).toBe(84); // 100 / 10^(6/80) ≈ 84.14, step 1
-		expect(r.realized[0]).toEqual(toRealized(h, r.slots[0]!));
-		expect(r.changes.map((c) => c.field)).toEqual(['freq']); // q isn't stepped: it realizes exactly
-	});
-
 	it('projects the preamp', () => {
-		const h = example('h-realization-laws');
-		expect(fit(h, [], 3)).toMatchObject({
+		const manual = profile({ preamp: { mode: 'manual', gain: { min: -12, max: 0, step: 0.1 } } });
+		expect(fit(manual, [], 3)).toMatchObject({
 			preamp: 0,
-			changes: [{ field: 'preamp', wanted: 3, realized: 0 }]
+			changes: [{ field: 'preamp', wanted: 3, written: 0 }]
 		});
 		expect(fit(profile(), [], -4).preamp).toBe(0); // mode none
 		expect(fit(example('d-gain-dependent-window'), [], -4).preamp).toBe(-4); // mode auto
@@ -63,7 +39,7 @@ describe('fit (SPEC §13.6)', () => {
 		const p = profile({ rules: [{ type: 'minSpacing', octaves: 1 }] });
 		const r = fit(p, [pk(100, 3), pk(150, 2)]);
 		expect(r.slots.map((s) => s?.freq ?? null)).toEqual([100, 200, null, null]);
-		expect(r.changes).toEqual([{ filter: 1, slot: 1, field: 'freq', wanted: 150, realized: 200 }]);
+		expect(r.changes).toEqual([{ filter: 1, slot: 1, field: 'freq', wanted: 150, written: 200 }]);
 		expect(r.feasible).toBe(true);
 	});
 
@@ -74,7 +50,7 @@ describe('fit (SPEC §13.6)', () => {
 		const r = fit(p, cluster);
 		expect(r.slots.map((s) => s?.freq)).toEqual([20, 40, 80, 160, 320, 640, 1280, 2560]);
 		expect(r.feasible).toBe(true);
-		const again = fit(p, present(r.realized));
+		const again = fit(p, present(r.slots));
 		expect(again.slots).toEqual(r.slots);
 	});
 
@@ -117,7 +93,7 @@ describe('fit (SPEC §13.6)', () => {
 			[4000, 1]
 		]);
 		expect(r.feasible).toBe(false);
-		const again = fit(p, present(r.realized));
+		const again = fit(p, present(r.slots));
 		expect(again.slots).toEqual(r.slots);
 	});
 

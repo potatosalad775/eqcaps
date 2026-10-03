@@ -24,8 +24,7 @@ Each tier works without the ones above it. Tiers T0–T2 and T4 **never write to
 - Search by brand, model, alias, USB id. Filter by status, kind and feature (has steps, partitioned, conditional…).
 - **Profile view:** a per-slot chart (one row per slot on a log-frequency axis showing its freq
   window, variants drawn as alternative windows), plus gain/Q domains, type badges, rules,
-  realization laws (marked measured or not), preamp, provenance with links to evidence, and raw
-  JSON.
+  preamp, provenance with links to evidence, and raw JSON.
 - **Playground:** paste filters (Equalizer APO text, AutoEQ `ParametricEQ.txt`, or JSON), pick a
   profile, and see `validateList` violations and the `fit` result as a diff. This is where app
   developers learn the engine.
@@ -42,8 +41,7 @@ Each tier works without the ones above it. Tiers T0–T2 and T4 **never write to
 
 ### T2: Read (read-only, needs a handler with read-back)
 
-- Pull the current EQ from the device and show the written values in canonical units. When the
-  profile has `realization` laws, also show what the listener gets (`toRealized`).
+- Pull the current EQ from the device and show the written values in canonical units.
 - Run `validate` against the matched profile. A discrepancy is a finding. For example, the device
   reports a gain of `0.05` while the profile says `step: 0.1`, or 12 slots come back while the
   profile says 10.
@@ -93,7 +91,7 @@ Probing is offered only when all of these hold. Otherwise the UI explains which 
 - The bridge handler supports **read-back** (`canRead`). Write-only devices can't be probed (EarFun,
   Edifier).
 - The handler supports **raw push**: no `normalizeFiltersForDevice`, no clamping in the app layer,
-  and no `fit` or `toWritten` (§4). Codec-level clamps are known separately (§4) so results
+  and no `fit` (§4). Codec-level clamps are known separately (§4) so results
   can be attributed.
 - The device does not `disconnectOnSave`, or the handler supports automatic reconnection.
 - The user has acknowledged the safety notice (§3.4).
@@ -161,8 +159,8 @@ starting, and the counter while it runs.
 - **Read-back ≠ realized response.** Firmware may store 15 dB while the DSP clips at 12, or store a
   Q it then ignores, or realize a Q or frequency that differs from what it stores
   ([research/prior-art.md §2.1](research/prior-art.md#21-realization-compensation-devicepeq-upstream)).
-  Only acoustic measurement (`source.kind: measurement`) verifies realization, and it's the only
-  evidence that can establish `realization` laws (SPEC §8). The evidence report states this
+  Only acoustic measurement (`source.kind: measurement`) shows how the device sounds, and the
+  format doesn't record that (SPEC §8, DECISIONS D39). The evidence report states this
   explicitly. devicePEQ's REW-driven verification page and its browser-native sweep
   capture are prior art for a later measurement tier
   ([research/prior-art.md §5](research/prior-art.md#5-upstream-assets-worth-reusing)). That tier
@@ -183,7 +181,7 @@ The inspector uses `packages/device-bridge`, extracted from modernGraphTool's `s
 | --- | --- |
 | Identify unknown devices | connectors accept "any device" mode; identity separated from handler lookup |
 | T2/T3 attribution | **split each handler into a pure codec** (`encode(bands) → bytes`, `decode(bytes) → bands`) and transport I/O. The codec alone can be probed offline (encode→decode) to learn wire-level limits with no hardware, which feeds `handler-code` sources automatically. It also gives a virtual device for tests and UI work. |
-| Raw push | push sends written values straight to the codec: no `normalizeFiltersForDevice`, no clamping. With realization in profiles (SPEC §8) the bridge has no compensation to bypass, unlike devicePEQ, which needed a verification-only switch. Every push is raw; consumers fit first (DECISIONS D33). |
+| Raw push | push sends written values straight to the codec: no `normalizeFiltersForDevice`, no clamping. Nothing corrects firmware quirks (DECISIONS D39), so the bridge has no compensation to bypass, unlike devicePEQ, which needed a verification-only switch. Every push is raw; consumers fit first (DECISIONS D33). |
 | Portable transports | handlers talk to a transport interface (open, send/receive reports or bytes, close) with no browser types. WebHID, Web Serial and Web Bluetooth are the browser implementations. The Android app supplies a native USB one (DECISIONS D27). |
 | Capability flags | `canRead`, `canWrite`, `slots`, `disconnectOnSave`, `supportsPreamp` exposed per handler |
 | Link to DB | registrations reference a profile **id** instead of carrying `minGain`/`maxGain`/`maxFilters`/`supportsLSHSFilters`. Protocol-only fields (`reportId`, `schemeNo`, `baudRate`, slots…) stay in the bridge. |
@@ -205,7 +203,7 @@ database, and an unknown device gets its vendor's usual protocol, marked experim
 ```
 apps/inspector (Svelte 5 + Vite, static SPA)
   ├── uses packages/client       fetch index/profiles, cache, match identity → profiles
-  ├── uses packages/core         resolveSlot / validate / fit / assign / complete / toRealized / toWritten
+  ├── uses packages/core         resolveSlot / validate / fit / assign / complete
   ├── uses packages/device-bridge  connectors + handlers (+ codecs)
   └── probe engine (in-app module) experiment planner, inference, evidence writer
 ```
@@ -231,7 +229,7 @@ apps/inspector (Svelte 5 + Vite, static SPA)
     { "id": "gain-max-slot0", "pushes": [ { "sent": { }, "readBack": { }, "ms": 140 } ], "conclusion": { } }
   ],
   "derivedProfile": { },
-  "caveats": ["read-back only; realization not verified"]
+  "caveats": ["read-back only; how it sounds was not measured"]
 }
 ```
 
@@ -251,7 +249,7 @@ A read (T2) is recorded as one experiment without pushes:
       "readBack": { "filters": [{ "type": "PK", "freq": 1400, "q": 7, "gain": 0 }, null], "preamp": 0 },
       "findings": ["Slot 3: q 7 is out of range (allowed: 0.1 – 5 in 0.001 steps)"] }
   ],
-  "caveats": ["Read-back only: …", "Realization not verified: …"]
+  "caveats": ["Read-back only: …", "Read-back shows the values the device was told, …"]
 }
 ```
 

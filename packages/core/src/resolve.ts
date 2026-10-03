@@ -5,7 +5,6 @@ import { mergeSlotFields, slotOverrides } from './slots.ts';
 import type {
 	Domain,
 	FilterType,
-	Law,
 	NumericCondition,
 	Profile,
 	Variant,
@@ -25,7 +24,7 @@ export interface EngineSlot {
 }
 
 /**
- * A profile prepared for the engine operations: merged slots, field orders, laws. Built once per
+ * A profile prepared for the engine operations: merged slots and field orders. Built once per
  * operation; profiles are never cached across calls, since apps edit them in place.
  */
 export interface EngineProfile {
@@ -33,14 +32,12 @@ export interface EngineProfile {
 	bandCount: number | null;
 	/** One per slot, or the template alone when unbounded. */
 	slots: EngineSlot[];
-	laws: Law[];
 	/** Every slot accepts exactly the same filters. */
 	homogeneous: boolean;
 }
 
 export function engineProfile(profile: Profile): EngineProfile {
 	const overrides = slotOverrides(profile);
-	const laws = profile.realization?.laws ?? [];
 	const slots: EngineSlot[] = [];
 	for (let i = 0; i < (profile.bandCount ?? 1); i++) {
 		const merged = mergeSlotFields(profile.band, overrides.get(i)?.entry);
@@ -57,7 +54,7 @@ export function engineProfile(profile: Profile): EngineProfile {
 			q,
 			gain,
 			variants,
-			order: fieldOrder(merged, laws)
+			order: fieldOrder(merged)
 		});
 	}
 	const key = (s: EngineSlot) => JSON.stringify([s.types, s.freq, s.q, s.gain, s.variants]);
@@ -66,7 +63,6 @@ export function engineProfile(profile: Profile): EngineProfile {
 		profile,
 		bandCount: profile.bandCount,
 		slots,
-		laws,
 		homogeneous: slots.every((s) => key(s) === first)
 	};
 }

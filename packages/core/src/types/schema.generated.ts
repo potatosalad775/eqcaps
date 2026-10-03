@@ -17,7 +17,6 @@ export interface Profile {
 	/** Per-slot overrides of the band template, merged per key, replace (SPEC §5.2). */
 	bands?: BandOverride[];
 	rules?: Rule[];
-	realization?: Realization;
 	preamp: Preamp;
 	/** Only "linked" in v1; "independent" is reserved (SPEC §9). */
 	channels?: 'linked';
@@ -41,7 +40,6 @@ export interface AuthoringProfile {
 	/** Per-slot overrides of the band template, merged per key, replace (SPEC §5.2). */
 	bands?: BandOverride[];
 	rules?: Rule[];
-	realization?: AuthoringRealization;
 	preamp?: Preamp;
 	/** Only "linked" in v1; "independent" is reserved (SPEC §9). */
 	channels?: 'linked';
@@ -194,38 +192,6 @@ export interface MinSpacingRule {
 	octaves: number;
 }
 
-/** Laws by which the engine's filters deviate from the written values. Absent = unknown (SPEC §8). */
-export interface Realization {
-	laws: Law[];
-	/** Realization is measured iff a measurement source without via is listed. */
-	sources: Source[];
-}
-
-export type Law = GainScaledQLaw | NyquistScaledQLaw | ShelfFrequencyShiftLaw;
-
-/** Sample rate (Hz) the engine designs its filters at. A fixed property of the part. */
-export type DesignRate = number;
-
-/** Realized q = q / A, A = 10^(|gain|/40). */
-export interface GainScaledQLaw {
-	law: 'gainScaledQ';
-	types: ('PK' | 'LSC' | 'HSC')[];
-}
-
-/** Realized q = q · cos(π·f / designRate). */
-export interface NyquistScaledQLaw {
-	law: 'nyquistScaledQ';
-	types: FilterTypes;
-	designRate: DesignRate;
-}
-
-/** Realized freq = (designRate/π) · atan(tan(π·f / designRate) · d), d = √A for LSC, 1/√A for HSC. */
-export interface ShelfFrequencyShiftLaw {
-	law: 'shelfFrequencyShift';
-	types: ('LSC' | 'HSC')[];
-	designRate: DesignRate;
-}
-
 /** manual: adjustable within gain. auto: the device computes its own headroom. none: no control. unknown: e.g. seeded data (SPEC §9). */
 export type Preamp =
 	| {
@@ -270,12 +236,5 @@ export interface Meta extends MetaFields {
 export type AuthoringSource = SourceFields;
 
 export interface AuthoringMeta extends MetaFields {
-	sources: AuthoringSource[];
-}
-
-/** Laws by which the engine's filters deviate from the written values. Absent = unknown (SPEC §8). */
-export interface AuthoringRealization {
-	laws: Law[];
-	/** Realization is measured iff a measurement source without via is listed. */
 	sources: AuthoringSource[];
 }

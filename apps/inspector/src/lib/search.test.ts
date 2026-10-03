@@ -81,8 +81,8 @@ describe('featuresOf', () => {
 		expect(featuresOf(example('d-gain-dependent-window')).has('conditional')).toBe(true);
 		expect(featuresOf(example('e-graphic-10')).has('graphic')).toBe(true);
 		expect(featuresOf(example('c-partitioned-windows')).has('rules')).toBe(true);
-		const h = featuresOf(example('h-realization-laws'));
-		expect(h.has('realization') && h.has('preamp') && h.has('stepped')).toBe(true);
+		const graphic = featuresOf(example('e-graphic-10'));
+		expect(graphic.has('preamp') && graphic.has('stepped')).toBe(true);
 		expect(featuresOf(example('g-equalizer-apo')).has('graphic')).toBe(false);
 	});
 });

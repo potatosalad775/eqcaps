@@ -13,8 +13,8 @@ consists of:
 
 1. **A format**: [SPEC.md](SPEC.md), JSON Schema, conformance vectors.
 2. **A database**: community-maintained profiles, CI-validated, published as static JSON.
-3. **A reference engine**: resolve / validate / fit / assign / complete, plus written ↔ realized
-   conversion, in TypeScript, portable by spec.
+3. **A reference engine**: resolve / validate / fit / assign / complete, in TypeScript, portable
+   by spec.
 4. **An inspector web app**: browse, connect a device, read, probe, author, submit.
    See [INSPECTOR.md](INSPECTOR.md).
 
@@ -119,6 +119,8 @@ move to Phase 3, where the `/next/` deploy and outside PRs first need them.
 - Property tests (fast-check) over random profiles and filter lists: soundness, faithfulness on
   valid input, idempotence, no added bands, and `toWritten`∘`toRealized` = identity.
 - `conformance/v1/` vectors: exact ops + property ops (SPEC §13.8).
+- *2026-10-03:* realization laws, `toRealized` and `toWritten` were removed from the format before
+  v1 was first published (D39).
 - **Exit:** properties hold over ≥ 10k generated cases; vectors checked in; SPEC §13 updated with
   anything implementation forced us to clarify.
 
@@ -238,11 +240,10 @@ also needs reconnection after saves.
 - **modernGraphTool** (the original draft's M3/M5/M6, done in that repo): replace
   `EqConstraintPreset` with core types; load via client; re-enable the picker with visible badge +
   one-click "unlimited"; per-slot hints; "Fit to device"; `fit` + `complete` before push;
-  `toRealized` after pull and for the graph; AutoEQ optimizing within per-slot domains through
-  `toRealized`; device-peq compensation removed; `deriveDeviceConstraint()` replaced by `matchDevice()`.
+  AutoEQ optimizing within per-slot domains; device-peq compensation removed (D39);
+  `deriveDeviceConstraint()` replaced by `matchDevice()`.
 - **Android hardware PEQ app** (its own repo, D27): `core` + `client` + `device-bridge` from npm,
-  a native USB transport plugin, an embedded `bundle.json`, `fit` + `complete` before push,
-  `toRealized` after pull.
+  a native USB transport plugin, an embedded `bundle.json`, `fit` + `complete` before push.
   Consumer guide for embedding.
 - Kotlin port: not scheduled (D15).
 
@@ -259,7 +260,7 @@ also needs reconnection after saves.
 | Public ids/URLs churn | Home fixed under the owner's account (D24); custom domain before any move; ids permanent, with `deprecated` + `replacedBy` |
 | Device tiers are Chromium-only | T0/T4 work everywhere; the UI explains instead of hiding |
 | Android USB access (WebView has no WebHID, Web Serial or WebUSB) | Native plugin stays protocol-free and lives in the app repo; codecs never touch browser APIs (D27). A Kotlin device bridge remains out of scope. |
-| Realization laws are wrong or missing for a device | The database ships none (D39): devices get the values the user asks for, and reported quirks are warnings in the notes; no `realization` key means unknown, not exact |
+| A device's filters sound different from the values it's told | Out of scope (D39): devices get the values the user asks for, as vendor apps send them; reported quirks are warnings in `meta.notes` |
 
 ## 7. Immediate next steps
 

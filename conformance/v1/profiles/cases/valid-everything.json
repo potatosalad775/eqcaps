@@ -1,5 +1,5 @@
 {
-	"description": "Extension keys, a group profile, firmware scoping, type-conditioned variants, rules, measured realization and maintainer verification together.",
+	"description": "Extension keys, a group profile, firmware scoping, type-conditioned variants, rules and maintainer verification together.",
 	"spec": "§2–§10",
 	"profile": {
 		"x-note": "extension keys are allowed anywhere",
@@ -37,20 +37,6 @@
 			{ "type": "ascendingFrequency", "strict": false },
 			{ "type": "minSpacing", "octaves": 0.25 }
 		],
-		"realization": {
-			"laws": [
-				{ "law": "gainScaledQ", "types": ["PK"] },
-				{ "law": "nyquistScaledQ", "types": ["PK", "LSC", "HSC"], "designRate": 96000 }
-			],
-			"sources": [
-				{
-					"kind": "measurement",
-					"ref": "evidence/base/2026-10-02-9f3e.json",
-					"date": "2026-10-02",
-					"by": "someone"
-				}
-			]
-		},
 		"preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.5 } },
 		"channels": "linked",
 		"meta": {

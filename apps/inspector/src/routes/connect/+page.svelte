@@ -5,12 +5,7 @@
 	// the bridge's pull, never push or setEnabled.
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import {
-		toRealized,
-		type Filter,
-		type IndexEntry,
-		type Profile
-	} from '@potatosalad775/eqcaps-core';
+	import type { Filter, IndexEntry, Profile } from '@potatosalad775/eqcaps-core';
 	import type { DeviceMatch } from '@potatosalad775/eqcaps-client';
 	import {
 		guessProtocol,
@@ -231,7 +226,6 @@
 	const findings = $derived(
 		profile && pulled && device ? readFindings(profile, pulled, device.capabilities) : null
 	);
-	const hasLaws = $derived((profile?.realization?.laws.length ?? 0) > 0);
 	const present = (xs: (Filter | null)[]) => xs.filter((x): x is Filter => x !== null);
 
 	function findingsText(): string {
@@ -287,9 +281,11 @@
 
 	async function openInPlayground() {
 		if (!pulled || !profileId) return;
-		const realized = present(pulled.filters).map((f) => (profile ? toRealized(profile, f) : f));
 		try {
-			localStorage.setItem('eqcaps-inspector:playground', formatApo(realized, pulled.preamp ?? 0));
+			localStorage.setItem(
+				'eqcaps-inspector:playground',
+				formatApo(present(pulled.filters), pulled.preamp ?? 0)
+			);
 		} catch {
 			// The playground then shows its sample.
 		}
@@ -558,7 +554,6 @@
 								<th class="px-2 text-right font-normal">Hz</th>
 								<th class="px-2 text-right font-normal">dB</th>
 								<th class="px-2 text-right font-normal">Q</th>
-								{#if hasLaws}<th class="px-2 text-left font-normal">You hear</th>{/if}
 							</tr>
 						</thead>
 						<tbody class="font-mono tabular-nums">
@@ -570,12 +565,6 @@
 										<td class="px-2 text-right">{formatField('freq', f.freq)}</td>
 										<td class="px-2 text-right">{formatField('gain', f.gain)}</td>
 										<td class="px-2 text-right">{formatField('q', f.q)}</td>
-										{#if hasLaws && profile}
-											{@const r = toRealized(profile, f)}
-											<td class="px-2 text-xs text-zinc-500"
-												>{formatField('freq', r.freq)} Hz Q {formatField('q', r.q)}</td
-											>
-										{/if}
 									{:else}
 										<td class="px-2 text-zinc-400" colspan="4">off</td>
 									{/if}
@@ -583,11 +572,7 @@
 							{/each}
 						</tbody>
 					</table>
-					<p class="mt-1 text-xs text-zinc-500">
-						Written values, as the device stores them{hasLaws
-							? '; "You hear" applies the profile\'s realization laws'
-							: ''}.
-					</p>
+					<p class="mt-1 text-xs text-zinc-500">Values as the device stores them.</p>
 				</div>
 
 				{#if findings}

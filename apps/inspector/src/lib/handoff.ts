@@ -152,9 +152,7 @@ export function codecDraft(
  * SPEC §3: members extend the group's base, since groups shrink as members get profiles.
  */
 export function memberBase(group: Profile): string {
-	const via = [...group.meta.sources, ...(group.realization?.sources ?? [])].find(
-		(s) => s.via !== undefined
-	)?.via;
+	const via = group.meta.sources.find((s) => s.via !== undefined)?.via;
 	return via ?? group.id;
 }
 

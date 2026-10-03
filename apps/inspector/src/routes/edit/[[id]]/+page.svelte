@@ -211,7 +211,7 @@
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const refs = new Set<string>();
 		const from = original ? parse(original) : null;
-		for (const s of [...(from?.meta?.sources ?? []), ...(from?.realization?.sources ?? [])]) {
+		for (const s of from?.meta?.sources ?? []) {
 			if (s.ref.startsWith('evidence/')) refs.add(s.ref);
 		}
 		if (evidenceRef) refs.add(evidenceRef);
@@ -405,8 +405,8 @@
 				<details open class="space-y-3">
 					<summary class="cursor-pointer text-lg font-semibold">Form</summary>
 					<p class="text-xs text-zinc-500">
-						Common fields. Per-slot overrides, conditional domains, rules and realization laws are
-						edited in the JSON below. A field is written to the file when you leave it.
+						Common fields. Per-slot overrides, conditional domains and rules are edited in the JSON
+						below. A field is written to the file when you leave it.
 					</p>
 
 					<div class="grid grid-cols-[max-content_1fr] items-center gap-x-4 gap-y-2 text-sm">

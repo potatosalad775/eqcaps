@@ -1,17 +1,8 @@
 import fc from 'fast-check';
 import { describe, expect, it, vi } from 'vitest';
-import {
-	domainViolation,
-	fit,
-	near,
-	normalizeFilter,
-	project,
-	toRealized,
-	toWritten
-} from '../src/index.ts';
+import { domainViolation, fit, near, project } from '../src/index.ts';
 import {
 	caseArb,
-	filterArb,
 	freqDomain,
 	gainDomain,
 	profileArb,
@@ -24,8 +15,7 @@ import {
 	checkFaithful,
 	checkIdempotent,
 	checkNoAddedBands,
-	checkSound,
-	same
+	checkSound
 } from './checks.ts';
 
 // The normative engine properties (SPEC §13.5–§13.7) over random valid profiles and filter lists.
@@ -43,7 +33,7 @@ describe('fit properties (SPEC §13.6)', () => {
 		);
 	});
 
-	it('faithful: validateList(x) = [] ⇒ realized = x, with no changes', () => {
+	it('faithful: validateList(x) = [] ⇒ slots hold x, with no changes', () => {
 		let applied = 0;
 		fc.assert(
 			fc.property(caseArb, (c) => {
@@ -55,7 +45,7 @@ describe('fit properties (SPEC §13.6)', () => {
 		expect(applied).toBeGreaterThan(RUNS / 10);
 	});
 
-	it('idempotent: fit(F.realized) = F', () => {
+	it('idempotent: fit(F.slots) = F', () => {
 		fc.assert(
 			fc.property(caseArb, (c) => checkIdempotent(c.profile, c.filters, c.preamp)),
 			{ numRuns: RUNS }
@@ -73,7 +63,7 @@ describe('fit properties (SPEC §13.6)', () => {
 describe('assign property (SPEC §13.5)', () => {
 	it('returns a valid assignment whenever one exists', () => {
 		const arb = profileArb.chain((profile) =>
-			fc.record({ profile: fc.constant(profile), filters: validListArb(profile, false) })
+			fc.record({ profile: fc.constant(profile), filters: validListArb(profile) })
 		);
 		fc.assert(
 			fc.property(arb, (c) => checkAssign(c.profile, c.filters, true)),
@@ -94,23 +84,6 @@ describe('complete properties (SPEC §13.7)', () => {
 });
 
 describe('exact ops', () => {
-	it('toWritten ∘ toRealized = identity, and the other way round', () => {
-		const arb = profileArb.chain((profile) =>
-			fc.record({
-				profile: fc.constant(profile),
-				filter: filterArb(profile).filter((f) => f.freq <= 20000)
-			})
-		);
-		fc.assert(
-			fc.property(arb, ({ profile, filter }) => {
-				const f = normalizeFilter(filter);
-				expect(same(toWritten(profile, toRealized(profile, f)), f)).toBe(true);
-				expect(same(toRealized(profile, toWritten(profile, f)), f)).toBe(true);
-			}),
-			{ numRuns: RUNS }
-		);
-	});
-
 	it('project lands in the domain, fixes members, and is idempotent', () => {
 		const arb = fc.oneof(
 			fc.tuple(freqDomain, fc.constant('freq' as const)),

@@ -13,10 +13,7 @@ export const ISSUE_CODES = {
 	'band-index-duplicate': '§5.2: a slot is overridden more than once.',
 	'slot-incomplete': '§2, §5: after merging, a slot lacks types, freq, q or gain.',
 	'variant-self-reference': "§6: a variant's `when` references a field the variant defines.",
-	'dependency-cycle': '§6, §8: variant and realization-law dependencies form a cycle.',
-	'law-conflict': '§8: more than one freq law applies to a filter type.',
-	'design-rate-too-low':
-		'§8: designRate is not greater than twice the freq maximum of a slot the law applies to.',
+	'dependency-cycle': '§6: variant dependencies form a cycle.',
 	'firmware-range-empty': '§3: match.firmware has min ≥ max, so no firmware matches.',
 	'status-needs-evidence': '§10: a verified status without a counting source.',
 	'status-needs-maintainer':

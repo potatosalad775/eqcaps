@@ -3,26 +3,23 @@ import { compareNear, near } from './domain.ts';
 import { fitToSlot } from './fit-slot.ts';
 import { isActive, normalizeFilter, usesGain, type Filter } from './filter.ts';
 import { project } from './project.ts';
-import { realize, unrealize } from './realization.ts';
 import { engineProfile, type EngineProfile, type EngineSlot } from './resolve.ts';
 import type { FilterType, Preamp, Profile } from './types/schema.generated.ts';
 import { validateEngine, type Violation } from './validate.ts';
 
-/** One difference between a wanted filter (or preamp) and what fit realized for it. */
+/** One difference between a wanted filter (or preamp) and what fit wrote for it. */
 export interface Change {
 	/** Index of the input filter; null for the preamp. */
 	filter: number | null;
 	slot: number | null;
 	field: 'type' | 'freq' | 'q' | 'gain' | 'preamp';
 	wanted: number | FilterType;
-	realized: number | FilterType;
+	written: number | FilterType;
 }
 
 export interface FitResult {
 	/** Written values, one per slot: what to send to the engine. */
 	slots: (Filter | null)[];
-	/** toRealized(slots): what the listener gets. */
-	realized: (Filter | null)[];
 	preamp: number;
 	/** Every field of an assigned filter that came out different, in input order; then the preamp. */
 	changes: Change[];
@@ -40,12 +37,12 @@ export interface FitResult {
  * input, idempotent, and it never adds active filters.
  *
  * One pass assigns, projects and applies the rules. Some of its choices (which assignment wins
- * under ascendingFrequency) depend on the input values, so a pass over its own realized output
- * can choose differently. fit therefore repeats the pass on its realized output until a result
+ * under ascendingFrequency) depend on the input values, so a pass over its own output can choose
+ * differently. fit therefore repeats the pass on its output until a result
  * comes back (at most MAX_PASSES times). Usually that is a fixpoint. On profiles whose rules can
  * never be met it can be a cycle, and fit takes the member with the fewest violations, then the
- * one whose realized filters are closest to the wanted ones as a multiset, then the first in slot
- * order. Both are idempotent: a fit of the chosen result's realized filters walks the same cycle,
+ * one whose filters are closest to the wanted ones as a multiset, then the first in slot order.
+ * Both are idempotent: a fit of the chosen result's filters walks the same cycle,
  * the choice depends only on its members, and there the chosen result is at distance 0.
  */
 export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): FitResult {
@@ -56,7 +53,7 @@ export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): F
 	let cur = pass(p, wanted, pre);
 	const seen = [cur];
 	for (let i = 1; i < MAX_PASSES; i++) {
-		const input = cur.slots.flatMap((f, s) => (f ? [{ s, f: realize(p.laws, f) }] : []));
+		const input = cur.slots.flatMap((f, s) => (f ? [{ s, f }] : []));
 		const next = pass(
 			p,
 			input.map((x) => x.f),
@@ -82,18 +79,17 @@ export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): F
 	}
 
 	const { slots, slotOf, lost } = cur;
-	const realized = slots.map((s) => (s ? realize(p.laws, s) : null));
 	const changes: Change[] = [];
 	slotOf.forEach((s, k) => {
 		const w = wanted[k] as Filter;
 		const add = (field: Change['field'], from: number | FilterType, to: number | FilterType) =>
-			changes.push({ filter: k, slot: s, field, wanted: from, realized: to });
+			changes.push({ filter: k, slot: s, field, wanted: from, written: to });
 		if (s === null) {
 			// Projected flat: its slot is left empty.
 			if (lost.get(k) === 'flattened') add('gain', w.gain, 0);
 			return;
 		}
-		const r = realized[s] as Filter;
+		const r = slots[s] as Filter;
 		if (w.type !== r.type) add('type', w.type, r.type);
 		for (const field of ['freq', 'q', 'gain'] as const) {
 			if (field === 'gain' && !usesGain(w.type) && !usesGain(r.type)) continue;
@@ -101,11 +97,10 @@ export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): F
 		}
 	});
 	if (!near(preamp, pre)) {
-		changes.push({ filter: null, slot: null, field: 'preamp', wanted: preamp, realized: pre });
+		changes.push({ filter: null, slot: null, field: 'preamp', wanted: preamp, written: pre });
 	}
 	return {
 		slots,
-		realized,
 		preamp: pre,
 		changes,
 		unassigned: wanted.filter((_, k) => lost.get(k) === 'unassigned'),
@@ -127,7 +122,7 @@ function closest(p: EngineProfile, wanted: readonly Filter[], passes: readonly P
 		x,
 		d: distance(
 			active,
-			x.slots.flatMap((s) => (s ? [realize(p.laws, s)] : []))
+			x.slots.flatMap((s) => (s ? [s] : []))
 		)
 	}));
 	scored.sort(
@@ -158,11 +153,11 @@ function apart(w: Filter, r: Filter): number {
 	);
 }
 
-/** Min-cost matching of the wanted filters onto the realized ones, as multisets. */
-function distance(wanted: readonly Filter[], realized: readonly Filter[]): number {
+/** Min-cost matching of the wanted filters onto the written ones, as multisets. */
+function distance(wanted: readonly Filter[], written: readonly Filter[]): number {
 	const at = (r: number, j: number) =>
-		j < realized.length ? apart(wanted[r] as Filter, realized[j] as Filter) : FAR;
-	const rowToCol = hungarian(wanted.length, realized.length + wanted.length, at);
+		j < written.length ? apart(wanted[r] as Filter, written[j] as Filter) : FAR;
+	const rowToCol = hungarian(wanted.length, written.length + wanted.length, at);
 	return rowToCol.reduce((sum, j, r) => sum + at(r, j), 0);
 }
 
@@ -205,12 +200,11 @@ interface Pass {
 }
 
 function pass(p: EngineProfile, wanted: readonly Filter[], preamp: number): Pass {
-	const written = wanted.map((f) => unrealize(p.laws, f));
 	// Under ascendingFrequency, a frequency-ordered assignment may do better than the min-cost
 	// one. It wins only if it keeps as many filters and breaks fewer rules.
-	let best = attempt(p, wanted, assignEngine(p, written), preamp);
+	let best = attempt(p, wanted, assignEngine(p, wanted), preamp);
 	if (best.violations.some((v) => v.rule === 'ascendingFrequency')) {
-		const other = attempt(p, wanted, orderedAssignEngine(p, written), preamp);
+		const other = attempt(p, wanted, orderedAssignEngine(p, wanted), preamp);
 		const kept = (a: Pass) => a.slotOf.filter((s) => s !== null).length;
 		if (kept(other) >= kept(best) && other.violations.length < best.violations.length) best = other;
 	}
@@ -241,7 +235,7 @@ function attempt(
 	let slots = assigned.slots.map((f, s) => {
 		if (!f) return null;
 		const k = filterIn.get(s) as number;
-		const g = fitToSlot(slotAt(s), p.laws, wanted[k] as Filter);
+		const g = fitToSlot(slotAt(s), wanted[k] as Filter);
 		if (isActive(g)) return g;
 		lost.set(k, 'flattened');
 		return null;
@@ -289,7 +283,7 @@ function spread(
 		const prev = (slots[order[i - 1] as number] as Filter).freq;
 		const s = order[i] as number;
 		if (farEnough(prev, (slots[s] as Filter).freq)) continue;
-		const moved = fitToSlot(slotAt(s), p.laws, wanted.get(s) as Filter, prev * 2 ** octaves);
+		const moved = fitToSlot(slotAt(s), wanted.get(s) as Filter, prev * 2 ** octaves);
 		if (farEnough(prev, moved.freq)) slots[s] = moved;
 	}
 }

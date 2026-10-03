@@ -9,7 +9,7 @@ import type { Derivation } from './derive.ts';
 import type { ProbeResult } from './types.ts';
 
 export const PROBE_CAVEATS = [
-	'Read-back only: the device stores these values, but what it plays was not measured, so realization is not verified.',
+	'Read-back only: the device stores these values, but how they sound was not measured.',
 	'A bound the device took at the probe’s search limit is a lower bound on its range, not the range itself.',
 	'Probed on one unit, with one firmware: other firmware may accept other values.'
 ];
