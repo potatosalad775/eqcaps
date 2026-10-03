@@ -175,6 +175,8 @@ class Probe {
 	private backup: Backup | null = null;
 	/** The band count is exact as far as reads go: the device reports it, or reads past it fail. */
 	private readBounded = false;
+	/** The most bands a write carried that the device kept: what the restore writes. */
+	private keptWrite = 0;
 
 	constructor(
 		private readonly io: ProbeIO,
@@ -297,14 +299,17 @@ class Probe {
 			...(this.caps.needsBandCount ? { bands } : {}),
 			...(this.caps.readsSlot ? this.slotRequest() : {})
 		};
-		try {
-			return await this.io.pull(request);
-		} catch (e) {
-			// One retry for a slow answer; a gone device fails again at once.
-			if (!retry || !isBridgeError(e, 'timeout')) throw e;
-			await this.sleep(500);
-			return this.io.pull(request);
+		// Two retries for a slow answer, with longer pauses; a gone device fails again at once.
+		for (const pause of retry ? [500, 1500] : []) {
+			try {
+				return await this.io.pull(request);
+			} catch (e) {
+				if (!isBridgeError(e, 'timeout') && !isBridgeError(e, 'bad-response')) throw e;
+				this.note(`a read went unanswered; retrying after ${pause} ms`);
+				await this.sleep(pause);
+			}
 		}
+		return this.io.pull(request);
 	}
 
 	/**
@@ -607,7 +612,14 @@ class Probe {
 
 	private async restore(): Promise<RestoreResult> {
 		const backup = this.backup!;
-		const count = this.K || this.o.profile?.bandCount || this.caps.bands || backup.filters.length;
+		// A size the device was seen to keep; without one, nothing landed, and the restore only
+		// confirms that by reading back.
+		const count =
+			this.keptWrite ||
+			this.K ||
+			this.o.profile?.bandCount ||
+			this.caps.bands ||
+			backup.filters.length;
 		const n = Math.min(count, backup.filters.length);
 		const flat = (i: number): Filter => {
 			const b = this.base[i];
@@ -689,29 +701,84 @@ class Probe {
 	 */
 	private async bandCount() {
 		const readable = this.backup!.filters.length;
-		const codecMax = this.o.analysis.bands.max;
-		const tries = [Math.min(readable, codecMax)];
-		const hinted = this.o.profile?.bandCount ?? this.caps.bands;
-		if (hinted && hinted < tries[0]!) tries.push(hinted);
-		for (const n of tries) {
-			if (n < this.o.analysis.bands.min) continue;
-			const count = await this.countWith(n);
-			if (count > 0) {
-				const atLeast =
-					count === n && n < codecMax && this.caps.bands === undefined && !this.readBounded;
-				this.findings.bandCount = { value: count, atLeast };
-				this.K = count;
-				this.base = Array.from({ length: count }, (_, j) => ({
-					...this.markerBand(j, count),
-					gain: BASE_GAIN
-				}));
-				this.findings.slots = Array.from({ length: count }, () => ({}));
-				this.state = this.state.slice(0, count);
-				this.conclude({ bands: count, atLeast, written: n });
-				return;
+		const { min, max: codecMax } = this.o.analysis.bands;
+		const top = Math.min(readable, codecMax);
+		if (top < min) throw new ProbeError('the device reads back fewer bands than a write carries');
+		let n = top;
+		let count = await this.countWith(top);
+		let refused: number | undefined;
+		if (count === 0) {
+			// Nothing of a `top`-band write landed. Find the largest write that does: one push per
+			// size tried, the profile's band count first.
+			refused = top;
+			let kept = min - 1;
+			const hint = this.o.profile?.bandCount ?? this.caps.bands;
+			const sizes = (lo: number, hi: number) => Math.floor((lo + hi) / 2);
+			let next = hint !== undefined && hint < top && hint >= min ? hint : sizes(kept, refused);
+			while (refused - kept > 1 && next > kept && next < refused) {
+				if (await this.lands(next)) kept = next;
+				else refused = next;
+				next = sizes(kept, refused);
+			}
+			if (kept < min) {
+				throw new ProbeError(
+					'the device kept none of the test values, whatever the number of bands written, so its band count is unknown'
+				);
+			}
+			n = kept;
+			count = await this.countWith(kept);
+			if (count === 0) {
+				throw new ProbeError(
+					'the device kept test values once, then none: its band count is unknown'
+				);
 			}
 		}
-		throw new ProbeError('the device kept none of the test values, so its band count is unknown');
+		this.keptWrite = n;
+		const atLeast =
+			refused === undefined &&
+			count === n &&
+			n < codecMax &&
+			this.caps.bands === undefined &&
+			!this.readBounded;
+		this.findings.bandCount = {
+			value: count,
+			atLeast,
+			...(refused !== undefined ? { writeLimit: { kept: n, refused } } : {})
+		};
+		this.K = count;
+		this.base = Array.from({ length: count }, (_, j) => ({
+			...this.markerBand(j, count),
+			gain: BASE_GAIN
+		}));
+		this.findings.slots = Array.from({ length: count }, () => ({}));
+		this.state = this.state.slice(0, count);
+		this.conclude({
+			bands: count,
+			atLeast,
+			written: n,
+			...(refused !== undefined ? { notKept: `writes of ${refused} bands or more` } : {})
+		});
+	}
+
+	/**
+	 * One push of `n` bands, each with a gain it doesn't hold now: whether any band took its new
+	 * value. (Comparing with what the bands held before, not with the backup, so what an earlier
+	 * attempt left behind doesn't count.)
+	 */
+	private async lands(n: number): Promise<boolean> {
+		this.K = n;
+		const before = [...this.state];
+		const filters = Array.from({ length: n }, (_, j) => {
+			const held = before[j]?.gain;
+			const gain = CODE_GAINS.find((g) => held === undefined || !this.kept('gain', g, held))!;
+			return { ...this.markerBand(j, n), gain: this.onWire('gain', gain) };
+		});
+		const { back } = await this.write(filters);
+		this.state = back.filters.slice(0, n);
+		return filters.some((f, j) => {
+			const got = back.filters[j];
+			return !!got && this.kept('gain', f.gain, got.gain);
+		});
 	}
 
 	private async countWith(n: number): Promise<number> {
@@ -1354,8 +1421,7 @@ class Probe {
 			}
 			for (const [s, f] of found) {
 				const p = plain(s);
-				const differs =
-					!p || !same(p.max?.value, f.max?.value) || !same(p.min?.value, f.min?.value);
+				const differs = !p || !sameBound(p.max, f.max) || !sameBound(p.min, f.min);
 				if (!differs) continue;
 				const c = perSlot[s]![i]!;
 				(this.findings.slots[s]!.conditions ??= []).push({ label: c.label, when: c.when, freq: f });
@@ -1519,6 +1585,11 @@ function clampLike(pairs: readonly Pair[]): (p: Pair, step: number) => boolean {
 		const edge = (p.stored === hi && p.sent > hi) || (p.stored === lo && p.sent < lo);
 		return edge && Math.abs(p.sent - p.stored) > step / 2 + 1e-9 * Math.max(1, Math.abs(p.sent));
 	};
+}
+
+/** Two bounds that say the same: equal values, or both past the search limit. */
+function sameBound(a: Bound | undefined, b: Bound | undefined): boolean {
+	return (a?.how === 'limit' && b?.how === 'limit') || same(a?.value, b?.value);
 }
 
 /** The band was refused: its canary didn't land, or (without one) nothing changed. */

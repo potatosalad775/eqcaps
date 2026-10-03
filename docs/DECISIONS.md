@@ -627,6 +627,18 @@ its match, and checks the profile against that protocol's codec as for table ent
 *2026-10-03:* not every hardware profile has a protocol any more. The RME ADI-2 DAC FS profiles
 (from RME's manual) describe a device controlled over MIDI SysEx, which no handler speaks. The
 protocol test lists such profiles by id, so a missing protocol is always a decision.
+*2026-10-03, later:* the owner recorded the vendor web apps of a NiceHCK PureAural
+(app.nicehck.cn) and an OSHUN DECO writing 10 bands (WebHID traffic of their own devices). Both
+compute coefficients exactly as the bridge does (RBJ, Q2.30, at 96 kHz, at the frame's own
+frequency, no 0.9775 factor), but write differently from devicePEQ's convention, which the bridge
+follows: band frames carry the preamp at byte 34 (bridge: 0) and 0 (OSHUN) or 3 (PureAural) at
+byte 35 (bridge: preset 101); the PureAural uses `0x21` at byte 2 (bridge and OSHUN: `0x18`); the
+save is `0a 04 00 00 ff ff`, then the preamp (OSHUN), or `0a…`, `01`, preamp, `04` (PureAural),
+where the bridge sends `05 00`, `17 00`, `0a … 00`, `01 01 00`. `80 0c` answers a firmware
+version (`"0.3"`, `"0.4"`). The bridge's 10-band writes left the PureAural unchanged. Its app
+offers far more than Walkplay's (gain level, amplifier class, volume, mic gain, balance), so it
+is treated as its own device, not a Walkplay variant. Protocol options from these captures and
+device profiles for both are for a later session.
 **Rejected:** keeping devicePEQ's `normalizeFiltersForDevice` in the bridge (constraint logic that
 duplicates core's `fit`); passing profiles to the bridge for writes; a Kotlin bridge (D27); a
 registry in the bridge that matches device identities to handlers, hand-written or generated from
@@ -862,6 +874,27 @@ accepts, then restore the user's EQ and confirm it.
   restored and verified, a preamp range different from the seeded profile found, and the result
   taken to the editor as a new profile.
 
+*2026-10-03, after the first real devices:* the owner probed a NiceHCK PureAural and an
+OSHUN DECO (Walkplay protocol), which changed four things.
+- **Devices that don't check what they're sent.** Both kept every value up to the search limits
+  in every field. Walkplay writes carry the bridge's biquad coefficients plus a copy of the band's
+  parameters, and read-back returns that copy, which the firmware stores without checking. A
+  field taken at both search limits now says nothing: the matched profile's range is kept, with
+  a note. When that holds for every field probed, the derivation is `unchecked`: the notes start
+  with a warning, the page says so, and the evidence file is cited as `community`, not `probe`.
+- **Band count by the largest write that lands.** The PureAural's 10- and 16-band writes changed
+  nothing while 8-band writes were kept, yet its vendor app writes 10 bands. So when a write
+  changes nothing, smaller writes are tried (the profile's count, then halving), one push each,
+  each with values the bands don't hold yet. The count found is reported with the write limit
+  ("may be the device, or the way this protocol writes"), never as the device's count, and the
+  restore writes a size that was seen to land. Reads past the count can return stale buffers
+  (Walkplay answers carry bytes of earlier answers), so reads answering is no proof of bands.
+- **No conditions from limits.** Two windows that both reach the search limits are the same.
+- **Readable output.** Notes and differences are grouped across bands ("in every band", "bands
+  1–4, 6"); reads that go unanswered are retried twice (0.5 s, 1.5 s) before the probe stops.
+Tested with a `FakeDevice` that ignores writes over 8 bands and one that drops every ninth read.
+Write counts are unchanged.
+
 **Rejected:** the engine in the bridge or a package of its own (owner's choice: the inspector,
 INSPECTOR §5); a script writing `handler-code` sources into `data/` (owner's choice); probing
 each band separately from the start (×bands writes for every device, not only the few that need
@@ -869,7 +902,8 @@ it); whole-set detection by an extra known-good write per push (the canary costs
 inferring steps from values spread over the spectrum before the windows are known (partitions
 clamp them into fake grids); reading a reset as a clamp, or stopping at the first one; treating a
 band count that reads stop at as "at least".
-**Open:** the exit's real-hardware runs (three handler families; the owner has Walkplay units),
+**Open:** the exit's real-hardware runs (three handler families; the owner has Walkplay units;
+on Walkplay a probe settles the band count and stored grid, not ranges),
 reconnection for devices that disconnect on save (KT Micro), conditional Q and gain domains (only
 frequency windows are probed), and whether a group member's file should keep only the constraints
 that differ from its base.

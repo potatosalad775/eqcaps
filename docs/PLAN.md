@@ -266,18 +266,21 @@ also needs reconnection after saves.
 1. Owner: push, so `/v1/` and the new inspector deploy. Then publish `core`, `client` and the
    bridge as 0.2.0 (`npm run release -- 0.2.0`); the client then defaults to `/v1/`. Before that,
    the bridge can be tried in another app from `npm run release -- 0.2.0-rc.1 --pack`.
-2. Phase 5 exit, owner: probe a Walkplay unit from `/connect` (quick first, then full), with the
-   output muted. Check that the restore is reported verified, compare the derived constraints with
-   the group profile, and submit the evidence with any difference. Then two more handler families
-   on real hardware, which need devices the owner doesn't have.
-3. Publish the data package `@potatosalad775/eqcaps` (D32): decide its contents (the `/v1/` files)
+2. Phase 5 exit: first real runs done on a NiceHCK PureAural and an OSHUN DECO (D38). Restores
+   verified; Walkplay firmware stores what it is sent, so probes there settle band counts, not
+   ranges. Next: two more handler families on real hardware (devices the owner doesn't have).
+3. Next session: profiles for the PureAural (its own device, not a Walkplay variant) and the
+   OSHUN DECO, with the protocol differences their vendor apps showed (D33 note) as protocol
+   options, the captures as tests, and ranges from the apps' UIs (`vendor-app`). Whether the
+   OSHUN's bands 11–16 do anything needs a measurement.
+4. Publish the data package `@potatosalad775/eqcaps` (D32): decide its contents (the `/v1/` files)
    and add it to the release script.
-4. Carried from Phase 4: verified profiles, with every hard case among them. A probe file is
+5. Carried from Phase 4: verified profiles, with every hard case among them. A probe file is
    counting evidence (SPEC §10), so probed profiles can now be raised to `community-verified`.
    The two RME drafts are the nearest by documents: their notes list what to check (shelf
    direction, frequency grid, Q step, the older ADI-2 DAC).
-5. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
+6. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
    A capture of the vendor app's USB traffic, made by the owner, would show whether the device
    answers reads and what a reliable write looks like. Until then it can't be probed.
-6. Answer Q11 (compact USB match entries), or leave it until the index grows. It is additive, so it
+7. Answer Q11 (compact USB match entries), or leave it until the index grows. It is additive, so it
    fits a v1 minor.

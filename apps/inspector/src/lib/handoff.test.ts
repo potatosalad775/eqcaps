@@ -129,4 +129,15 @@ describe('profileForDevice', () => {
 		expect(fixed.meta.sources[0]!.kind).toBe('probe');
 		expect(fixed).not.toHaveProperty('rules');
 	});
+
+	it('cites a probe that found no limits as community evidence', () => {
+		const probe = {
+			mode: 'full' as const,
+			constraints: { bandCount: 10, band: {}, rules: [], preamp: { mode: 'unknown' as const } },
+			notes: [],
+			counting: false
+		};
+		const data = profileForDevice(handoff({ probe }));
+		expect(data.meta.sources.map((s) => s.kind)).toEqual(['community']);
+	});
 });

@@ -84,7 +84,11 @@ export interface SlotFindings {
 }
 
 export interface Findings {
-	bandCount?: { value: number; atLeast: boolean };
+	/**
+	 * `writeLimit`: writes of `refused` bands or more changed nothing while writes of `kept` did,
+	 * which may be the device or the way this protocol writes.
+	 */
+	bandCount?: { value: number; atLeast: boolean; writeLimit?: { kept: number; refused: number } };
 	steps: Partial<Record<'gain' | 'q' | 'freq' | 'preamp', StepResult>>;
 	slots: SlotFindings[];
 	order?: { rule: 'none' | 'reorders' | 'rejects'; strict?: boolean } | { skipped: string };

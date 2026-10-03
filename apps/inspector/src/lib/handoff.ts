@@ -36,7 +36,16 @@ export interface Handoff {
 	 * A probe (T3) rather than a read: the evidence file is cited as a `probe` source, and the
 	 * constraints it derived go into the profile, with what it couldn't settle in the notes.
 	 */
-	probe?: { mode: 'quick' | 'full'; constraints: DerivedConstraints; notes: string[] };
+	probe?: {
+		mode: 'quick' | 'full';
+		constraints: DerivedConstraints;
+		notes: string[];
+		/**
+		 * False when the device took everything up to the search limits (`Derivation.unchecked`):
+		 * the file is then cited as `community`, since it says nothing about the ranges.
+		 */
+		counting?: boolean;
+	};
 	/**
 	 * The protocol that drove the device, and the commit of the bridge's code: a new profile
 	 * without a probe starts from what the protocol's wire can carry (`handler-code`).
@@ -70,7 +79,7 @@ export function loadHandoff(): Handoff | null {
 export function citeEvidence(data: AuthoringProfile, handoff: Handoff, by?: string) {
 	const sources = data.meta?.sources ?? [];
 	if (sources.some((s) => s.ref === handoff.evidence.path)) return data;
-	const cite = handoff.probe ? probeSource : readSource;
+	const cite = handoff.probe && handoff.probe.counting !== false ? probeSource : readSource;
 	const source = cite(handoff.evidence.path, handoff.date, by, handoff.firmware);
 	const cited = { ...data, meta: { ...data.meta, sources: [...sources, source] } };
 	return handoff.probe ? withProbe(cited, handoff.probe, handoff.date) : cited;

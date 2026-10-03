@@ -502,3 +502,78 @@ test('the evidence file: one line per push, and only personal strings up for rev
 	expect(fields.some((p) => p.includes('/pushes/'))).toBe(false);
 	expect(JSON.parse(text)).toEqual(JSON.parse(JSON.stringify(report)));
 });
+
+describe('hardening (first runs on real devices)', () => {
+	const t = data('walkplay-schemeno16-devices');
+
+	test('a device that stores whatever it is sent: ranges kept from the profile, and said so', async () => {
+		const analysis = analyzeCodec(walkplay);
+		const clip = (
+			d: { min: number; max: number; step: number },
+			l: { min: number; max: number }
+		) => ({
+			min: Math.max(d.min, Math.ceil(l.min / d.step) * d.step),
+			max: Math.min(d.max, Math.floor(l.max / d.step) * d.step),
+			step: d.step
+		});
+		const echo = truth({
+			bandCount: 10,
+			band: {
+				types: ['PK', 'LSC', 'HSC', 'LPQ', 'HPQ'],
+				freq: clip(analysis.freq as never, { min: 1, max: 40000 }),
+				q: clip(analysis.q as never, { min: 0.01, max: 100 }),
+				gain: clip(analysis.gain as never, { min: -30, max: 30 })
+			}
+		});
+		const fake = new FakeDevice({ protocol: walkplay, truth: echo });
+		const result = await runProbe(fake, { mode: 'full', analysis, profile: t, ...quiet });
+		const derived = deriveConstraints(result, { analysis, profile: t })!;
+		expect(derived.unchecked).toBe(true);
+		expect(derived.notes[0]).toMatch(/without checking it/);
+		expect(derived.constraints.band.gain).toEqual(t.band.gain);
+		expect(derived.constraints.band.freq).toEqual(t.band.freq);
+		// One line per kind of note, not one per band.
+		expect(derived.notes.filter((n) => n.includes('frequency in'))).toHaveLength(1);
+		expect(derived.notes.join('\n')).toMatch(/in every band/);
+		// No conditions made up from two windows that both reach the search limits.
+		expect(derived.constraints.band.variants).toBeUndefined();
+		expect(result.restore.verified).toBe(true);
+	});
+
+	test('writes over 8 bands change nothing: the count is what this protocol can write, and the restore fits', async () => {
+		const initial = Array.from({ length: 10 }, (_, i): Filter => ({
+			type: 'PK',
+			freq: 100 * (i + 1),
+			q: 0.75,
+			gain: i % 3
+		}));
+		const { result, fake, notes } = await probe(
+			{ protocol: walkplay, truth: t, initial, maxWriteBands: 8, phantomBands: 6 },
+			{ mode: 'quick', profile: t }
+		);
+		expect(result.aborted).toBeUndefined();
+		expect(result.findings.bandCount).toEqual({
+			value: 8,
+			atLeast: false,
+			writeLimit: { kept: 8, refused: 9 }
+		});
+		expect(notes.join('\n')).toMatch(/writes of 9 bands or more changed nothing/);
+		expect(result.restore.verified).toBe(true);
+		expect(fake.stored).toEqual(initial);
+	});
+
+	test('reads that go unanswered now and then are retried, not fatal', async () => {
+		const { result, diff } = await probe({ protocol: walkplay, truth: t, timeoutEvery: 9 });
+		expect(result.aborted).toBeUndefined();
+		expect(result.anomalies.some((a) => a.includes('unanswered'))).toBe(true);
+		expect(diff).toEqual([]);
+		expect(result.restore.verified).toBe(true);
+	});
+
+	test('differences are grouped by band', () => {
+		const other = { ...t, band: { ...t.band, gain: { min: -6, max: 6, step: 0.5 } } } as Profile;
+		expect(constraintDiff(t, other)).toEqual([
+			'every band: gain −6 dB to +6 dB in 0.5 dB steps, not −10 dB to +10 dB in 0.00390625 dB steps'
+		]);
+	});
+});

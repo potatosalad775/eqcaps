@@ -382,9 +382,14 @@
 				Started from your device's probe ({handoff.probe.mode}): its band count, types, domains,
 				rules and preamp are in the file, and the evidence file
 				<span class="font-mono">{evidenceRef}</span> is cited in
-				<span class="font-mono">meta.sources</span> as a probe, which counts toward a verified
-				status once a maintainer has reviewed it. What the probe couldn't settle is in
-				<span class="font-mono">meta.notes</span>.
+				<span class="font-mono">meta.sources</span>
+				{#if handoff.probe.counting === false}
+					as a community source: the device kept everything the probe sent, so the probe verifies
+					none of its ranges.
+				{:else}
+					as a probe, which counts toward a verified status once a maintainer has reviewed it.
+				{/if}
+				What the probe couldn't settle is in <span class="font-mono">meta.notes</span>.
 			{:else}
 				Started from your device's read-back: the evidence file
 				<span class="font-mono">{evidenceRef}</span> is cited in

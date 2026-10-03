@@ -18,6 +18,7 @@ import {
 	type Variant
 } from '@potatosalad775/eqcaps-core';
 import type { CodecAnalysis } from '@potatosalad775/eqcaps-device-bridge';
+import { bandList } from './compare.ts';
 import type { Bound, FieldFinding, ProbeResult } from './types.ts';
 
 /** The constraint part of a profile, as a probe derives it. */
@@ -33,6 +34,12 @@ export interface Derivation {
 	constraints: DerivedConstraints;
 	/** What the derivation assumed or couldn't settle, for `meta.notes` and the screen. */
 	notes: string[];
+	/**
+	 * The device took every value the probe sent, up to its search limits, in every field
+	 * probed: it seems to store what it is sent without checking it, so the probe says nothing
+	 * about its ranges. Such a probe isn't counting evidence for them.
+	 */
+	unchecked: boolean;
 }
 
 /** Used for a field neither the probe, the profile nor the wire bounds. */
@@ -44,12 +51,42 @@ const DEFAULTS: Record<'freq' | 'q' | 'gain', Domain> = {
 
 const LABEL = { freq: 'frequency', q: 'Q', gain: 'gain', preamp: 'preamp' } as const;
 
-function boundNote(field: keyof typeof LABEL, side: 'min' | 'max', b: Bound, where: string) {
+/**
+ * Notes about bands, one line for every band a note applies to ("gain maximum in every band:
+ * …"). A note's text marks where the bands go with `{where}`.
+ */
+class Notes {
+	private readonly lines = new Map<string, number[]>();
+	constructor(private readonly count: number) {}
+
+	add(text: string, band?: number) {
+		const bands = this.lines.get(text) ?? [];
+		if (band !== undefined) bands.push(band);
+		this.lines.set(text, bands);
+	}
+
+	list(): string[] {
+		return [...this.lines].map(([text, bands]) =>
+			text.replace('{where}', bands.length ? bandsWhere(bands, this.count) : '')
+		);
+	}
+}
+
+/** " in band 3", " in bands 1–4, 6", " in every band"; nothing for a one-band engine. */
+function bandsWhere(bands: readonly number[], count: number): string {
+	if (count <= 1) return '';
+	if (new Set(bands).size >= count) return ' in every band';
+	const list = bandList(bands);
+	return ` in band${bands.length > 1 ? 's' : ''} ${list}`;
+}
+
+function boundNote(field: keyof typeof LABEL, side: 'min' | 'max', b: Bound, label = '') {
+	const name = `${LABEL[field]} ${side === 'max' ? 'maximum' : 'minimum'}{where}${label}`;
 	if (b.how === 'limit') {
-		return `${LABEL[field]} ${side === 'max' ? 'maximum' : 'minimum'}${where}: the device took the probe's search limit (${b.value}), so the real bound is ${side === 'max' ? 'at least' : 'at most'} that.`;
+		return `${name}: the device took the probe's search limit (${b.value}), so the real bound is ${side === 'max' ? 'at least' : 'at most'} that.`;
 	}
 	if (b.how === 'inconclusive') {
-		return `${LABEL[field]} ${side === 'max' ? 'maximum' : 'minimum'}${where}: inconclusive; ${b.value} is the furthest value the device kept.`;
+		return `${name}: inconclusive; ${b.value} is the furthest value the device kept.`;
 	}
 	return null;
 }
@@ -59,8 +96,9 @@ function domainOf(
 	f: FieldFinding,
 	step: number | undefined,
 	field: keyof typeof LABEL,
-	where: string,
-	notes: string[]
+	notes: Notes,
+	band?: number,
+	label = ''
 ): Domain | null {
 	if (f.values) {
 		if (f.values.length === 0) return null;
@@ -71,19 +109,25 @@ function domainOf(
 		['min', f.min],
 		['max', f.max]
 	] as const) {
-		const n = boundNote(field, side, b, where);
-		if (n) notes.push(n);
+		const n = boundNote(field, side, b, label);
+		if (n) notes.add(n, band);
 	}
 	const min = f.min.value;
 	const max = f.max.value;
 	if (near(min, max)) return { value: min };
 	if (step && onGrid(min, step) && onGrid(max, step)) return { min, max, step };
-	if (step)
-		notes.push(
-			`${LABEL[field]}${where}: bounds ${min} and ${max} are off the ${step} grid, so no step is given.`
+	if (step) {
+		notes.add(
+			`${LABEL[field]}{where}${label}: bounds ${min} and ${max} are off the ${step} grid, so no step is given.`,
+			band
 		);
+	}
 	return { min, max };
 }
+
+/** Both bounds at the search limit: the device took everything the probe sent. */
+const unbounded = (f: FieldFinding | undefined) =>
+	f?.min?.how === 'limit' && f?.max?.how === 'limit';
 
 /** Slot `i` of `profile`, merged, with its variants. */
 function profileSlot(profile: Profile | undefined, i: number): SlotFields | undefined {
@@ -95,13 +139,13 @@ function profileSlot(profile: Profile | undefined, i: number): SlotFields | unde
 function variantsOf(
 	conditions: NonNullable<ProbeResult['findings']['slots'][number]['conditions']>,
 	step: number | undefined,
-	where: string,
-	notes: string[]
+	notes: Notes,
+	band: number
 ): Variant[] {
 	const typed = new Map<string, { types: FilterType[]; freq: Domain }>();
 	const other: Variant[] = [];
 	for (const c of conditions) {
-		const freq = domainOf(c.freq, step, 'freq', `${where} (${c.label})`, notes);
+		const freq = domainOf(c.freq, step, 'freq', notes, band, ` (${c.label})`);
 		if (!freq) continue;
 		const type = c.when.type?.eq;
 		if (type) {
@@ -164,11 +208,16 @@ export function deriveConstraints(
 ): Derivation | null {
 	const { findings } = result;
 	if (!findings.bandCount) return null;
-	const notes: string[] = [];
 	const { analysis, profile } = context;
 	const count = findings.bandCount.value;
-	if (findings.bandCount.atLeast) {
-		notes.push(`Band count: the device kept all ${count} bands written, so it may have more.`);
+	const notes = new Notes(count);
+	const limit = findings.bandCount.writeLimit;
+	if (limit) {
+		notes.add(
+			`Band count: writes of ${limit.refused} bands or more changed nothing, while writes of ${limit.kept} were kept. That may be the device, or the way this protocol writes to it: ${count} is what the device took from this protocol.`
+		);
+	} else if (findings.bandCount.atLeast) {
+		notes.add(`Band count: the device kept all ${count} bands written, so it may have more.`);
 	}
 	const step = (field: 'freq' | 'q' | 'gain' | 'preamp') => {
 		const s = findings.steps[field];
@@ -177,11 +226,12 @@ export function deriveConstraints(
 		return w && !('values' in w) ? w.step : undefined;
 	};
 	const fallbacks = new Set<string>();
+	let searched = 0;
+	let open = 0;
 	const slots: SlotFields[] = [];
 	for (let i = 0; i < count; i++) {
 		const f = findings.slots[i] ?? {};
 		const known = profileSlot(profile, i);
-		const where = count > 1 ? ` in band ${i + 1}` : '';
 		const slot: SlotFields = {};
 		if (known?.label !== undefined) slot.label = known.label;
 		if (f.types) slot.types = f.types;
@@ -192,7 +242,21 @@ export function deriveConstraints(
 			);
 		}
 		for (const field of ['freq', 'q', 'gain'] as const) {
-			const probed = f[field] ? domainOf(f[field]!, step(field), field, where, notes) : null;
+			const finding = f[field];
+			if (finding?.min && finding.max) searched++;
+			if (unbounded(finding)) {
+				open++;
+				// The device took everything up to the limits: that says nothing about its range.
+				if (known?.[field]) {
+					slot[field] = known[field];
+					notes.add(
+						`${LABEL[field]}{where}: the device took every value up to the probe's search limits, so the probe can't tell its range; the profile's is kept.`,
+						i
+					);
+					continue;
+				}
+			}
+			const probed = finding ? domainOf(finding, step(field), field, notes, i) : null;
 			if (probed) {
 				slot[field] = probed;
 				continue;
@@ -205,7 +269,7 @@ export function deriveConstraints(
 			);
 		}
 		if (f.conditions?.length) {
-			const variants = variantsOf(f.conditions, step('freq'), where, notes);
+			const variants = variantsOf(f.conditions, step('freq'), notes, i);
 			if (variants.length) slot.variants = variants;
 		} else if (result.mode === 'quick' && known?.variants?.length) {
 			slot.variants = known.variants;
@@ -213,7 +277,7 @@ export function deriveConstraints(
 		slots.push(slot);
 	}
 	if (fallbacks.size) {
-		notes.push(`Not probed: ${[...fallbacks].join(', ')}. Check these by hand.`);
+		notes.add(`Not probed: ${[...fallbacks].join(', ')}. Check these by hand.`);
 	}
 	const { band, bands } = assembleSlots(slots);
 
@@ -225,7 +289,7 @@ export function deriveConstraints(
 				? []
 				: [{ type: 'ascendingFrequency', ...(order.strict === false ? { strict: false } : {}) }];
 		if (order.rule === 'reorders') {
-			notes.push(
+			notes.add(
 				'The device sorts bands by frequency itself; writing them in ascending order keeps read-backs in step.'
 			);
 		}
@@ -236,25 +300,39 @@ export function deriveConstraints(
 	}
 
 	let preamp: Preamp;
-	if (findings.preamp) {
-		const d = domainOf(findings.preamp, step('preamp'), 'preamp', '', notes);
+	const pre = findings.preamp;
+	if (pre && unbounded(pre) && profile?.preamp.mode === 'manual') {
+		preamp = profile.preamp;
+		notes.add(
+			"preamp: the device took every value up to the probe's search limits, so the probe can't tell its range; the profile's is kept."
+		);
+	} else if (pre) {
+		const d = domainOf(pre, step('preamp'), 'preamp', notes);
 		preamp = d ? { mode: 'manual', gain: d } : (profile?.preamp ?? { mode: 'unknown' });
 	} else {
 		preamp = profile?.preamp ?? { mode: 'unknown' };
 	}
 
 	if (findings.wholeSet) {
-		notes.push(
+		notes.add(
 			'The device refused whole writes when one band was invalid, so it was probed band by band.'
 		);
 	}
 	if (findings.resets) {
-		notes.push(
+		notes.add(
 			`${findings.resets} write${findings.resets > 1 ? 's' : ''} changed bands that weren't under test (possible silent resets); those test values were counted as refused.`
+		);
+	}
+	const unchecked = searched > 0 && open === searched;
+	const list = notes.list();
+	if (unchecked) {
+		list.unshift(
+			"The device took every value the probe sent, up to its search limits, in every field: it seems to store what it is sent without checking it. Reading back can't show such a device's limits; take its ranges from the vendor's app or documents, or from a measurement."
 		);
 	}
 	return {
 		constraints: { bandCount: count, band, ...(bands ? { bands } : {}), rules, preamp },
-		notes
+		notes: list,
+		unchecked
 	};
 }

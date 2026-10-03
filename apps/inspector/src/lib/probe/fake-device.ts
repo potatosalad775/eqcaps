@@ -52,6 +52,10 @@ export interface FakeDeviceOptions {
 	reorders?: boolean;
 	/** Bands past the device's count that a band-by-band read still answers (as unset). */
 	phantomBands?: number;
+	/** A write carrying more bands than this changes nothing, silently (as the PureAural did). */
+	maxWriteBands?: number;
+	/** Every so many reads, one goes unanswered (`timeout`) once. */
+	timeoutEvery?: number;
 	/** Capability overrides (for example `disconnectOnSave`). */
 	capabilities?: Partial<DeviceCapabilities>;
 }
@@ -85,6 +89,7 @@ export class FakeDevice implements ProbeIO {
 	writes = 0;
 	readonly pushes: PushRequest[] = [];
 	disconnected = false;
+	private reads = 0;
 	private readonly o: FakeDeviceOptions;
 	private readonly handler: AnyHandler;
 
@@ -174,6 +179,9 @@ export class FakeDevice implements ProbeIO {
 		// Exactly what the wire carries: refused values throw here, as on hardware.
 		const frames = this.handler.codec.encode(request, handlerOptions);
 		const wire = this.handler.codec.decode(frames, handlerOptions);
+		if (this.o.maxWriteBands !== undefined && request.filters.length > this.o.maxWriteBands) {
+			return { reconnect: false };
+		}
 
 		const next = [...this.stored];
 		let rejected = false;
@@ -221,6 +229,10 @@ export class FakeDevice implements ProbeIO {
 	async pull(request: PullRequest = {}): Promise<PullResult> {
 		this.check();
 		if (!this.capabilities.canRead) throw new BridgeError('unsupported', 'write-only');
+		this.reads++;
+		if (this.o.timeoutEvery && this.reads % this.o.timeoutEvery === 0) {
+			throw new BridgeError('timeout', 'no answer this time');
+		}
 		let filters: (Filter | null)[];
 		if (this.capabilities.needsBandCount) {
 			const asked = request.bands ?? this.bandCount;

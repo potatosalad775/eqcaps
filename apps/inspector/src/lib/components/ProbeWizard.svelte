@@ -161,7 +161,8 @@
 						probe: {
 							mode: result.mode,
 							constraints: derivation.constraints,
-							notes: derivation.notes
+							notes: derivation.notes,
+							counting: !derivation.unchecked
 						}
 					}
 				: {}),
@@ -322,6 +323,14 @@
 		{#if derivation}
 			<div class="space-y-2 text-sm">
 				<h4 class="font-medium">What the device accepts</h4>
+				{#if derivation.unchecked}
+					<p class="rounded bg-amber-50 px-3 py-2 dark:bg-amber-950">
+						<strong>This device seems not to check what it is sent.</strong> It kept every value the probe
+						tried, up to the probe's limits, so reading back can't show its ranges: where the matched
+						profile has a range, it is kept below. The band count and types still hold. The evidence file
+						is cited as a community source, not as a verifying probe.
+					</p>
+				{/if}
 				{#if summary}
 					<ul class="list-disc pl-5">
 						<li>{summary.bands}</li>
