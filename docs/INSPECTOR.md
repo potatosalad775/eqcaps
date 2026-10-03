@@ -48,7 +48,7 @@ Each tier works without the ones above it. The inspector **never writes to a dev
 - Show what the handler's codec can represent (if the handler exposes a codec, §4), which explains
   read-back rounding.
 
-### T3: Guided read (read-only; planned, replaces the probe)
+### T3: Guided read (read-only, replaces the probe)
 
 The user changes the EQ in the vendor's own app, step by step as the inspector asks, and the
 inspector reads the device back after each step. What the vendor app let the user set becomes
@@ -84,7 +84,7 @@ CI's own checks as the user types. A read from the connect page arrives with its
 cited and is re-checked against every edit. Evidence files are attached to the pull request,
 since one link can only create one file.
 
-## 3. Guided reads (T3, planned)
+## 3. Guided reads (T3)
 
 The probe learned limits by writing values and reading back what stuck. That needed the firmware
 to check what it is sent, and many don't (Walkplay stores anything), and every firmware bug became
@@ -216,7 +216,7 @@ apps/inspector (Svelte 5 + Vite, static SPA)
   ├── uses packages/client       fetch index/profiles, cache, match identity → profiles
   ├── uses packages/core         resolveSlot / validate / fit / assign / complete
   ├── uses packages/device-bridge  connectors + handlers (+ codecs), pull only
-  └── guided reads (planned)      step planner, inference, evidence writer
+  └── src/lib/guided/            guided reads: step planner, inference, evidence writer
 ```
 
 - Deployed with the published data on the same origin (`/` = app, `/v1/…` = data).
@@ -295,7 +295,7 @@ Stored at `data/evidence/<profile-id>/<date>-<short hash>.json`, referenced from
 | `/` | search + "Connect a device" |
 | `/p/<id>` | profile view (T0) |
 | `/playground` | validate/fit playground |
-| `/connect` | T1 identify → T2 read → T3 guided read (planned) |
+| `/connect` | T1 identify → T2 read → T3 guided read |
 | `/edit/<id?>` | T4 editor + submit |
 | `/docs` | consumer guide (how to use the CDN, client, engine) |
 
@@ -305,3 +305,4 @@ and T2 (no probing yet). `/edit` and `/docs` are next.
 is Phase 5.
 *2026-10-03, later:* `/connect` probes (T3, D38). Removed again the same day (D40); guided reads
 (§3) are planned in its place.
+*2026-10-03, later still:* `/connect` runs guided reads (T3, D41), offered after a read.

@@ -213,7 +213,7 @@ so the inspector, which only reads, identifies it and says so; its profile now a
 a device matched only by a group can be added as its own profile from Connect, driven by the
 group's protocol (D33), with no code change.
 
-### Phase 5: Guided reads (T3) · M (≈1–2 weeks) · planned (replaces probe mode, D40)
+### Phase 5: Guided reads (T3) · M (≈1–2 weeks) · done 2026-10-03 (replaces probe mode, D40)
 The inspector never writes to a device. A guided read asks the user to change the EQ in the
 vendor's own app, one step at a time, and reads the device back after each step; what the app let
 them set becomes `vendor-app` evidence. Design: INSPECTOR §3.
@@ -252,6 +252,12 @@ On a CrinEar Protocol Micro, band-count writes past its 8 bands corrupted its st
 restore, written at the wrong size, didn't repair it. Walkplay firmware also stores whatever it
 is sent, so probes there couldn't learn ranges anyway.
 
+*2026-10-04:* done. The exit is met by the owner's guided read of a CrinEar Protocol Micro in
+Walkplay's web app (`data/evidence/crinear-protocol-micro/`, cited by its profile as
+`vendor-app`), and `no-writes.test.ts` checks the inspector's imports. A second guided read
+produced the EarAcoustic OSHUN DECO profile. Only the shared web-tab case (INSPECTOR §3.4) has run
+on hardware; reconnecting for a phone or desktop vendor app is built but not yet tried (§7).
+
 ### Phase 6: Consumers (parallel once Phases 2–3 land)
 - **modernGraphTool** (the original draft's M3/M5/M6, done in that repo): replace
   `EqConstraintPreset` with core types; load via client; re-enable the picker with visible badge +
@@ -280,25 +286,22 @@ is sent, so probes there couldn't learn ranges anyway.
 
 ## 7. Immediate next steps
 
-1. Owner: push, so `/v1/` and the new inspector deploy, and `/next/` stops being served (D36).
-   Then publish `core`, `client` and the bridge as 0.2.0 (`npm run release -- 0.2.0`), and
-   deprecate 0.1.0 of `core` and `client` on npm (`npm deprecate`). Before that, the bridge can be
-   tried in another app from `npm run release -- 0.2.0-rc.1 --pack`.
-2. Next session: guided reads (Phase 5, INSPECTOR §3). The decisions are settled (D41); the
-   build is next.
-3. Next session: profiles for the PureAural (its own device, not a Walkplay variant) and the
-   OSHUN DECO, with the protocol differences their vendor apps showed (D33 note) as protocol
-   options, the captures as tests, and ranges from the apps' UIs (`vendor-app`). Whether the
-   OSHUN's bands 11–16 do anything needs a measurement.
-4. Publish the data package `@potatosalad775/eqcaps` (D32): decide its contents (the `/v1/` files)
+1. A guided read with a phone or desktop vendor app (INSPECTOR §3.4): the page reconnects to a
+   granted device for each step, which hasn't run on hardware yet.
+2. Next session: a profile for the PureAural (its own device, not a Walkplay variant), and for both
+   it and the OSHUN DECO the protocol differences their vendor apps showed (D33 note) as protocol
+   options, with the captures as tests. The OSHUN DECO profile is in (2026-10-04, from a guided
+   read), with ranges from Walkplay's web app; whether its bands 11–16 do anything needs a
+   measurement.
+3. Publish the data package `@potatosalad775/eqcaps` (D32): decide its contents (the `/v1/` files)
    and add it to the release script.
-5. Carried from Phase 4: verified profiles, with every hard case among them. Guided reads
+4. Carried from Phase 4: verified profiles, with every hard case among them. Guided reads
    (`vendor-app` evidence) are the way in for devices with read-back.
    The two RME drafts are the nearest by documents: their notes list what to check (shelf
    direction, frequency grid, Q step, the older ADI-2 DAC).
-6. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
+5. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
    A capture of the vendor app's USB traffic, made by the owner, would show whether the device
    answers reads and what a reliable write looks like. Until then it can't be read.
-7. Shrink the group profiles: as devices are identified, give them device profiles with their
+6. Shrink the group profiles: as devices are identified, give them device profiles with their
    real (vendor id, product id) and drop pairs from the groups. Q11 is answered (D43): lists made
    the index 6× smaller but still claim pairs that don't exist.
