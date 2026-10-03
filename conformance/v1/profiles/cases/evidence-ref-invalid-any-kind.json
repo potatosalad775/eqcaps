@@ -1,0 +1,16 @@
+{
+	"description": "Any source whose ref starts with evidence/ must be an evidence file path, whatever its kind: here a guided read cited as vendor-app, with the profile directory missing.",
+	"spec": "§10",
+	"profile": {
+		"meta": {
+			"sources": [
+				{
+					"kind": "vendor-app",
+					"ref": "evidence/2026-10-04-a1b2c3.json",
+					"date": "2026-10-04"
+				}
+			]
+		}
+	},
+	"expect": [{ "code": "evidence-ref-invalid", "path": "/meta/sources/0/ref" }]
+}

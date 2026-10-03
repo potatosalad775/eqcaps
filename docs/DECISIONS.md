@@ -773,6 +773,8 @@ than a 1.1 minor. Nothing had been published under `/v1/` yet, and a new format'
 declaring 1.1 would only confuse.
 *2026-10-03, amended again before first publication:* `realization` left format 1.0 (D39), for the
 same reason.
+*2026-10-03, amended before first publication:* the evidence-ref rule covers every `ref` that
+starts with `evidence/` (D41), for the same reason.
 **Rejected:** dropping `/next/` at the freeze (breaks every 0.1.x client's default); keeping the
 file name SPEC-DRAFT.md (a frozen definition called a draft misleads readers; links inside the
 repository were updated, and old links to the file on GitHub break).
@@ -1008,6 +1010,45 @@ inspector can hold the same HID device at once (INSPECTOR §3.4).
 **Rejected:** keeping the probe with the drafted fixes (they close this failure, not the next
 firmware's); keeping it behind a developer flag (code nobody runs rots, and the risk is the same
 for whoever enables it); keeping the `probe` source kind for a future tool (nothing produces it).
+*2026-10-03:* the open questions are answered in D41.
+
+### D41. Guided reads: cited as `vendor-app`, one experiment per step, the device shared (accepted, 2026-10-03)
+The owner settled D40's open questions before `/v1/` was first published.
+- **Citation.** A guided read is a `vendor-app` source whose `ref` is its evidence file. The
+  evidence-ref rule (SPEC §10, `evidence-ref-invalid`) now covers any source whose `ref` starts with
+  `evidence/`, whatever its kind; `measurement` refs must still be evidence files, and other kinds
+  may still describe what was seen in text ("JDS Labs Core app 1.2, EQ page limits"). CI already
+  checked that every `evidence/` ref exists, whatever its kind. This makes the rule stricter, so it
+  joins format 1.0, as D37 and D39 did.
+- **Evidence file.** The T2 file (INSPECTOR §6), plus a `vendorApp` block (`name`, `version`,
+  `platform`, typed by the user and shown in the PII review), and one experiment after the first
+  `read` per step: the instruction, the band, field and what was asked, the **full** read-back,
+  what changed since the previous read, and the conclusion (a bound, a step, a type code). A
+  skipped step is recorded as skipped; a redone step is a new experiment, and the last one counts.
+  The final `restore` step lists what differs from the first read. The file ends with the
+  `constraints` the steps established and `notChecked`. `evidenceVersion` stays 1: the file isn't
+  part of the format, and a T2 file is unchanged.
+- **Sharing the device.** Checked on a CrinEar Protocol Micro (Walkplay, `0x3302:0xc20f`) with
+  Walkplay's web app (`peq.szwalkplay.com`), Chrome 154 on macOS: the vendor tab and the inspector
+  held the device open at once, in either order (the vendor app disconnected and reconnected while
+  the inspector held it). The vendor app writes on every change, with no save step, and the
+  inspector's reads saw each change at once: band 1 gain 0 → 3 → 10 (the app's maximum, matching
+  the group profile) → 0, and the final read matched the first exactly. The vendor app showed no
+  errors after the inspector's reads. The owner changed the preamp by hand during the run, which
+  a read showed as a change outside the step, so change detection reports every change, not
+  only the asked one.
+  The page therefore keeps its connection when the vendor app is in another tab, and still
+  supports the worst case (a phone or desktop app): one read per step, reconnecting a granted
+  device without the chooser and checking its identity.
+
+**Why:** the evidence is the vendor app's limits whichever way they were seen, so a new kind
+would add an enum value consumers must handle without telling them anything the file doesn't;
+full read-backs let a reviewer recompute every conclusion and see that the other bands stayed
+put, at about 10 KB for a whole run.
+**Rejected:** a `guided-read` source kind (a kind only our tool produces, which D40 removed `probe`
+for); requiring every `vendor-app` ref to be an evidence file (most vendor-app evidence is a
+manual reading of the app's UI, with nothing to file); storing only the changed values per step
+(smaller, but a reviewer can't check that nothing else moved).
 
 ---
 

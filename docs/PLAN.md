@@ -217,16 +217,14 @@ The inspector never writes to a device. A guided read asks the user to change th
 vendor's own app, one step at a time, and reads the device back after each step; what the app let
 them set becomes `vendor-app` evidence. Design: INSPECTOR §3.
 
-Decide first (DECISIONS D40, open):
-- **How a guided read is cited.** `vendor-app` with `ref` pointing to the evidence file in
-  `data/evidence/`, which means the evidence-ref rule (SPEC §10, today `measurement` only) covers
-  `vendor-app` refs that start with `evidence/`; or a source kind of its own. Either is a format
-  change to settle before `/v1/` is first published.
-- **Evidence file shape:** one experiment per step, with the instruction, the read-back, what
-  changed since the last read, and the conclusion (a bound, a step, a type code).
-- **Sharing the device with the vendor app** (INSPECTOR §3.4): check on a Walkplay unit whether
-  Chrome lets the vendor web app and the inspector open the same HID device; build for the
-  worst case, one read per step with a reconnect, without the chooser.
+Decided (DECISIONS D41, 2026-10-03):
+- **Citation:** a `vendor-app` source whose `ref` is the evidence file. The evidence-ref rule
+  (SPEC §10) covers every `ref` that starts with `evidence/`, in format 1.0.
+- **Evidence file:** the T2 file plus `vendorApp`, one experiment per step (instruction, the full
+  read-back, what changed, the conclusion), `constraints` and `notChecked` (INSPECTOR §6).
+- **Sharing:** Walkplay's web app and the inspector held a Protocol Micro at once, in either
+  order (INSPECTOR §3.4). The page keeps its connection and still supports reconnecting a granted
+  device for a phone or desktop vendor app.
 
 Build:
 - `src/lib/guided/` (plain TS, tested by the root Vitest run, D34): the step planner (what's
@@ -284,7 +282,8 @@ is sent, so probes there couldn't learn ranges anyway.
 1. Owner: push, so `/v1/` and the new inspector deploy. Then publish `core`, `client` and the
    bridge as 0.2.0 (`npm run release -- 0.2.0`); the client then defaults to `/v1/`. Before that,
    the bridge can be tried in another app from `npm run release -- 0.2.0-rc.1 --pack`.
-2. Next session: guided reads (Phase 5, INSPECTOR §3), starting with the decisions listed there.
+2. Next session: guided reads (Phase 5, INSPECTOR §3). The decisions are settled (D41); the
+   build is next.
 3. Next session: profiles for the PureAural (its own device, not a Walkplay variant) and the
    OSHUN DECO, with the protocol differences their vendor apps showed (D33 note) as protocol
    options, the captures as tests, and ranges from the apps' UIs (`vendor-app`). Whether the

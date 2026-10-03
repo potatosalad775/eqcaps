@@ -1,0 +1,21 @@
+{
+	"description": "A vendor-app source may cite an evidence file (a guided read) or describe what was observed in text; both are valid.",
+	"spec": "§10",
+	"profile": {
+		"meta": {
+			"sources": [
+				{
+					"kind": "vendor-app",
+					"ref": "evidence/base/2026-10-04-a1b2c3.json",
+					"date": "2026-10-04"
+				},
+				{
+					"kind": "vendor-app",
+					"ref": "Vendor EQ web app, EQ page limits",
+					"date": "2026-10-04"
+				}
+			]
+		}
+	},
+	"expect": []
+}

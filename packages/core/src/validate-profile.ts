@@ -259,8 +259,14 @@ function checkMatch(profile: Profile): Issue[] {
 
 // §10 -----------------------------------------------------------------------------------------
 
+/**
+ * A measurement source points to its evidence file, and any source whose ref starts with
+ * `evidence/` (a guided read cited as `vendor-app`, a read-back as `community`) must be a
+ * well-formed evidence path (SPEC §10).
+ */
 function checkEvidenceRef(source: Source, path: string): Issue[] {
-	if (source.kind === 'measurement' && !EVIDENCE_REF.test(source.ref)) {
+	const needsFile = source.kind === 'measurement' || source.ref.startsWith('evidence/');
+	if (needsFile && !EVIDENCE_REF.test(source.ref)) {
 		return [
 			error(
 				'evidence-ref-invalid',

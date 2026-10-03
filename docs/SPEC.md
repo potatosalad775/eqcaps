@@ -291,12 +291,15 @@ A source has `kind`, `ref` and `date` (`YYYY-MM-DD`). `firmware` is optional. `b
 handle of whoever produced the evidence; it's optional, except where `maintainer-verified` relies
 on it. Handles compare case-insensitively, as on GitHub. `via` is set only by the build (§11), and
 CI rejects it in authoring files. For `measurement` sources, `ref` is the evidence file's path
-relative to `data/`: `evidence/<profile id>/<file>.json`.
+relative to `data/`: `evidence/<profile id>/<file>.json`. Other kinds may cite an evidence file
+too, such as a guided read of the vendor's app (`vendor-app`, INSPECTOR §3) or a read-back
+(`community`), and any `ref` that starts with `evidence/` must be such a path. Otherwise `ref` is
+free text or a URL.
 
 | Source `kind` | Meaning | Counting |
 | --- | --- | --- |
 | `vendor-docs` | Published spec / manual / SDK | ✔ |
-| `vendor-app` | Observed in the vendor's own app (UI limits, captured traffic) | ✔ |
+| `vendor-app` | Observed in the vendor's own app (UI limits, captured traffic), described in `ref` or recorded in an evidence file (a guided read) | ✔ |
 | `measurement` | Acoustic measurement of the device's response, showing which values take effect. `ref` points to the measurement data in `data/evidence/`. | ✔ |
 | `handler-code` | Inferred from a device-bridge encoder (wire limits only) | ✘ |
 | `community` | Reported without counting evidence, such as a device's read-back of the values it holds (INSPECTOR §2 T2), which says nothing about limits | ✘ |

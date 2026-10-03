@@ -298,8 +298,7 @@
 	<h1 class="text-2xl font-semibold">Connect a device</h1>
 	<p class="text-zinc-600 dark:text-zinc-400">
 		See what your device says about itself, which profile matches it, and whether its current EQ
-		fits that profile. Reading never changes your device's settings. Probing, which writes test
-		values to learn what the device accepts, is a separate step you start yourself.
+		fits that profile. The inspector only reads: it never changes your device's settings.
 	</p>
 </div>
 

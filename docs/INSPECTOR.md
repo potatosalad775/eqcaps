@@ -137,13 +137,16 @@ preamp), with notes for what wasn't asked or didn't settle.
 ### 3.4 Connection
 
 The vendor app and the inspector may not share the device:
-- **Vendor web app in another tab** (Walkplay, NiceHCK): WebHID may let both open the device, or
-  not. To be checked on real devices.
+- **Vendor web app in another tab** (Walkplay, NiceHCK): both can hold the device. Checked on a
+  CrinEar Protocol Micro with Walkplay's web app in Chrome on macOS, opened in either order; the
+  app writes on every change, and the inspector's next read shows it (DECISIONS D41).
 - **Vendor phone or desktop app:** the device moves to the phone for each step and back. The page
   reconnects to a device it was already granted (`navigator.hid.getDevices()`) without the chooser,
   and checks it's the same device by its identity.
 
-The design must work in the second case: one read per step, the device reconnected for each.
+The design must work in the second case too: one read per step, the device reconnected for each.
+Change detection reports every change since the last read, not only the one asked for: a user
+may touch other controls (the owner moved the preamp during the check).
 
 ### 3.5 Safety
 
@@ -229,8 +232,35 @@ A profile cites it as a `community` source: it shows values the device holds, no
 (SPEC §10, DECISIONS D35). The file is named `<date>-<first 6 hex of its SHA-256>.json`.
 
 *2026-10-03:* a probe's file (D38) had more fields (pushes, backup, derived constraints); the probe
-is gone (D40). A guided read (§3) will record one experiment per step, with its instruction and
-read-back; its shape is to be settled with it.
+is gone (D40).
+
+A guided read (§3) adds the vendor app and one experiment per step (DECISIONS D41):
+
+```jsonc
+{
+  "evidenceVersion": 1,
+  "tool": { … }, "device": { … }, "handler": "walkplay-hid", "profile": "…", "date": "…",
+  "vendorApp": { "name": "Walkplay EQ web app", "version": "…", "platform": "web" },  // typed by the user
+  "experiments": [
+    { "id": "read", "readBack": { … }, "findings": [] },
+    { "id": "gain-max-1",
+      "instruction": "In the vendor app, set band 1's gain as high as it goes.",
+      "band": 1, "field": "gain", "ask": "max",
+      "readBack": { "filters": [ … every band … ], "preamp": 0 },
+      "changed": [{ "band": 1, "field": "gain", "from": 0, "to": 10 }],
+      "conclusion": { "band": 1, "field": "gain", "max": 10 } },
+    { "id": "q-min-1", "skipped": true },
+    …
+    { "id": "restore", "readBack": { … }, "changed": [] }   // against the first read
+  ],
+  "constraints": { "bands": 8, "gain": { "min": -10, "max": 10 }, … },
+  "notChecked": ["conditional domains", "rules"],
+  "caveats": [ … ]
+}
+```
+
+A redone step is a new experiment with the same `id`; the last one counts. A profile cites the
+file as a `vendor-app` source: it records the vendor app's limits (SPEC §10).
 
 - **Never collected:** serial numbers, Bluetooth MAC addresses, IP addresses of network devices.
 - **Reviewed before export:** Bluetooth names, which are often personal ("Alex's EH13"). The export
