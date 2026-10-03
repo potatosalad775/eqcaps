@@ -1,0 +1,24 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-peq-10-band-10db-full-shelves",
+	"id": "earacoustic-audio-oshun-deco",
+	"device": { "brand": "EarAcoustic Audio", "model": "OSHUN DECO" },
+	"match": {
+		"usb": [{ "vendorId": "0x3302", "productId": "0x4312", "productName": "OSHUN DECO" }]
+	},
+	"bandCount": 10,
+	"band": {
+		"types": ["PK", "HSC", "LSC", "HPQ", "LPQ"]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "evidence/earacoustic-audio-oshun-deco/2026-10-04-245292.json",
+				"date": "2026-10-04"
+			}
+		],
+		"notes": "Guided read with the eqcaps inspector on 2026-10-04: the values were set in https://peq.szwalkplay.com/ and read back from the device. The EQ at the end differs from the EQ at the start. Bands 2–10 not checked: assumed to match band 1. Preamp not checked: from walkplay-schemeno16-devices."
+	}
+}
