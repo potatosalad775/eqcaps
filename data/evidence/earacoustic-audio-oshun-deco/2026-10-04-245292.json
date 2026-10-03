@@ -86,9 +86,7 @@
 				],
 				"preamp": 0
 			},
-			"findings": [
-				"Slot 1: type LPQ is not allowed (allowed: PK, LSC, HSC)"
-			]
+			"findings": ["Slot 1: type LPQ is not allowed (allowed: PK, LSC, HSC)"]
 		},
 		{
 			"id": "bands",
@@ -791,13 +789,7 @@
 				"max": 10,
 				"step": 0.1
 			},
-			"types": [
-				"PK",
-				"HSC",
-				"LSC",
-				"HPQ",
-				"LPQ"
-			]
+			"types": ["PK", "HSC", "LSC", "HPQ", "LPQ"]
 		},
 		"preamp": {
 			"mode": "manual",

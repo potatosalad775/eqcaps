@@ -7,9 +7,7 @@
 		"usb": [{ "vendorId": "0x3302", "productId": "0x4312", "productName": "OSHUN DECO" }]
 	},
 	"bandCount": 10,
-	"band": {
-		"types": ["PK", "HSC", "LSC", "HPQ", "LPQ"]
-	},
+	"band": { "types": ["PK", "HSC", "LSC", "HPQ", "LPQ"] },
 	"meta": {
 		"status": "draft",
 		"sources": [
