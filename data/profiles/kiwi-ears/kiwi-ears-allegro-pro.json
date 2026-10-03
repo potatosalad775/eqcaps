@@ -11,6 +11,7 @@
 			{ "vendorId": "0x31b2", "productName": "Kiwi Ears-Allegro PRO" }
 		]
 	},
+	"protocol": { "disconnectOnSave": true },
 	"meta": {
 		"status": "draft",
 		"sources": [

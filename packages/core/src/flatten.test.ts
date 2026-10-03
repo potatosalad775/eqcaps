@@ -21,6 +21,7 @@ const chip: AuthoringProfile = {
 		{ index: 3, types: ['HSC'] }
 	],
 	preamp: { mode: 'unknown' },
+	protocol: { handler: 'chip-hid', presets: [{ id: 1, name: 'Custom' }] },
 	meta: { status: 'draft', sources: [src('chip handler')] },
 	'x-chip': 'kept'
 } as AuthoringProfile;
@@ -41,6 +42,7 @@ const device: AuthoringProfile = {
 	device: { brand: 'Brand', model: 'Model' },
 	match: { usb: [{ vendorId: '0x0001', productId: '0x0002' }] },
 	bands: [{ index: 1, freq: { min: 20, max: 300 } }],
+	protocol: { options: { reportId: 2 } },
 	meta: { status: 'draft', sources: [src('device config')] }
 };
 
@@ -59,6 +61,14 @@ describe('flattenProfile (SPEC §11)', () => {
 		expect(profile?.band).toEqual({ ...chip.band, gain: { min: -12, max: 6 } });
 		expect(profile?.bandCount).toBe(4);
 		expect((profile as unknown as Record<string, unknown>)['x-chip']).toBe('kept');
+	});
+
+	it('merges protocol per key', () => {
+		expect(profile?.protocol).toEqual({
+			handler: 'chip-hid',
+			presets: [{ id: 1, name: 'Custom' }],
+			options: { reportId: 2 }
+		});
 	});
 
 	it('merges bands by index, per key, keeping untouched slots', () => {
@@ -93,6 +103,7 @@ describe('flattenProfile (SPEC §11)', () => {
 			'band',
 			'bands',
 			'preamp',
+			'protocol',
 			'meta',
 			'x-chip'
 		]);

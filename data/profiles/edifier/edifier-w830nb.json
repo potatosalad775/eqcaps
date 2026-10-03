@@ -22,6 +22,11 @@
 		"gain": { "min": -6, "max": 6, "step": 0.25 }
 	},
 	"preamp": { "mode": "none" },
+	"protocol": {
+		"handler": "edifier-serial",
+		"presets": [{ "id": 0, "name": "Custom EQ" }],
+		"baudRate": 115200
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

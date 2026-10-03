@@ -38,10 +38,11 @@ for v2. Don't define format details anywhere except SPEC.md.
 
 1. **Vendor-neutral format.** Nothing app-specific in profiles: no measurement names, no
    modernGraphTool store ids, no UI concepts.
-2. **Constraint data ≠ protocol data.** Profiles say which values are accepted, never how to talk
-   to a device (report ids, baud rates, scheme numbers, slot ids). Protocol lives in
-   `packages/device-bridge`, which references profiles by id. `schema/`, `data/`, `core` and
-   `client` never depend on the bridge.
+2. **Constraint data ≠ wire format.** Profiles say which values are accepted, never how bytes
+   are laid out on the wire (frames, commands, scheme numbers, wire grids): that is the handlers'
+   code in `packages/device-bridge`. A profile's `protocol` only selects a bridge handler and its
+   per-device settings (D42); the engine never reads it. `schema/`, `data/`, `core` and `client`
+   never depend on the bridge.
 3. **Canonical units, written values:** Hz, dB, RBJ-cookbook Q. Domains describe the values the
    engine is told; authors fold in unit conversions (register value → dB, octaves → Q). How the
    engine's filters sound is out of scope: nothing models or corrects firmware quirks (D39).
@@ -77,10 +78,11 @@ for v2. Don't define format details anywhere except SPEC.md.
   browser APIs (those are in `src/browser/`, typed structurally). Codecs write exactly the written
   values they're given: round onto the wire grid, never clamp, pad or convert types; anything the
   wire can't carry is a `BridgeError`. A handler is a pure codec (`encode`/`decode`/`wire`) plus a
-  session that does the I/O. `src/protocols.ts` maps profile ids to handler settings; constraints
-  stay in profiles and identities in profile `match` (the client matches, the bridge doesn't).
-  A device profile under a group profile (`device.group`, D37) gets no entry: `protocolForMatches`
-  drives it with the group's protocol.
+  session that does the I/O. Which handler drives a device, with its options and presets, is the
+  profile's `protocol` (D42), inherited from the base, so a device on a known protocol is a data
+  file only; `src/protocols.ts` checks it against the handlers (`protocolOf`) and holds the
+  vendor guesses for devices without a profile. Identities stay in profile `match` (the client
+  matches, the bridge doesn't). A new handler option goes in that file's `OPTIONS` and the README.
   Protocols come from devicePEQ `0617f38`; test against device answers
   (`packages/device-bridge/test/captures/`) and codec round trips, not devicePEQ's bytes.
 - Inspector (D34): SvelteKit SPA with adapter-static and Tailwind, never server-rendered. Logic

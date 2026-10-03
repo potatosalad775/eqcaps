@@ -12,6 +12,7 @@
 		"gain": { "min": -24, "max": 12, "step": 0.1 }
 	},
 	"preamp": { "mode": "manual", "gain": { "min": -24, "max": 12, "step": 0.1 } },
+	"protocol": { "handler": "fiio-usb-hid" },
 	"meta": {
 		"status": "draft",
 		"sources": [

@@ -28,6 +28,7 @@
 			{ "vendorId": "0xb44d", "productName": "CS431XX" }
 		]
 	},
+	"protocol": { "experimental": true },
 	"meta": {
 		"status": "draft",
 		"sources": [

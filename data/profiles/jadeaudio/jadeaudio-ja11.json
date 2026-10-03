@@ -12,6 +12,16 @@
 			{ "vendorId": "0x0a12", "productName": "JadeAudio JA11" }
 		]
 	},
+	"protocol": {
+		"options": { "reportId": 2, "disabledPresetId": 4 },
+		"presets": [
+			{ "id": 0, "name": "Vocal" },
+			{ "id": 1, "name": "Classic" },
+			{ "id": 2, "name": "Bass" },
+			{ "id": 3, "name": "USER1" }
+		],
+		"disconnectOnSave": true
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

@@ -11,6 +11,18 @@
 			{ "vendorId": "0x0a12", "productName": "FIIO FP3" }
 		]
 	},
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 160, "name": "USER1" }
+		]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

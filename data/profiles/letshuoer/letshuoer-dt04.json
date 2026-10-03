@@ -28,6 +28,7 @@
 			{ "vendorId": "0xb44d", "productName": "DT04" }
 		]
 	},
+	"protocol": { "experimental": true },
 	"meta": {
 		"status": "draft",
 		"sources": [

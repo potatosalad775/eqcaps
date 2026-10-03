@@ -39,6 +39,7 @@
 			"description": "Only \"linked\" in v1; \"independent\" is reserved (SPEC §9).",
 			"const": "linked"
 		},
+		"protocol": { "$ref": "#/$defs/protocol" },
 		"meta": { "$ref": "#/$defs/meta" }
 	},
 	"patternProperties": { "^x-": true },
@@ -58,7 +59,7 @@
 			"maxLength": 64
 		},
 		"kindRules": {
-			"description": "Hardware profiles carry a match and a finite bandCount; software profiles have no match (SPEC §2).",
+			"description": "Hardware profiles carry a match and a finite bandCount; software profiles have no match, group or protocol (SPEC §2).",
 			"if": {
 				"type": "object",
 				"properties": { "kind": { "const": "software" } },
@@ -68,7 +69,8 @@
 				"type": "object",
 				"properties": {
 					"match": false,
-					"device": { "type": "object", "properties": { "group": false } }
+					"device": { "type": "object", "properties": { "group": false } },
+					"protocol": false
 				}
 			},
 			"else": {
@@ -385,6 +387,53 @@
 					"required": ["mode"]
 				}
 			]
+		},
+		"protocol": {
+			"description": "How the device bridge drives the device: its handler, and the settings that differ between the devices one handler drives. Hardware only; the engine never reads it (SPEC §9).",
+			"type": "object",
+			"properties": {
+				"handler": {
+					"description": "Id of the device-bridge handler that speaks the device's protocol (\"walkplay-hid\").",
+					"type": "string",
+					"pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+				},
+				"options": {
+					"description": "The handler's settings for this device, as the device bridge defines them.",
+					"type": "object"
+				},
+				"presets": {
+					"description": "The EQ presets (memories) the device offers, by their ids on the device.",
+					"type": "array",
+					"items": { "$ref": "#/$defs/preset" },
+					"minItems": 1
+				},
+				"disconnectOnSave": {
+					"description": "The device drops the connection after a write that saves.",
+					"type": "boolean"
+				},
+				"baudRate": {
+					"description": "Serial devices: the baud rate, where the handler's default doesn't fit.",
+					"type": "integer",
+					"minimum": 1
+				},
+				"experimental": {
+					"description": "The protocol is unconfirmed for this device.",
+					"type": "boolean"
+				}
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["handler"]
+		},
+		"preset": {
+			"type": "object",
+			"properties": {
+				"id": { "type": "integer", "minimum": 0 },
+				"name": { "type": "string", "minLength": 1 }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["id", "name"]
 		},
 		"githubHandle": {
 			"type": "string",

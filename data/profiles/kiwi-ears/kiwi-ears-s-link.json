@@ -6,6 +6,18 @@
 	"kind": "hardware",
 	"device": { "brand": "Kiwi Ears", "model": "S-Link" },
 	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x3016" }] },
+	"protocol": {
+		"options": {
+			"bandRegisters": [
+				{ "freq": "0x37", "q": "0x38" },
+				{ "freq": "0x3b", "q": "0x3c" },
+				{ "freq": "0x3d", "q": "0x3f" },
+				{ "freq": "0x39", "q": "0x3a" },
+				{ "freq": "0x35", "q": "0x36" }
+			]
+		},
+		"disconnectOnSave": true
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [
@@ -15,6 +27,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Every product id devicePEQ assigns to its \"Kiwi Ears KT_3016L\" group, under each vendor id of the vendor block (0x31b2). devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified."
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Every product id devicePEQ assigns to its \"Kiwi Ears KT_3016L\" group, under each vendor id of the vendor block (0x31b2). devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified.\nProtocol: the bands are stored out of register order."
 	}
 }

@@ -24,11 +24,11 @@ import {
 	guessProtocol,
 	isBridgeError,
 	openDevice,
-	protocolFor,
 	type HidTransport,
 	type SerialPortIdentity,
 	type StreamTransport
 } from '../src/index.ts';
+import { protocolFor } from './data.ts';
 import { noSleep } from './replay.ts';
 
 const pk = (freq: number, gain: number, q = 1): Filter => ({ type: 'PK', freq, gain, q });

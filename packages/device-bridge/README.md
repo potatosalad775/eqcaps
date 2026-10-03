@@ -12,9 +12,10 @@ hardware device in the [eqcaps](https://github.com/potatosalad775/eqcaps) databa
 - **Driven by the database.** The bridge knows how to talk to a device, not what it accepts or
   which device it is. The client matches a connected device to its eqcaps profile; the profile
   says what the device accepts (fit and complete with `@potatosalad775/eqcaps-core` before
-  writing); `protocolForMatches(matches)` says how to talk to it: the protocol of the most
-  specific matched profile that has one. A device profile added under a group profile has none of
-  its own and is driven by the group's; `protocolFor(profileId)` looks up one profile.
+  writing) and, in its `protocol`, which handler drives it with which settings.
+  `protocolForMatches(matches)` gives the protocol of the most specific match that has one this
+  bridge can drive; `protocolOf(profile)` reads one profile's or index entry's. A device added to
+  the database on a protocol the bridge already speaks needs no new bridge release.
 - **Writes exactly what it is given.** No clamping, padding, type conversion or compensation. A
   value the wire can't carry or a type the protocol has no code for is a `BridgeError`, before
   anything is sent.
@@ -72,6 +73,35 @@ the wire. `analyzeCodec(protocol)` works out offline what a protocol's writes ca
 counts one write takes, the filter types with wire codes, and each field's wire range and
 resolution as an eqcaps domain. That is `handler-code` knowledge (SPEC §10): what a device can be
 sent, not what it accepts. `handlerCodeUrl(handler, commit)` is the source `ref` for it.
+
+## Handlers and their options
+
+A profile's `protocol` (eqcaps SPEC §9) names one of these handlers, with the options its device
+needs. Byte options may be written as hex strings (`"0x21"`). `protocolProblem(protocol)` says
+why a block can't be driven: an unknown handler (data newer than this bridge) or option.
+
+| Handler | Transports | Options |
+| --- | --- | --- |
+| `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`; `0x21` on newer models), `disabledPresetId` (the "EQ off" preset) |
+| `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101) |
+| `moondrop-usb-hid` | HID | – |
+| `moondrop-old-fashioned-hid` | HID | – |
+| `conexant-usb-hid` | HID | – |
+| `ktmicro-usb-hid` | HID | `baseRegister` (default `0x26`), `bandRegisters` (`[{ "freq", "q" }]` per band, for models that skip or reorder registers), `disabledSlot` (default 2), `customSlot` (default 3) |
+| `fosi-audio-usb-hid` | HID | `reportId` (default 1), `bandwidth` (default 0), `defaultSlot` (default 7) |
+| `qudelix-usb-hid` | HID | – (the report comes from the descriptor) |
+| `jds-labs-usb-serial` | serial | – |
+| `nothing-usb-serial` | serial | `customSlot` (default 5) |
+| `fiio-usb-serial` | serial | `saveCommand` (default `0x19`) |
+| `fiio-f110` | serial, BLE | – |
+| `tanchjim-rita-serial` | serial | – |
+| `moondrop-edge-serial` | serial | – |
+| `edifier-serial` | serial | – |
+| `airoha` | serial, BLE | – |
+
+The rest of the block is the same for every handler: `presets` (`[{ "id", "name" }]`, the
+device's EQ memories), `disconnectOnSave`, `baudRate` (serial; default 115200 over USB, 9600 over
+Bluetooth) and `experimental`. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,
 `timeout`, `bad-response`, `rejected`, `transport` or `invalid-request`.

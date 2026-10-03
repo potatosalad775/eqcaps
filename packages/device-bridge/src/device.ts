@@ -34,6 +34,7 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	types: readonly FilterType[];
 	/** What the write frames can carry. A profile domain outside it can't be written. */
 	wire: WireGrid;
+	/** The protocol's preset slots. */
 	slots: readonly Slot[];
 	/** The device drops the connection after a push that saves; reconnect afterwards. */
 	disconnectOnSave: boolean;
@@ -62,8 +63,8 @@ export const transportsOf = (h: AnyHandler): readonly Transport['kind'][] =>
 		: (h.transport as readonly Transport['kind'][]);
 
 /**
- * Drives `transport` with `protocol`: `protocolFor(profileId)` for a device the database knows,
- * `guessProtocol(vendorId)` otherwise. Operations run one at a time.
+ * Drives `transport` with `protocol`: `protocolOf(profile)` (or `protocolForMatches`) for a device
+ * the database knows, `guessProtocol(vendorId)` otherwise. Operations run one at a time.
  */
 export function openDevice(
 	transport: Transport,
@@ -88,7 +89,7 @@ export function openDevice(
 		...handler.capabilities(transport, handlerOptions),
 		types: handler.codec.types,
 		wire: handler.codec.wire(handlerOptions),
-		slots: protocol.slots ?? [],
+		slots: protocol.presets ?? [],
 		disconnectOnSave: protocol.disconnectOnSave ?? false,
 		experimental: protocol.experimental ?? false
 	};

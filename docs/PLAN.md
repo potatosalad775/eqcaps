@@ -72,7 +72,7 @@ eqcaps/
 │   ├── client/                   fetch/cache index, profiles, bundle; matchDevice()
 │   ├── build/                    structural validation (Ajv) and the validation pipeline; later
 │   │                             compile, index, bundle, hashes and the CI CLI
-│   ├── device-bridge/            codecs, sessions, protocols by profile id, transport interface and
+│   ├── device-bridge/            codecs, sessions, profiles' protocols checked, transport interface and
 │   │                             browser transports (WebHID/Web Serial/Web Bluetooth); from devicePEQ (D20, D33)
 │   └── kotlin/                   (not scheduled, D15) Kotlin port of core
 ├── apps/inspector/               Svelte 5 + Vite static SPA
@@ -178,8 +178,9 @@ is live on Pages, and `main` is protected (one approval, CI required, D28). `cor
 The device bridge is built (D33): 16 protocols from devicePEQ `0617f38`, each a pure codec
 (request ↔ frames, plus the wire grid it can carry) and a session that does the I/O, behind
 transports without browser types, with WebHID, Web Serial and Web Bluetooth implementations.
-Protocols are keyed by profile id, so the client's `matchDevice` is the only identity answer;
-devices without a profile get a vendor guess marked experimental. Tests decode the recorded device
+Profiles carry their protocol (handler and per-device settings, D42), so the client's
+`matchDevice` is the only identity answer and a device on a known protocol needs no bridge
+release; devices without a profile get a vendor guess marked experimental. Tests decode the recorded device
 answers, round-trip every codec on its wire grid, check every hardware profile against its codec,
 and run the consumer recipe (`fit` → `complete` → push) for every profile. They corrected three
 seeded profiles and found two codec bugs; the open data findings are listed in D33.

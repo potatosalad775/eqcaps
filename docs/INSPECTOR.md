@@ -205,8 +205,8 @@ per model) become codec regression tests and seed the virtual device.
 "any device" WebHID connect, identity extraction, the descriptor as `collections`, capability
 flags, raw push, and the captures as regression tests. Every handler is split into a pure codec
 (`encode`, `decode`, and `wire()`: the range and resolution each field can carry) and a session,
-so offline analysis can start from the codecs. Protocols are keyed by profile
-id rather than carried by registrations: the device is identified once, by the client against the
+so offline analysis can start from the codecs. Protocols are carried by the profiles (D42)
+rather than by registrations: the device is identified once, by the client against the
 database, and an unknown device gets its vendor's usual protocol, marked experimental.
 
 ## 5. Architecture

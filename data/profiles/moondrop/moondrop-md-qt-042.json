@@ -28,6 +28,7 @@
 			{ "vendorId": "0xb44d", "productName": "MD-QT-042" }
 		]
 	},
+	"protocol": { "experimental": true },
 	"meta": {
 		"status": "draft",
 		"sources": [

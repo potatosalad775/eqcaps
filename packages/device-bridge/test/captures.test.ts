@@ -1,26 +1,24 @@
 // Against devicePEQ's recorded device captures (D20, D33). For each capture the protocol is found
-// the way an app finds it: the client matches the device to a profile, `protocolFor` gives the
-// protocol. A pull replays the recorded answers and the decoded state is snapshotted, with what the
+// the way an app finds it: the client matches the device to a profile, whose `protocol` drives
+// it. A pull replays the recorded answers and the decoded state is snapshotted, with what the
 // draft profile says about it. The recorded writes are reference frames: decoding them and
 // encoding the result gives the same band frames back.
 
 import { matchDevice } from '@potatosalad775/eqcaps-client';
 import { validate, type Filter, type Profile } from '@potatosalad775/eqcaps-core';
 import { describe, expect, test } from 'vitest';
-import { validateRepository } from '../../build/src/node.ts';
 import {
 	HANDLERS,
 	identityOf,
 	openDevice,
-	protocolFor,
 	type AnyHandler,
 	type HidFrame,
 	type Protocol,
 	type PushRequest
 } from '../src/index.ts';
+import { profiles, protocolFor } from './data.ts';
 import { loadCaptures, noSleep, recordedFrames, ReplayHid, type Capture } from './replay.ts';
 
-const profiles = validateRepository().profiles;
 const all = [...profiles.values()];
 
 /** Captures recorded with another protocol than the one the device's profile now has. */

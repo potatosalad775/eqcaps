@@ -28,6 +28,7 @@
 			{ "vendorId": "0xb44d", "productName": "Dual CS43198" }
 		]
 	},
+	"protocol": { "experimental": true },
 	"meta": {
 		"status": "draft",
 		"sources": [

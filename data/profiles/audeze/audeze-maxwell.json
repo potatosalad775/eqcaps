@@ -17,6 +17,15 @@
 		"gain": { "min": -12, "max": 12, "step": 0.01 }
 	},
 	"preamp": { "mode": "none" },
+	"protocol": {
+		"handler": "airoha",
+		"presets": [
+			{ "id": 0, "name": "Preset 1" },
+			{ "id": 1, "name": "Preset 2" },
+			{ "id": 2, "name": "Preset 3" },
+			{ "id": 3, "name": "Preset 4" }
+		]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

@@ -63,6 +63,11 @@ profile data (D29), not bridge config. Constant wire factors such as `compensate
 codec: they're unit conversions.
 *2026-10-03:* neither: `compensate2X` corrects a firmware quirk, not a unit, and realization left
 the format. Nothing corrects quirks (D39).
+*2026-10-03, later:* narrowed by D42. The per-device settings (handler, `reportId`, slot ids,
+`baudRate`, `disconnectOnSave`) moved into the profile's `protocol` block, so a new device needs
+no bridge release. The line now runs between data and code: the wire format (frames, commands,
+scheme numbers, grids) stays in the bridge's handlers, and the engine never reads `protocol`. A
+software-EQ app ignores the block as it ignores `match`.
 
 ### D3. Profiles are device-keyed; sharing through `extends` (accepted)
 One profile per device engine, with `abstract` bases for chip families and `extends`, flattened at
@@ -590,7 +595,8 @@ Edge, Edifier, Airoha (SPP and BLE).
   the preamp and slot where the protocol reports them. Protocols that read band by band take the
   count from the caller or the profile (`needsBandCount`). A chosen `slot` is refused where the
   protocol reads only the current preset (`readsSlot`), rather than answered with the current one.
-- **Protocols are keyed by profile id.** `PROTOCOLS` maps each hardware profile to its handler,
+- **Protocols are keyed by profile id.** *2026-10-03, superseded by D42:* profiles carry their
+  protocol, and the table is gone. `PROTOCOLS` maps each hardware profile to its handler,
   protocol options, preset slots and transport details (baud rate, disconnect on save). Which
   profile a connected device is, is the database's question, answered once by the client's
   `matchDevice`; the bridge holds no device identities. A device with no profile gets
@@ -627,6 +633,8 @@ write; all four are corrected (D31). Left open, kept visible by the tests: FiiO 
 HPQ, BP and AP, which no FiiO codec has codes for; recorded devices hold values outside their
 draft ranges (KT Micro Chu 2, Bunny and One DSP with Q up to 8 against 5, Kiwi Ears Allegro Pro
 at 18 Hz, EPZ TP13 at 19.55 Hz).
+*2026-10-03, superseded by D42:* protocols are in the profiles, inherited from their base, so a
+device profile under a group has its own through the base it extends.
 *2026-10-03, later:* a device profile under a group (D37) has no protocol entry of its own: the
 device also matches the group, whose protocol drives it. `protocolForMatches(matches)` returns the
 protocol of the most specific matched profile that has one, so apps keep a single identity
@@ -703,7 +711,7 @@ gained the evidence export with its PII review, and hands a reviewed read-back t
 *2026-10-03, later:* Connect's outcome follows the match. Against a group profile (D37) it offers
 "Add my device" first: a new profile extending the group's base (SPEC §3), prefilled with the
 device's USB identity and the evidence, so only brand, model and id are left to write. The
-protocol comes from the matches (D33), so the new profile needs no code. Group profiles carry a
+protocol comes from that base (D42), so the new profile needs no code. Group profiles carry a
 badge in search, on their page and in the match list.
 
 ### D35. Inspector editor, submission and evidence files (accepted, 2026-10-03)
@@ -1056,6 +1064,44 @@ put, at about 10 KB for a whole run.
 for); requiring every `vendor-app` ref to be an evidence file (most vendor-app evidence is a
 manual reading of the app's UI, with nothing to file); storing only the changed values per step
 (smaller, but a reviewer can't check that nothing else moved).
+
+### D42. Profiles name their protocol; the bridge has no per-device table (accepted, 2026-10-03)
+Adding a device the bridge already speaks to meant a line in the bridge's `PROTOCOLS` table
+(`src/protocols.ts`, from devicePEQ's per-device configs) and so a bridge release before any app
+could drive it, although its profile was already on the CDN. Of the table's 95 entries, about 60
+only repeated what the profile's base already said (every profile under a `walkplay-peq-*` base
+used `walkplay-hid`, every `moondrop-peq-*` one `moondrop-usb-hid`, with no exception); the other
+~35 held real per-device settings (FiiO preset slots, report ids and save commands, KT Micro band
+registers, disconnect on save). D37 helped only devices that match a group profile.
+- **`protocol` in the profile.** A hardware profile MAY carry `protocol`: the bridge handler id,
+  the handler's `options` for this device, its `presets` (EQ memories, id and name),
+  `disconnectOnSave`, `baudRate` and `experimental` (SPEC §9). The engine never reads it. It is
+  inherited like `band`, merged per key, so a base names the handler (and the presets every
+  device under it shares) and a device file adds only what differs. Every table entry moved into
+  the data; the protocols the bridge derives from the data equal the table's, entry for entry.
+- **The bridge reads it.** `protocolOf(profile or index entry)` checks the block against the
+  handlers the installed bridge has: an unknown handler (data newer than the bridge) or an option
+  the handler doesn't take gives undefined, never a guess. `protocolForMatches` takes the client's
+  matches and returns the first drivable one, as before. `protocolFor(id)` and `PROTOCOLS` are
+  gone. Options that are wire numbers may be written as hex strings (`"0x21"`), as USB ids are.
+  The handler vocabulary (ids and options) is the bridge's, documented in its README, and checked
+  by the bridge's tests over every profile; the format defines only the envelope.
+- **The index carries `protocol`**, so an app drives a matched device and filters a browser
+  chooser from `index.json` alone, offline from the bundle too (invariant 8).
+- **Invariant 2 restated.** Profiles still never say *how* to talk to a device: no frame layouts,
+  command bytes, scheme numbers or wire grids. Those stay in the bridge's handlers. What moved is
+  the per-device *selection* of a handler and its settings, which is a fact about the device like
+  its USB identity, and which the bridge can't know without a release.
+**Why:** a device on a known protocol is now a data file only: a contributor (or the inspector's
+"Add my device") writes the profile, CI checks it against the codec, and the deployed bridge
+drives it once the data is published. A new bridge release is needed only for a new handler,
+which is new code anyway. Inheritance removes the 60 redundant entries rather than moving them.
+**Rejected:** a `device.platform` field mapped to handlers in the bridge (removes the redundant
+entries, but FiiO's per-device slots and options would still need a release); generating the
+table from the profiles' bases at build time (still a release per device, and couples the bridge
+build to authoring files); separate protocol files beside the profiles (two files and a second
+inheritance mechanism per device); defining every handler's options in the profile schema (ties
+the format to the bridge's handler list; the bridge validates its own vocabulary).
 
 ---
 

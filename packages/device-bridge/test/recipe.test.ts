@@ -4,18 +4,15 @@
 
 import { complete, fit, type Filter, type Profile } from '@potatosalad775/eqcaps-core';
 import { describe, expect, test } from 'vitest';
-import { validateRepository } from '../../build/src/node.ts';
 import {
 	HANDLERS,
 	openDevice,
-	PROTOCOLS,
 	transportsOf,
 	type HidTransport,
 	type StreamTransport
 } from '../src/index.ts';
+import { profiles, PROTOCOLS } from './data.ts';
 import { noSleep } from './replay.ts';
-
-const profiles = validateRepository().profiles;
 
 const WANTED: Filter[] = [
 	{ type: 'LSC', freq: 105, q: 0.7, gain: 3 },

@@ -17,6 +17,16 @@
 		"gain": { "min": -12, "max": 12 }
 	},
 	"preamp": { "mode": "unknown" },
+	"protocol": {
+		"handler": "nothing-usb-serial",
+		"presets": [
+			{ "id": 0, "name": "Balanced" },
+			{ "id": 1, "name": "Voice" },
+			{ "id": 2, "name": "More Treble" },
+			{ "id": 3, "name": "More Bass" },
+			{ "id": 5, "name": "Custom" }
+		]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

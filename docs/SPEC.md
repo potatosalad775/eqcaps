@@ -43,6 +43,7 @@ never folded in, even a constant one (DECISIONS D39).
   "rules": [ ],                          // §7
   "preamp": { },                         // §9
   "channels": "linked",                  // §9
+  "protocol": { },                       // §9, hardware only
   "meta": { }                            // §10
 }
 ```
@@ -61,6 +62,7 @@ never folded in, even a constant one (DECISIONS D39).
 | `rules` | – | default `[]` |
 | `preamp` | ✔ | §9; `{ "mode": "unknown" }` is allowed and honest. |
 | `channels` | – | default `"linked"` |
+| `protocol` | – | §9; hardware only. How the device bridge drives the device. |
 | `meta` | ✔ | §10 |
 
 Keys starting with `x-` are extensions. They are allowed anywhere and ignored by consumers. Any
@@ -258,7 +260,7 @@ measurement shows it, and vendor apps don't correct for it. Domains hold what th
 (§1), and consumers send the values the user asks for. A reported quirk may be noted in
 `meta.notes` (DECISIONS D39).
 
-## 9. Preamp and channels
+## 9. Preamp, channels and protocol
 
 ```jsonc
 "preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.5 } }
@@ -269,6 +271,31 @@ measurement shows it, and vendor apps don't correct for it. Domains hold what th
 
 `channels`: only `"linked"` (one filter set drives both channels) in v1. `"independent"` is
 reserved for per-channel engines.
+
+**Protocol (`protocol`).** Which handler of the device bridge (`packages/device-bridge`) drives the
+device, and the settings that differ between the devices one handler drives. Hardware only. The
+engine never reads it (§13), and it never describes the wire itself: frame layouts, commands and
+wire grids are the handler's (D42).
+
+```jsonc
+"protocol": {
+  "handler": "fiio-usb-hid",                     // required: a bridge handler id
+  "options": { "reportId": 1, "saveCommand": "0x21" }, // the handler's settings for this device
+  "presets": [{ "id": 0, "name": "Jazz" }, { "id": 160, "name": "USER1" }], // EQ memories
+  "disconnectOnSave": false,                     // the device drops the connection after a save
+  "baudRate": 57600,                             // serial devices, where the default doesn't fit
+  "experimental": true                           // the protocol is unconfirmed for this device
+}
+```
+
+- `handler` and the keys of `options` are the bridge's vocabulary, documented in its README. CI
+  checks every profile's `protocol` against the bridge's handlers.
+- `presets` ids are the device's own preset numbers, unique within the list. They are unrelated to
+  the profile's filter slots (§5).
+- A consumer that doesn't know the handler, or an option, MUST treat the device as having no
+  protocol it can drive (never guess one), and MUST NOT reject the profile for it (§15).
+- A hardware profile without `protocol` is one no handler drives (the RME ADI-2 series is
+  controlled over MIDI SysEx).
 
 ## 10. Provenance (`meta`)
 
@@ -329,9 +356,10 @@ Source files under `data/` MAY use:
 
 - `"abstract": true`. The file is a base only. It is never published and needs no `match` or `device`.
 - `"extends": "<id>"`. Start from that profile and apply this file's keys on top: top-level keys
-  replace; `band` merges per key (§5.2 rule); `bands` merge by index: for each slot this file
-  overrides, its keys replace the base's keys for that slot, again per key, and the base's
-  overrides of other slots stay. `match`, `device`, `meta` and `id` are **never inherited**,
+  replace; `band` and `protocol` merge per key (§5.2 rule), so a base can name the handler and a
+  device add its presets; `bands` merge by index: for each slot this file overrides, its keys
+  replace the base's keys for that slot, again per key, and the base's overrides of other slots
+  stay. `match`, `device`, `meta` and `id` are **never inherited**,
   because provenance of the base doesn't transfer silently. `meta.sources` of the base are copied
   into the published file, after the file's own, with `"via": "<id of the file that declared
   them>"`. They are shown for context and never count toward the profile's status (§10).
@@ -699,7 +727,7 @@ profiles whose `$schema` points at its own copy of the schema; new consumers use
 
 | Path | Content |
 | --- | --- |
-| `index.json` | `{ schemaVersion, dataVersion, generatedAt, profiles: [{ id, kind, brand, model, aliases?, group?, engine?, status, replacedBy?, match?, path, sha256, bytes }] }`, one entry per profile, deprecated ones included, sorted by id. It includes `match`, so clients can identify a device without fetching every profile. `path` is relative to the index. |
+| `index.json` | `{ schemaVersion, dataVersion, generatedAt, profiles: [{ id, kind, brand, model, aliases?, group?, engine?, status, replacedBy?, match?, protocol?, path, sha256, bytes }] }`, one entry per profile, deprecated ones included, sorted by id. It includes `match` and `protocol`, so clients can identify and drive a device without fetching every profile. `path` is relative to the index. |
 | `profiles/<id>.json` | One flattened profile. |
 | `bundle.json` | `{ schemaVersion, dataVersion, generatedAt, profiles: [...] }`: every non-deprecated profile in one file, for apps that embed a snapshot (Android). |
 | `schema/profile.schema.json` | The JSON Schema. |

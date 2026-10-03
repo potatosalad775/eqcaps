@@ -18,6 +18,7 @@
 		"gain": { "min": -12, "max": 12, "step": 0.1 }
 	},
 	"preamp": { "mode": "unknown" },
+	"protocol": { "handler": "qudelix-usb-hid", "experimental": true },
 	"meta": {
 		"status": "draft",
 		"sources": [
@@ -38,6 +39,6 @@
 				"by": "potatosalad775"
 			}
 		],
-		"notes": "Seeded from AutoEQ by scripts/import/seed.ts. Band count, gain range and peaking Q range from AutoEQ's PEQ_CONFIGS QUDELIX_5K, which is an optimizer setting: the engine may allow more bands. The frequency range and the shelves' Q range are assumptions. USB identity from a devicePEQ recorded capture. Steps are the USB write's resolution (freq 1 Hz, gain 0.1 dB, Q 1/1024), with Q's minimum moved onto that grid (corrected 2026-10-02). The second USB identity (0x4007, \"Qudelix-5K USB DAC\") is a maintainer's unit, added 2026-10-03; devicePEQ's capture has 0x4005 \"... 48KHz\". 0x0a12 is the Bluetooth chip vendor's id, shared with other devices (FiiO's among them), so the vendor alone says nothing."
+		"notes": "Seeded from AutoEQ by scripts/import/seed.ts. Band count, gain range and peaking Q range from AutoEQ's PEQ_CONFIGS QUDELIX_5K, which is an optimizer setting: the engine may allow more bands. The frequency range and the shelves' Q range are assumptions. USB identity from a devicePEQ recorded capture. Steps are the USB write's resolution (freq 1 Hz, gain 0.1 dB, Q 1/1024), with Q's minimum moved onto that grid (corrected 2026-10-02). The second USB identity (0x4007, \"Qudelix-5K USB DAC\") is a maintainer's unit, added 2026-10-03; devicePEQ's capture has 0x4005 \"... 48KHz\". 0x0a12 is the Bluetooth chip vendor's id, shared with other devices (FiiO's among them), so the vendor alone says nothing.\nProtocol: the USB protocol is write-only. devicePEQ dropped the device for that; the bridge keeps it, marked experimental."
 	}
 }

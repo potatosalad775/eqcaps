@@ -28,6 +28,7 @@
 			{ "vendorId": "0xb44d", "productName": "ES9039 HiFi DSP Audio" }
 		]
 	},
+	"protocol": { "experimental": true },
 	"meta": {
 		"status": "draft",
 		"sources": [

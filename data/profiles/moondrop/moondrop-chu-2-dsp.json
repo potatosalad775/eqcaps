@@ -11,6 +11,7 @@
 			{ "vendorId": "0x31b2", "productName": "Chu2 DSP" }
 		]
 	},
+	"protocol": { "disconnectOnSave": true },
 	"meta": {
 		"status": "draft",
 		"sources": [

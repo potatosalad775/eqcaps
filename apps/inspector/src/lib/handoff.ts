@@ -149,8 +149,8 @@ export function memberBase(group: Profile): string {
 /**
  * A new profile for a device, from what it said about itself: the USB identity as its match
  * (exact product name, SPEC §3). It extends `handoff.extends` when set, so only identity and
- * provenance are written; otherwise it is a whole profile with as many bands as the device
- * returned. Bluetooth names are left out: people rename their devices, so the user writes the
+ * provenance are written (the protocol comes from the base too, D42); otherwise it is a whole
+ * profile with as many bands as the device returned, driven by the protocol that read it. Bluetooth names are left out: people rename their devices, so the user writes the
  * match by hand.
  */
 export function profileForDevice(handoff: Handoff): AuthoringProfile {
@@ -173,6 +173,12 @@ export function profileForDevice(handoff: Handoff): AuthoringProfile {
 			: {};
 	if (!handoff.extends && handoff.readBack.filters.length > 0) {
 		data.bandCount = handoff.readBack.filters.length;
+	}
+	if (!handoff.extends && handoff.protocol) {
+		const { handler, options = {} } = handoff.protocol;
+		data.protocol = Object.keys(options).length
+			? { handler, options: { ...options } }
+			: { handler };
 	}
 	if (!handoff.extends && !handoff.guided && handoff.protocol) {
 		const draft = codecDraft(handoff.protocol, data.bandCount ?? 10, handoff.date);

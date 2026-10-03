@@ -28,6 +28,7 @@
 			{ "vendorId": "0xb44d", "productName": "BGVP MX1" }
 		]
 	},
+	"protocol": { "experimental": true },
 	"meta": {
 		"status": "draft",
 		"sources": [

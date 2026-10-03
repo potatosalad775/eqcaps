@@ -10,8 +10,8 @@
 	import {
 		guessProtocol,
 		identityOf,
-		protocolFor,
 		protocolForMatches,
+		protocolOf,
 		type DeviceIdentity,
 		type HidCollectionInfo,
 		type Protocol,
@@ -87,13 +87,13 @@
 	);
 
 	/**
-	 * The protocol: the profile's; else that of the most specific matched profile that has one
-	 * (a device profile under a group is driven by the group's, D33); else a vendor guess for HID,
-	 * marked experimental. `via` names the profile it came from when that isn't the chosen one.
+	 * The protocol: the chosen profile's; else that of the most specific matched profile that has
+	 * one this bridge can drive (D42); else a vendor guess for HID, marked experimental. `via`
+	 * names the profile it came from when that isn't the chosen one.
 	 */
 	const driver: { protocol: Protocol; via?: string } | undefined = $derived.by(() => {
 		if (profileId) {
-			const p = protocolFor(profileId);
+			const p = protocolOf(catalog.index?.profiles.find((e) => e.id === profileId));
 			if (p) return { protocol: p };
 		}
 		const matched = protocolForMatches(matches);

@@ -18,6 +18,17 @@
 		"gain": { "min": -12, "max": 12 }
 	},
 	"preamp": { "mode": "none" },
+	"protocol": {
+		"handler": "fosi-audio-usb-hid",
+		"presets": [
+			{ "id": 0, "name": "Bypass" },
+			{ "id": 7, "name": "Custom 1" },
+			{ "id": 8, "name": "Custom 2" },
+			{ "id": 9, "name": "Custom 3" },
+			{ "id": 10, "name": "Custom 4" },
+			{ "id": 11, "name": "Custom 5" }
+		]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

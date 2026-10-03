@@ -37,9 +37,9 @@ export type { HandlerId, HandlerOptions } from './handlers/index.ts';
 export {
 	guessProtocol,
 	KNOWN_HID_VENDORS,
-	PROTOCOLS,
-	protocolFor,
-	protocolForMatches
+	protocolForMatches,
+	protocolOf,
+	protocolProblem
 } from './protocols.ts';
 export type { Protocol } from './protocols.ts';
 export { chooserFilters } from './chooser.ts';

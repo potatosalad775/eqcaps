@@ -33,6 +33,7 @@ const KEY_ORDER = [
 	'rules',
 	'preamp',
 	'channels',
+	'protocol',
 	'meta'
 ];
 
@@ -107,6 +108,8 @@ function merge(base: Resolved, file: Resolved): Resolved {
 	for (const [k, v] of Object.entries(file)) {
 		if (k === 'extends' || k === 'abstract') continue;
 		if (k === 'band' && base.band) out.band = { ...base.band, ...file.band };
+		else if (k === 'protocol' && base.protocol)
+			out.protocol = { ...base.protocol, ...file.protocol };
 		else if (k === 'bands' && base.bands) out.bands = mergeBands(base.bands, file.bands ?? []);
 		else if (k === 'schemaVersion' && base.schemaVersion) {
 			out.schemaVersion = laterVersion(base.schemaVersion, file.schemaVersion as string);

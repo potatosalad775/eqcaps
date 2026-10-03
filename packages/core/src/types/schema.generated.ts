@@ -20,6 +20,7 @@ export interface Profile {
 	preamp: Preamp;
 	/** Only "linked" in v1; "independent" is reserved (SPEC §9). */
 	channels?: 'linked';
+	protocol?: Protocol;
 	meta: Meta;
 }
 
@@ -43,6 +44,7 @@ export interface AuthoringProfile {
 	preamp?: Preamp;
 	/** Only "linked" in v1; "independent" is reserved (SPEC §9). */
 	channels?: 'linked';
+	protocol?: AuthoringProtocol;
 	meta: AuthoringMeta;
 	/** A base only: never published, needs no match or device (SPEC §11). */
 	abstract?: boolean;
@@ -202,6 +204,27 @@ export type Preamp =
 			mode: 'auto' | 'none' | 'unknown';
 	  };
 
+/** How the device bridge drives the device: its handler, and the settings that differ between the devices one handler drives. Hardware only; the engine never reads it (SPEC §9). */
+export interface Protocol {
+	/** Id of the device-bridge handler that speaks the device's protocol ("walkplay-hid"). */
+	handler: string;
+	/** The handler's settings for this device, as the device bridge defines them. */
+	options?: { [key: string]: unknown };
+	/** The EQ presets (memories) the device offers, by their ids on the device. */
+	presets?: Preset[];
+	/** The device drops the connection after a write that saves. */
+	disconnectOnSave?: boolean;
+	/** Serial devices: the baud rate, where the handler's default doesn't fit. */
+	baudRate?: number;
+	/** The protocol is unconfirmed for this device. */
+	experimental?: boolean;
+}
+
+export interface Preset {
+	id: number;
+	name: string;
+}
+
 export type GithubHandle = string;
 
 /** Provenance of a claim (SPEC §10). */
@@ -237,4 +260,20 @@ export type AuthoringSource = SourceFields;
 
 export interface AuthoringMeta extends MetaFields {
 	sources: AuthoringSource[];
+}
+
+/** `protocol` as written: merged per key with the base's, so `handler` may come from the base (SPEC §11). */
+export interface AuthoringProtocol {
+	/** Id of the device-bridge handler that speaks the device's protocol ("walkplay-hid"). */
+	handler?: string;
+	/** The handler's settings for this device, as the device bridge defines them. */
+	options?: { [key: string]: unknown };
+	/** The EQ presets (memories) the device offers, by their ids on the device. */
+	presets?: Preset[];
+	/** The device drops the connection after a write that saves. */
+	disconnectOnSave?: boolean;
+	/** Serial devices: the baud rate, where the handler's default doesn't fit. */
+	baudRate?: number;
+	/** The protocol is unconfirmed for this device. */
+	experimental?: boolean;
 }

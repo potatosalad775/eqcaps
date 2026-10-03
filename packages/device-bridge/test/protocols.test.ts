@@ -1,52 +1,35 @@
-// The protocol table against the database: every key is a profile, every hardware profile has a
-// protocol (its own, or a group's that matches its devices), and what the profile allows is what
-// the codec can write.
+// The profiles' protocols against the bridge (D33, D42): every hardware profile has one this bridge
+// can drive, it runs over a transport the profile's identity implies, and what the profile allows
+// is what the codec can write.
 
 import {
 	domainBounds,
+	indexFields,
 	resolveSlot,
 	type Domain,
-	type BluetoothMatch,
 	type FilterType,
-	type Profile,
-	type UsbMatch
+	type Profile
 } from '@potatosalad775/eqcaps-core';
+import { matchDevice } from '@potatosalad775/eqcaps-client';
 import { describe, expect, test } from 'vitest';
-import { validateRepository } from '../../build/src/node.ts';
 import {
 	chooserFilters,
 	guessProtocol,
 	HANDLERS,
 	KNOWN_HID_VENDORS,
-	PROTOCOLS,
-	protocolFor,
 	protocolForMatches,
+	protocolOf,
+	protocolProblem,
 	transportsOf,
 	type AnyHandler,
-	type Protocol,
 	type WireField,
 	type WireGrid
 } from '../src/index.ts';
+import { profiles, PROTOCOLS } from './data.ts';
 
-const profiles = validateRepository().profiles;
-const table = Object.entries(PROTOCOLS);
-/** The table plus device profiles driven through a group's protocol: what the codecs must carry. */
-const driven: [string, Protocol][] = [
-	...table,
-	...[...profiles.values()]
-		.filter((p) => p.kind === 'hardware' && !(p.id in PROTOCOLS))
-		.flatMap((p): [string, Protocol][] => {
-			const via = drivenThrough(p);
-			return via ? [[p.id, PROTOCOLS[via]!]] : [];
-		})
-];
-const handlerOf = (id: string) =>
-	HANDLERS[(PROTOCOLS[id] ?? driven.find(([d]) => d === id)![1]).handler] as AnyHandler;
+const driven = Object.entries(PROTOCOLS);
+const handlerOf = (id: string) => HANDLERS[PROTOCOLS[id]!.handler] as AnyHandler;
 const profile = (id: string) => profiles.get(id) as Profile;
-
-test('every key is a profile id', () => {
-	expect(table.filter(([id]) => !profiles.has(id)).map(([id]) => id)).toEqual([]);
-});
 
 /**
  * Hardware the bridge doesn't drive, listed so a missing protocol is always a decision. The RME
@@ -54,82 +37,89 @@ test('every key is a profile id', () => {
  */
 const WITHOUT_PROTOCOL = new Set(['rme-adi-2-dac-fs', 'rme-adi-2-dac-fs-bass-treble']);
 
-/** Every device `e` matches also matches `f`: `f` asks for a subset of what `e` asks for. */
-function usbCovers(f: UsbMatch, e: UsbMatch): boolean {
-	return (
-		f.vendorId === e.vendorId &&
-		(f.productId === undefined || f.productId === e.productId) &&
-		(f.productName === undefined || f.productName === e.productName)
-	);
-}
+test('every protocol in the data is one this bridge can drive', () => {
+	const problems = [...profiles.values()]
+		.filter((p) => p.protocol !== undefined)
+		.flatMap((p) => {
+			const problem = protocolProblem(p.protocol);
+			return problem ? [`${p.id}: ${problem}`] : [];
+		});
+	expect(problems).toEqual([]);
+});
 
-function bluetoothCovers(f: BluetoothMatch, e: BluetoothMatch): boolean {
-	const name =
-		f.name !== undefined
-			? e.name === f.name
-			: (e.name ?? e.namePrefix ?? '').startsWith(f.namePrefix ?? '\u0000');
-	return name && (f.serviceUuid === undefined || f.serviceUuid === e.serviceUuid);
-}
-
-/**
- * The profile with a protocol that drives `p`'s devices (protocolForMatches): one whose match
- * covers every entry of `p`'s, so any device `p` matches also matches it.
- */
-function drivenThrough(p: Profile): string | undefined {
-	const usb = p.match?.usb ?? [];
-	const bt = p.match?.bluetooth ?? [];
-	if (usb.length + bt.length === 0) return undefined;
-	const drivers = [...profiles.values()].filter(
-		(q) => q.id !== p.id && q.meta.status !== 'deprecated' && q.id in PROTOCOLS
-	);
-	const covered = (q: Profile) =>
-		usb.every((e) => (q.match?.usb ?? []).some((f) => usbCovers(f, e))) &&
-		bt.every((e) => (q.match?.bluetooth ?? []).some((f) => bluetoothCovers(f, e)));
-	return drivers.find(covered)?.id;
-}
-
-test('every hardware profile has a protocol, its own or one matching its devices', () => {
+test('every hardware profile has a protocol', () => {
 	const missing = [...profiles.values()].filter(
-		(p) =>
-			p.kind === 'hardware' &&
-			!(p.id in PROTOCOLS) &&
-			!WITHOUT_PROTOCOL.has(p.id) &&
-			drivenThrough(p) === undefined
+		(p) => p.kind === 'hardware' && !(p.id in PROTOCOLS) && !WITHOUT_PROTOCOL.has(p.id)
 	);
 	expect(missing.map((p) => p.id)).toEqual([]);
 	expect([...WITHOUT_PROTOCOL].filter((id) => id in PROTOCOLS || !profiles.has(id))).toEqual([]);
 });
 
-test('a device profile under a group is driven by the group', () => {
-	const group = profile('walkplay-schemeno16-devices');
-	const member = {
-		...group,
-		id: 'nicehck-pureaural',
-		device: { brand: 'NiceHCK', model: 'PureAural' },
-		match: { usb: [{ vendorId: '0x3302', productId: '0x4322', productName: 'NICEHCK PureAural' }] }
-	} as Profile;
-	expect(drivenThrough(member)).toBe('walkplay-schemeno16-devices');
-	const other = { ...member, match: { usb: [{ vendorId: '0x9999', productName: 'X' }] } };
-	expect(drivenThrough(other as Profile)).toBeUndefined();
+describe('protocolOf', () => {
+	test('reads hex strings as numbers', () => {
+		expect(protocolOf(profile('fiio-btr17'))?.options).toEqual({
+			saveCommand: 0x21,
+			disabledPresetId: 240
+		});
+		expect(
+			protocolOf({
+				protocol: {
+					handler: 'ktmicro-usb-hid',
+					options: { bandRegisters: [{ freq: '0x35', q: 54 }] }
+				}
+			})?.options
+		).toEqual({ bandRegisters: [{ freq: 0x35, q: 0x36 }] });
+	});
+
+	test('index entries carry the protocol', () => {
+		expect(protocolOf(indexFields(profile('crinear-protocol-micro')))).toEqual({
+			handler: 'walkplay-hid',
+			presets: [{ id: 101, name: 'Custom' }]
+		});
+	});
+
+	test("refuses what the bridge can't drive, and says why", () => {
+		const bad = {
+			'no handler': { handler: 'walkplay-bt' },
+			'unknown option': { handler: 'walkplay-hid', options: { reportId: 1 } },
+			'not a byte': { handler: 'fiio-usb-hid', options: { reportId: 256 } },
+			'bad hex': { handler: 'fiio-usb-hid', options: { saveCommand: '0x2G' } },
+			'preset twice': {
+				handler: 'walkplay-hid',
+				presets: [
+					{ id: 1, name: 'A' },
+					{ id: 1, name: 'B' }
+				]
+			},
+			'bad baud rate': { handler: 'fiio-usb-serial', baudRate: 0 }
+		};
+		for (const [what, protocol] of Object.entries(bad)) {
+			expect(protocolOf({ protocol }), what).toBeUndefined();
+			expect(protocolProblem(protocol), what).toBeTypeOf('string');
+		}
+		expect(protocolProblem({ handler: 'walkplay-bt' })).toMatch(/no handler "walkplay-bt"/);
+		expect(protocolOf({})).toBeUndefined();
+		expect(protocolOf(undefined)).toBeUndefined();
+	});
+
+	test('ignores extension keys in options', () => {
+		expect(
+			protocolOf({ protocol: { handler: 'walkplay-hid', options: { 'x-note': 'hi' } } })
+		).toEqual({ handler: 'walkplay-hid' });
+	});
 });
 
-test('protocolForMatches takes the first match with a protocol', () => {
-	expect(
-		protocolForMatches([{ id: 'nicehck-pureaural' }, { id: 'walkplay-schemeno16-devices' }])
-	).toEqual({
+test('protocolForMatches takes the first match with a protocol this bridge can drive', () => {
+	const group = profile('walkplay-schemeno16-devices');
+	expect(protocolForMatches([{ id: 'rme-adi-2-dac-fs' }, group])).toEqual({
 		profileId: 'walkplay-schemeno16-devices',
-		protocol: PROTOCOLS['walkplay-schemeno16-devices']
+		protocol: protocolOf(group)
 	});
 	expect(
-		protocolForMatches([{ id: 'fiio-ka17' }, { id: 'walkplay-schemeno16-devices' }])?.profileId
-	).toBe('fiio-ka17');
+		protocolForMatches([{ id: 'future', protocol: { handler: 'walkplay-bt' } }, group])?.profileId
+	).toBe('walkplay-schemeno16-devices');
+	expect(protocolForMatches([profile('fiio-ka17'), group])?.profileId).toBe('fiio-ka17');
 	expect(protocolForMatches([{ id: 'rme-adi-2-dac-fs' }])).toBeUndefined();
-});
-
-test('protocolFor only answers for table keys', () => {
-	expect(protocolFor('fiio-ka17')?.handler).toBe('fiio-usb-hid');
-	expect(protocolFor('toString')).toBeUndefined();
-	expect(protocolFor('no-such-device')).toBeUndefined();
 });
 
 test("each handler runs over a transport the profile's identity implies", () => {
@@ -207,6 +197,17 @@ test('profile domains the wire cannot carry', () => {
 		if (found.size) findings[`${id} (${p.handler})`] = [...found];
 	}
 	expect(findings).toMatchSnapshot();
+});
+
+test("protocolForMatches takes the client's matches over index entries", () => {
+	const index = [...profiles.values()].map(indexFields);
+	const { matches } = matchDevice(index, {
+		usb: { vendorId: 0x3302, productId: 0xc20f, productName: 'Protocol Micro' }
+	});
+	expect(protocolForMatches(matches)).toEqual({
+		profileId: 'crinear-protocol-micro',
+		protocol: { handler: 'walkplay-hid', presets: [{ id: 101, name: 'Custom' }] }
+	});
 });
 
 describe('devices without a profile', () => {

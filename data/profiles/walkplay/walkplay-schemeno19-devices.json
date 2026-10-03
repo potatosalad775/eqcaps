@@ -225,6 +225,7 @@
 		"gain": { "min": -10, "max": 10, "step": 0.00390625 }
 	},
 	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127, "step": 1 } },
+	"protocol": { "handler": "walkplay-hid", "presets": [{ "id": 101, "name": "Custom" }] },
 	"meta": {
 		"status": "draft",
 		"sources": [

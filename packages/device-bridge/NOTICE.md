@@ -35,8 +35,8 @@ SOFTWARE.
 ## devicePEQ
 
 <https://github.com/jeromeof/devicePEQ> at commit `0617f38`: the handlers' protocols, the
-protocol table's settings and preset slots, and the recorded device captures in the repository's
-tests.
+per-device protocol settings and preset slots (now in the eqcaps profiles' `protocol` blocks), and
+the recorded device captures in the repository's tests.
 
 ```
 Copyright 2024 Jerome O'Flaherty (jerome.oflaherty@icloud.com)

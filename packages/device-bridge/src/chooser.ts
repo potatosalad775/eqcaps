@@ -1,11 +1,15 @@
 import { transportsOf } from './device.ts';
 import type { AnyHandler } from './handler.ts';
 import { HANDLERS } from './handlers/index.ts';
-import { KNOWN_HID_VENDORS, protocolFor } from './protocols.ts';
+import { KNOWN_HID_VENDORS, protocolOf } from './protocols.ts';
 
-/** A database entry, as the client's index lists it: a profile id and how to recognize the device. */
+/**
+ * A database entry, as the client's index lists it: a profile id, how to recognize the device and
+ * how to drive it.
+ */
 export interface ChooserEntry {
 	id: string;
+	protocol?: unknown;
 	match?: {
 		usb?: readonly { vendorId: string }[];
 		bluetooth?: readonly { name?: string; namePrefix?: string }[];
@@ -38,7 +42,7 @@ export function chooserFilters(entries: Iterable<ChooserEntry> = []): ChooserFil
 	const serial: number[] = [];
 	const ble = new Map<string, { name: string } | { namePrefix: string }>();
 	for (const entry of entries) {
-		const protocol = protocolFor(entry.id);
+		const protocol = protocolOf(entry);
 		if (!protocol) continue;
 		const kinds = transportsOf(HANDLERS[protocol.handler]);
 		for (const { vendorId } of entry.match?.usb ?? []) {

@@ -11,6 +11,25 @@
 			{ "vendorId": "0x0a12", "productName": "RETRO NANO" }
 		]
 	},
+	"protocol": {
+		"options": { "disabledPresetId": 11 },
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 8, "name": "Retro" },
+			{ "id": 9, "name": "sDamp-1" },
+			{ "id": 10, "name": "sDamp-2" },
+			{ "id": 160, "name": "USER1" },
+			{ "id": 161, "name": "USER2" },
+			{ "id": 162, "name": "USER3" },
+			{ "id": 11, "name": "Close EQ" }
+		]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

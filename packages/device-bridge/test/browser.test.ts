@@ -12,7 +12,8 @@ import {
 	type SerialPortLike
 } from '../src/browser/index.ts';
 import { ChunkQueue } from '../src/browser/stream.ts';
-import { identityOf, protocolFor } from '../src/index.ts';
+import { identityOf } from '../src/index.ts';
+import { protocolFor } from './data.ts';
 import { validateRepository } from '../../build/src/node.ts';
 
 const profiles = [...validateRepository().profiles.values()];

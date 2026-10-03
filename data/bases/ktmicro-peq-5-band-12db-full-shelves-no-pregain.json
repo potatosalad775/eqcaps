@@ -12,6 +12,7 @@
 		"gain": { "min": -10, "max": 10, "step": 0.1 }
 	},
 	"preamp": { "mode": "auto" },
+	"protocol": { "handler": "ktmicro-usb-hid", "presets": [{ "id": 3, "name": "Custom" }] },
 	"meta": {
 		"status": "draft",
 		"sources": [

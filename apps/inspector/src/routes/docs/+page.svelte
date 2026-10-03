@@ -30,7 +30,7 @@ import { requestHidDevice } from '@potatosalad775/eqcaps-device-bridge/browser';
 const index = await client.loadIndex();
 const transport = await requestHidDevice({ entries: index?.profiles ?? [] });
 const { best, matches } = await client.matchDevice(identityOf(transport));
-const { protocol } = protocolForMatches(matches);  // a group's, for a device added under a group
+const { protocol } = protocolForMatches(matches);  // from the data: no bridge release per device
 const device = openDevice(transport, protocol, { profile });
 const state = await device.pull();                // written values, band order
 await device.push({ filters: bands });            // exactly what you give it: fit + complete first`;

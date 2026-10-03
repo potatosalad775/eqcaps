@@ -17,6 +17,7 @@
 		"gain": { "min": -15, "max": 15, "step": 0.01 }
 	},
 	"preamp": { "mode": "none" },
+	"protocol": { "handler": "tanchjim-rita-serial", "presets": [{ "id": 0, "name": "Custom EQ" }] },
 	"meta": {
 		"status": "draft",
 		"sources": [

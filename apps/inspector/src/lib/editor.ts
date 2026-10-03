@@ -98,6 +98,7 @@ const KEY_ORDER = [
 	'rules',
 	'preamp',
 	'channels',
+	'protocol',
 	'meta'
 ];
 const META_ORDER = ['status', 'replacedBy', 'sources', 'contributors', 'notes'];

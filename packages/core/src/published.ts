@@ -1,4 +1,4 @@
-import type { Match, Meta, Profile } from './types/schema.generated.ts';
+import type { Match, Meta, Profile, Protocol } from './types/schema.generated.ts';
 
 /** One profile in `index.json` (SPEC §14). */
 export interface IndexEntry {
@@ -14,6 +14,8 @@ export interface IndexEntry {
 	replacedBy?: string;
 	/** Hardware only. Lets a client identify a device without fetching every profile. */
 	match?: Match;
+	/** Hardware only. Lets an app drive a matched device without fetching its profile. */
+	protocol?: Protocol;
 	/** Relative to the index: `profiles/<id>.json`. */
 	path: string;
 	/** Hex SHA-256 of the profile file's bytes. Profiles are cacheable by it. */
@@ -51,6 +53,7 @@ export function indexFields(p: Profile): Omit<IndexEntry, 'path' | 'sha256' | 'b
 		...(p.engine !== undefined ? { engine: p.engine } : {}),
 		status: p.meta.status,
 		...(p.meta.replacedBy !== undefined ? { replacedBy: p.meta.replacedBy } : {}),
-		...(p.match ? { match: p.match } : {})
+		...(p.match ? { match: p.match } : {}),
+		...(p.protocol ? { protocol: p.protocol } : {})
 	};
 }

@@ -12,6 +12,30 @@
 		"gain": { "min": -24, "max": 12, "step": 0.1 }
 	},
 	"preamp": { "mode": "manual", "gain": { "min": -24, "max": 12, "step": 0.1 } },
+	"protocol": {
+		"handler": "fiio-usb-hid",
+		"options": { "saveCommand": "0x21", "disabledPresetId": 17 },
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Rock" },
+			{ "id": 2, "name": "R&B" },
+			{ "id": 3, "name": "Hip-hop" },
+			{ "id": 4, "name": "Pop" },
+			{ "id": 5, "name": "Dance" },
+			{ "id": 6, "name": "Classic" },
+			{ "id": 7, "name": "USER1" },
+			{ "id": 8, "name": "USER2" },
+			{ "id": 9, "name": "USER3" },
+			{ "id": 10, "name": "USER4" },
+			{ "id": 11, "name": "USER5" },
+			{ "id": 12, "name": "USER6" },
+			{ "id": 13, "name": "USER7" },
+			{ "id": 14, "name": "USER8" },
+			{ "id": 15, "name": "USER9" },
+			{ "id": 16, "name": "USER10" },
+			{ "id": 17, "name": "Close EQ" }
+		]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

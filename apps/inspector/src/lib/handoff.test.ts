@@ -96,6 +96,7 @@ describe('profileForDevice', () => {
 			'/blob/abc1234/packages/device-bridge/src/handlers/walkplay-hid.ts'
 		);
 		expect(data.meta.notes).toMatch(/wire limits/);
+		expect(data.protocol).toEqual({ handler: 'walkplay-hid' });
 	});
 
 	it('adds a group member from a guided read: its constraints, cited as vendor-app', async () => {

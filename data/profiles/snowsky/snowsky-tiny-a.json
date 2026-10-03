@@ -11,6 +11,7 @@
 			{ "vendorId": "0x0a12", "productName": "SNOWSKY TINY A" }
 		]
 	},
+	"protocol": { "options": { "disabledPresetId": 240 } },
 	"meta": {
 		"status": "draft",
 		"sources": [

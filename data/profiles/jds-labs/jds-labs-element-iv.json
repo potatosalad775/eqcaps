@@ -17,6 +17,13 @@
 		{ "index": [10, 11], "types": ["HSC"], "label": "Highshelf" }
 	],
 	"preamp": { "mode": "unknown" },
+	"protocol": {
+		"handler": "jds-labs-usb-serial",
+		"presets": [
+			{ "id": 0, "name": "Headphones" },
+			{ "id": 1, "name": "RCA" }
+		]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

@@ -35,6 +35,10 @@
 		"gain": { "min": -12, "max": 3, "step": 0.1 }
 	},
 	"preamp": { "mode": "none" },
+	"protocol": {
+		"handler": "moondrop-old-fashioned-hid",
+		"presets": [{ "id": 0, "name": "Custom" }]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

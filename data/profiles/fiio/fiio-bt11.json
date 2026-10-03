@@ -13,6 +13,21 @@
 			{ "vendorId": "0x0a12", "productName": "FIIO BT11 (UAC1.0)" }
 		]
 	},
+	"protocol": {
+		"options": { "disabledPresetId": 11 },
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 5, "name": "R&B" },
+			{ "id": 6, "name": "Classic" },
+			{ "id": 7, "name": "Hip-hop" },
+			{ "id": 4, "name": "USER1" },
+			{ "id": 8, "name": "USER2" },
+			{ "id": 9, "name": "USER3" }
+		]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

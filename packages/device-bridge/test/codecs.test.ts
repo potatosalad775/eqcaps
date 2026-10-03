@@ -1,4 +1,4 @@
-// Every codec, under every set of options the protocol table uses: what `encode` writes, `decode`
+// Every codec, under every set of options the profiles' protocols use: what `encode` writes, `decode`
 // reads back, for any request on the codec's own wire grid, its end points included; values
 // outside the grid are refused, never clamped, and so are a preamp or slot the write doesn't
 // carry (D33).
@@ -12,7 +12,6 @@ import {
 	HANDLERS,
 	isBridgeError,
 	KNOWN_HID_VENDORS,
-	PROTOCOLS,
 	transportsOf,
 	type AnyHandler,
 	type Protocol,
@@ -21,8 +20,9 @@ import {
 	type WireField,
 	type WireGrid
 } from '../src/index.ts';
+import { PROTOCOLS } from './data.ts';
 
-/** Each distinct handler and options pair, from the table and the vendor guesses. */
+/** Each distinct handler and options pair, from the profiles and the vendor guesses. */
 const variants = new Map<string, { handler: string; options: object }>();
 const add = (handler: string, options: object = {}) =>
 	variants.set(`${handler} ${JSON.stringify(options)}`, { handler, options });

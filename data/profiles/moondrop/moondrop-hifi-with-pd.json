@@ -28,6 +28,7 @@
 			{ "vendorId": "0xb44d", "productName": "MOONDROP HiFi with PD" }
 		]
 	},
+	"protocol": { "experimental": true },
 	"meta": {
 		"status": "draft",
 		"sources": [

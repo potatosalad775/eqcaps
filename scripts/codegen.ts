@@ -51,6 +51,7 @@ export function deriveSourceSchema(profile: Schema): Schema {
 				'Start from this profile and apply this file on top. match, device, meta and id are never inherited (SPEC §11).',
 			$ref: '#/$defs/profileId'
 		},
+		protocol: { $ref: '#/$defs/authoringProtocol' },
 		meta: { $ref: '#/$defs/authoringMeta' }
 	};
 	s.required = ['id', 'meta'];
@@ -68,6 +69,12 @@ export function deriveSourceSchema(profile: Schema): Schema {
 			...meta.properties,
 			sources: { ...meta.properties.sources, items: { $ref: '#/$defs/authoringSource' } }
 		}
+	};
+	const { required: _required, ...protocol } = defs.protocol as Schema;
+	defs.authoringProtocol = {
+		...protocol,
+		description:
+			"`protocol` as written: merged per key with the base's, so `handler` may come from the base (SPEC §11)."
 	};
 	defs.authoringRules = {
 		description:
@@ -101,6 +108,9 @@ const constraintOnly = (s: Schema) =>
 function objectBody(s: Schema, names: (ref: string) => string): string {
 	const props = (s.properties ?? {}) as Record<string, Schema>;
 	const required = new Set((s.required ?? []) as string[]);
+	if (Object.keys(props).length === 0 && s.additionalProperties !== false) {
+		return '{ [key: string]: unknown }';
+	}
 	const lines = Object.entries(props).map(
 		([name, p]) => `${doc(p)}${key(name)}${required.has(name) ? '' : '?'}: ${tsType(p, names)};`
 	);
