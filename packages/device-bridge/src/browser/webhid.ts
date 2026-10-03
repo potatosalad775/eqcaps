@@ -102,3 +102,24 @@ export async function requestHidDevice(
 	}
 	return hidTransport(device);
 }
+
+/**
+ * A device this site was already granted, found again without the chooser: after it was unplugged
+ * and plugged back in, say, or moved to a phone and back. Matches vendor id, product id and the
+ * exact product name, preferring the vendor-defined interface; null if it isn't connected.
+ */
+export async function grantedHidDevice(
+	identity: { vendorId: number; productId: number; productName: string },
+	hid: HidLike | undefined = browserApis().hid
+): Promise<HidTransport | null> {
+	if (!hid) throw new BridgeError('unsupported', 'WebHID is not available in this browser');
+	const granted = await hid.getDevices().catch(transportError('getDevices'));
+	const same = granted.filter(
+		(d) =>
+			d.vendorId === identity.vendorId &&
+			d.productId === identity.productId &&
+			d.productName === identity.productName
+	);
+	const device = same.find(hasVendorCollection) ?? same[0];
+	return device ? hidTransport(device) : null;
+}

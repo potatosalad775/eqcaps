@@ -400,7 +400,7 @@
 					"enum": ["vendor-docs", "vendor-app", "measurement", "handler-code", "community"]
 				},
 				"ref": {
-					"description": "URL, citation, or for measurement a path under evidence/.",
+					"description": "URL, citation, or a path under evidence/ (required for measurement).",
 					"type": "string",
 					"minLength": 1
 				},

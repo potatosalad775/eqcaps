@@ -3,6 +3,7 @@
 import { describe, expect, test } from 'vitest';
 import { matchDevice } from '@potatosalad775/eqcaps-client';
 import {
+	grantedHidDevice,
 	requestBleDevice,
 	requestHidDevice,
 	requestSerialPort,
@@ -112,6 +113,22 @@ describe('WebHID', () => {
 		expect(transport!.collections[0]!.usagePage).toBe(0xff00);
 	});
 
+	test('finds a granted device again without the chooser, by its exact identity', async () => {
+		const audio = fakeHid('Protocol Micro', 0x3302, 0xc20f, [{ usagePage: 0x0c }]);
+		const other = fakeHid('Protocol Micro ', 0x3302, 0xc20f, [{ usagePage: 0xff00 }]);
+		const hid = {
+			requestDevice: async () => {
+				throw new Error('no chooser');
+			},
+			getDevices: async () => [other, audio]
+		};
+		const identity = { vendorId: 0x3302, productId: 0xc20f, productName: 'Protocol Micro' };
+		const transport = await grantedHidDevice(identity, hid);
+		expect(transport!.productName).toBe('Protocol Micro');
+		expect(audio.opened).toBe(true);
+		expect(await grantedHidDevice({ ...identity, productId: 1 }, hid)).toBeNull();
+	});
+
 	test('a cancelled chooser gives null', async () => {
 		const t = await requestHidDevice({
 			hid: { requestDevice: async () => [], getDevices: async () => [] }
@@ -188,6 +205,22 @@ describe('Web Serial', () => {
 		// No name to match by: the user says which device it is.
 		await choice!.open(protocolFor('tanchjim-rita'));
 		expect(port.baud()).toBe(9600);
+	});
+
+	test('finds a granted device again without the chooser, by its exact identity', async () => {
+		const audio = fakeHid('Protocol Micro', 0x3302, 0xc20f, [{ usagePage: 0x0c }]);
+		const other = fakeHid('Protocol Micro ', 0x3302, 0xc20f, [{ usagePage: 0xff00 }]);
+		const hid = {
+			requestDevice: async () => {
+				throw new Error('no chooser');
+			},
+			getDevices: async () => [other, audio]
+		};
+		const identity = { vendorId: 0x3302, productId: 0xc20f, productName: 'Protocol Micro' };
+		const transport = await grantedHidDevice(identity, hid);
+		expect(transport!.productName).toBe('Protocol Micro');
+		expect(audio.opened).toBe(true);
+		expect(await grantedHidDevice({ ...identity, productId: 1 }, hid)).toBeNull();
 	});
 
 	test('a cancelled chooser gives null', async () => {

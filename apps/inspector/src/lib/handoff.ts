@@ -10,7 +10,8 @@ import {
 	type Protocol
 } from '@potatosalad775/eqcaps-device-bridge';
 import { blankProfile } from './editor.ts';
-import { readSource } from './evidence.ts';
+import { guidedSource, readSource } from './evidence.ts';
+import type { GuidedConstraints } from './guided/constraints.ts';
 
 export interface Handoff {
 	/**
@@ -30,6 +31,12 @@ export interface Handoff {
 	readBack: { filters: (Filter | null)[]; preamp?: number };
 	/** The protocol reads as many bands as it is asked for, so the count says nothing (D33). */
 	needsBandCount: boolean;
+	/**
+	 * A guided read (T3) rather than a single read: the evidence file is cited as `vendor-app`
+	 * (D41), and the constraints it found go into the profile, with what it didn't settle in the
+	 * notes.
+	 */
+	guided?: { constraints: GuidedConstraints; notes: string[]; vendorApp: string };
 	/**
 	 * The protocol that drove the device, and the commit of the bridge's code: a new profile
 	 * starts from what the protocol's wire can carry (`handler-code`).
@@ -56,12 +63,33 @@ export function loadHandoff(): Handoff | null {
 	}
 }
 
-/** `data` citing the handoff's evidence, once: a read-back, as `community` (SPEC §10). */
+/**
+ * `data` citing the handoff's evidence, once: a read-back as `community`, a guided read as
+ * `vendor-app` (SPEC §10, D41). A guided read's constraints replace the file's (they override
+ * what it extends).
+ */
 export function citeEvidence(data: AuthoringProfile, handoff: Handoff, by?: string) {
 	const sources = data.meta?.sources ?? [];
 	if (sources.some((s) => s.ref === handoff.evidence.path)) return data;
-	const source = readSource(handoff.evidence.path, handoff.date, by, handoff.firmware);
-	return { ...data, meta: { ...data.meta, sources: [...sources, source] } };
+	const cite = handoff.guided ? guidedSource : readSource;
+	const source = cite(handoff.evidence.path, handoff.date, by, handoff.firmware);
+	const cited = { ...data, meta: { ...data.meta!, sources: [...sources, source] } };
+	return handoff.guided ? withGuided(cited, handoff.guided, handoff.date) : cited;
+}
+
+/** `data` with a guided read's constraints, and its notes appended to `meta.notes`. */
+export function withGuided(
+	data: AuthoringProfile,
+	guided: NonNullable<Handoff['guided']>,
+	date: string
+): AuthoringProfile {
+	const { bands, ...rest } = guided.constraints;
+	const out = { ...data, ...rest } as AuthoringProfile;
+	if (bands) out.bands = bands;
+	else delete out.bands;
+	const line = `Guided read with the eqcaps inspector on ${date}: the values were set in ${guided.vendorApp} and read back from the device.${guided.notes.length ? ` ${guided.notes.join(' ')}` : ''}`;
+	const notes = data.meta?.notes ? `${data.meta.notes}\n${line}` : line;
+	return { ...out, meta: { ...out.meta!, notes } };
 }
 
 /**
@@ -146,7 +174,7 @@ export function profileForDevice(handoff: Handoff): AuthoringProfile {
 	if (!handoff.extends && handoff.readBack.filters.length > 0) {
 		data.bandCount = handoff.readBack.filters.length;
 	}
-	if (!handoff.extends && handoff.protocol) {
+	if (!handoff.extends && !handoff.guided && handoff.protocol) {
 		const draft = codecDraft(handoff.protocol, data.bandCount ?? 10, handoff.date);
 		Object.assign(data, draft.constraints);
 		data.meta = { ...data.meta!, sources: [draft.source], notes: draft.notes };

@@ -97,4 +97,46 @@ describe('profileForDevice', () => {
 		);
 		expect(data.meta.notes).toMatch(/wire limits/);
 	});
+
+	it('adds a group member from a guided read: its constraints, cited as vendor-app', async () => {
+		const guided: NonNullable<Handoff['guided']> = {
+			constraints: {
+				bandCount: 8,
+				band: {
+					types: ['PK', 'LSC', 'HSC'],
+					freq: { min: 20, max: 20000, step: 1 },
+					q: { min: 0.1, max: 10, step: 0.01 },
+					gain: { min: -10, max: 10, step: 0.1 }
+				},
+				preamp: { mode: 'manual', gain: { min: -12, max: 0, step: 1 } }
+			},
+			notes: ['Bands 2–7 not checked: assumed to match band 1.'],
+			vendorApp: 'Walkplay EQ web app'
+		};
+		const data = profileForDevice(
+			handoff({ extends: 'walkplay-peq-10-band-10db-full-shelves', profileId: 'x', guided })
+		);
+		expect(data).toMatchObject({ bandCount: 8, band: guided.constraints.band });
+		expect(data.meta.sources.map((s) => s.kind)).toEqual(['vendor-app']);
+		expect(data.meta.notes).toMatch(/^Guided read .* Walkplay EQ web app .* Bands 2–7 not checked/);
+
+		// The vendor-app source counts, so the profile may be community-verified.
+		data.id = 'crinear-protocol-micro';
+		data.device = { brand: 'CrinEar', model: 'Protocol Micro' };
+		data.meta.status = 'community-verified';
+		data.meta.sources[0]!.ref = 'evidence/crinear-protocol-micro/2026-10-03-abcdef.json';
+		const base = 'data/bases/walkplay-peq-10-band-10db-full-shelves.json';
+		const result = checkEdited({
+			path: authoringPath(data),
+			text: await formatAuthoring(data),
+			chain: [
+				{ path: base, text: readFileSync(new URL(`../../../../${base}`, import.meta.url), 'utf8') }
+			],
+			others: [],
+			evidence: new Set(['evidence/crinear-protocol-micro/2026-10-03-abcdef.json']),
+			schema: schemaValidator()
+		});
+		expect(result.issues).toEqual([]);
+		expect(result.profile?.bandCount).toBe(8);
+	});
 });

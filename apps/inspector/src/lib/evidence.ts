@@ -4,6 +4,8 @@
 
 import type { Filter, Source } from '@potatosalad775/eqcaps-core';
 import type { DeviceIdentity, PullResult } from '@potatosalad775/eqcaps-device-bridge';
+import type { GuidedConstraints } from './guided/constraints.ts';
+import type { Change, Conclusion, StepAsk, StepField } from './guided/types.ts';
 
 /** A read-back (T2): the EQ the device holds, as its protocol reports it. No push. */
 export interface ReadExperiment {
@@ -16,6 +18,30 @@ export interface ReadExperiment {
 	};
 	/** What the read-back says about the profile it was checked against (violation texts). */
 	findings: string[];
+}
+
+/**
+ * A guided read's step (T3, DECISIONS D41): the instruction, the full read-back, what changed since
+ * the previous read, and what it established. A skipped step has only `id` and `skipped`; an
+ * `each` step the user finished has `done`.
+ */
+export interface GuidedExperiment {
+	id: string;
+	instruction?: string;
+	band?: number;
+	field?: StepField;
+	ask?: StepAsk;
+	/** What the user typed: the band count, or the value typed into the app for a grid check. */
+	typed?: number;
+	/** The user said the value already was where the step asked. */
+	already?: true;
+	readBack?: ReadExperiment['readBack'];
+	changed?: Change[];
+	conclusion?: Conclusion;
+	/** Why the read didn't settle the step. */
+	problem?: string;
+	skipped?: true;
+	done?: true;
 }
 
 export interface EvidenceReport {
@@ -35,7 +61,14 @@ export interface EvidenceReport {
 	/** The profile the device was checked against. */
 	profile?: string;
 	date: string;
-	experiments: ReadExperiment[];
+	/** Guided reads: the vendor app the user set values in, as they described it. */
+	vendorApp?: { name: string; version?: string; platform: 'web' | 'phone' | 'desktop' };
+	experiments: (ReadExperiment | GuidedExperiment)[];
+	/** Guided reads: the constraints the steps established (no `meta`: the profile cites this file). */
+	constraints?: GuidedConstraints;
+	/** Guided reads: what the steps didn't settle or disagreed on, and what was never checked. */
+	notes?: string[];
+	notChecked?: string[];
 	caveats: string[];
 }
 
@@ -95,8 +128,17 @@ export interface StringField {
 /** Fields whose text comes from the device or the browser rather than from the app. */
 const PERSONAL = /^\/(device\/(productName|bluetoothName|firmware)|tool\/userAgent)$/;
 
+/**
+ * Parts of the file the app wrote itself, from codes and numbers: read-backs, a guided read's
+ * instructions, changes, conclusions and derived constraints. Their strings aren't listed for
+ * review.
+ */
+const GENERATED =
+	/^\/(experiments\/\d+\/(readBack|instruction|field|ask|changed|conclusion|problem)|constraints|notes|notChecked|caveats)(\/|$)/;
+
 /** Every string in `value`, so the export screen can show each one and let the user redact it. */
 export function stringFields(value: unknown, pointer = ''): StringField[] {
+	if (GENERATED.test(pointer)) return [];
 	if (typeof value === 'string') {
 		return [{ pointer, value, personal: PERSONAL.test(pointer) }];
 	}
@@ -179,6 +221,14 @@ export function readSource(ref: string, date: string, by?: string, firmware?: st
 		date,
 		...(by ? { by } : {})
 	};
+}
+
+/**
+ * The source a profile cites a guided read with: the vendor app set every value, inside its own
+ * limits, so the file records the vendor app's limits, `vendor-app` evidence (SPEC §10, D41).
+ */
+export function guidedSource(ref: string, date: string, by?: string, firmware?: string): Source {
+	return { ...readSource(ref, date, by, firmware), kind: 'vendor-app' };
 }
 
 /** YYYY-MM-DD in the user's time zone. */

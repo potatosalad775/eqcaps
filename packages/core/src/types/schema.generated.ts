@@ -208,7 +208,7 @@ export type GithubHandle = string;
 export interface SourceFields {
 	/** vendor-docs, vendor-app and measurement count toward verification; handler-code and community don't. */
 	kind: 'vendor-docs' | 'vendor-app' | 'measurement' | 'handler-code' | 'community';
-	/** URL, citation, or for measurement a path under evidence/. */
+	/** URL, citation, or a path under evidence/ (required for measurement). */
 	ref: string;
 	date: string;
 	firmware?: string;

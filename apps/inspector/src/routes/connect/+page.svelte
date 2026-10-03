@@ -1,7 +1,8 @@
 <script lang="ts">
-	// T1 identify and T2 read (INSPECTOR §2): connect a device, show what it says about itself,
-	// match it against the database, and read its EQ back to check the profile. The inspector
-	// never writes to a device: this page calls the bridge's pull, never push or setEnabled (D40).
+	// T1 identify, T2 read and T3 guided read (INSPECTOR §2): connect a device, show what it says
+	// about itself, match it against the database, and read its EQ back to check the profile. The
+	// inspector never writes to a device: this page and GuidedRead call the bridge's pull, never
+	// push or setEnabled (D40).
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { Filter, IndexEntry, Profile } from '@potatosalad775/eqcaps-core';
@@ -9,10 +10,8 @@
 	import {
 		guessProtocol,
 		identityOf,
-		openDevice,
 		protocolFor,
 		protocolForMatches,
-		type BridgeDevice,
 		type DeviceIdentity,
 		type HidCollectionInfo,
 		type Protocol,
@@ -37,10 +36,12 @@
 		wrongConstraintIssueUrl
 	} from '$lib/connect';
 	import { catalog } from '$lib/data.svelte';
+	import { openReadOnly, type ReadOnlyDevice } from '$lib/device';
 	import { APP_COMMIT } from '$lib/channel';
 	import { readEvidence, today } from '$lib/evidence';
 	import { memberBase } from '$lib/handoff';
 	import EvidenceReview from '$lib/components/EvidenceReview.svelte';
+	import GuidedRead from '$lib/components/GuidedRead.svelte';
 	import { formatApo } from '$lib/filters-text';
 	import { formatField } from '$lib/format';
 	import { violationText } from '$lib/violations';
@@ -72,7 +73,7 @@
 	let ambiguous = $state(false);
 	let profileId = $state('');
 	let profile = $state.raw<Profile | null>(null);
-	let device = $state.raw<BridgeDevice | null>(null);
+	let device = $state.raw<ReadOnlyDevice | null>(null);
 	let pulled = $state.raw<PullResult | null>(null);
 	let bandsWanted = $state(10);
 	let busy = $state('');
@@ -114,7 +115,7 @@
 	const writeOnly = $derived.by(() => {
 		if (chosen?.kind !== 'hid' || !protocol) return false;
 		try {
-			return !openDevice(chosen.transport, protocol).capabilities.canRead;
+			return !openReadOnly(chosen.transport, protocol).capabilities.canRead;
 		} catch {
 			return false;
 		}
@@ -186,7 +187,7 @@
 							? await chosen.choice.open(protocol)
 							: await chosen.choice.open(protocol);
 				const bandCount = profile?.bandCount ?? bandsWanted;
-				device = openDevice(transport, protocol, { profile: { bandCount } });
+				device = openReadOnly(transport, protocol, { profile: { bandCount } });
 			}
 			pulled = await device.pull(profile ? {} : { bands: bandsWanted });
 		} catch (e) {
@@ -620,6 +621,20 @@
 				{#if evidence}
 					{#key evidence.report}
 						<EvidenceReview report={evidence.report} handoff={evidence.handoff} {groupBase} />
+					{/key}
+				{/if}
+
+				{#if evidence && device}
+					{#key pulled}
+						<GuidedRead
+							{device}
+							first={pulled}
+							report={evidence.report}
+							handoff={evidence.handoff}
+							{profile}
+							{groupBase}
+							onreconnect={(d) => (device = d)}
+						/>
 					{/key}
 				{/if}
 			{/if}
