@@ -120,8 +120,9 @@ always; the last band too, and every band only when the first and last disagree.
 - **Types:** "set band 1 to each type the app offers, one per read", which records the wire code of
   each type the app uses, and which ones it offers.
 - **Preamp**, where the protocol reads it: lowest, highest, one step.
-- **Grid check:** two or three values the user types into the app, where the app allows typing,
-  to confirm the step found.
+- **Grid check:** a value with many decimals (1.111111) the user types into the app, where the
+  app allows typing. It shows whether the app rounds typed values onto its own step or passes
+  them on as they are, which the buttons can't show (§3.3).
 
 Not planned: conditional domains (a window that changes with gain or type) and rules. The notes say
 they weren't checked.
@@ -129,10 +130,28 @@ they weren't checked.
 ### 3.3 Inference
 
 From the reads only: a bound is the value read at the extreme step; a step is the difference of
-two reads one step apart, cross-checked by the GCD of every value read for that field; a type is
-the code read after the user chose it. A value that disagrees with the matched profile is a
-finding, as in T2. The result is a set of constraints (band count, per-band domains, types,
-preamp), with notes for what wasn't asked or didn't settle.
+two reads one step apart, cross-checked by the GCD of every value the app set for that field
+(not the device's defaults); a type is the code read after the user chose it. Values are read
+through the wire's rounding: a device with 1/256 dB steps holds 0.1015625 for the app's 0.1, and
+the shortest decimal within half a wire step is taken as the app's value.
+
+A grid check decides between two kinds of app. If a typed 1.111111 reaches the device as its own
+rounding onto the wire (1.109375 at 1/256), the app **passes typed values through**: the step is
+the wire's, however coarse the app's buttons, and the bounds are the values the device holds
+(Q 0.1015625, not 0.1), since those are what it is told. If the device holds the typed value
+rounded to the app's step, the app's step stands. Where the app's step is the wire's, the two
+can't be told apart and don't need to be. Without a grid check (an app with sliders only), the
+step is the app's; the wire may carry finer values, but nothing the vendor offers sends them, so
+the profile describes what the vendor supports.
+
+A value that disagrees with the matched profile is a finding, as in T2. The result is a set of
+constraints (band count, per-band domains, types, preamp), with notes for what wasn't asked or
+didn't settle.
+
+*2026-10-03:* the owner's guided read of a CrinEar Protocol Micro in Walkplay's web app found
+0.1 dB buttons for gain and Q, and a typed 1.111111 held as 1.109375. The first inference took
+1.109375 for the app's 1.11 and made the step 0.01; the pass-through rule above replaced it
+(DECISIONS D41).
 
 ### 3.4 Connection
 

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
 	validateProfile,
@@ -5,14 +6,28 @@ import {
 	type FilterType,
 	type Profile
 } from '@potatosalad775/eqcaps-core';
-import { readEvidence, guidedSource, stringFields } from '../evidence.ts';
+import {
+	readEvidence,
+	guidedSource,
+	stringFields,
+	type GuidedExperiment,
+	type ReadExperiment
+} from '../evidence.ts';
 import { changes } from './changes.ts';
 import { deriveConstraints } from './constraints.ts';
 import { guidedEvidence } from './evidence.ts';
 import { appValue, conclude, gcdOf, infer } from './infer.ts';
 import { nextStep, plannedSteps, stepState } from './plan.ts';
 import { readEntry } from './session.ts';
-import type { Entry, GuidedContext, NumField, Snapshot, Step } from './types.ts';
+import type {
+	Entry,
+	GuidedContext,
+	NumField,
+	Snapshot,
+	Step,
+	StepAsk,
+	StepField
+} from './types.ts';
 
 // A Walkplay-like device: 8 bands; the wire carries gain and Q in 1/256 steps, freq in 1 Hz and
 // the preamp in 1 dB. Its vendor app allows gain ±10 in 0.1 dB, freq 20–20000 Hz, Q 0.1–10 in
@@ -375,6 +390,76 @@ describe('a guided read', () => {
 		u.set(1, 'gain', 10);
 		u.read({}, max);
 		expect(infer(u.ctx, u.entries).bands.get(1)!.gain.max).toBe(10);
+	});
+});
+
+describe('typed values (the grid check)', () => {
+	it('keeps the app’s step when the app rounds a typed value onto it', () => {
+		const u = new User(ctx());
+		for (let i = 0; i < 200 && u.step; i++) {
+			if (u.step.id === 'gain-value-1') {
+				u.set(1, 'gain', 3.3); // typed 3.33, the app rounds to 0.1
+				u.read({ typed: 3.33 });
+			} else u.answer();
+		}
+		const inf = infer(u.ctx, u.entries);
+		expect(inf.passThrough.has('gain')).toBe(false);
+		expect(inf.bands.get(1)!.gain.step).toBe(0.1);
+		expect(inf.checks.find((c) => c.field === 'gain')!.ok).toBe(true);
+	});
+
+	// The owner's guided read of a CrinEar Protocol Micro with Walkplay's web app (D41): its ±
+	// buttons move gain and Q by 0.1, but a typed 1.111111 reaches the device as 1.109375, its
+	// rounding onto the 1/256 wire grid. So the app passes typed values through.
+	it('finds a pass-through app in a real guided read: the wire’s step, bounds as held', () => {
+		const file = new URL(
+			'../../../../../data/evidence/crinear-protocol-micro/2026-10-03-3f3bd4.json',
+			import.meta.url
+		);
+		const report = JSON.parse(readFileSync(file, 'utf8')) as {
+			experiments: (ReadExperiment | GuidedExperiment)[];
+		};
+		const [first, ...steps] = report.experiments;
+		const c = ctx({ first: first!.readBack! as Snapshot });
+		const entries: Entry[] = steps.map((x) => {
+			const e = x as GuidedExperiment;
+			const step = {
+				id: e.id,
+				field: (e.field ?? e.id.split('-')[0]) as StepField,
+				ask: (e.ask ?? e.id.split('-')[1]) as StepAsk,
+				...(e.band !== undefined
+					? { band: e.band }
+					: /-(\d+)$/.test(e.id)
+						? { band: Number(e.id.split('-').pop()) }
+						: {})
+			};
+			if (e.skipped) return { kind: 'skip', step };
+			if (e.done) return { kind: 'done', step };
+			return {
+				kind: 'read',
+				step,
+				read: e.readBack as Snapshot,
+				changed: e.changed!,
+				...(e.typed !== undefined ? { typed: e.typed } : {}),
+				...(e.already ? { already: true } : {})
+			};
+		});
+		const inf = infer(c, entries);
+		expect([...inf.passThrough].sort()).toEqual(['gain', 'q']);
+		expect(inf.bands.get(1)).toEqual({
+			gain: { min: -10, max: 10, step: 0.00390625 },
+			freq: { min: 20, max: 20000, step: 1 },
+			q: { min: 0.1015625, max: 10, step: 0.00390625 },
+			types: ['LSC', 'HPQ', 'LPQ', 'PK'] // as read; the constraints put PK first
+		});
+		expect(inf.preamp).toEqual({ min: -16, max: 6, step: 1 });
+		expect(inf.checks.every((x) => x.ok)).toBe(true);
+		expect(inf.notes[0]).toBe(
+			"Gain: the app passes typed values through (typed 1.111111111111, the device holds 1.109375), so the step is the wire's 0.00390625, finer than the app's 0.1 buttons."
+		);
+		const d = deriveConstraints(inf, c, base, []);
+		expect(d.constraints.band.q).toEqual({ min: 0.1015625, max: 10, step: 0.00390625 });
+		expect(validateProfile({ ...base, ...d.constraints })).toEqual([]);
 	});
 });
 

@@ -1,0 +1,2490 @@
+{
+	"evidenceVersion": 1,
+	"tool": {
+		"name": "eqcaps inspector",
+		"commit": "9357559",
+		"userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+	},
+	"device": {
+		"transport": "hid",
+		"vendorId": "0x3302",
+		"productId": "0xc20f",
+		"productName": "Protocol Micro"
+	},
+	"handler": "walkplay-hid",
+	"profile": "walkplay-schemeno11-devices",
+	"date": "2026-10-03",
+	"vendorApp": {
+		"name": "peq.szwalkplay.com",
+		"version": "0.2",
+		"platform": "web"
+	},
+	"experiments": [
+		{
+			"id": "read",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 50,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"findings": []
+		},
+		{
+			"id": "bands",
+			"instruction": "Count the bands the vendor app shows, and enter the number.",
+			"field": "bands",
+			"ask": "count",
+			"typed": 8,
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 50,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [],
+			"conclusion": {
+				"field": "bands",
+				"bands": 8
+			}
+		},
+		{
+			"id": "gain-max-1",
+			"instruction": "In the vendor app, set band 1's gain as high as it goes.",
+			"band": 1,
+			"field": "gain",
+			"ask": "max",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 50,
+						"q": 0.75,
+						"gain": 10
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "gain",
+					"from": 0,
+					"to": 10
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "gain",
+				"max": 10
+			}
+		},
+		{
+			"id": "gain-min-1",
+			"instruction": "In the vendor app, set band 1's gain as low as it goes.",
+			"band": 1,
+			"field": "gain",
+			"ask": "min",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 50,
+						"q": 0.75,
+						"gain": -10
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "gain",
+					"from": 10,
+					"to": -10
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "gain",
+				"min": -10
+			}
+		},
+		{
+			"id": "gain-step-1",
+			"instruction": "In the vendor app, change band 1's gain by the smallest step it allows: one click of its arrow, or one notch.",
+			"band": 1,
+			"field": "gain",
+			"ask": "step",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 50,
+						"q": 0.75,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "gain",
+					"from": -10,
+					"to": -9.8984375
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "gain",
+				"step": 0.1
+			}
+		},
+		{
+			"id": "freq-min-1",
+			"instruction": "In the vendor app, set band 1's frequency as low as it goes.",
+			"band": 1,
+			"field": "freq",
+			"ask": "min",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 20,
+						"q": 0.75,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "freq",
+					"from": 50,
+					"to": 20
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "freq",
+				"min": 20
+			}
+		},
+		{
+			"id": "freq-max-1",
+			"instruction": "In the vendor app, set band 1's frequency as high as it goes.",
+			"band": 1,
+			"field": "freq",
+			"ask": "max",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 20000,
+						"q": 0.75,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "freq",
+					"from": 20,
+					"to": 20000
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "freq",
+				"max": 20000
+			}
+		},
+		{
+			"id": "freq-step-1",
+			"instruction": "In the vendor app, change band 1's frequency by the smallest step it allows: one click of its arrow, or one notch.",
+			"band": 1,
+			"field": "freq",
+			"ask": "step",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 0.75,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "freq",
+					"from": 20000,
+					"to": 19999
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "freq",
+				"step": 1
+			}
+		},
+		{
+			"id": "q-min-1",
+			"instruction": "In the vendor app, set band 1's Q as low as it goes.",
+			"band": 1,
+			"field": "q",
+			"ask": "min",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 0.1015625,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "q",
+					"from": 0.75,
+					"to": 0.1015625
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "q",
+				"min": 0.1
+			}
+		},
+		{
+			"id": "q-max-1",
+			"instruction": "In the vendor app, set band 1's Q as high as it goes.",
+			"band": 1,
+			"field": "q",
+			"ask": "max",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 10,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "q",
+					"from": 0.1015625,
+					"to": 10
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "q",
+				"max": 10
+			}
+		},
+		{
+			"id": "q-step-1",
+			"instruction": "In the vendor app, change band 1's Q by the smallest step it allows: one click of its arrow, or one notch.",
+			"band": 1,
+			"field": "q",
+			"ask": "step",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 10,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [],
+			"problem": "Nothing changed since the last read. Change it in the vendor app (and save there, if the app has a save button), then read again."
+		},
+		{
+			"id": "q-step-1",
+			"instruction": "In the vendor app, change band 1's Q by the smallest step it allows: one click of its arrow, or one notch.",
+			"band": 1,
+			"field": "q",
+			"ask": "step",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 10,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [],
+			"problem": "Nothing changed since the last read. Change it in the vendor app (and save there, if the app has a save button), then read again."
+		},
+		{
+			"id": "q-step-1",
+			"instruction": "In the vendor app, change band 1's Q by the smallest step it allows: one click of its arrow, or one notch.",
+			"band": 1,
+			"field": "q",
+			"ask": "step",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "q",
+					"from": 10,
+					"to": 9.8984375
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "q",
+				"step": 0.1
+			}
+		},
+		{
+			"id": "type-each-1",
+			"instruction": "In the vendor app, set band 1 to a filter type not listed yet, then read. When every type the app offers is listed, choose Done.",
+			"band": 1,
+			"field": "type",
+			"ask": "each",
+			"readBack": {
+				"filters": [
+					{
+						"type": "LSC",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "type",
+					"from": "PK",
+					"to": "LSC"
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "type",
+				"type": "LSC"
+			}
+		},
+		{
+			"id": "type-each-1",
+			"instruction": "In the vendor app, set band 1 to a filter type not listed yet, then read. When every type the app offers is listed, choose Done.",
+			"band": 1,
+			"field": "type",
+			"ask": "each",
+			"readBack": {
+				"filters": [
+					{
+						"type": "HPQ",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "type",
+					"from": "LSC",
+					"to": "HPQ"
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "type",
+				"type": "HPQ"
+			}
+		},
+		{
+			"id": "type-each-1",
+			"instruction": "In the vendor app, set band 1 to a filter type not listed yet, then read. When every type the app offers is listed, choose Done.",
+			"band": 1,
+			"field": "type",
+			"ask": "each",
+			"readBack": {
+				"filters": [
+					{
+						"type": "LPQ",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "type",
+					"from": "HPQ",
+					"to": "LPQ"
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "type",
+				"type": "LPQ"
+			}
+		},
+		{
+			"id": "type-each-1",
+			"instruction": "In the vendor app, set band 1 to a filter type not listed yet, then read. When every type the app offers is listed, choose Done.",
+			"band": 1,
+			"field": "type",
+			"ask": "each",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "type",
+					"from": "LPQ",
+					"to": "PK"
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "type",
+				"type": "PK"
+			}
+		},
+		{
+			"id": "type-each-1",
+			"done": true
+		},
+		{
+			"id": "gain-max-8",
+			"instruction": "In the vendor app, set band 8's gain as high as it goes.",
+			"band": 8,
+			"field": "gain",
+			"ask": "max",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 8,
+					"field": "gain",
+					"from": 0,
+					"to": 10
+				}
+			],
+			"conclusion": {
+				"band": 8,
+				"field": "gain",
+				"max": 10
+			}
+		},
+		{
+			"id": "gain-min-8",
+			"instruction": "In the vendor app, set band 8's gain as low as it goes.",
+			"band": 8,
+			"field": "gain",
+			"ask": "min",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": -10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 8,
+					"field": "gain",
+					"from": 10,
+					"to": -10
+				}
+			],
+			"conclusion": {
+				"band": 8,
+				"field": "gain",
+				"min": -10
+			}
+		},
+		{
+			"id": "freq-min-8",
+			"instruction": "In the vendor app, set band 8's frequency as low as it goes.",
+			"band": 8,
+			"field": "freq",
+			"ask": "min",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 20,
+						"q": 0.75,
+						"gain": -10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 8,
+					"field": "freq",
+					"from": 15000,
+					"to": 20
+				}
+			],
+			"conclusion": {
+				"band": 8,
+				"field": "freq",
+				"min": 20
+			}
+		},
+		{
+			"id": "freq-max-8",
+			"instruction": "In the vendor app, set band 8's frequency as high as it goes.",
+			"band": 8,
+			"field": "freq",
+			"ask": "max",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 20000,
+						"q": 0.75,
+						"gain": -10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 8,
+					"field": "freq",
+					"from": 20,
+					"to": 20000
+				}
+			],
+			"conclusion": {
+				"band": 8,
+				"field": "freq",
+				"max": 20000
+			}
+		},
+		{
+			"id": "q-min-8",
+			"instruction": "In the vendor app, set band 8's Q as low as it goes.",
+			"band": 8,
+			"field": "q",
+			"ask": "min",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 20000,
+						"q": 0.1015625,
+						"gain": -10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 8,
+					"field": "q",
+					"from": 0.75,
+					"to": 0.1015625
+				}
+			],
+			"conclusion": {
+				"band": 8,
+				"field": "q",
+				"min": 0.1
+			}
+		},
+		{
+			"id": "q-max-8",
+			"instruction": "In the vendor app, set band 8's Q as high as it goes.",
+			"band": 8,
+			"field": "q",
+			"ask": "max",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 8,
+					"field": "q",
+					"from": 0.1015625,
+					"to": 10
+				}
+			],
+			"conclusion": {
+				"band": 8,
+				"field": "q",
+				"max": 10
+			}
+		},
+		{
+			"id": "type-each-8",
+			"instruction": "In the vendor app, set band 8 to a filter type not listed yet, then read. When every type the app offers is listed, choose Done.",
+			"band": 8,
+			"field": "type",
+			"ask": "each",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [],
+			"conclusion": {
+				"band": 8,
+				"field": "type",
+				"type": "PK"
+			}
+		},
+		{
+			"id": "type-each-8",
+			"instruction": "In the vendor app, set band 8 to a filter type not listed yet, then read. When every type the app offers is listed, choose Done.",
+			"band": 8,
+			"field": "type",
+			"ask": "each",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "LSC",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 8,
+					"field": "type",
+					"from": "PK",
+					"to": "LSC"
+				}
+			],
+			"conclusion": {
+				"band": 8,
+				"field": "type",
+				"type": "LSC"
+			}
+		},
+		{
+			"id": "type-each-8",
+			"instruction": "In the vendor app, set band 8 to a filter type not listed yet, then read. When every type the app offers is listed, choose Done.",
+			"band": 8,
+			"field": "type",
+			"ask": "each",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "HPQ",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 8,
+					"field": "type",
+					"from": "LSC",
+					"to": "HPQ"
+				}
+			],
+			"conclusion": {
+				"band": 8,
+				"field": "type",
+				"type": "HPQ"
+			}
+		},
+		{
+			"id": "type-each-8",
+			"instruction": "In the vendor app, set band 8 to a filter type not listed yet, then read. When every type the app offers is listed, choose Done.",
+			"band": 8,
+			"field": "type",
+			"ask": "each",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "LPQ",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [
+				{
+					"band": 8,
+					"field": "type",
+					"from": "HPQ",
+					"to": "LPQ"
+				}
+			],
+			"conclusion": {
+				"band": 8,
+				"field": "type",
+				"type": "LPQ"
+			}
+		},
+		{
+			"id": "type-each-8",
+			"done": true
+		},
+		{
+			"id": "preamp-max",
+			"instruction": "In the vendor app, set the preamp as high as it goes.",
+			"field": "preamp",
+			"ask": "max",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "LPQ",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": 6
+			},
+			"changed": [
+				{
+					"field": "preamp",
+					"from": -1,
+					"to": 6
+				}
+			],
+			"conclusion": {
+				"field": "preamp",
+				"max": 6
+			}
+		},
+		{
+			"id": "preamp-min",
+			"instruction": "In the vendor app, set the preamp as low as it goes.",
+			"field": "preamp",
+			"ask": "min",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "LPQ",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -16
+			},
+			"changed": [
+				{
+					"field": "preamp",
+					"from": 6,
+					"to": -16
+				}
+			],
+			"conclusion": {
+				"field": "preamp",
+				"min": -16
+			}
+		},
+		{
+			"id": "preamp-step",
+			"instruction": "In the vendor app, change the preamp by the smallest step it allows: one click of its arrow, or one notch.",
+			"field": "preamp",
+			"ask": "step",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 19999,
+						"q": 9.8984375,
+						"gain": -9.8984375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "LPQ",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -15
+			},
+			"changed": [
+				{
+					"field": "preamp",
+					"from": -16,
+					"to": -15
+				}
+			],
+			"conclusion": {
+				"field": "preamp",
+				"step": 1
+			}
+		},
+		{
+			"id": "gain-value-1",
+			"instruction": "If the vendor app lets you type values: type one into band 1's gain, with as many decimals as the app takes, and enter the same number here. Skip this if the app only has sliders.",
+			"band": 1,
+			"field": "gain",
+			"ask": "value",
+			"typed": 1.111111111111,
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 20,
+						"q": 9.8984375,
+						"gain": 1.109375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "LPQ",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -15
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "freq",
+					"from": 19999,
+					"to": 20
+				},
+				{
+					"band": 1,
+					"field": "gain",
+					"from": -9.8984375,
+					"to": 1.109375
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "gain",
+				"typed": 1.111111111111,
+				"read": 1.11
+			}
+		},
+		{
+			"id": "freq-value-1",
+			"instruction": "If the vendor app lets you type values: type one into band 1's frequency, with as many decimals as the app takes, and enter the same number here. Skip this if the app only has sliders.",
+			"band": 1,
+			"field": "freq",
+			"ask": "value",
+			"typed": 20.11111111111111,
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 20,
+						"q": 9.8984375,
+						"gain": 1.109375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "LPQ",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -15
+			},
+			"changed": [],
+			"conclusion": {
+				"band": 1,
+				"field": "freq",
+				"typed": 20.11111111111111,
+				"read": 20
+			}
+		},
+		{
+			"id": "q-value-1",
+			"instruction": "If the vendor app lets you type values: type one into band 1's Q, with as many decimals as the app takes, and enter the same number here. Skip this if the app only has sliders.",
+			"band": 1,
+			"field": "q",
+			"ask": "value",
+			"typed": 1.1111111111111112,
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 20,
+						"q": 1.109375,
+						"gain": 1.109375
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "LPQ",
+						"freq": 20000,
+						"q": 10,
+						"gain": -10
+					}
+				],
+				"preamp": -15
+			},
+			"changed": [
+				{
+					"band": 1,
+					"field": "q",
+					"from": 9.8984375,
+					"to": 1.109375
+				}
+			],
+			"conclusion": {
+				"band": 1,
+				"field": "q",
+				"typed": 1.1111111111111112,
+				"read": 1.11
+			}
+		},
+		{
+			"id": "restore",
+			"instruction": "Put your EQ back in the vendor app as it was before the first step. The read is compared with the first one.",
+			"field": "restore",
+			"ask": "restore",
+			"readBack": {
+				"filters": [
+					{
+						"type": "PK",
+						"freq": 50,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 200,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 1000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 2500,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 5000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 10000,
+						"q": 0.75,
+						"gain": 0
+					},
+					{
+						"type": "PK",
+						"freq": 15000,
+						"q": 0.75,
+						"gain": 0
+					}
+				],
+				"preamp": -1
+			},
+			"changed": [],
+			"conclusion": {
+				"field": "restore",
+				"matchesFirst": true
+			}
+		}
+	],
+	"constraints": {
+		"bandCount": 8,
+		"band": {
+			"freq": {
+				"min": 20,
+				"max": 20000,
+				"step": 1
+			},
+			"q": {
+				"min": 0.1,
+				"max": 10,
+				"step": 0.01
+			},
+			"gain": {
+				"min": -10,
+				"max": 10,
+				"step": 0.01
+			},
+			"types": ["PK", "LSC", "HPQ", "LPQ"]
+		},
+		"preamp": {
+			"mode": "manual",
+			"gain": {
+				"min": -16,
+				"max": 6,
+				"step": 1
+			}
+		}
+	},
+	"notes": [
+		"Gain step: one step read as 0.1, but 1.11 was read too, so the step is 0.01.",
+		"Q step: one step read as 0.1, but 0.75 was read too, so the step is 0.01.",
+		"Bands 2–7 not checked: assumed to match band 1."
+	],
+	"notChecked": [
+		"Conditional domains (a window that changes with gain or type) and rules were not checked."
+	],
+	"caveats": [
+		"Guided read: the user set every value in the vendor app, and the inspector only read the device back. The limits found are the vendor app’s, which may be narrower than what the firmware accepts.",
+		"Each conclusion relies on the user setting what its step asked; its read-back and changes show what the device held.",
+		"Read-back shows the values the device was told, not how they sound."
+	]
+}

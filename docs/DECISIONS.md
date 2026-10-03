@@ -1041,6 +1041,13 @@ The owner settled D40's open questions before `/v1/` was first published.
   supports the worst case (a phone or desktop app): one read per step, reconnecting a granted
   device without the chooser and checking its identity.
 
+*2026-10-03, later:* the first guided read (CrinEar Protocol Micro, Walkplay's web app) showed
+that an app's buttons don't always show its grid: the ± buttons moved gain and Q by 0.1, while a
+typed value reached the device at the wire's 1/256 resolution. The grid check now decides it
+(INSPECTOR §3.3): an app that passes typed values through gets the wire's step and the bounds the
+device holds; without a typed value, the app's step stands, since nothing the vendor offers sends
+finer values. Conclusions in the evidence file are the values as read; the interpretation is in
+`constraints` and `notes`.
 **Why:** the evidence is the vendor app's limits whichever way they were seen, so a new kind
 would add an enum value consumers must handle without telling them anything the file doesn't;
 full read-backs let a reviewer recompute every conclusion and see that the other bands stayed

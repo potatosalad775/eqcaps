@@ -372,12 +372,24 @@
 			{#if handoff.action === 'new' && handoff.extends}
 				A profile of its own for your device, extending <span class="font-mono"
 					>{handoff.extends}</span
-				>: fill in its brand, model and id; everything else is inherited.
+				>: fill in its brand, model and id;
+				{handoff.guided
+					? 'the constraints the guided read found are written out, overriding what it inherits.'
+					: 'everything else is inherited.'}
 			{/if}
-			Started from your device's read-back: the evidence file
-			<span class="font-mono">{evidenceRef}</span> is cited in
-			<span class="font-mono">meta.sources</span>. Change the values the read-back shows are wrong,
-			and the check on the right updates as you type.
+			{#if handoff.guided}
+				Started from your guided read in {handoff.guided.vendorApp}: its band count, types, domains
+				and preamp are in the file, and the evidence file
+				<span class="font-mono">{evidenceRef}</span> is cited in
+				<span class="font-mono">meta.sources</span> as vendor-app evidence, which counts toward a
+				verified status once a maintainer has reviewed it. What it didn't check is in
+				<span class="font-mono">meta.notes</span>.
+			{:else}
+				Started from your device's read-back: the evidence file
+				<span class="font-mono">{evidenceRef}</span> is cited in
+				<span class="font-mono">meta.sources</span>. Change the values the read-back shows are
+				wrong, and the check on the right updates as you type.
+			{/if}
 		</div>
 	{/if}
 

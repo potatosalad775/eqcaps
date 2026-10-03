@@ -1,6 +1,8 @@
 // Inference from reads only (INSPECTOR §3.3): a bound is the value read at the extreme step; a step
-// is the difference of two reads one step apart, cross-checked by the GCD of every value read for
-// that field; a type is the code read after the user chose it.
+// is the difference of two reads one step apart, cross-checked by the GCD of every value the app
+// set for that field; a type is the code read after the user chose it. A typed value the device
+// holds as the wire's rounding of it shows the app passes typed values through: the field's step
+// is then the wire's, however coarse the app's buttons are.
 
 import { near, onGrid, type FilterType } from '@potatosalad775/eqcaps-core';
 import { changeText, valueAt } from './changes.ts';
@@ -36,7 +38,10 @@ export interface Outcome {
 const whose = (step: Step) =>
 	step.field === 'preamp' ? 'the preamp' : `band ${step.band}'s ${LABEL[step.field as NumField]}`;
 
-/** What one read entry establishes for its step, or why it doesn't. */
+/**
+ * What one read entry establishes for its step, or why it doesn't. Values are as the device holds
+ * them: `infer` decides what the app sent.
+ */
 export function conclude(entry: Extract<Entry, { kind: 'read' }>, ctx: GuidedContext): Outcome {
 	const { step, read, changed } = entry;
 	const band = step.band;
@@ -60,7 +65,6 @@ export function conclude(entry: Extract<Entry, { kind: 'read' }>, ctx: GuidedCon
 		}
 	}
 	const field = step.field as NumField;
-	const wire = ctx.wire[field]?.step;
 	const at = valueAt(read, field, band);
 	if (at === undefined) {
 		return { problem: field === 'preamp' ? 'The read has no preamp.' : `Band ${band} is off.` };
@@ -69,7 +73,7 @@ export function conclude(entry: Extract<Entry, { kind: 'read' }>, ctx: GuidedCon
 	const where = band === undefined ? {} : { band };
 	if (step.ask === 'value') {
 		if (entry.typed === undefined) return { problem: 'Enter the value you typed into the app.' };
-		return { conclusion: { ...where, field, typed: entry.typed, read: appValue(at, wire) } };
+		return { conclusion: { ...where, field, typed: entry.typed, read: at } };
 	}
 	if (!own && !(entry.already && step.ask !== 'step')) {
 		if (changed.length === 0) {
@@ -84,9 +88,9 @@ export function conclude(entry: Extract<Entry, { kind: 'read' }>, ctx: GuidedCon
 	}
 	if (step.ask === 'step') {
 		const d = Math.abs((own!.to as number) - (own!.from as number));
-		return { conclusion: { ...where, field, step: appValue(d, wire, wire) } };
+		return { conclusion: { ...where, field, step: d } };
 	}
-	return { conclusion: { ...where, field, [step.ask]: appValue(at, wire) } };
+	return { conclusion: { ...where, field, [step.ask]: at } };
 }
 
 /** The entries that count for each step id: the last one, or every read of an `each` step. */
@@ -121,6 +125,7 @@ export interface GridCheck {
 	band?: number;
 	field: NumField;
 	typed: number;
+	/** As the device holds it. */
 	read: number;
 	ok: boolean;
 }
@@ -131,6 +136,11 @@ export interface Inference {
 	bands: Map<number, BandFindings>;
 	preamp: FieldFindings;
 	checks: GridCheck[];
+	/**
+	 * Fields whose typed values the app passes to the device as they are (§3.3): their step is the
+	 * wire's and their bounds are the values the device holds.
+	 */
+	passThrough: Set<NumField>;
 	/** Whether the last read matched the first; undefined until the restore step. */
 	restored?: boolean;
 	/** What the reads didn't settle or disagreed on, for the screen and `meta.notes`. */
@@ -138,10 +148,17 @@ export interface Inference {
 }
 
 const emptyBand = (): BandFindings => ({ gain: {}, freq: {}, q: {} });
+const NUM_FIELDS = ['gain', 'freq', 'q', 'preamp'] as const;
 
-/** Everything the entries establish, steps cross-checked against every value read. */
+/** Everything the entries establish, steps cross-checked against every value the app set. */
 export function infer(ctx: GuidedContext, entries: readonly Entry[]): Inference {
-	const inf: Inference = { bands: new Map(), preamp: {}, checks: [], notes: [] };
+	const inf: Inference = {
+		bands: new Map(),
+		preamp: {},
+		checks: [],
+		passThrough: new Set(),
+		notes: []
+	};
 	const band = (b: number) => {
 		let f = inf.bands.get(b);
 		if (!f) inf.bands.set(b, (f = emptyBand()));
@@ -166,15 +183,13 @@ export function infer(ctx: GuidedContext, entries: readonly Entry[]): Inference 
 		if (c.field === 'bands') inf.bandCount = c.bands!;
 		else if (c.field === 'restore') inf.restored = c.matchesFirst!;
 		else if (c.typed !== undefined && c.read !== undefined) {
-			const field = c.field as NumField;
-			const tol = (ctx.wire[field]?.step ?? 0) / 2;
-			const ok = Math.abs(c.read - c.typed) <= tol + 1e-9 || near(c.read, c.typed);
+			const where = c.band !== undefined ? { band: c.band } : {};
 			inf.checks.push({
-				...(c.band !== undefined ? { band: c.band } : {}),
-				field,
+				...where,
+				field: c.field as NumField,
 				typed: c.typed,
 				read: c.read,
-				ok
+				ok: true
 			});
 		} else {
 			const target =
@@ -182,7 +197,7 @@ export function infer(ctx: GuidedContext, entries: readonly Entry[]): Inference 
 			for (const k of ['min', 'max', 'step'] as const) if (c[k] !== undefined) target[k] = c[k];
 		}
 	}
-	crossCheckSteps(ctx, entries, inf);
+	for (const field of NUM_FIELDS) interpret(ctx, entries, inf, field);
 	for (const c of inf.checks) {
 		if (!c.ok) {
 			inf.notes.push(
@@ -196,51 +211,97 @@ export function infer(ctx: GuidedContext, entries: readonly Entry[]): Inference 
 	return inf;
 }
 
+/** More decimals than an app's own grid would have: 1.111111, not 1.1 or 1.25. */
+const decimals = (x: number) => {
+	const s = String(x);
+	const i = s.indexOf('.');
+	return i < 0 || s.includes('e') ? 0 : s.length - i - 1;
+};
+
 /**
- * Every value read for a field must lie on the step found for it (asked on band 1, or the
- * preamp). A value that doesn't means the step read was a multiple of the real one (a slider
- * moved two notches), so the step becomes the GCD of the values, or is dropped if none fits.
+ * Turns one field's raw findings into the app's values. The step read is cross-checked first:
+ * every value the app set must lie on it, or the step read was a multiple of the real one (a
+ * slider moved two notches), so it becomes the GCD of the values, or is dropped if none fits.
+ * Then a grid check showing the app passes typed values through makes the step the wire's and
+ * keeps the bounds as read; otherwise the values are the app's, the wire's rounding undone.
  */
-function crossCheckSteps(ctx: GuidedContext, entries: readonly Entry[], inf: Inference) {
-	const reads = [ctx.first, ...entries.flatMap((e) => (e.kind === 'read' ? [e.read] : []))];
-	for (const field of ['gain', 'freq', 'q', 'preamp'] as const) {
-		const owner = field === 'preamp' ? inf.preamp : inf.bands.get(1)?.[field];
-		const step = owner?.step;
-		if (!owner || step === undefined) continue;
-		const wire = ctx.wire[field]?.step;
-		const values = new Set<number>();
-		for (const r of reads) {
-			if (field === 'preamp') {
-				if (r.preamp !== undefined) values.add(appValue(r.preamp, wire));
-			} else {
-				for (const f of r.filters) if (f) values.add(appValue(f[field], wire));
-			}
+function interpret(ctx: GuidedContext, entries: readonly Entry[], inf: Inference, field: NumField) {
+	const wire = ctx.wire[field]?.step;
+	const owners = field === 'preamp' ? [inf.preamp] : [...inf.bands.values()].map((b) => b[field]);
+	const asked = field === 'preamp' ? inf.preamp : inf.bands.get(1)?.[field];
+	const read = asked?.step === undefined ? undefined : appValue(asked.step, wire, wire);
+	const { step: appStep, note } = crossCheck(entries, field, wire, read);
+
+	const checks = inf.checks.filter((c) => c.field === field);
+	const held = (c: GridCheck) =>
+		wire ? Math.abs(c.read - c.typed) <= wire / 2 + 1e-9 : near(c.read, c.typed);
+	const offAppGrid = (c: GridCheck) =>
+		appStep !== undefined ? !onGrid(c.typed, appStep) : decimals(c.typed) > 3;
+	// When the app's step is the wire's, passing through and rounding look (and work) the same.
+	const finer = wire === undefined || appStep === undefined || appStep > wire * 1.5;
+	const through = finer ? checks.find((c) => held(c) && offAppGrid(c)) : undefined;
+	if (through) {
+		inf.passThrough.add(field);
+		for (const o of owners) {
+			if (wire === undefined) delete o.step;
+			else o.step = wire;
 		}
-		const off = [...values].filter((v) => !onGrid(v, step));
-		if (off.length === 0) continue;
-		const g = gcdOf([step, ...values]);
-		const floor = Math.max(wire ?? 0, 1e-3);
-		if (g >= floor && [...values].every((v) => onGrid(v, g))) {
-			owner.step = g;
-			inf.notes.push(
-				`${cap(LABEL[field])} step: one step read as ${step}, but ${off[0]} was read too, so the step is ${g}.`
-			);
-		} else {
-			delete owner.step;
-			inf.notes.push(
-				`${cap(LABEL[field])} step: ${step} was read, but ${off[0]} isn't on that grid, so no step is given.`
-			);
+		for (const c of checks) c.ok = held(c);
+		const app = appStep === undefined ? '' : `, finer than the app's ${appStep} buttons`;
+		inf.notes.push(
+			`${cap(LABEL[field])}: the app passes typed values through (typed ${through.typed}, the device holds ${through.read}), so the step is ${wire === undefined ? 'not limited' : `the wire's ${wire}`}${app}.`
+		);
+		return;
+	}
+
+	for (const o of owners) {
+		if (o.min !== undefined) o.min = appValue(o.min, wire);
+		if (o.max !== undefined) o.max = appValue(o.max, wire);
+	}
+	if (asked) {
+		if (appStep === undefined) delete asked.step;
+		else asked.step = appStep;
+	}
+	if (note) inf.notes.push(note);
+	for (const c of checks) {
+		// On the app's grid, or rounded by the app onto it: both agree with the step.
+		const rounded = appStep === undefined ? c.typed : Math.round(c.typed / appStep) * appStep;
+		c.ok = held(c) || held({ ...c, typed: rounded });
+	}
+}
+
+/** The step read, checked against every value the app set during the steps (not defaults). */
+function crossCheck(
+	entries: readonly Entry[],
+	field: NumField,
+	wire: number | undefined,
+	step: number | undefined
+): { step?: number; note?: string } {
+	if (step === undefined) return {};
+	const values = new Set<number>([step]);
+	for (const e of entries) {
+		if (e.kind !== 'read' || e.step.ask === 'value' || e.step.ask === 'restore') continue;
+		for (const ch of e.changed) {
+			if (ch.field === field && typeof ch.to === 'number') values.add(appValue(ch.to, wire));
 		}
 	}
+	const off = [...values].filter((v) => !onGrid(v, step));
+	if (off.length === 0) return { step };
+	const g = gcdOf([...values]);
+	const name = cap(LABEL[field]);
+	if (g >= Math.max(wire ?? 0, 1e-3) && [...values].every((v) => onGrid(v, g))) {
+		return {
+			step: g,
+			note: `${name} step: one step read as ${step}, but ${off[0]} was set too, so the step is ${g}.`
+		};
+	}
+	return {
+		note: `${name} step: ${step} was read, but ${off[0]} isn't on that grid, so no step is given.`
+	};
 }
 
 /** GCD of numbers with up to 6 decimals, computed on integers so 0.3 and 0.1 give 0.1. */
 export function gcdOf(values: readonly number[]): number {
-	const decimals = (x: number) => {
-		const s = String(x);
-		const i = s.indexOf('.');
-		return i < 0 || s.includes('e') ? 0 : s.length - i - 1;
-	};
 	const scale = 10 ** Math.min(6, Math.max(0, ...values.map(decimals)));
 	let g = 0;
 	for (const v of values) {

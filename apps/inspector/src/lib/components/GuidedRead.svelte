@@ -66,7 +66,8 @@
 	let entries = $state.raw<Entry[]>([]);
 	/** A step the user chose to redo; otherwise the planner's next step. */
 	let target = $state.raw<Step | null>(null);
-	let typed = $state('');
+	/** A number input's value: a number, or null while it's empty. */
+	let typed = $state<number | null>(null);
 	let already = $state(false);
 	let busy = $state(false);
 	let error = $state('');
@@ -126,11 +127,11 @@
 		const s = step;
 		let n: number | undefined;
 		if (s.ask === 'count' || s.ask === 'value') {
-			n = Number(typed);
-			if (typed.trim() === '' || !Number.isFinite(n)) {
+			if (typeof typed !== 'number' || !Number.isFinite(typed)) {
 				error = 'Enter a number first.';
 				return;
 			}
+			n = typed;
 		}
 		busy = true;
 		error = '';
@@ -143,7 +144,7 @@
 			entries = [...entries, readEntry(ctx, entries, s, pulled, opts)];
 			target = null;
 			already = false;
-			if (s.ask !== 'count') typed = '';
+			if (s.ask !== 'count') typed = null;
 			lost = false;
 		} catch (e) {
 			error = `The read failed: ${e instanceof Error ? e.message : String(e)}`;
@@ -157,7 +158,7 @@
 		if (!step) return;
 		entries = [...entries, { kind: 'skip', step }];
 		target = null;
-		typed = '';
+		typed = null;
 	}
 
 	function done() {

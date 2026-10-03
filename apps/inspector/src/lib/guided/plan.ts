@@ -111,8 +111,10 @@ export function instruction(s: Step): string {
 			return `In the vendor app, set ${where(s.field as NumField)} as low as it goes.`;
 		case 'step':
 			return `In the vendor app, change ${where(s.field as NumField)} by the smallest step it allows: one click of its arrow, or one notch.`;
-		case 'value':
-			return `If the vendor app lets you type values: type one into ${where(s.field as NumField)}, with as many decimals as the app takes, and enter the same number here. Skip this if the app only has sliders.`;
+		case 'value': {
+			const example = { gain: '1.111111', freq: '1111.111', q: '1.111111', preamp: '1.111111' };
+			return `If the vendor app lets you type values: type ${example[s.field as NumField]} into ${where(s.field as NumField)} (or as many decimals as it takes), and enter the same number here. This shows whether the app passes typed values on as they are, which can be finer than its buttons. Skip this if the app only has sliders.`;
+		}
 	}
 }
 
