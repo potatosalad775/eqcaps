@@ -21,6 +21,7 @@ quantization, conditional domains, cross-band rules, preamp, device identity and
 | [`packages/device-bridge`](packages/device-bridge/) | Reads and writes EQ on every hardware device in the database over HID, serial and Bluetooth, behind transport interfaces with no browser types. |
 | [`data/`](data/) | The profiles (`profiles/<brand>/<id>.json`) and shared bases. See [CONTRIBUTING.md](CONTRIBUTING.md). |
 | [`packages/build`](packages/build/) | Validation pipeline and data build used by CI |
+| [`apps/inspector`](apps/inspector/) | The web app at [potatosalad775.github.io/eqcaps](https://potatosalad775.github.io/eqcaps/): browse profiles, try the engine on your filters, read a connected device and check it against its profile |
 
 ## Development
 
@@ -36,6 +37,7 @@ npm run codegen   # after editing schema/v1/profile.schema.json
 npm run conformance  # after changing engine behaviour or scripts/conformance.ts
 npm run data:validate  # check data/ as CI does
 npm run data:build     # publish /next/ into dist/site/next/
+npm run inspector:dev  # the inspector, reading the local dist/site/next/
 ```
 
 `@potatosalad775/eqcaps-core` and `@potatosalad775/eqcaps-client` are on npm; the device bridge

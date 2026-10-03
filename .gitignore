@@ -4,6 +4,7 @@ node_modules
 /dist
 packages/*/dist
 apps/*/dist
+apps/*/.svelte-kit
 /coverage
 *.tsbuildinfo
 

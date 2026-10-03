@@ -228,3 +228,6 @@ Stored at `data/evidence/<profile-id>/<date>-<short hash>.json`, referenced from
 | `/connect` | T1 identify → T2 read → T3 probe wizard |
 | `/edit/<id?>` | T4 editor + submit |
 | `/docs` | consumer guide (how to use the CDN, client, engine) |
+
+*2026-10-02:* built so far (DECISIONS D34): `/`, `/p/<id>`, `/playground`, and `/connect` with T1
+and T2 (no probing yet). `/edit` and `/docs` are next.

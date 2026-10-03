@@ -1,0 +1,31 @@
+{
+	"name": "@potatosalad775/eqcaps-inspector",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Browse eqcaps profiles, try the engine on your own filters, and check a connected device against the database.",
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings"
+	},
+	"dependencies": {
+		"@potatosalad775/eqcaps-build": "0.0.0",
+		"@potatosalad775/eqcaps-client": "0.0.0",
+		"@potatosalad775/eqcaps-core": "0.0.0",
+		"@potatosalad775/eqcaps-device-bridge": "0.0.0"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-static": "^3.0.10",
+		"@sveltejs/kit": "^2.70.3",
+		"@sveltejs/vite-plugin-svelte": "^7.3.1",
+		"@tailwindcss/vite": "^4.3.3",
+		"svelte": "^5.57.1",
+		"svelte-check": "^4.7.6",
+		"tailwindcss": "^4.3.3",
+		"vite": "^8.3.2"
+	}
+}

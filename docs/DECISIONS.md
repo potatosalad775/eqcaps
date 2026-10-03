@@ -327,6 +327,10 @@ the draft left room, these choices were made (all now in SPEC §6–§8 and §13
   no use. Warnings (`not-neutral`, `no-room`) replace the draft's unspecified "emit a warning".
   `assign` also returns `slotOf`, and `validateList` names the input filter of each violation,
   because an editing UI holds a list, not slots.
+  *2026-10-02 (Phase 4):* `fit` returns `slotOf` too, for the same reason: the inspector's
+  playground shows each wanted filter beside what it became, and `changes` names only the filters
+  that moved. The reference already composed this mapping across its passes. Additive, and pinned
+  by a property check: it pairs every filled slot with exactly one wanted filter.
 - **Engine vectors are generated** by `scripts/conformance.ts` from hand-written inputs, with the
   reference engine supplying exact-op expectations. `npm run check` fails on drift, as it does for
   codegen. Unit tests pin hand-computed values independently, so a generated vector can't simply
@@ -621,6 +625,48 @@ embedded bundle); tests that require pushes to reproduce devicePEQ's recorded by
 arithmetic quirks (the goal is driving the database's devices, not reproducing devicePEQ);
 devicePEQ's synthetic captures (Conexant, the two BLE ones, Qudelix) and non-EQ ones (mic gain,
 the vendor site).
+
+### D34. Inspector: a static SvelteKit app on the same origin as the data (accepted, 2026-10-02)
+`apps/inspector` (private workspace, not published) is the T0–T2 tiers of INSPECTOR §2 so far:
+search, profile view, playground, and connect → identify → match → read → validate.
+- **SvelteKit with adapter-static, as a SPA.** Same stack as modernGraphTool (D21: SvelteKit is
+  its Vite plugin), Tailwind included. Nothing renders on the server. Pages without parameters are
+  prerendered shells; `/p/<id>` is not, because ids come from the data, which changes without a
+  redeploy of the app. GitHub Pages answers unknown paths with `404.html`, which is the SPA
+  fallback, so profile links are real paths. Built with `BASE_PATH=/eqcaps` and deployed at `/`
+  of the Pages site beside `/next/`, replacing the placeholder page.
+- **Data through the client, same origin.** The app reads `/next/` next to itself (dev and
+  preview serve the local `dist/site/next/`), loads `index.json` for search and identity and
+  `bundle.json` for profiles and feature filters (about 70 KB gzipped together), and gets
+  everything else from the client: cache in `localStorage`, ETag revalidation (TTL 5 minutes,
+  since contributors check their own changes here), failures as messages. Deprecated profiles,
+  which the bundle leaves out, are fetched one by one.
+- **Workspace sources.** Vite resolves workspace packages through the `eqcaps:source` condition,
+  so nothing is built first. The app uses `build`'s main entry in the browser (`brandSlug` now,
+  Ajv for the editor later); only its `./node` entry needs Node.
+- **Playground formats.** Equalizer APO text (which AutoEQ's `ParametricEQ.txt` is) and JSON.
+  Codes map per SPEC §5.3: `LP`/`HP` become `LPQ`/`HPQ` at Q = 1/√2, `LSQ`/`HSQ` become
+  `LSC`/`HSC` (D22), `BW Oct` becomes Q by the cookbook. Shelves given by slope are refused with
+  a message rather than converted from an assumed default. Unreadable lines are reported by number
+  and the rest still parse.
+- **T1/T2 never write.** The connect page calls `pull` and nothing else from the bridge. The
+  device is identified once, by the client's `matchDevice` over the index; the protocol is
+  `protocolFor(profile)`, or for an unknown HID device `guessProtocol(vendorId)`, shown as
+  experimental. A read-back is checked with `validate` against the chosen profile, plus the band
+  count when the protocol reports it; every discrepancy is a finding, with a prefilled
+  "wrong constraint" issue. An unknown device gets a prefilled "new device" issue whose text the
+  user edits before it leaves the page (the PII review of INSPECTOR §6). Issue forms are prefilled
+  by their field ids; the profile itself never goes in a URL here.
+- **Tests.** The pure modules (parsing, search, slot rows, violation text, connect helpers) are
+  unit-tested from the root Vitest run; `npm run check` runs `svelte-check`. The connect flow was
+  exercised headlessly against a fake WebHID device replaying the KT Micro Chu 2 capture, which
+  reproduced D33's open finding (Q 7 read back against the profile's 5).
+
+**Rejected:** hash routing (ugly, unshareable-looking links, for no gain over the 404 fallback);
+prerendering a page per profile at build time (couples the app's deploy to the data's, and the
+SPA reads the data anyway); a UI component library (plain Svelte and Tailwind are enough so
+far); fetching profiles one by one for search (the bundle is small, and feature filters need the
+profiles).
 
 ---
 

@@ -8,12 +8,14 @@ profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor
 who adopts the format.
 
 **Status: Phases 0–3 done (`/next/` live, `core` and `client` 0.1.0 on npm); Phase 4 in progress:
-`packages/device-bridge` built, inspector next (PLAN §5).** Read `docs/PLAN.md` first.
+`packages/device-bridge` built; `apps/inspector` has browse, playground and connect (T0–T2), editor
+next (PLAN §5).** Read `docs/PLAN.md` first.
 
 Commands: `npm run lint` · `npm run check` (codegen and vector drift + typecheck) · `npm test` ·
 `npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json` ·
 `npm run conformance` after changing engine behaviour · `npm run data:validate` · `npm run data:build`
-(writes `dist/site/next/`) · `npm run release -- <version>` (owner only, run locally for npm 2FA).
+(writes `dist/site/next/`) · `npm run inspector:dev` (serves the local `dist/site/next/`; run
+`data:build` first) · `npm run release -- <version>` (owner only, run locally for npm 2FA).
 Never edit `schema/v1/source.schema.json`,
 `*.generated.ts` or `conformance/v1/*.json` (engine vectors) by hand.
 
@@ -74,6 +76,9 @@ in the same change. Don't define format details anywhere except SPEC-DRAFT.md.
   stay in profiles and identities in profile `match` (the client matches, the bridge doesn't).
   Protocols come from devicePEQ `0617f38`; test against device answers
   (`packages/device-bridge/test/captures/`) and codec round trips, not devicePEQ's bytes.
+- Inspector (D34): SvelteKit SPA with adapter-static and Tailwind, never server-rendered. Logic
+  that can be tested lives in plain `.ts` modules under `src/lib/` (tested by the root Vitest run);
+  routes and components stay thin. T0–T2 pages never call the bridge's `push` or `setEnabled`.
 - Workspace packages import each other by package name. Node scripts that need sources run with
   `--conditions=eqcaps:source`; `scripts/*.ts` import sources by relative path.
 - USB ids are lowercase 4-digit hex strings (`"0x2972"`). HID `productName` matches exactly,

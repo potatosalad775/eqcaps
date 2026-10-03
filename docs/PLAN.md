@@ -180,8 +180,14 @@ Protocols are keyed by profile id, so the client's `matchDevice` is the only ide
 devices without a profile get a vendor guess marked experimental. Tests decode the recorded device
 answers, round-trip every codec on its wire grid, check every hardware profile against its codec,
 and run the consumer recipe (`fit` → `complete` → push) for every profile. They corrected three
-seeded profiles and found two codec bugs; the open data findings are listed in D33. Left: publish
-the bridge, confirm it on real hardware, the inspector, and the hand-authored profiles.
+seeded profiles and found two codec bugs; the open data findings are listed in D33.
+
+The inspector is started (D34): search with feature filters, the profile view with its per-slot
+chart, the playground (`validateList`, `fit` as a diff, `complete`), and the connect page (T1
+identity, HID descriptor dump, matching, T2 read and validate, prefilled issues). It deploys at `/`
+beside `/next/`. Left: publish the bridge, confirm connect → read on real hardware, the editor and
+PR submission (T4), the evidence export with its PII review, the hand-authored profiles, and the
+freeze.
 
 ### Phase 5: Probe mode (T3) · L (3–4 weeks)
 - Bridge: offline codec analysis (the codecs' `wire()` and `types`, D33) that produces
@@ -225,7 +231,9 @@ the bridge, confirm it on real hardware, the inspector, and the hand-authored pr
 1. Owner: publish the bridge with `core` and `client` as 0.2.0 (`npm run release -- 0.2.0`). The
    captures prove the bytes, not that a write lands: the first real-hardware check comes with the
    inspector's connect → read flow, or modernGraphTool switching over to the package.
-2. Phase 4: start `apps/inspector` (T0 browse and playground first; T1/T2 on the bridge).
-3. Hand-author the ≥ 10 verified profiles the freeze needs. Candidates from D33's findings: the
+2. Run the inspector's connect → read against real devices (one per handler family the owner
+   has), and record what differs in D33.
+3. Phase 4: the inspector's editor and submission (T4), then the evidence report (INSPECTOR §6).
+4. Hand-author the ≥ 10 verified profiles the freeze needs. Candidates from D33's findings: the
    FiiO filter types and the KT Micro Q ranges, settled from vendor apps or docs.
-4. Answer Q11 (compact USB match entries), or leave it until the index grows.
+5. Answer Q11 (compact USB match entries), or leave it until the index grows.

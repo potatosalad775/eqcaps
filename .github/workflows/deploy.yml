@@ -2,7 +2,7 @@ name: Deploy
 
 # Publishes the data to GitHub Pages on every push to main (DECISIONS D18):
 #   /next/   the pre-freeze channel: profiles/, index.json, bundle.json, schema/, conformance/
-#   /        a placeholder page until the inspector lands (PLAN Phase 4)
+#   /        the inspector (apps/inspector), reading /next/ from the same origin
 # `/v1/` joins at the format freeze. Needs Pages enabled with "GitHub Actions" as its source.
 
 on:
@@ -40,8 +40,14 @@ jobs:
       - name: Build data (/next/)
         run: npm run data:build
 
-      - name: Add landing page
-        run: cp .github/pages/index.html dist/site/index.html
+      # Pages serves the repository's site under /eqcaps/ (DECISIONS D24).
+      - name: Build inspector (/)
+        run: npm run build -w apps/inspector
+        env:
+          BASE_PATH: /eqcaps
+
+      - name: Add inspector to the site
+        run: cp -R apps/inspector/dist/. dist/site/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

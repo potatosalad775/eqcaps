@@ -6,6 +6,7 @@ package-lock.json
 /coverage/
 packages/*/dist/
 apps/*/dist/
+apps/*/.svelte-kit/
 
 # Markdown is hand-wrapped at 100 columns with compact tables and column-aligned jsonc comments
 # in code blocks. Prettier pads every table to its widest cell and reindents the examples, which
