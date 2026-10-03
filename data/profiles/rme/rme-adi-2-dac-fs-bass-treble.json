@@ -24,7 +24,7 @@
 	],
 	"preamp": { "mode": "none" },
 	"meta": {
-		"status": "community-verified",
+		"status": "draft",
 		"sources": [
 			{
 				"kind": "vendor-docs",
@@ -37,6 +37,6 @@
 				"date": "2026-10-03"
 			}
 		],
-		"notes": "From the User's Guide ADI-2 DAC v1.8, §12.3 Subpage Bass / Treble: a bass shelf at 20-150 Hz in 1 Hz steps (default 85 Hz, Q 0.9) and a treble shelf at 3-10 kHz in 100 Hz steps (default 6.5 kHz, Q 0.7), each -6 to +6 dB in 0.5 dB steps, Q 0.5 to 1.5. The guide gives no Q step, so Q is left continuous. This engine runs alongside the 5-band PEQ (rme-adi-2-dac-fs). Loudness (§12.4) adds to it and is not described here. The match is shared with the PEQ profile, told apart by engine; see its notes for where the USB ids come from."
+		"notes": "From the User's Guide ADI-2 DAC v1.8, §12.3 Subpage Bass / Treble: a bass shelf at 20-150 Hz in 1 Hz steps (default 85 Hz, Q 0.9) and a treble shelf at 3-10 kHz in 100 Hz steps (default 6.5 kHz, Q 0.7), each -6 to +6 dB in 0.5 dB steps, Q 0.5 to 1.5. The guide gives no Q step, so Q is left continuous. This engine runs alongside the 5-band PEQ (rme-adi-2-dac-fs). Loudness (§12.4) adds to it and is not described here. The match is shared with the PEQ profile, told apart by engine; see its notes for where the USB ids come from. Draft until checked: written from the manual alone and not yet tried on a device or reviewed. Open points: the Q step, whether the original ADI-2 DAC (the alias) has the same EQ and USB ids."
 	}
 }

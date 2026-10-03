@@ -30,7 +30,7 @@
 	],
 	"preamp": { "mode": "none" },
 	"meta": {
-		"status": "community-verified",
+		"status": "draft",
 		"sources": [
 			{
 				"kind": "vendor-docs",
@@ -43,6 +43,6 @@
 				"date": "2026-10-03"
 			}
 		],
-		"notes": "From the User's Guide ADI-2 DAC v1.8, §12.2 Subpage Parametric EQ: band 1 is Peak, Shelf, High Cut or High Pass; bands 2-4 are fixed to Peak; band 5 is Peak, Shelf or High Cut. Gain -12 to +12 dB in 0.5 dB steps. Frequency 20 Hz (200 Hz for bands 4 and 5) to 20 kHz, 'in steps between 1 Hz and 100 Hz': the guide doesn't say where the step changes, so the frequency domains are left continuous and the device rounds. Q 0.5 to 9.9 on bands 1-3 and 0.5 to 5.0 on bands 4-5, in steps of 0.1. Cut and pass filters are 12 dB/oct, at the band's Q. The guide calls the shelf of bands 1 and 5 just 'Shelf' and doesn't say which way it faces: a low shelf on band 1 and a high shelf on band 5 is an assumption to confirm on the device. There is no EQ preamp: the DSP has 24 dB of internal headroom (§13) and Volume must be lowered for large boosts. With Dual EQ on, left and right have their own settings, which v1 profiles don't describe; this profile is the linked (default) setting. Bass/Treble is a separate engine: rme-adi-2-dac-fs-bass-treble. The USB product name carries the unit's serial number ('ADI-2 DAC (51120366)'), so the match uses ids only; they come from a Linux hardware report, not from RME."
+		"notes": "From the User's Guide ADI-2 DAC v1.8, §12.2 Subpage Parametric EQ: band 1 is Peak, Shelf, High Cut or High Pass; bands 2-4 are fixed to Peak; band 5 is Peak, Shelf or High Cut. Gain -12 to +12 dB in 0.5 dB steps. Frequency 20 Hz (200 Hz for bands 4 and 5) to 20 kHz, 'in steps between 1 Hz and 100 Hz': the guide doesn't say where the step changes, so the frequency domains are left continuous and the device rounds. Q 0.5 to 9.9 on bands 1-3 and 0.5 to 5.0 on bands 4-5, in steps of 0.1. Cut and pass filters are 12 dB/oct, at the band's Q. The guide calls the shelf of bands 1 and 5 just 'Shelf' and doesn't say which way it faces: a low shelf on band 1 and a high shelf on band 5 is an assumption to confirm on the device. There is no EQ preamp: the DSP has 24 dB of internal headroom (§13) and Volume must be lowered for large boosts. With Dual EQ on, left and right have their own settings, which v1 profiles don't describe; this profile is the linked (default) setting. Bass/Treble is a separate engine: rme-adi-2-dac-fs-bass-treble. The USB product name carries the unit's serial number ('ADI-2 DAC (51120366)'), so the match uses ids only; they come from a Linux hardware report, not from RME. Draft until checked: written from the manual alone and not yet tried on a device or reviewed. Open points: which way the band 1 and band 5 shelves face, the frequency grid, whether the original ADI-2 DAC (the alias) has the same EQ and USB ids."
 	}
 }

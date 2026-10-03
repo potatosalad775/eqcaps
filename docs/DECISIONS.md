@@ -721,9 +721,12 @@ SPEC-DRAFT.md) is now the v1 definition; it changes only by additive minors (SPE
 anything else needs v2 under a new prefix.
 - **Exit criteria waived in part, by the owner.** PLAN's Phase 4 exit asked for ≥ 10 profiles at
   `community-verified` or better across every hard case, and a real HID device going connect →
-  read → validate → prefilled PR. At the freeze, two profiles were verified (RME ADI-2 DAC FS,
-  PEQ and Bass/Treble), and real devices (several Walkplay units) were identified and read, while
-  the full flow ran only against a replayed capture. The owner judged that no further format
+  read → validate → prefilled PR. At the freeze, no profile was verified, and real devices
+  (several Walkplay units) were identified and read, while the full flow ran only against a
+  replayed capture. The RME ADI-2 DAC FS profiles (PEQ and Bass/Treble), written from RME's
+  manual, were briefly marked `community-verified` and set back to `draft` the same day: nobody
+  had reviewed them or tried them on a device, and they rest on assumptions the manual doesn't
+  settle. The owner judged that no further format
   change was needed. What the gate was meant to catch, a format gap found in real use, can still
   be fixed by a minor if it is additive.
 - **Channels.** `/v1/` is built from `main` beside `/next/`. `/next/` keeps being served with the

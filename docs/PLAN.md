@@ -196,12 +196,13 @@ inspector; it was exercised against a fake WebHID device replaying the KT Micro 
 hardware. `npm run release -- <version> --pack` writes tarballs of `core`, `client` and the
 bridge to `dist/pack/` for trying them in another app before publishing. The first hand-authored
 profiles are in: RME ADI-2 DAC FS (PEQ, type- and frequency-partitioned) and its Bass/Treble
-engine (stepped), both `community-verified` from RME's manual. Left for the exit: publish the
-bridge, the real-hardware run, eight more verified profiles covering the value-set, graphic and
-conditional cases (these need vendor apps or the devices themselves), and the freeze.
+engine (stepped), written from RME's manual. They are `draft` until someone reviews them or tries
+them on a device. Left for the exit: publish the bridge, the real-hardware run, ten verified
+profiles covering every hard case (these need vendor apps or the devices themselves), and the
+freeze.
 
 *2026-10-03, later:* **format v1 is frozen** (D36), by the owner's decision, with the exit
-criteria waived in part: two verified profiles rather than ten, and real devices identified and
+criteria waived in part: no verified profiles rather than ten, and real devices identified and
 read (Walkplay units) but the full flow only on a replayed capture. `/v1/` is built beside
 `/next/`, and the client and inspector default to it. The Qudelix 5K is write-only over USB (D33),
 so the inspector, which only reads, identifies it and says so; its profile now also matches the
@@ -252,9 +253,9 @@ so the inspector, which only reads, identifies it and says so; its profile now a
 2. Publish the data package `@potatosalad775/eqcaps` (D32): decide its contents (the `/v1/` files)
    and add it to the release script.
 3. Carried from Phase 4: real-hardware runs (one device per handler family; a write test through
-   modernGraphTool, since the inspector only reads) recorded in D33, and more verified profiles,
-   with the value-set, graphic and conditional cases among them. Review the two RME profiles' open
-   point (which way the band 1 and band 5 shelves face).
+   modernGraphTool, since the inspector only reads) recorded in D33, and verified profiles, with
+   every hard case among them. The two RME drafts are the nearest: their notes list what to check
+   (shelf direction, frequency grid, Q step, the older ADI-2 DAC).
 4. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
    A capture of the vendor app's USB traffic, made by the owner, would show whether the device
    answers reads and what a reliable write looks like.
