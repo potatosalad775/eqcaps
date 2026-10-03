@@ -69,7 +69,10 @@ share: ask the user which device it is.
 `preamp` or `slot` the protocol can't write is refused, not sent without it, and so is a pull of
 a `slot` the protocol can't read. Each handler's `codec`
 turns a push request into frames and back without a device, for checking what a value becomes on
-the wire.
+the wire. `analyzeCodec(protocol)` works out offline what a protocol's writes can carry: the band
+counts one write takes, the filter types with wire codes, and each field's wire range and
+resolution as an eqcaps domain. That is `handler-code` knowledge (SPEC §10): what a device can be
+sent, not what it accepts. `handlerCodeUrl(handler, commit)` is the source `ref` for it.
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,
 `timeout`, `bad-response`, `rejected`, `transport` or `invalid-request`.

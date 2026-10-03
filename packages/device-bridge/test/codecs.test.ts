@@ -7,6 +7,7 @@ import { FILTER_TYPES, type Filter, type FilterType } from '@potatosalad775/eqca
 import fc from 'fast-check';
 import { describe, expect, test } from 'vitest';
 import {
+	analyzeCodec,
 	guessProtocol,
 	HANDLERS,
 	isBridgeError,
@@ -14,6 +15,7 @@ import {
 	PROTOCOLS,
 	transportsOf,
 	type AnyHandler,
+	type Protocol,
 	type PushRequest,
 	type Transport,
 	type WireField,
@@ -169,5 +171,33 @@ describe.each(
 	const missing = (FILTER_TYPES as readonly FilterType[]).filter((t) => !codec.types.includes(t));
 	test.skipIf(missing.length === 0)('a type without a wire code is refused', () => {
 		expect(refused({ ...base(), type: missing[0]! }, 'unsupported-type')).toBe(true);
+	});
+
+	test('the offline analysis agrees with the codec', () => {
+		const analysis = analyzeCodec({ handler: id, options } as Protocol);
+		expect(analysis.types).toEqual(codec.types);
+		if (caps.bands !== undefined) expect(analysis.bands.max).toBe(caps.bands);
+		const { min, max } = analysis.bands;
+		expect(min).toBeGreaterThanOrEqual(1);
+		expect(() =>
+			codec.encode({ filters: Array.from({ length: min }, base) }, options)
+		).not.toThrow();
+		expect(() =>
+			codec.encode({ filters: Array.from({ length: max }, base) }, options)
+		).not.toThrow();
+		// Every bound of every domain is a value the wire writes and reads back as itself.
+		for (const field of ['freq', 'q', 'gain'] as const) {
+			const d = analysis[field];
+			if (!d) continue;
+			const ends =
+				'values' in d ? [d.values[0]!, d.values.at(-1)!] : 'min' in d ? [d.min, d.max] : [];
+			for (const v of ends) {
+				const filters = Array.from({ length: min }, (_, i) =>
+					i === 0 ? { ...base(), [field]: v } : base()
+				);
+				const back = codec.decode(codec.encode({ filters }, options), options).filters[0]!;
+				expect(close(back[field], v), `${field} ${v} reads back as ${back[field]}`).toBe(true);
+			}
+		}
 	});
 });

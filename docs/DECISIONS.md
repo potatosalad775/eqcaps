@@ -779,6 +779,101 @@ group is still one hardware engine, and `kind` already means hardware vs softwar
 `generic` (sounds like a quality judgement) and `family` (suggests a chipset family, while some
 groups are a firmware scheme or a shared product name).
 
+### D38. Probe mode: engine, strategy and evidence (accepted, 2026-10-03)
+T3 of INSPECTOR §3: experiments that push test values and read them back to learn what a device
+accepts, then restore the user's EQ and confirm it.
+- **Where it lives (owner's choice).** The engine is plain TypeScript in the inspector,
+  `apps/inspector/src/lib/probe/`: planner, inference, engine, derivation, comparison, evidence
+  and a `FakeDevice`. It drives anything with the bridge's `pull`/`push` and capabilities
+  (`ProbeIO`), so a `BridgeDevice` and the fake are interchangeable. The bridge gains only offline
+  codec analysis: `analyzeCodec(protocol)` (band counts a write takes, coded types, each field's
+  wire range and resolution as a domain, null for unbounded floats) and `handlerCodeUrl`.
+- **Handler-code drafts (owner's choice).** No script writes `handler-code` sources into `data/`.
+  A device the database lacks, taken to the editor from Connect without a probe, starts from its
+  protocol's wire limits, cited as `handler-code` at the app's commit; float fields the wire
+  doesn't bound keep the editor's placeholders, and the notes say so.
+- **Every slot at once, with a canary.** Each push carries one test value per band. Each band
+  also flips a "canary" field (gain, else Q) between two values it was seen to keep, so a band
+  that took the write is told from one that refused it, whatever happened to the test value. A
+  push where no canary landed is repeated with one band left out: if that band's canary lands,
+  bands are refused one by one and the push stands; if not, the device refuses whole writes, and
+  from then on bands are probed one at a time, each starting from the bounds the band before it
+  ended on (two writes per bound when bands agree).
+- **Steps first, then bounds, then a check.** Steps are inferred from values just off each band's
+  base (they stay inside partitioned windows): the largest known step or GCD of stored values
+  that explains every pair, rounding to nearest or truncating; a float wire storing values as
+  sent is continuous. A pair stored at the edge of its band and moved further than the candidate
+  grid's rounding may be a clamp and may go unexplained. Bounds are searched from a hint (the
+  matched profile's bound, or the previous band's), then the search limit, then common values
+  (±12 dB, 20 Hz…), then the grid. After the bounds, values spread across each band's window
+  check the grid; clamps are then known exactly (stored at a bound, sent past it). A finer grid
+  re-searches the bounds; none at all (a set the device snaps to) becomes a sweep. Value-list
+  wires (Edifier) are swept directly.
+- **Search limits.** Gain and preamp ±30 dB, Q 0.01–100, frequency 1 Hz–40 kHz, each within the
+  wire. A bound the device accepts at the limit is reported as "at least", in the notes.
+- **Band count** by codes: gains −1 to −4 dB, one base-4 digit of the band's index per push plus
+  one push changing every band, over the bands that read back (reads past the count are searched
+  first, without retries). Bands are counted from the first while each read back its own code.
+  The count is exact when reads stop or the device reports it, otherwise "at least".
+- **Order after the windows.** A device that wants ascending bands makes each band's window stop
+  at its neighbours' frequencies when probed band by band; that pattern is the rule (strict when
+  one step short), and the first band's minimum and the last band's maximum then stand for all.
+  Otherwise descending frequencies inside the shared window tell kept (no rule), sorted
+  (`reorders`, emitted as a rule so read-backs stay in step) or refused (then two equal
+  frequencies tell strictness). Frequency test values ascend with the band index throughout.
+- **Conditions:** the window again with a +2 dB boost and with each other kept type; different
+  windows become variants (types with equal windows merge into `in`). Bands alike so far are
+  checked on the first and last band only, and all of them if those two disagree.
+- **Silent resets** show as fields nobody changed (base or canary) changing on half the bands or
+  more. INSPECTOR §3.5 says "reported, not interpreted"; the engine reports each one and also
+  re-tests the bands of that write one by one, counting the value that reset the device as
+  refused. Without that, a reset to 0 dB reads as a clamp at 0 dB.
+- **Backup and restore.** The backup is read before the first write, shown and downloadable
+  while the probe runs. Restore is attempted after any write, on every path (done, stopped,
+  failed), retried once, and confirmed by reading back; a band that was off is restored flat and
+  counts as restored if it reads back off or at 0 dB. A failed restore keeps the backup open on
+  screen with instructions. Devices that disconnect on save aren't probed: there is no automatic
+  reconnection yet (INSPECTOR §3.1).
+- **Derivation.** Per-band findings become a template plus grouped overrides (each key's most
+  common value), variants, the ordering rule and the preamp. What wasn't probed (a quick probe's
+  Q, frequency and types) comes from the matched profile, else the wire, and the notes say which.
+  `constraintDiff` compares profiles by what they accept, not how they're written.
+- **Evidence.** INSPECTOR §6's file, with `probe` (mode, writes, why it stopped), `backup`,
+  `backupRestored`, the experiments' pushes and conclusions, `derivedProfile` (constraints only:
+  the profile cites the file, so the file can't cite the profile) and `notes`. Filters in pushes
+  are `[type, freq, q, gain]` tuples, one push per line; read evidence is unchanged. The PII
+  review skips what the app generated (pushes, conclusions, backup, derived constraints). A
+  profile cites it as a `probe` source, which counts (SPEC §10); a fix or a new profile gets the
+  derived constraints, overriding what it extends.
+- **Safety UX** (INSPECTOR §3.4): preconditions listed, planned writes shown, a hearing checkbox
+  and a second confirmation before the first write, ≥ 100 ms between writes, a stop button that
+  restores, EQ commands only. The page asks to stay in front: browsers throttle background tabs'
+  timers, which stretches a probe from seconds to many minutes.
+- **Tests.** `FakeDevice` puts a real codec in front of firmware that accepts what a profile says
+  (clamping or refusing, coercing types, refusing whole writes, NAKs, silent resets, sorting,
+  disconnecting). Probes derive the seeded Walkplay profile, every hard case (type- and
+  frequency-partitioned, stepped, graphic, value set on a float wire, conditional, both ordering
+  behaviours), the JDS Labs profile, and lossless firmware over five codecs; every failure path
+  restores or says it couldn't; and a fast-check property over random firmware (partitions,
+  boost windows, all failure modes) passed 2000 cases. Typical writes over those: clamping 53,
+  refusing 90, whole-write or resetting devices about 100 (clamping) to 260 (refusing), at most
+  about 600 for twelve refusing bands. The connect page was run end to end in Chrome against a
+  fake WebHID device speaking the Walkplay protocol: full probe in 68 writes (estimate 132), EQ
+  restored and verified, a preamp range different from the seeded profile found, and the result
+  taken to the editor as a new profile.
+
+**Rejected:** the engine in the bridge or a package of its own (owner's choice: the inspector,
+INSPECTOR §5); a script writing `handler-code` sources into `data/` (owner's choice); probing
+each band separately from the start (×bands writes for every device, not only the few that need
+it); whole-set detection by an extra known-good write per push (the canary costs nothing);
+inferring steps from values spread over the spectrum before the windows are known (partitions
+clamp them into fake grids); reading a reset as a clamp, or stopping at the first one; treating a
+band count that reads stop at as "at least".
+**Open:** the exit's real-hardware runs (three handler families; the owner has Walkplay units),
+reconnection for devices that disconnect on save (KT Micro), conditional Q and gain domains (only
+frequency windows are probed), and whether a group member's file should keep only the constraints
+that differ from its base.
+
 ---
 
 ## Open questions for the owner

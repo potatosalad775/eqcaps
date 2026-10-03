@@ -210,7 +210,7 @@ so the inspector, which only reads, identifies it and says so; its profile now a
 a device matched only by a group can be added as its own profile from Connect, driven by the
 group's protocol (D33), with no code change.
 
-### Phase 5: Probe mode (T3) · L (3–4 weeks)
+### Phase 5: Probe mode (T3) · L (3–4 weeks) · built 2026-10-03, exit pending real hardware
 - Bridge: offline codec analysis (the codecs' `wire()` and `types`, D33) that produces
   `handler-code` sources automatically.
 - Probe engine: planner, parallel per-slot search, step inference, whole-set-rejection fallback,
@@ -219,6 +219,20 @@ group's protocol (D33), with no code change.
 - **Exit:** ≥ 3 handler families probed end to end on real hardware; derived profiles match the
   hand-authored ones, or the difference is explained and fixed; restore is verified on every run,
   including injected failures.
+
+*2026-10-03:* built (D38). The bridge analyses codecs offline (`analyzeCodec`), and a new device
+taken to the editor starts from its protocol's wire limits as `handler-code`. The probe engine is
+in the inspector (`src/lib/probe/`): backup, band count, steps, bounds per band, grid check, types,
+conditional windows, band order and preamp, all bands per write, with whole-write rejection and
+silent resets detected and handled, and restore verified on every path. `/connect` offers it
+after a read, behind the hearing gate, and its result goes to the editor as a `probe` source.
+Tested against virtual devices (real codecs, simulated firmware): every hard case, every failure
+path (disconnect mid-probe, refused and NAKed writes, silent resets, a stop, a restore the device
+doesn't keep), and 2000 random devices, all derived exactly or with the difference explained in
+the notes, and restored. The connect page ran a full probe end to end in Chrome against a fake
+WebHID Walkplay device. Left for the exit: real hardware. The owner has Walkplay units, so one
+family can be run now; two more families (FiiO, KT Micro, Moondrop…) need devices, and KT Micro
+also needs reconnection after saves.
 
 ### Phase 6: Consumers (parallel once Phases 2–3 land)
 - **modernGraphTool** (the original draft's M3/M5/M6, done in that repo): replace
@@ -252,14 +266,18 @@ group's protocol (D33), with no code change.
 1. Owner: push, so `/v1/` and the new inspector deploy. Then publish `core`, `client` and the
    bridge as 0.2.0 (`npm run release -- 0.2.0`); the client then defaults to `/v1/`. Before that,
    the bridge can be tried in another app from `npm run release -- 0.2.0-rc.1 --pack`.
-2. Publish the data package `@potatosalad775/eqcaps` (D32): decide its contents (the `/v1/` files)
+2. Phase 5 exit, owner: probe a Walkplay unit from `/connect` (quick first, then full), with the
+   output muted. Check that the restore is reported verified, compare the derived constraints with
+   the group profile, and submit the evidence with any difference. Then two more handler families
+   on real hardware, which need devices the owner doesn't have.
+3. Publish the data package `@potatosalad775/eqcaps` (D32): decide its contents (the `/v1/` files)
    and add it to the release script.
-3. Carried from Phase 4: real-hardware runs (one device per handler family; a write test through
-   modernGraphTool, since the inspector only reads) recorded in D33, and verified profiles, with
-   every hard case among them. The two RME drafts are the nearest: their notes list what to check
-   (shelf direction, frequency grid, Q step, the older ADI-2 DAC).
-4. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
+4. Carried from Phase 4: verified profiles, with every hard case among them. A probe file is
+   counting evidence (SPEC §10), so probed profiles can now be raised to `community-verified`.
+   The two RME drafts are the nearest by documents: their notes list what to check (shelf
+   direction, frequency grid, Q step, the older ADI-2 DAC).
+5. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
    A capture of the vendor app's USB traffic, made by the owner, would show whether the device
-   answers reads and what a reliable write looks like.
-5. Answer Q11 (compact USB match entries), or leave it until the index grows. It is additive, so it
+   answers reads and what a reliable write looks like. Until then it can't be probed.
+6. Answer Q11 (compact USB match entries), or leave it until the index grows. It is additive, so it
    fits a v1 minor.

@@ -1,7 +1,8 @@
 <script lang="ts">
-	// T1 identify and T2 read (INSPECTOR §2): connect a device, show what it says about itself,
-	// match it against the database, and read its EQ back to check the profile. This page never
-	// writes to the device: it calls the bridge's pull, never push or setEnabled.
+	// T1 identify, T2 read and T3 probe (INSPECTOR §2): connect a device, show what it says about
+	// itself, match it against the database, and read its EQ back to check the profile. Only the
+	// probe wizard writes, through the probe engine, after its safety gate; this page itself calls
+	// the bridge's pull, never push or setEnabled.
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import {
@@ -51,6 +52,7 @@
 	import { violationText } from '$lib/violations';
 	import GroupBadge from '$lib/components/GroupBadge.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import ProbeWizard from '$lib/components/ProbeWizard.svelte';
 
 	const apis = (() => {
 		try {
@@ -268,7 +270,12 @@
 				filters: pulled.filters,
 				...(pulled.preamp !== undefined ? { preamp: pulled.preamp } : {})
 			},
-			needsBandCount: device?.capabilities.needsBandCount ?? true
+			needsBandCount: device?.capabilities.needsBandCount ?? true,
+			protocol: {
+				handler: protocol.handler,
+				...(protocol.options ? { options: protocol.options } : {}),
+				commit: APP_COMMIT
+			}
 		};
 		return { report, handoff };
 	});
@@ -297,7 +304,8 @@
 	<h1 class="text-2xl font-semibold">Connect a device</h1>
 	<p class="text-zinc-600 dark:text-zinc-400">
 		See what your device says about itself, which profile matches it, and whether its current EQ
-		fits that profile. This page only reads: it never changes your device's settings.
+		fits that profile. Reading never changes your device's settings. Probing, which writes test
+		values to learn what the device accepts, is a separate step you start yourself.
 	</p>
 </div>
 
@@ -488,9 +496,9 @@
 				{/if}
 				{#if writeOnly || (device && !device.capabilities.canRead)}
 					<p class="rounded bg-zinc-100 px-3 py-2 text-sm dark:bg-zinc-900">
-						This protocol can only write to the device: it has no way to read the EQ back. This page
-						only reads, so it can identify the device but not check its EQ. Apps that drive the
-						device bridge can still write to it.
+						This protocol can only write to the device: it has no way to read the EQ back. So this
+						page can identify the device, but neither check its EQ nor probe it (a probe learns from
+						what reads back). Apps that drive the device bridge can still write to it.
 					</p>
 				{:else}
 					<button
@@ -632,6 +640,19 @@
 						<EvidenceReview report={evidence.report} handoff={evidence.handoff} {groupBase} />
 					{/key}
 				{/if}
+			{/if}
+
+			{#if device && pulled && chosen}
+				{#key device}
+					<ProbeWizard
+						{device}
+						identity={chosen.identity}
+						transport={chosen.kind}
+						{profile}
+						{profileId}
+						{groupBase}
+					/>
+				{/key}
 			{/if}
 		</section>
 	</div>

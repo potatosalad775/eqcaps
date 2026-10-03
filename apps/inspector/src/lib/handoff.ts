@@ -2,10 +2,17 @@
 // profile change can cite it and be checked against it (connect → read → validate → PR).
 // Kept in sessionStorage: it stays in this tab and is never sent anywhere.
 
-import type { AuthoringProfile, Filter, Profile } from '@potatosalad775/eqcaps-core';
-import type { DeviceIdentity } from '@potatosalad775/eqcaps-device-bridge';
+import type { AuthoringProfile, Filter, Profile, Source } from '@potatosalad775/eqcaps-core';
+import {
+	analyzeCodec,
+	handlerCodeUrl,
+	type DeviceIdentity,
+	type Protocol
+} from '@potatosalad775/eqcaps-device-bridge';
 import { blankProfile } from './editor.ts';
 import { readSource } from './evidence.ts';
+import type { DerivedConstraints } from './probe/derive.ts';
+import { probeSource } from './probe/evidence.ts';
 
 export interface Handoff {
 	/**
@@ -25,6 +32,16 @@ export interface Handoff {
 	readBack: { filters: (Filter | null)[]; preamp?: number };
 	/** The protocol reads as many bands as it is asked for, so the count says nothing (D33). */
 	needsBandCount: boolean;
+	/**
+	 * A probe (T3) rather than a read: the evidence file is cited as a `probe` source, and the
+	 * constraints it derived go into the profile, with what it couldn't settle in the notes.
+	 */
+	probe?: { mode: 'quick' | 'full'; constraints: DerivedConstraints; notes: string[] };
+	/**
+	 * The protocol that drove the device, and the commit of the bridge's code: a new profile
+	 * without a probe starts from what the protocol's wire can carry (`handler-code`).
+	 */
+	protocol?: { handler: Protocol['handler']; options?: object; commit: string };
 }
 
 const KEY = 'eqcaps-inspector:handoff';
@@ -46,12 +63,78 @@ export function loadHandoff(): Handoff | null {
 	}
 }
 
-/** `data` citing the handoff's evidence, once. */
+/**
+ * `data` citing the handoff's evidence, once: a read-back as `community`, a probe as `probe`
+ * (SPEC §10). A probe's constraints replace the file's (they override what it extends).
+ */
 export function citeEvidence(data: AuthoringProfile, handoff: Handoff, by?: string) {
 	const sources = data.meta?.sources ?? [];
 	if (sources.some((s) => s.ref === handoff.evidence.path)) return data;
-	const source = readSource(handoff.evidence.path, handoff.date, by, handoff.firmware);
-	return { ...data, meta: { ...data.meta, sources: [...sources, source] } };
+	const cite = handoff.probe ? probeSource : readSource;
+	const source = cite(handoff.evidence.path, handoff.date, by, handoff.firmware);
+	const cited = { ...data, meta: { ...data.meta, sources: [...sources, source] } };
+	return handoff.probe ? withProbe(cited, handoff.probe, handoff.date) : cited;
+}
+
+/** `data` with a probe's constraints, and its notes appended to `meta.notes`. */
+export function withProbe(
+	data: AuthoringProfile,
+	probe: NonNullable<Handoff['probe']>,
+	date: string
+): AuthoringProfile {
+	const { bands, rules, ...rest } = probe.constraints;
+	const out = { ...data, ...rest } as AuthoringProfile;
+	if (bands) out.bands = bands;
+	else delete out.bands;
+	if (rules.length) out.rules = rules;
+	else delete out.rules;
+	const line = `Probed with the eqcaps inspector on ${date} (${probe.mode} probe).${probe.notes.length ? ` ${probe.notes.join(' ')}` : ''}`;
+	const notes = data.meta?.notes ? `${data.meta.notes}\n${line}` : line;
+	return { ...out, meta: { ...out.meta!, notes } };
+}
+
+/**
+ * What a protocol's wire can carry, as profile constraints for `bandCount` bands, with the
+ * `handler-code` source that says so (SPEC §10: wire limits only, never verified). A float field
+ * the wire doesn't bound keeps the editor's placeholder, and the notes say which.
+ */
+export function codecDraft(
+	protocol: NonNullable<Handoff['protocol']>,
+	bandCount: number,
+	date: string
+): {
+	constraints: Pick<AuthoringProfile, 'bandCount' | 'band' | 'preamp'>;
+	source: Source;
+	notes: string;
+} {
+	const analysis = analyzeCodec({
+		handler: protocol.handler,
+		options: protocol.options
+	} as Protocol);
+	const blank = blankProfile();
+	const placeholders: string[] = [];
+	const field = <K extends 'freq' | 'q' | 'gain'>(k: K) => {
+		const d = analysis[k];
+		if (d) return d;
+		placeholders.push(k);
+		return blank.band![k]!;
+	};
+	const band = {
+		types: analysis.types.filter((t) => !t.startsWith('x-')),
+		freq: field('freq'),
+		q: field('q'),
+		gain: field('gain')
+	};
+	const count = Math.min(Math.max(bandCount, analysis.bands.min), analysis.bands.max);
+	return {
+		constraints: {
+			bandCount: count,
+			band,
+			preamp: analysis.preamp ? { mode: 'manual', gain: analysis.preamp } : { mode: 'unknown' }
+		},
+		source: { kind: 'handler-code', ref: handlerCodeUrl(protocol.handler, protocol.commit), date },
+		notes: `Started from what the ${protocol.handler} protocol can write: wire limits, not what the device accepts.${placeholders.length ? ` ${placeholders.join(', ')}: placeholders (the wire carries any value).` : ''}`
+	};
 }
 
 /**
@@ -93,6 +176,11 @@ export function profileForDevice(handoff: Handoff): AuthoringProfile {
 			: {};
 	if (!handoff.extends && handoff.readBack.filters.length > 0) {
 		data.bandCount = handoff.readBack.filters.length;
+	}
+	if (!handoff.extends && !handoff.probe && handoff.protocol) {
+		const draft = codecDraft(handoff.protocol, data.bandCount ?? 10, handoff.date);
+		Object.assign(data, draft.constraints);
+		data.meta = { ...data.meta!, sources: [draft.source], notes: draft.notes };
 	}
 	return citeEvidence(data, handoff);
 }

@@ -81,4 +81,52 @@ describe('profileForDevice', () => {
 		expect(data.band?.types).toBeDefined();
 		expect(citeEvidence(data, handoff()).meta.sources).toHaveLength(1);
 	});
+
+	it('starts from the protocol’s wire limits, cited as handler code', () => {
+		const data = profileForDevice(
+			handoff({ protocol: { handler: 'walkplay-hid', commit: 'abc1234' } })
+		);
+		expect(data.bandCount).toBe(3);
+		expect(data.band).toMatchObject({
+			types: ['PK', 'LSC', 'HSC', 'LPQ', 'HPQ'],
+			freq: { min: 1, max: 65534, step: 1 }
+		});
+		expect(data.meta.sources.map((s) => s.kind)).toEqual(['handler-code', 'community']);
+		expect(data.meta.sources[0]!.ref).toContain(
+			'/blob/abc1234/packages/device-bridge/src/handlers/walkplay-hid.ts'
+		);
+		expect(data.meta.notes).toMatch(/wire limits/);
+	});
+
+	it('takes a probe’s constraints and cites it as counting evidence', () => {
+		const probe = {
+			mode: 'full' as const,
+			constraints: {
+				bandCount: 8,
+				band: {
+					types: ['PK' as const],
+					freq: { min: 20, max: 20000, step: 1 },
+					q: { min: 0.25, max: 8, step: 0.00390625 },
+					gain: { min: -12, max: 12, step: 0.5 }
+				},
+				rules: [],
+				preamp: { mode: 'unknown' as const }
+			},
+			notes: ['Not probed: Q.']
+		};
+		const data = profileForDevice(
+			handoff({ probe, protocol: { handler: 'walkplay-hid', commit: 'c' } })
+		);
+		expect(data.bandCount).toBe(8);
+		expect(data.band?.gain).toEqual({ min: -12, max: 12, step: 0.5 });
+		expect(data.meta.sources.map((s) => s.kind)).toEqual(['probe']);
+		expect(data.meta.notes).toMatch(/\(full probe\)\. Not probed: Q\./);
+		// A fix keeps the file and its sources, and takes the probe's constraints over them.
+		const fixed = citeEvidence(
+			{ ...data, meta: { status: 'draft', sources: [] } },
+			handoff({ action: 'fix', probe })
+		);
+		expect(fixed.meta.sources[0]!.kind).toBe('probe');
+		expect(fixed).not.toHaveProperty('rules');
+	});
 });

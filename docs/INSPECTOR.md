@@ -55,6 +55,9 @@ Each tier works without the ones above it. Tiers T0–T2 and T4 **never write to
 Automated push → pull experiments that **derive** constraints from the device's own behaviour, and
 output a draft profile plus an evidence report. Details in §3.
 
+*2026-10-03:* built (DECISIONS D38): a probe section on `/connect`, offered after a read, with a
+quick and a full mode.
+
 ### T4: Author and submit
 
 - Schema-aware editor (form + JSON) with live semantic validation and a diff against the existing
@@ -71,6 +74,9 @@ output a draft profile plus an evidence report. Details in §3.
 - The submit screen states that data contributions are CC0-1.0 (DECISIONS D25).
 
 *2026-10-03:* built (DECISIONS D35) except "start from a probe result", which comes with T3.
+*2026-10-03, later:* a probe result starts a profile too (D38): its constraints go into the file
+and its evidence is cited as `probe`. A device the database lacks, taken to the editor from a
+read, starts from its protocol's wire limits, cited as `handler-code`.
 A device matched only by a group profile is offered "Add my device": a profile of its own that
 extends the group's base, prefilled from its identity and read-back. The
 editor works on authoring files, read from the repository (bases aren't published), and runs
@@ -124,6 +130,15 @@ stored value is on the `s` grid and every sent value projects to its stored valu
 from a list of known steps (1/4096 … 1) plus the GCD of stored differences. Anything not cleanly
 explained is reported as "no uniform grid" and the profile falls back to `values`.
 
+*2026-10-03:* built as DECISIONS D38 describes, which settles what this section leaves open: how a
+push tests every band at once and still tells a refused band from a whole refused write (a
+canary field per band), in which order steps and bounds are found and how the grid is checked
+afterwards, the search limits (±30 dB, Q 0.01–100, 1 Hz–40 kHz), the band-count codes, how the
+ordering rule is read from the windows, and that the backup is restored and verified on every
+path. Measured on virtual devices, a full probe takes about 50 writes on a device that clamps and
+90 on one that refuses, within §3.3's estimate; a device that refuses whole writes is probed band
+by band and takes up to a few hundred. Devices that disconnect on save aren't probed yet.
+
 ### 3.3 Write budget
 
 A full probe is about 15 binary-search rounds × (gain, Q, freq bounds) plus step, type and condition
@@ -156,7 +171,8 @@ starting, and the counter while it runs.
   parallel strategy degrades to per-slot searches (more writes). The probe engine detects this
   ("nothing changed") and switches strategy.
 - **Silent resets.** Some devices reset to defaults on invalid input. Detected by markers in other
-  slots changing unexpectedly. Reported, not interpreted.
+  slots changing unexpectedly. Reported, not interpreted. *2026-10-03:* reported, and the value
+  that caused it is counted as refused, found by re-testing that write's bands one by one (D38).
 
 ## 4. Device bridge requirements
 
@@ -242,6 +258,12 @@ A read (T2) is recorded as one experiment without pushes:
 A profile cites it as a `community` source: it shows values the device holds, not its limits
 (SPEC §10, DECISIONS D35). The file is named `<date>-<first 6 hex of its SHA-256>.json`.
 
+*2026-10-03:* a probe's file (D38) has the shape above, plus `probe` (`mode`, `writes`, and
+`aborted` when it stopped early), `backup`, `backupRestored`, the experiments' `pushes` and
+`conclusion`s, `derivedProfile` (constraints only) and `notes`. In pushes and the backup a filter
+is a `[type, freq, q, gain]` tuple, `null` when off, and each push's filters sit on one line, since
+a probe writes hundreds. A profile cites it as a `probe` source, which counts (SPEC §10).
+
 - **Never collected:** serial numbers, Bluetooth MAC addresses, IP addresses of network devices.
 - **Reviewed before export:** Bluetooth names, which are often personal ("Alex's EH13"). The export
   screen shows every string field and lets the user redact it.
@@ -264,3 +286,4 @@ Stored at `data/evidence/<profile-id>/<date>-<short hash>.json`, referenced from
 and T2 (no probing yet). `/edit` and `/docs` are next.
 *2026-10-03:* `/edit/<id?>` and `/docs` are built (D35); `/connect` exports evidence. Probing (T3)
 is Phase 5.
+*2026-10-03, later:* `/connect` probes (T3, D38).

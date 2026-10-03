@@ -18,6 +18,23 @@ export interface ReadExperiment {
 	findings: string[];
 }
 
+/**
+ * A probe experiment (T3): its pushes and what they showed. Filters are written compactly as
+ * `[type, freq, q, gain]`, null for a band that is off, since a probe makes hundreds of pushes.
+ */
+export interface ProbeExperiment {
+	id: string;
+	pushes: {
+		sent: { filters: FilterTuple[]; preamp?: number };
+		readBack?: { filters: (FilterTuple | null)[]; preamp?: number };
+		ms: number;
+		note?: string;
+	}[];
+	conclusion: Record<string, unknown>;
+}
+
+export type FilterTuple = [type: string, freq: number, q: number, gain: number];
+
 export interface EvidenceReport {
 	evidenceVersion: 1;
 	tool: { name: 'eqcaps inspector'; commit: string; userAgent?: string };
@@ -35,7 +52,16 @@ export interface EvidenceReport {
 	/** The profile the device was checked against. */
 	profile?: string;
 	date: string;
-	experiments: ReadExperiment[];
+	/** Probes only: `quick` or `full`, and how many writes the probe made. */
+	probe?: { mode: 'quick' | 'full'; writes: number; aborted?: string };
+	/** Probes only: the EQ read before the first write, and whether it was put back. */
+	backup?: { filters: (FilterTuple | null)[]; preamp?: number; slot?: number };
+	backupRestored?: boolean;
+	experiments: (ReadExperiment | ProbeExperiment)[];
+	/** Probes only: the constraints the experiments support (no `meta`: the profile cites this file). */
+	derivedProfile?: Record<string, unknown>;
+	/** Probes only: what the probe noticed and didn't interpret, and what it couldn't settle. */
+	notes?: string[];
 	caveats: string[];
 }
 
@@ -95,8 +121,15 @@ export interface StringField {
 /** Fields whose text comes from the device or the browser rather than from the app. */
 const PERSONAL = /^\/(device\/(productName|bluetoothName|firmware)|tool\/userAgent)$/;
 
+/**
+ * Parts of a probe's file the app wrote itself, from codes and numbers: pushes (each filter type
+ * is a string), the backup, the derived constraints. Their strings aren't listed for review.
+ */
+const GENERATED = /^\/(experiments\/\d+\/(pushes|conclusion)|backup|derivedProfile)(\/|$)/;
+
 /** Every string in `value`, so the export screen can show each one and let the user redact it. */
 export function stringFields(value: unknown, pointer = ''): StringField[] {
+	if (GENERATED.test(pointer)) return [];
 	if (typeof value === 'string') {
 		return [{ pointer, value, personal: PERSONAL.test(pointer) }];
 	}
@@ -138,9 +171,37 @@ export function applyEdits<T>(report: T, edits: ReadonlyMap<string, string>): T 
 	return walk(report, '') as T;
 }
 
-/** The file's text: pretty-printed with tabs, one trailing newline. */
+/**
+ * The file's text: pretty-printed with tabs, one trailing newline. Filter tuples and lists of
+ * numbers or tuples stay on one line, so a probe's pushes read one per line.
+ */
 export function evidenceText(report: EvidenceReport): string {
-	return `${JSON.stringify(report, null, '\t')}\n`;
+	return `${format(report, '')}\n`;
+}
+
+/** `["PK", 1000, 1, -2]` */
+const isTuple = (v: unknown) =>
+	Array.isArray(v) &&
+	v.length === 4 &&
+	typeof v[0] === 'string' &&
+	v.slice(1).every((x) => typeof x === 'number');
+
+function format(value: unknown, indent: string): string {
+	const inner = `${indent}\t`;
+	if (Array.isArray(value)) {
+		if (value.length === 0) return '[]';
+		const flat =
+			isTuple(value) || value.every((v) => v === null || typeof v === 'number' || isTuple(v));
+		if (flat) return JSON.stringify(value);
+		return `[\n${value.map((v) => inner + format(v, inner)).join(',\n')}\n${indent}]`;
+	}
+	if (value && typeof value === 'object') {
+		const entries = Object.entries(value).filter(([, v]) => v !== undefined);
+		if (entries.length === 0) return '{}';
+		const lines = entries.map(([k, v]) => `${inner}${JSON.stringify(k)}: ${format(v, inner)}`);
+		return `{\n${lines.join(',\n')}\n${indent}}`;
+	}
+	return JSON.stringify(value);
 }
 
 /** `evidence/<profile id>/<date>-<6 hex of the text's SHA-256>.json`, relative to data/. */

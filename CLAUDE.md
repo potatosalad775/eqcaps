@@ -9,7 +9,7 @@ who adopts the format.
 
 **Status: Phases 0–4 done; format v1 frozen 2026-10-03 (D36), published under `/v1/` beside
 `/next/`. `core` and `client` 0.1.0 on npm; the bridge and 0.2.0 are next (PLAN §7). Phase 5
-(probe mode) is the next phase.** Read `docs/PLAN.md` first.
+(probe mode, D38) is built and tested against virtual devices; its exit needs real-hardware runs.** Read `docs/PLAN.md` first.
 
 Commands: `npm run lint` · `npm run check` (codegen and vector drift + typecheck) · `npm test` ·
 `npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json` ·
@@ -82,7 +82,10 @@ for v2. Don't define format details anywhere except SPEC.md.
   (`packages/device-bridge/test/captures/`) and codec round trips, not devicePEQ's bytes.
 - Inspector (D34): SvelteKit SPA with adapter-static and Tailwind, never server-rendered. Logic
   that can be tested lives in plain `.ts` modules under `src/lib/` (tested by the root Vitest run);
-  routes and components stay thin. T0–T2 pages never call the bridge's `push` or `setEnabled`.
+  routes and components stay thin. Only the probe engine (`src/lib/probe/`, D38) calls the
+  bridge's `push`, behind the T3 gate in `ProbeWizard.svelte`; nothing calls `setEnabled`.
+  Probe changes are tested against `FakeDevice` (real codecs, simulated firmware), including the
+  random-firmware property (`EQCAPS_PROBE_RUNS` raises its run count).
   The editor (D35) edits authoring files, read from the repository (`/data/` in dev, GitHub
   `main` in production), and checks them with `packages/build`, as CI does.
 - Workspace packages import each other by package name. Node scripts that need sources run with

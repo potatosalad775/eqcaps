@@ -83,10 +83,10 @@
 <div class="space-y-3 rounded border border-zinc-200 p-3 dark:border-zinc-800">
 	<h3 class="font-medium">Evidence</h3>
 	<p class="text-xs text-zinc-500">
-		A file recording what was read, to submit with a profile change. Check every text in it first.
-		Names you gave the device and anything else personal should go: clear a field to remove it.
-		Serial numbers and Bluetooth addresses are never read. Nothing leaves this page until you submit
-		it on GitHub, and what you submit becomes public-domain data (CC0-1.0).
+		A file recording what was read or probed, to submit with a profile change. Check every text in
+		it first. Names you gave the device and anything else personal should go: clear a field to
+		remove it. Serial numbers and Bluetooth addresses are never read. Nothing leaves this page until
+		you submit it on GitHub, and what you submit becomes public-domain data (CC0-1.0).
 	</p>
 	<label class="flex items-center gap-2 text-sm">
 		Firmware version
