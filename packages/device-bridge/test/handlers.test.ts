@@ -201,6 +201,38 @@ describe('device session', () => {
 		expect(sent).toEqual([]);
 	});
 
+	test("EQ off selects the profile's bypass preset, which reads back as no slot", async () => {
+		const sent: number[][] = [];
+		const listeners = new Set<(id: number, d: Uint8Array) => void>();
+		let preset = 240;
+		const t: HidTransport = {
+			...silentHid(),
+			vendorId: 0x2972,
+			productName: 'FIIO BTR17',
+			sendReport: async (_id, d) => {
+				sent.push([...d]);
+				// A preset query is answered with the current preset.
+				const answer = [0xbb, 0x0b, 0, 0, 0x16, 1, preset, 0, 0xee];
+				if (d[0] === 0xbb && d[4] === 0x16)
+					for (const l of listeners) l(7, Uint8Array.from(answer));
+			},
+			onInputReport: (listener) => {
+				listeners.add(listener);
+				return () => listeners.delete(listener);
+			}
+		};
+		const device = open(t, 'fiio-btr17');
+		expect(device.capabilities.slots).toContainEqual({ id: 240, name: 'BYPASS', bypass: true });
+		await device.setEnabled(false);
+		expect(sent.at(-1)?.slice(4, 7)).toEqual([0x16, 1, 240]);
+		expect(await device.currentSlot()).toBeNull();
+		preset = 160;
+		expect(await device.currentSlot()).toBe(160);
+
+		const noBypass = openDevice(t, { handler: 'fiio-usb-hid' }, { sleep: noSleep });
+		await expect(noBypass.setEnabled(false)).rejects.toMatchObject({ code: 'invalid-request' });
+	});
+
 	test('operations run one at a time', async () => {
 		const log: string[] = [];
 		let release!: () => void;

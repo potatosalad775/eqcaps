@@ -71,7 +71,8 @@ describe('checkEdited', () => {
 		const text = read(KA17);
 		const chain = await loadChain(JSON.parse(text), entries, reader);
 		expect(chain.map((f) => f.path)).toEqual([
-			'data/bases/fiio-peq-10-band-12db-all-filters-7.json'
+			'data/bases/fiio-peq-10-band-12db-all-filters-7.json',
+			'data/bases/fiio-usb-hid.json'
 		]);
 		const result = checkEdited({
 			path: KA17,

@@ -1,0 +1,14 @@
+{
+	"description": "A match field may list several values; any one of them matches. Lists are non-empty and unique.",
+	"spec": "§3",
+	"profile": {
+		"match": {
+			"usb": [
+				{ "vendorId": ["0x0001", "0x0002"], "productId": ["0x0010", "0x0011"] },
+				{ "vendorId": "0x0003", "productName": ["Device", "DEVICE"] }
+			],
+			"bluetooth": [{ "namePrefix": ["Device", "DEVICE"] }, { "name": ["Device 1"] }]
+		}
+	},
+	"expect": []
+}

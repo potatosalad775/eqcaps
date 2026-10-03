@@ -2,8 +2,6 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "walkplay-peq-8-band-10db-ls-lowpass",
 	"id": "crinear-protocol-micro",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "CrinEar", "model": "Protocol Micro" },
 	"match": {
 		"usb": [{ "vendorId": "0x3302", "productId": "0xc20f", "productName": "Protocol Micro" }]

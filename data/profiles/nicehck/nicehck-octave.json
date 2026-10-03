@@ -2,31 +2,34 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "walkplay-peq-10-band-10db-full-shelves",
 	"id": "nicehck-octave",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "NiceHCK", "model": "Octave" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x3302", "productId": "0x39c3", "productName": "Octave" },
-			{ "vendorId": "0x0104", "productName": "Octave" },
-			{ "vendorId": "0x011b", "productName": "Octave" },
-			{ "vendorId": "0x011d", "productName": "Octave" },
-			{ "vendorId": "0x0661", "productName": "Octave" },
-			{ "vendorId": "0x0663", "productName": "Octave" },
-			{ "vendorId": "0x0666", "productName": "Octave" },
-			{ "vendorId": "0x0762", "productName": "Octave" },
-			{ "vendorId": "0x0909", "productName": "Octave" },
-			{ "vendorId": "0x0d8c", "productName": "Octave" },
-			{ "vendorId": "0x2fc6", "productName": "Octave" },
-			{ "vendorId": "0x3302", "productName": "Octave" },
-			{ "vendorId": "0x34be", "productName": "Octave" },
-			{ "vendorId": "0x35d8", "productName": "Octave" },
-			{ "vendorId": "0x36a7", "productName": "Octave" },
-			{ "vendorId": "0x373b", "productName": "Octave" },
-			{ "vendorId": "0x60c1", "productName": "Octave" },
-			{ "vendorId": "0x60e1", "productName": "Octave" },
-			{ "vendorId": "0xb445", "productName": "Octave" },
-			{ "vendorId": "0xb44d", "productName": "Octave" }
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "Octave"
+			}
 		]
 	},
 	"meta": {
@@ -43,6 +46,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Its recorded capture's product id is in devicePEQ's \"SchemeNo18\" group, whose settings apply under the device's own."
+		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo18\" group, whose settings apply under the device's own."
 	}
 }

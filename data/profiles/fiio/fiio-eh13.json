@@ -2,8 +2,6 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-spp-peq-10-band-20db-full-shelves",
 	"id": "fiio-eh13",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "EH13" },
 	"match": { "bluetooth": [{ "name": "FIIO EH13" }] },
 	"meta": {
@@ -20,6 +18,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ reaches this engine over Bluetooth SPP and BLE with slightly different limits; this profile keeps the values both accept."
+		"notes": "devicePEQ reaches this engine over Bluetooth SPP and BLE with slightly different limits; this profile keeps the values both accept."
 	}
 }

@@ -2,16 +2,8 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-5-band-12db-all-filters-7",
 	"id": "snowsky-tiny-a",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Snowsky", "model": "Tiny A" },
-	"match": {
-		"usb": [
-			{ "vendorId": "0x2972", "productName": "SNOWSKY TINY A" },
-			{ "vendorId": "0x0a12", "productName": "SNOWSKY TINY A" }
-		]
-	},
-	"protocol": { "options": { "disabledPresetId": 240 } },
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "SNOWSKY TINY A" }] },
 	"meta": {
 		"status": "draft",
 		"sources": [
@@ -20,7 +12,6 @@
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
 			}
-		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+		]
 	}
 }

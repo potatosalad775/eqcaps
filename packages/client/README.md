@@ -30,8 +30,10 @@ if (profile) {
   pluggable: `memoryStore()` (default), `webStorageStore(localStorage)`, or your own `CacheStore`.
 - **Offline.** Pass an embedded `bundle.json` as `snapshot`; it answers whenever neither the network
   nor the cache can.
-- **Matching** follows the format's specificity rules: `best` is set only for a unique top match.
-  On a tie (`ambiguous`), let the user choose. Deprecated profiles never match.
+- **Matching** follows the format's specificity rules: `best` is set only for a unique top match,
+  and at equal specificity a device profile beats a group profile. On a tie (`ambiguous`), let the
+  user choose. Deprecated profiles never match. Match fields may list several values; 0.1.x
+  predates that and reads the `/next/` channel, which writes them out one per entry.
 
 The default `baseUrl` is the format's channel `V1_URL`
 (`https://potatosalad775.github.io/eqcaps/v1/`). Versions before 0.2.0 defaulted to the pre-freeze

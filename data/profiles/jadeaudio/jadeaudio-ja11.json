@@ -2,23 +2,21 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-5-band-12db-full-shelves",
 	"id": "jadeaudio-ja11",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "JadeAudio", "model": "JA11" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x2972", "productId": "0x0102", "productName": "JadeAudio JA11" },
-			{ "vendorId": "0x2972", "productName": "JadeAudio JA11" },
-			{ "vendorId": "0x0a12", "productName": "JadeAudio JA11" }
+			{ "vendorId": ["0x0a12", "0x2972"], "productName": "JadeAudio JA11" }
 		]
 	},
 	"protocol": {
-		"options": { "reportId": 2, "disabledPresetId": 4 },
+		"options": { "reportId": 2 },
 		"presets": [
 			{ "id": 0, "name": "Vocal" },
 			{ "id": 1, "name": "Classic" },
 			{ "id": 2, "name": "Bass" },
-			{ "id": 3, "name": "USER1" }
+			{ "id": 3, "name": "USER1" },
+			{ "id": 4, "name": "Close EQ", "bypass": true }
 		],
 		"disconnectOnSave": true
 	},
@@ -36,6 +34,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+		"notes": "devicePEQ gives only the id of the preset that turns the EQ off; its name, \"Close EQ\", is assumed from other FiiO models."
 	}
 }

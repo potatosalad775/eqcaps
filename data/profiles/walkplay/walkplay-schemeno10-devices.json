@@ -2,51 +2,34 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "walkplay-peq-8-band-10db-pk-only",
 	"id": "walkplay-schemeno10-devices",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Walkplay", "model": "SchemeNo10 devices", "group": true },
 	"match": {
 		"usb": [
-			{ "vendorId": "0x2972", "productId": "0x0104" },
-			{ "vendorId": "0x0a12", "productId": "0x0104" },
-			{ "vendorId": "0x0104", "productId": "0x0881" },
-			{ "vendorId": "0x0104", "productId": "0x0888" },
-			{ "vendorId": "0x011b", "productId": "0x0881" },
-			{ "vendorId": "0x011b", "productId": "0x0888" },
-			{ "vendorId": "0x011d", "productId": "0x0881" },
-			{ "vendorId": "0x011d", "productId": "0x0888" },
-			{ "vendorId": "0x0661", "productId": "0x0881" },
-			{ "vendorId": "0x0661", "productId": "0x0888" },
-			{ "vendorId": "0x0663", "productId": "0x0881" },
-			{ "vendorId": "0x0663", "productId": "0x0888" },
-			{ "vendorId": "0x0666", "productId": "0x0881" },
-			{ "vendorId": "0x0666", "productId": "0x0888" },
-			{ "vendorId": "0x0762", "productId": "0x0881" },
-			{ "vendorId": "0x0762", "productId": "0x0888" },
-			{ "vendorId": "0x0909", "productId": "0x0881" },
-			{ "vendorId": "0x0909", "productId": "0x0888" },
-			{ "vendorId": "0x0d8c", "productId": "0x0881" },
-			{ "vendorId": "0x0d8c", "productId": "0x0888" },
-			{ "vendorId": "0x2fc6", "productId": "0x0881" },
-			{ "vendorId": "0x2fc6", "productId": "0x0888" },
-			{ "vendorId": "0x3302", "productId": "0x0881" },
-			{ "vendorId": "0x3302", "productId": "0x0888" },
-			{ "vendorId": "0x34be", "productId": "0x0881" },
-			{ "vendorId": "0x34be", "productId": "0x0888" },
-			{ "vendorId": "0x35d8", "productId": "0x0881" },
-			{ "vendorId": "0x35d8", "productId": "0x0888" },
-			{ "vendorId": "0x36a7", "productId": "0x0881" },
-			{ "vendorId": "0x36a7", "productId": "0x0888" },
-			{ "vendorId": "0x373b", "productId": "0x0881" },
-			{ "vendorId": "0x373b", "productId": "0x0888" },
-			{ "vendorId": "0x60c1", "productId": "0x0881" },
-			{ "vendorId": "0x60c1", "productId": "0x0888" },
-			{ "vendorId": "0x60e1", "productId": "0x0881" },
-			{ "vendorId": "0x60e1", "productId": "0x0888" },
-			{ "vendorId": "0xb445", "productId": "0x0881" },
-			{ "vendorId": "0xb445", "productId": "0x0888" },
-			{ "vendorId": "0xb44d", "productId": "0x0881" },
-			{ "vendorId": "0xb44d", "productId": "0x0888" }
+			{ "vendorId": ["0x0a12", "0x2972"], "productId": "0x0104" },
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productId": ["0x0881", "0x0888"]
+			}
 		]
 	},
 	"meta": {
@@ -58,6 +41,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Every product id devicePEQ assigns to its \"WalkPlay-SchemeNo10\" group, under each vendor id of the vendor block (0x2972, 0x0a12). devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified."
+		"notes": "Every product id devicePEQ assigns to its \"WalkPlay-SchemeNo10\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified."
 	}
 }

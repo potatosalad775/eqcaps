@@ -6,25 +6,30 @@
 	"device": { "brand": "Moondrop", "model": "Old Fashioned" },
 	"match": {
 		"usb": [
-			{ "vendorId": "0x0104", "productName": "Old Fashioned" },
-			{ "vendorId": "0x011b", "productName": "Old Fashioned" },
-			{ "vendorId": "0x011d", "productName": "Old Fashioned" },
-			{ "vendorId": "0x0661", "productName": "Old Fashioned" },
-			{ "vendorId": "0x0663", "productName": "Old Fashioned" },
-			{ "vendorId": "0x0666", "productName": "Old Fashioned" },
-			{ "vendorId": "0x0762", "productName": "Old Fashioned" },
-			{ "vendorId": "0x0909", "productName": "Old Fashioned" },
-			{ "vendorId": "0x0d8c", "productName": "Old Fashioned" },
-			{ "vendorId": "0x2fc6", "productName": "Old Fashioned" },
-			{ "vendorId": "0x3302", "productName": "Old Fashioned" },
-			{ "vendorId": "0x34be", "productName": "Old Fashioned" },
-			{ "vendorId": "0x35d8", "productName": "Old Fashioned" },
-			{ "vendorId": "0x36a7", "productName": "Old Fashioned" },
-			{ "vendorId": "0x373b", "productName": "Old Fashioned" },
-			{ "vendorId": "0x60c1", "productName": "Old Fashioned" },
-			{ "vendorId": "0x60e1", "productName": "Old Fashioned" },
-			{ "vendorId": "0xb445", "productName": "Old Fashioned" },
-			{ "vendorId": "0xb44d", "productName": "Old Fashioned" }
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "Old Fashioned"
+			}
 		]
 	},
 	"bandCount": 5,

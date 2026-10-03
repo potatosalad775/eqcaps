@@ -30,6 +30,17 @@ const ENTRIES = [
 	}),
 	entry({ id: 'poweramp', brand: 'Poweramp', model: 'Equalizer', kind: 'software' }),
 	entry({
+		id: 'walkplay-family',
+		brand: 'Walkplay',
+		model: 'Family',
+		match: {
+			usb: [
+				{ vendorId: ['0x0104', '0x3302'], productId: ['0x43cc', '0x4322'] },
+				{ vendorId: '0x3302', productName: ['KEYX', 'Truthear KEYX'] }
+			]
+		}
+	}),
+	entry({
 		id: 'old-fiio',
 		brand: 'FiiO',
 		model: 'Old',
@@ -61,6 +72,12 @@ describe('searchEntries', () => {
 		expect(ids({ query: '0x2972' })).toEqual(['fiio-k13-r2r']);
 		expect(ids({ query: '2972:0047' })).toEqual(['fiio-k13-r2r']);
 		expect(ids({ query: '2972:0048' })).toEqual([]);
+	});
+
+	it('finds every value a match field lists', () => {
+		expect(ids({ query: '0104:4322' })).toEqual(['walkplay-family']);
+		expect(ids({ query: '0x3302' })).toEqual(['walkplay-family']);
+		expect(ids({ query: 'truthear keyx' })).toEqual(['walkplay-family']);
 	});
 
 	it('filters by status, kind and features; hides deprecated unless asked or named', () => {

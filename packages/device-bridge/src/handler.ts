@@ -5,6 +5,8 @@ import type { HidTransport, StreamTransport, Transport } from './transport.ts';
 export interface Slot {
 	id: number;
 	name: string;
+	/** Selecting this slot turns the EQ off (`setEnabled(false)` selects it). */
+	bypass?: boolean;
 }
 
 export interface PullRequest {
@@ -127,6 +129,8 @@ export interface HandlerCapabilities {
 export interface HandlerContext<T extends Transport, O> {
 	transport: T;
 	options: O;
+	/** The preset the profile marks `bypass`: selecting it turns the EQ off (SPEC §9). */
+	bypass?: number;
 	/** Waits between writes. Tests replace it to run without real delays. */
 	sleep(ms: number): Promise<void>;
 	/** Diagnostic messages; silent unless the caller passes a logger. */
@@ -143,6 +147,8 @@ export interface Handler<T extends Transport, O, F> {
 	readonly gatt?: { service: string; tx: string; rx: string };
 	/** Handlers that run over Bluetooth SPP: the RFCOMM service class (Web Serial needs it). */
 	readonly sppServiceClass?: string;
+	/** The protocol turns the EQ off by selecting a preset, which the profile marks `bypass`. */
+	readonly bypassPreset?: boolean;
 	capabilities(transport: T, options: O): HandlerCapabilities;
 	/** `bands` is always set when `needsBandCount` is. */
 	pull(ctx: HandlerContext<T, O>, request: { slot?: number; bands?: number }): Promise<PullResult>;

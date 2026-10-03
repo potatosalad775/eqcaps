@@ -2,16 +2,11 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-wide-shelves",
 	"id": "fiio-oak-nano",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "Oak Nano" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x2972", "productId": "0x4016", "productName": "FIIO OAK NANO" },
-			{ "vendorId": "0x2972", "productName": "FIIO OAK NANO" },
-			{ "vendorId": "0x2972", "productName": "Oak Nano" },
-			{ "vendorId": "0x0a12", "productName": "FIIO OAK NANO" },
-			{ "vendorId": "0x0a12", "productName": "Oak Nano" }
+			{ "vendorId": ["0x0a12", "0x2972"], "productName": ["FIIO OAK NANO", "Oak Nano"] }
 		]
 	},
 	"protocol": {
@@ -39,7 +34,6 @@
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/fiio_fiio_oak_nano.json",
 				"date": "2026-10-02"
 			}
-		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+		]
 	}
 }

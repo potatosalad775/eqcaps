@@ -20,8 +20,6 @@ export interface KtmicroHidOptions {
 	baseRegister?: number;
 	/** Explicit (gain/freq, q/type) registers per band, for models that skip or reorder them. */
 	bandRegisters?: readonly { freq: number; q: number }[];
-	/** Slot that switches EQ off. Default 2. */
-	disabledSlot?: number;
 	/** Slot of the custom EQ. Default 3. */
 	customSlot?: number;
 }
@@ -129,6 +127,7 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 	id: 'ktmicro-usb-hid',
 	transport: 'hid',
 	codec: ktmicroCodec,
+	bypassPreset: true,
 
 	capabilities: (_transport, o) => ({
 		canRead: true,
@@ -164,7 +163,7 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 	async push(ctx, request) {
 		const frames = ktmicroCodec.encode(request, ctx.options);
 		// Writes don't take while EQ is off: switch the custom slot on first.
-		if ((await readSlot(ctx)) === (ctx.options.disabledSlot ?? 2)) {
+		if ((await readSlot(ctx)) === (ctx.bypass ?? 2)) {
 			await selectSlot(ctx, ctx.options.customSlot ?? 3);
 		}
 		for (const frame of frames) await sendFrame(ctx.transport, frame);
@@ -174,13 +173,10 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 
 	async currentSlot(ctx) {
 		const slot = await readSlot(ctx);
-		return slot === (ctx.options.disabledSlot ?? 2) ? null : slot;
+		return slot === (ctx.bypass ?? 2) ? null : slot;
 	},
 
 	async setEnabled(ctx, enabled, slot) {
-		await selectSlot(
-			ctx,
-			enabled ? (slot ?? ctx.options.customSlot ?? 3) : (ctx.options.disabledSlot ?? 2)
-		);
+		await selectSlot(ctx, enabled ? (slot ?? ctx.options.customSlot ?? 3) : (ctx.bypass ?? 2));
 	}
 };

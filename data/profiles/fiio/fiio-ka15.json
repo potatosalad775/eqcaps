@@ -2,18 +2,14 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-all-filters-7",
 	"id": "fiio-ka15",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "KA15" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x2972", "productId": "0x0104", "productName": "FIIO KA15" },
-			{ "vendorId": "0x2972", "productName": "FIIO KA15" },
-			{ "vendorId": "0x0a12", "productName": "FIIO KA15" }
+			{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO KA15" }
 		]
 	},
 	"protocol": {
-		"options": { "disabledPresetId": 10 },
 		"presets": [
 			{ "id": 0, "name": "Jazz" },
 			{ "id": 1, "name": "Pop" },
@@ -25,7 +21,7 @@
 			{ "id": 7, "name": "USER1" },
 			{ "id": 8, "name": "USER2" },
 			{ "id": 9, "name": "USER3" },
-			{ "id": 10, "name": "Close EQ" }
+			{ "id": 10, "name": "Close EQ", "bypass": true }
 		]
 	},
 	"meta": {
@@ -42,6 +38,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. The seed gave this device the Walkplay handler's wire grids, because devicePEQ lets the \"WalkPlay-SchemeNo10\" group that its product id falls in pick the handler; its recorded capture is FiiO's protocol, so it has FiiO's grids (corrected 2026-10-02)."
+		"notes": "The seed gave this device the Walkplay handler's wire grids, because devicePEQ lets the \"WalkPlay-SchemeNo10\" group that its product id falls in pick the handler; its recorded capture is FiiO's protocol, so it has FiiO's grids (corrected 2026-10-02)."
 	}
 }

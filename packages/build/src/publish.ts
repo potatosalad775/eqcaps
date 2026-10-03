@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import {
+	expandMatch,
 	indexFields,
 	SCHEMA_VERSION,
 	type DataBundle,
@@ -24,6 +25,11 @@ export interface PublishInput {
 	 * channel points at its own copy, since `/v1/` exists only from the format freeze on.
 	 */
 	schemaUrl?: string;
+	/**
+	 * Write every match entry single-valued (`expandMatch`). For the `/next/` channel: client 0.1.x
+	 * reads it and predates list-valued match fields (DECISIONS D43).
+	 */
+	singleValuedMatch?: boolean;
 }
 
 export interface Artifact {
@@ -49,8 +55,14 @@ export function publish(input: PublishInput): Artifact[] {
 	const artifacts: Artifact[] = [];
 	const entries: IndexEntry[] = [];
 
+	const channel = (p: Profile): Profile => ({
+		...p,
+		...(input.schemaUrl ? { $schema: input.schemaUrl } : {}),
+		...(input.singleValuedMatch && p.match ? { match: expandMatch(p.match) } : {})
+	});
+
 	for (const flat of profiles) {
-		const profile = input.schemaUrl ? { ...flat, $schema: input.schemaUrl } : flat;
+		const profile = channel(flat);
 		const path = `profiles/${profile.id}.json`;
 		const content = `${JSON.stringify(profile, null, '\t')}\n`;
 		artifacts.push({ path, content });
@@ -65,9 +77,7 @@ export function publish(input: PublishInput): Artifact[] {
 	const index: DataIndex = { ...head, profiles: entries };
 	const bundle: DataBundle = {
 		...head,
-		profiles: profiles
-			.filter((p) => p.meta.status !== 'deprecated')
-			.map((p) => (input.schemaUrl ? { ...p, $schema: input.schemaUrl } : p))
+		profiles: profiles.filter((p) => p.meta.status !== 'deprecated').map(channel)
 	};
 	artifacts.push(
 		{ path: 'index.json', content: `${JSON.stringify(index)}\n` },

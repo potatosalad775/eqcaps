@@ -1,0 +1,14 @@
+{
+	"description": "An entry that lists values claims every combination of them, so it collides with any entry claiming one of those combinations.",
+	"spec": "§3",
+	"profiles": [
+		{ "id": "device-a", "match": { "usb": [{ "vendorId": "0x0002", "productId": "0x0011" }] } },
+		{
+			"id": "device-b",
+			"match": {
+				"usb": [{ "vendorId": ["0x0001", "0x0002"], "productId": ["0x0010", "0x0011"] }]
+			}
+		}
+	],
+	"expect": [{ "code": "match-collision", "path": "/match/usb/0", "profileId": "device-b" }]
+}

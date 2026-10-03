@@ -77,18 +77,23 @@ export interface Match {
 /** Lowercase 4-digit hex string. */
 export type UsbId = string;
 
-/** vendorId plus productId and/or productName. Vendor-only matching is too broad (SPEC §3). */
+/** One USB id, or a list of them: any one of them matches (SPEC §3). */
+export type UsbIds = UsbId | UsbId[];
+
+/** One name, or a list of them: any one of them matches (SPEC §3). Compared exactly, case and whitespace included. */
+export type Names = string | string[];
+
+/** vendorId plus productId and/or productName. Vendor-only matching is too broad. A field that lists several values matches any of them (SPEC §3). */
 export interface UsbMatch {
-	vendorId: UsbId;
-	productId?: UsbId;
-	/** Compared exactly, case and whitespace included. */
-	productName?: string;
+	vendorId: UsbIds;
+	productId?: UsbIds;
+	productName?: Names;
 }
 
-/** name or namePrefix is required; serviceUuid alone is never sufficient (SPEC §3). */
+/** name or namePrefix is required; serviceUuid alone is never sufficient. A field that lists several values matches any of them (SPEC §3). */
 export interface BluetoothMatch {
-	name?: string;
-	namePrefix?: string;
+	name?: Names;
+	namePrefix?: Names;
 	serviceUuid?: string;
 }
 
@@ -210,7 +215,7 @@ export interface Protocol {
 	handler: string;
 	/** The handler's settings for this device, as the device bridge defines them. */
 	options?: { [key: string]: unknown };
-	/** The EQ presets (memories) the device offers, by their ids on the device. */
+	/** The EQ presets (memories) the device offers, by their ids on the device. At most one is the bypass preset. */
 	presets?: Preset[];
 	/** The device drops the connection after a write that saves. */
 	disconnectOnSave?: boolean;
@@ -223,6 +228,8 @@ export interface Protocol {
 export interface Preset {
 	id: number;
 	name: string;
+	/** Selecting this preset turns the EQ off: it holds no filters of its own (SPEC §9). */
+	bypass?: boolean;
 }
 
 export type GithubHandle = string;
@@ -268,7 +275,7 @@ export interface AuthoringProtocol {
 	handler?: string;
 	/** The handler's settings for this device, as the device bridge defines them. */
 	options?: { [key: string]: unknown };
-	/** The EQ presets (memories) the device offers, by their ids on the device. */
+	/** The EQ presets (memories) the device offers, by their ids on the device. At most one is the bypass preset. */
 	presets?: Preset[];
 	/** The device drops the connection after a write that saves. */
 	disconnectOnSave?: boolean;

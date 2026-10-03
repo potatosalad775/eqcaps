@@ -2,18 +2,14 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-wide-all-filters",
 	"id": "fiio-qx13",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "QX13" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x2972", "productId": "0x0128", "productName": "FIIO QX13" },
-			{ "vendorId": "0x2972", "productName": "FIIO QX13" },
-			{ "vendorId": "0x0a12", "productName": "FIIO QX13" }
+			{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO QX13" }
 		]
 	},
 	"protocol": {
-		"options": { "disabledPresetId": 240 },
 		"presets": [
 			{ "id": 0, "name": "Jazz" },
 			{ "id": 1, "name": "Pop" },
@@ -33,7 +29,7 @@
 			{ "id": 167, "name": "USER8" },
 			{ "id": 168, "name": "USER9" },
 			{ "id": 169, "name": "USER10" },
-			{ "id": 240, "name": "BYPASS" }
+			{ "id": 240, "name": "BYPASS", "bypass": true }
 		]
 	},
 	"meta": {
@@ -50,6 +46,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ's peakingAlpha shelf setting is not a law here: it converts its own slope convention to the Q this engine takes, which is exact RBJ Q (prior-art §2.1). Reported quirk, not corrected (D39): devicePEQ reports that peaking filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40))."
+		"notes": "devicePEQ's peakingAlpha shelf setting is not a law here: it converts its own slope convention to the Q this engine takes, which is exact RBJ Q (prior-art §2.1). Reported quirk, not corrected (D39): devicePEQ reports that peaking filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40))."
 	}
 }

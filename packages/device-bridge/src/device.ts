@@ -79,9 +79,11 @@ export function openDevice(
 		);
 	}
 	const handlerOptions = protocol.options ?? {};
+	const bypass = protocol.presets?.find((p) => p.bypass)?.id;
 	const ctx: HandlerContext<Transport, object> = {
 		transport,
 		options: handlerOptions,
+		...(bypass !== undefined ? { bypass } : {}),
 		sleep: options.sleep ?? realSleep,
 		log: options.log ?? (() => {})
 	};

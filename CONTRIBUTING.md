@@ -37,7 +37,11 @@ The format is defined in [docs/SPEC.md](docs/SPEC.md). In short:
 5. Put evidence files (measurements, read-backs) in `data/evidence/<id>/`. Remove anything personal first:
    Bluetooth names people gave their devices, serial numbers, MAC addresses.
 
-Devices that share a chip can share a base in `data/bases/` through `extends` (SPEC §11).
+Devices that share a chip can share a base in `data/bases/` through `extends` (SPEC §11). A
+protocol family's base (`walkplay-hid`, `fiio-usb-hid`) holds what every device on that protocol
+shares, and the shape bases extend it. A device file that extends a base inherits `kind` and
+`schemaVersion` too. In `match`, list several vendor ids, product ids or names in one entry rather
+than writing an entry per combination (SPEC §3).
 
 No git needed: the [inspector](https://potatosalad775.github.io/eqcaps/) edits a profile as a form
 or as JSON, checks it as CI will, and opens the pull request on GitHub for you ("Edit this
@@ -56,7 +60,8 @@ to be uncertain. Checking one against your device is one of the most useful thin
 If an existing protocol already drives your device, a profile is all it needs: its `match` is how
 apps recognize it, and its `protocol` how the bridge drives it ([SPEC §9](docs/SPEC.md)). A
 profile that extends a base inherits the base's `protocol`, so most devices only add what differs,
-such as FiiO's preset slots; the handlers' options are listed in the
+such as FiiO's preset slots (the one that turns the EQ off is marked `"bypass": true`); the
+handlers' options are listed in the
 [bridge's README](packages/device-bridge/README.md). No bridge release is needed: apps pick the
 device up with the data. The tests check that the protocol is one the bridge can drive and that
 the profile only allows what it can write. A recorded exchange with the device in

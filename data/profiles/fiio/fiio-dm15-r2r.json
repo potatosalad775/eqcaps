@@ -2,19 +2,11 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-wide-all-filters",
 	"id": "fiio-dm15-r2r",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "DM15 R2R" },
-	"match": {
-		"usb": [
-			{ "vendorId": "0x2972", "productName": "FIIO DM15 R2R" },
-			{ "vendorId": "0x0a12", "productName": "FIIO DM15 R2R" }
-		]
-	},
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO DM15 R2R" }] },
 	"protocol": {
-		"options": { "disabledPresetId": 240 },
 		"presets": [
-			{ "id": 240, "name": "BYPASS" },
+			{ "id": 240, "name": "BYPASS", "bypass": true },
 			{ "id": 0, "name": "Jazz" },
 			{ "id": 1, "name": "Pop" },
 			{ "id": 2, "name": "Rock" },
@@ -44,6 +36,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ marks this device experimental."
+		"notes": "devicePEQ marks this device experimental."
 	}
 }

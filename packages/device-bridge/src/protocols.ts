@@ -8,7 +8,7 @@ import type { Slot } from './handler.ts';
 import { HANDLERS, type HandlerId, type HandlerOptions } from './handlers/index.ts';
 
 interface ProtocolBase {
-	/** EQ preset slots the device offers. */
+	/** EQ preset slots the device offers; the one marked `bypass` turns the EQ off. */
 	presets?: readonly Slot[];
 	/** The device drops the connection after a push that saves. */
 	disconnectOnSave?: boolean;
@@ -64,7 +64,7 @@ const registers: Read = (v) =>
  * from the descriptor, Airoha's layout from the transport) aren't data and are left out.
  */
 const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOptions<K>]?: Read } } = {
-	'fiio-usb-hid': { reportId: byte, saveCommand: byte, disabledPresetId: byte },
+	'fiio-usb-hid': { reportId: byte, saveCommand: byte },
 	'walkplay-hid': { defaultSlot: byte },
 	'moondrop-usb-hid': {},
 	'moondrop-old-fashioned-hid': {},
@@ -72,7 +72,6 @@ const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOption
 	'ktmicro-usb-hid': {
 		baseRegister: byte,
 		bandRegisters: registers,
-		disabledSlot: byte,
 		customSlot: byte
 	},
 	'fosi-audio-usb-hid': { reportId: byte, bandwidth: number, defaultSlot: byte },
@@ -116,15 +115,21 @@ function read(raw: unknown): Protocol {
 	}
 	if (presets !== undefined) {
 		const ids = new Set<number>();
+		let bypassed = false;
 		out.presets = (Array.isArray(presets) ? presets : fail('presets: not a list')).map((p) => {
-			const { id: slot, name } = isObject(p) ? p : fail('presets: not an object');
+			const { id: slot, name, bypass } = isObject(p) ? p : fail('presets: not an object');
 			if (typeof slot !== 'number' || !Number.isInteger(slot) || slot < 0) {
 				fail(`presets: id ${JSON.stringify(slot)}`);
 			}
 			if (typeof name !== 'string' || !name) fail(`presets: name of ${String(slot)}`);
 			if (ids.has(slot as number)) fail(`presets: id ${String(slot)} twice`);
 			ids.add(slot as number);
-			return { id: slot, name };
+			if (bypass === undefined || bypass === false) return { id: slot, name };
+			if (bypass !== true) fail(`presets: bypass of ${String(slot)} is not a boolean`);
+			if (bypassed) fail('presets: more than one bypass preset');
+			if (!HANDLERS[id].bypassPreset) fail(`presets: ${id} turns the EQ off without a preset`);
+			bypassed = true;
+			return { id: slot, name, bypass: true };
 		});
 	}
 	for (const [k, v] of [

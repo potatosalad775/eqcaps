@@ -2,30 +2,33 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "walkplay-peq-8-band-10db-full-shelves",
 	"id": "letshuoer-dt04",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Letshuoer", "model": "DT04" },
 	"match": {
 		"usb": [
-			{ "vendorId": "0x0104", "productName": "DT04" },
-			{ "vendorId": "0x011b", "productName": "DT04" },
-			{ "vendorId": "0x011d", "productName": "DT04" },
-			{ "vendorId": "0x0661", "productName": "DT04" },
-			{ "vendorId": "0x0663", "productName": "DT04" },
-			{ "vendorId": "0x0666", "productName": "DT04" },
-			{ "vendorId": "0x0762", "productName": "DT04" },
-			{ "vendorId": "0x0909", "productName": "DT04" },
-			{ "vendorId": "0x0d8c", "productName": "DT04" },
-			{ "vendorId": "0x2fc6", "productName": "DT04" },
-			{ "vendorId": "0x3302", "productName": "DT04" },
-			{ "vendorId": "0x34be", "productName": "DT04" },
-			{ "vendorId": "0x35d8", "productName": "DT04" },
-			{ "vendorId": "0x36a7", "productName": "DT04" },
-			{ "vendorId": "0x373b", "productName": "DT04" },
-			{ "vendorId": "0x60c1", "productName": "DT04" },
-			{ "vendorId": "0x60e1", "productName": "DT04" },
-			{ "vendorId": "0xb445", "productName": "DT04" },
-			{ "vendorId": "0xb44d", "productName": "DT04" }
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "DT04"
+			}
 		]
 	},
 	"protocol": { "experimental": true },
@@ -38,6 +41,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ marks this device experimental."
+		"notes": "devicePEQ marks this device experimental."
 	}
 }

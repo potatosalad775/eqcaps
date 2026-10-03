@@ -94,7 +94,8 @@ for v2. Don't define format details anywhere except SPEC.md.
 - Workspace packages import each other by package name. Node scripts that need sources run with
   `--conditions=eqcaps:source`; `scripts/*.ts` import sources by relative path.
 - USB ids are lowercase 4-digit hex strings (`"0x2972"`). HID `productName` matches exactly,
-  trailing spaces included.
+  trailing spaces included. A match field takes a list rather than one entry per combination
+  (D43).
 - Name is **eqcaps** (D24): repo `potatosalad775/eqcaps`, Pages `potatosalad775.github.io/eqcaps`,
   npm `@potatosalad775/eqcaps` (data) and `@potatosalad775/eqcaps-{core,client,device-bridge}`.
   The local folder is still named `eqDeviceInfo`.

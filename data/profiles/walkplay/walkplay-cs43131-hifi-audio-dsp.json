@@ -2,31 +2,34 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "walkplay-peq-8-band-10db-ls-lowpass",
 	"id": "walkplay-cs43131-hifi-audio-dsp",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Walkplay", "model": "CS43131 HiFi Audio DSP", "group": true },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x3302", "productId": "0x51c0", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x0104", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x011b", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x011d", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x0661", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x0663", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x0666", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x0762", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x0909", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x0d8c", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x2fc6", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x3302", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x34be", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x35d8", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x36a7", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x373b", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x60c1", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0x60e1", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0xb445", "productName": "CS43131 HiFi Audio DSP" },
-			{ "vendorId": "0xb44d", "productName": "CS43131 HiFi Audio DSP" }
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "CS43131 HiFi Audio DSP"
+			}
 		]
 	},
 	"meta": {
@@ -43,6 +46,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Its recorded capture's product id is in devicePEQ's \"SchemeNo11\" group, whose settings apply under the device's own. Reported quirk, not corrected (D39): devicePEQ measured an EPZ TP13 placing bands about 2.25% below the frequency sent, with Q coming out lower toward high frequencies, and applies both to every SchemeNo11 device. Vendor apps send and show frequencies as they are, and so does this profile."
+		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo11\" group, whose settings apply under the device's own. Reported quirk, not corrected (D39): devicePEQ measured an EPZ TP13 placing bands about 2.25% below the frequency sent, with Q coming out lower toward high frequencies, and applies both to every SchemeNo11 device. Vendor apps send and show frequencies as they are, and so does this profile."
 	}
 }

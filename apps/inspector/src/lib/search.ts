@@ -2,6 +2,7 @@
 
 import {
 	isGraphic,
+	matchValues,
 	type Domain,
 	type IndexEntry,
 	type Meta,
@@ -70,8 +71,10 @@ function usbQuery(q: string): { vendorId: string; productId?: string } | null {
 
 function haystack(e: IndexEntry): string {
 	const parts = [e.id, e.brand, e.model, e.engine ?? '', ...(e.aliases ?? [])];
-	for (const u of e.match?.usb ?? []) parts.push(u.productName ?? '');
-	for (const b of e.match?.bluetooth ?? []) parts.push(b.name ?? '', b.namePrefix ?? '');
+	for (const u of e.match?.usb ?? []) parts.push(...matchValues(u.productName));
+	for (const b of e.match?.bluetooth ?? []) {
+		parts.push(...matchValues(b.name), ...matchValues(b.namePrefix));
+	}
 	return norm(parts.join(' \u0000 '));
 }
 
@@ -107,8 +110,8 @@ export function searchEntries(
 		if (usb) {
 			const hit = (e.match?.usb ?? []).some(
 				(u) =>
-					u.vendorId === usb.vendorId &&
-					(usb.productId === undefined || u.productId === usb.productId)
+					matchValues(u.vendorId).includes(usb.vendorId) &&
+					(usb.productId === undefined || matchValues(u.productId).includes(usb.productId))
 			);
 			if (hit) s = Math.max(s, usb.productId ? 95 : 40);
 		}

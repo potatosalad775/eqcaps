@@ -2,8 +2,6 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
 	"id": "moondrop-chu-2-dsp",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Moondrop", "model": "Chu 2 DSP" },
 	"match": {
 		"usb": [
@@ -26,6 +24,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Its recorded capture's product id is in devicePEQ's \"Kiwi Ears KT_0211L\" group, whose settings apply under the device's own."
+		"notes": "Its recorded capture's product id is in devicePEQ's \"Kiwi Ears KT_0211L\" group, whose settings apply under the device's own."
 	}
 }

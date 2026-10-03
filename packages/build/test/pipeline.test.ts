@@ -214,4 +214,30 @@ describe('publish', () => {
 		expect(entry).toMatchObject({ id: 'g', group: true });
 		expect(JSON.parse(byPath.get('index.json')!).profiles[0]).not.toHaveProperty('group');
 	});
+
+	it('writes single-valued match entries for clients that predate lists', () => {
+		const f = flat('f');
+		const listed = {
+			...f,
+			match: { usb: [{ vendorId: ['0x0001', '0x0002'], productName: ['A', 'B'] }] }
+		} as Profile;
+		const out = publish({
+			profiles: [listed],
+			schema: {},
+			conformance: [],
+			dataVersion: 'v',
+			generatedAt: 't',
+			singleValuedMatch: true
+		});
+		const usb = [
+			{ vendorId: '0x0001', productName: 'A' },
+			{ vendorId: '0x0001', productName: 'B' },
+			{ vendorId: '0x0002', productName: 'A' },
+			{ vendorId: '0x0002', productName: 'B' }
+		];
+		const file = (path: string) => JSON.parse(out.find((x) => x.path === path)!.content);
+		expect(file('profiles/f.json').match.usb).toEqual(usb);
+		expect(file('index.json').profiles[0].match.usb).toEqual(usb);
+		expect(file('bundle.json').profiles[0].match.usb).toEqual(usb);
+	});
 });

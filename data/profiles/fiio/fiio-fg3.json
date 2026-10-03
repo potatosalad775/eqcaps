@@ -4,12 +4,7 @@
 	"schemaVersion": "1.0",
 	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "FG3" },
-	"match": {
-		"usb": [
-			{ "vendorId": "0x2972", "productName": "FIIO FG3" },
-			{ "vendorId": "0x0a12", "productName": "FIIO FG3" }
-		]
-	},
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO FG3" }] },
 	"bandCount": 10,
 	"band": {
 		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP"],

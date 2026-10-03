@@ -1,0 +1,14 @@
+{
+	"description": "A protocol may mark one preset as the bypass preset, which turns the EQ off.",
+	"spec": "§9",
+	"profile": {
+		"protocol": {
+			"handler": "chip-hid",
+			"presets": [
+				{ "id": 0, "name": "Custom" },
+				{ "id": 240, "name": "Off", "bypass": true }
+			]
+		}
+	},
+	"expect": []
+}

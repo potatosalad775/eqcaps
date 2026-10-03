@@ -298,5 +298,6 @@ is sent, so probes there couldn't learn ranges anyway.
 6. Qudelix 5K: the USB handler can't read (D33), and devicePEQ's writes are reported unstable.
    A capture of the vendor app's USB traffic, made by the owner, would show whether the device
    answers reads and what a reliable write looks like. Until then it can't be read.
-7. Answer Q11 (compact USB match entries), or leave it until the index grows. It is additive, so it
-   fits a v1 minor.
+7. Shrink the group profiles: as devices are identified, give them device profiles with their
+   real (vendor id, product id) and drop pairs from the groups. Q11 is answered (D43): lists made
+   the index 6× smaller but still claim pairs that don't exist.

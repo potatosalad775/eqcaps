@@ -4,12 +4,7 @@
 	"schemaVersion": "1.0",
 	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "BR15 R2R" },
-	"match": {
-		"usb": [
-			{ "vendorId": "0x2972", "productName": "FIIO BR15 R2R" },
-			{ "vendorId": "0x0a12", "productName": "FIIO BR15 R2R" }
-		]
-	},
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO BR15 R2R" }] },
 	"bandCount": 10,
 	"band": {
 		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "AP"],
@@ -20,9 +15,8 @@
 	"preamp": { "mode": "manual", "gain": { "min": -24, "max": 12, "step": 0.1 } },
 	"protocol": {
 		"handler": "fiio-usb-hid",
-		"options": { "disabledPresetId": 240 },
 		"presets": [
-			{ "id": 240, "name": "BYPASS" },
+			{ "id": 240, "name": "BYPASS", "bypass": true },
 			{ "id": 0, "name": "Jazz" },
 			{ "id": 1, "name": "Pop" },
 			{ "id": 2, "name": "Rock" },

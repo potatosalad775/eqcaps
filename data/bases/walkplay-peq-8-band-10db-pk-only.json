@@ -1,18 +1,10 @@
 {
 	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "walkplay-hid",
 	"abstract": true,
 	"id": "walkplay-peq-8-band-10db-pk-only",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"bandCount": 8,
-	"band": {
-		"types": ["PK"],
-		"freq": { "min": 20, "max": 20000, "step": 1 },
-		"q": { "min": 0.1015625, "max": 10, "step": 0.00390625 },
-		"gain": { "min": -10, "max": 10, "step": 0.00390625 }
-	},
-	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127, "step": 1 } },
-	"protocol": { "handler": "walkplay-hid", "presets": [{ "id": 101, "name": "Custom" }] },
+	"band": { "types": ["PK"] },
 	"meta": {
 		"status": "draft",
 		"sources": [
@@ -20,13 +12,8 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/peqConstraintsConfig.json",
 				"date": "2026-10-02"
-			},
-			{
-				"kind": "handler-code",
-				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/walkplayHidHandler.js",
-				"date": "2026-10-02"
 			}
 		],
-		"notes": "devicePEQ's shared constraints \"walkplayPeq8Band10dBPkOnly\", with the wire grids of walkplayHidHandler.js. Seeded by scripts/import/seed.ts; ranges are what the handler encodes, not verified firmware limits."
+		"notes": "devicePEQ's shared constraints \"walkplayPeq8Band10dBPkOnly\". Seeded by scripts/import/seed.ts; ranges are what the handler encodes, not verified firmware limits."
 	}
 }

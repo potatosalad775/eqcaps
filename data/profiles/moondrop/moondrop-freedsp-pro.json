@@ -2,30 +2,33 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "moondrop-peq-8-band-12db-full-shelves",
 	"id": "moondrop-freedsp-pro",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Moondrop", "model": "FreeDSP Pro" },
 	"match": {
 		"usb": [
-			{ "vendorId": "0x0104", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x011b", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x011d", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x0661", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x0663", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x0666", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x0762", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x0909", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x0d8c", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x2fc6", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x3302", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x34be", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x35d8", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x36a7", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x373b", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x60c1", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0x60e1", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0xb445", "productName": "FreeDSP Pro" },
-			{ "vendorId": "0xb44d", "productName": "FreeDSP Pro" }
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "FreeDSP Pro"
+			}
 		]
 	},
 	"preamp": { "mode": "auto" },
@@ -38,6 +41,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ overrides its shared constraints with {\"deviceHandlesPregain\":true}."
+		"notes": "devicePEQ overrides its shared constraints with {\"deviceHandlesPregain\":true}."
 	}
 }

@@ -2,8 +2,6 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
 	"id": "tanchjim-bunny-dsp",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Tanchjim", "model": "Bunny DSP" },
 	"match": {
 		"usb": [
@@ -26,6 +24,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ overrides its shared constraints with {\"deviceHandlesPregain\":false}."
+		"notes": "devicePEQ overrides its shared constraints with {\"deviceHandlesPregain\":false}."
 	}
 }

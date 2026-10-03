@@ -2,31 +2,34 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "walkplay-peq-8-band-10db-full-shelves",
 	"id": "tanchjim-stargate-ii",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Tanchjim", "model": "Stargate II" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x3302", "productId": "0x43d4", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x0104", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x011b", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x011d", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x0661", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x0663", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x0666", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x0762", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x0909", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x0d8c", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x2fc6", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x3302", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x34be", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x35d8", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x36a7", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x373b", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x60c1", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0x60e1", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0xb445", "productName": "TANCHJIM-STARGATE II" },
-			{ "vendorId": "0xb44d", "productName": "TANCHJIM-STARGATE II" }
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "TANCHJIM-STARGATE II"
+			}
 		]
 	},
 	"band": { "types": ["PK"] },
@@ -44,6 +47,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ overrides its shared constraints with {\"supportsLSFilter\":false,\"supportsHSFilter\":false}."
+		"notes": "devicePEQ overrides its shared constraints with {\"supportsLSFilter\":false,\"supportsHSFilter\":false}."
 	}
 }

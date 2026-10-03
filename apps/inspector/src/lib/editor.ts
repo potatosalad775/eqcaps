@@ -268,15 +268,17 @@ export function profileIssueUrl(fields: {
 	return { url: url.href, paste: true };
 }
 
-/** A blank hardware profile, in authoring form, for `path` (authoringPath) to be derived from. */
+/**
+ * A blank hardware profile, in authoring form, for `path` (authoringPath) to be derived from. A
+ * file that extends a base inherits `schemaVersion` and `kind` from it (SPEC §11).
+ */
 export function blankProfile(options: { extends?: string; kind?: 'hardware' | 'software' } = {}) {
 	const kind = options.kind ?? 'hardware';
 	const data: Record<string, unknown> = {
 		$schema: '../../../schema/v1/source.schema.json',
 		...(options.extends ? { extends: options.extends } : {}),
 		id: '',
-		schemaVersion: '1.0',
-		kind,
+		...(options.extends ? {} : { schemaVersion: '1.0', kind }),
 		device: { brand: '', model: '' },
 		...(kind === 'hardware' ? { match: { usb: [] } } : {})
 	};

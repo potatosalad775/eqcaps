@@ -2,8 +2,6 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
 	"id": "kiwi-ears-s-link",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Kiwi Ears", "model": "S-Link" },
 	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x3016" }] },
 	"protocol": {
@@ -27,6 +25,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Every product id devicePEQ assigns to its \"Kiwi Ears KT_3016L\" group, under each vendor id of the vendor block (0x31b2). devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified.\nProtocol: the bands are stored out of register order."
+		"notes": "Every product id devicePEQ assigns to its \"Kiwi Ears KT_3016L\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified.\nProtocol: the bands are stored out of register order."
 	}
 }

@@ -2,17 +2,9 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-wide-all-filters",
 	"id": "fiio-k15",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "K15" },
-	"match": {
-		"usb": [
-			{ "vendorId": "0x2972", "productName": "FIIO K15" },
-			{ "vendorId": "0x0a12", "productName": "FIIO K15" }
-		]
-	},
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO K15" }] },
 	"protocol": {
-		"options": { "disabledPresetId": 240 },
 		"presets": [
 			{ "id": 0, "name": "Jazz" },
 			{ "id": 1, "name": "Pop" },
@@ -31,7 +23,7 @@
 			{ "id": 14, "name": "USER8" },
 			{ "id": 15, "name": "USER9" },
 			{ "id": 16, "name": "USER10" },
-			{ "id": 240, "name": "BYPASS" }
+			{ "id": 240, "name": "BYPASS", "bypass": true }
 		]
 	},
 	"meta": {
@@ -42,7 +34,6 @@
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
 			}
-		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+		]
 	}
 }

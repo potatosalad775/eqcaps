@@ -2,50 +2,34 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "walkplay-peq-8-band-10db-full-shelves",
 	"id": "ddhifi-dsp-cable",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "ddHiFi", "model": "DSP Cable" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x3302", "productId": "0x4357", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0104", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0104", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x011b", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x011b", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x011d", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x011d", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0661", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0661", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0663", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0663", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0666", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0666", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0762", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0762", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0909", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0909", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0d8c", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x0d8c", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x2fc6", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x2fc6", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x3302", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x3302", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x34be", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x34be", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x35d8", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x35d8", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x36a7", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x36a7", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x373b", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x373b", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x60c1", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x60c1", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x60e1", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0x60e1", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0xb445", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0xb445", "productName": "didiHiFi DSP Cable - Memory" },
-			{ "vendorId": "0xb44d", "productName": "ddHiFi DSP Cable - Memory" },
-			{ "vendorId": "0xb44d", "productName": "didiHiFi DSP Cable - Memory" }
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": ["ddHiFi DSP Cable - Memory", "didiHiFi DSP Cable - Memory"]
+			}
 		]
 	},
 	"meta": {
@@ -62,6 +46,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Its recorded capture's product id is in devicePEQ's \"SchemeNo15\" group, whose settings apply under the device's own."
+		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo15\" group, whose settings apply under the device's own."
 	}
 }

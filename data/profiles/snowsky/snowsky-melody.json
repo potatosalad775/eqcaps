@@ -2,18 +2,14 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-all-filters-7",
 	"id": "snowsky-melody",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Snowsky", "model": "Melody" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x2972", "productId": "0x0126", "productName": "SNOWSKY Melody" },
-			{ "vendorId": "0x2972", "productName": "SNOWSKY Melody" },
-			{ "vendorId": "0x0a12", "productName": "SNOWSKY Melody" }
+			{ "vendorId": ["0x0a12", "0x2972"], "productName": "SNOWSKY Melody" }
 		]
 	},
 	"protocol": {
-		"options": { "disabledPresetId": 240 },
 		"presets": [
 			{ "id": 0, "name": "Jazz" },
 			{ "id": 1, "name": "Pop" },
@@ -25,7 +21,7 @@
 			{ "id": 160, "name": "USER1" },
 			{ "id": 161, "name": "USER2" },
 			{ "id": 162, "name": "USER3" },
-			{ "id": 240, "name": "Close EQ" }
+			{ "id": 240, "name": "Close EQ", "bypass": true }
 		]
 	},
 	"meta": {
@@ -41,7 +37,6 @@
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/fiio_snowsky_melody.json",
 				"date": "2026-10-02"
 			}
-		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+		]
 	}
 }

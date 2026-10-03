@@ -75,13 +75,15 @@ source schema by relative path. The build replaces it with the published URL abo
 
 ## 3. Identity and matching (`match`)
 
-Lists are OR-ed; fields within one entry are AND-ed.
+Entries are OR-ed; fields within one entry are AND-ed. A field may list several values, and then
+holds if any of them matches.
 
 ```jsonc
 "match": {
   "usb": [
     { "vendorId": "0x2972", "productId": "0x0047" },
-    { "vendorId": "0x2972", "productName": "FIIO FX17 " }      // exact, trailing space is real
+    { "vendorId": "0x2972", "productName": "FIIO FX17 " },     // exact, trailing space is real
+    { "vendorId": ["0x0a12", "0x2972"], "productName": ["FIIO BTR17", "BTR17"] }  // 4 combinations
   ],
   "bluetooth": [
     { "name": "EH13" },
@@ -93,6 +95,10 @@ Lists are OR-ed; fields within one entry are AND-ed.
 ```
 
 - A `match` has at least one `usb` or `bluetooth` entry.
+- `vendorId`, `productId`, `productName`, `name` and `namePrefix` take one value or a non-empty
+  list of distinct values. An entry with lists stands for every combination of its fields'
+  values: the entry above matches both names under both vendor ids. Writing it as four entries
+  means the same.
 - USB ids are lowercase 4-digit hex strings. A `usb` entry MUST have `vendorId` plus at least one
   of `productId` / `productName`. Vendor-only matching is too broad, because chip vendors like
   Walkplay ship under dozens of brands.
@@ -100,19 +106,24 @@ Lists are OR-ed; fields within one entry are AND-ed.
   UUIDs are written in lowercase canonical form.
 - `productName` and `name` compare exactly (case- and whitespace-sensitive).
 - **Specificity** (higher wins): vid+pid+name = 4, vid+pid = 3, vid+name = 3, bt name = 2,
-  bt namePrefix(+uuid) = 1. On a tie, the consumer presents a choice and never picks silently.
+  bt namePrefix(+uuid) = 1, by the fields the entry has, whether they list one value or several.
+  At equal specificity a profile that isn't a group profile beats a group profile. On a remaining
+  tie, the consumer presents a choice and never picks silently.
 - `firmware` compares by dotted-numeric order: split on non-digits, compare components numerically,
   missing components = 0. If the device's firmware is unknown, `firmware` is ignored and ties are
   resolved by choice. `firmware` has at least one bound, and when it has both, `min` MUST be less
   than `max`; otherwise no firmware matches.
-- CI rejects two non-deprecated profiles with an identical match entry and overlapping firmware
-  ranges, unless their `engine` labels differ.
+- CI rejects two non-deprecated profiles whose match entries have a combination in common (the
+  same fields with the same values) and whose firmware ranges overlap, unless their `engine`
+  labels differ.
 
 **Group profiles.** A profile with `device.group: true` stands for several products that its match
 can't tell apart: devices sharing a chipset's firmware scheme, or a default product name that many
 brands ship. Its `brand` and `model` name the group ("Walkplay", "SchemeNo16 devices"), not a
-product. Matching is unchanged: a profile for one of those products, matched by a more specific
-entry (typically adding the product name), wins by specificity. A consumer MAY tell the user that
+product. A profile for one of those products wins over the group: by specificity when its entry
+is more specific (typically adding the product name), and otherwise because the group yields at
+equal specificity (a product matched by vendor id and name ties with a group matched by vendor id
+and product id). A consumer MAY tell the user that
 the matched profile is generic and that their exact model isn't listed. A device profile for a
 group member SHOULD extend the base the group extends rather than the group itself, since a group
 shrinks or is deprecated as its members get their own profiles. `group` is never inherited (§11).
@@ -281,7 +292,8 @@ wire grids are the handler's (D42).
 "protocol": {
   "handler": "fiio-usb-hid",                     // required: a bridge handler id
   "options": { "reportId": 1, "saveCommand": "0x21" }, // the handler's settings for this device
-  "presets": [{ "id": 0, "name": "Jazz" }, { "id": 160, "name": "USER1" }], // EQ memories
+  "presets": [{ "id": 0, "name": "Jazz" }, { "id": 160, "name": "USER1" },  // EQ memories
+              { "id": 240, "name": "BYPASS", "bypass": true }],
   "disconnectOnSave": false,                     // the device drops the connection after a save
   "baudRate": 57600,                             // serial devices, where the default doesn't fit
   "experimental": true                           // the protocol is unconfirmed for this device
@@ -292,6 +304,9 @@ wire grids are the handler's (D42).
   checks every profile's `protocol` against the bridge's handlers.
 - `presets` ids are the device's own preset numbers, unique within the list. They are unrelated to
   the profile's filter slots (§5).
+- `bypass: true` marks the preset that turns the EQ off: it holds no filters, and selecting it is
+  how the device's EQ is switched off. At most one preset is marked. An app offers it as an off
+  switch, not as a memory to write filters to.
 - A consumer that doesn't know the handler, or an option, MUST treat the device as having no
   protocol it can drive (never guess one), and MUST NOT reject the profile for it (§15).
 - A hardware profile without `protocol` is one no handler drives (the RME ADI-2 series is
@@ -723,7 +738,9 @@ filter types this engine version doesn't know, so a consumer can meet §7 and §
 
 Each channel holds the files below. `/v1/` is the format's channel. `/next/`, the channel before
 the freeze, is still built from the same data for clients that default to it (client 0.1.x), with
-profiles whose `$schema` points at its own copy of the schema; new consumers use `/v1/`.
+profiles whose `$schema` points at its own copy of the schema, and with every match entry written
+single-valued (one entry per combination, §3), since 0.1.x predates lists. New consumers use
+`/v1/`.
 
 | Path | Content |
 | --- | --- |

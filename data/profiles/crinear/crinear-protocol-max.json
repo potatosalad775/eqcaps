@@ -2,31 +2,34 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "walkplay-peq-10-band-10db-full-shelves",
 	"id": "crinear-protocol-max",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "CrinEar", "model": "Protocol Max" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x3302", "productId": "0x43cc", "productName": "Protocol Max" },
-			{ "vendorId": "0x0104", "productName": "Protocol Max" },
-			{ "vendorId": "0x011b", "productName": "Protocol Max" },
-			{ "vendorId": "0x011d", "productName": "Protocol Max" },
-			{ "vendorId": "0x0661", "productName": "Protocol Max" },
-			{ "vendorId": "0x0663", "productName": "Protocol Max" },
-			{ "vendorId": "0x0666", "productName": "Protocol Max" },
-			{ "vendorId": "0x0762", "productName": "Protocol Max" },
-			{ "vendorId": "0x0909", "productName": "Protocol Max" },
-			{ "vendorId": "0x0d8c", "productName": "Protocol Max" },
-			{ "vendorId": "0x2fc6", "productName": "Protocol Max" },
-			{ "vendorId": "0x3302", "productName": "Protocol Max" },
-			{ "vendorId": "0x34be", "productName": "Protocol Max" },
-			{ "vendorId": "0x35d8", "productName": "Protocol Max" },
-			{ "vendorId": "0x36a7", "productName": "Protocol Max" },
-			{ "vendorId": "0x373b", "productName": "Protocol Max" },
-			{ "vendorId": "0x60c1", "productName": "Protocol Max" },
-			{ "vendorId": "0x60e1", "productName": "Protocol Max" },
-			{ "vendorId": "0xb445", "productName": "Protocol Max" },
-			{ "vendorId": "0xb44d", "productName": "Protocol Max" }
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "Protocol Max"
+			}
 		]
 	},
 	"meta": {
@@ -48,6 +51,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Its recorded capture's product id is in devicePEQ's \"SchemeNo16\" group, whose settings apply under the device's own."
+		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo16\" group, whose settings apply under the device's own."
 	}
 }

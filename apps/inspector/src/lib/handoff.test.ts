@@ -29,6 +29,12 @@ describe('memberBase', () => {
 	});
 });
 
+/** A base in the repository, as the editor reads it. */
+const baseFile = (id: string) => {
+	const path = `data/bases/${id}.json`;
+	return { path, text: readFileSync(new URL(`../../../../${path}`, import.meta.url), 'utf8') };
+};
+
 describe('profileForDevice', () => {
 	it('adds a group member: identity and provenance only, the rest inherited', async () => {
 		const data = profileForDevice(
@@ -36,7 +42,6 @@ describe('profileForDevice', () => {
 		);
 		expect(data).toMatchObject({
 			extends: 'walkplay-peq-10-band-10db-full-shelves',
-			kind: 'hardware',
 			device: { brand: '', model: 'NICEHCK PureAural' },
 			match: {
 				usb: [{ vendorId: '0x3302', productId: '0x4322', productName: 'NICEHCK PureAural' }]
@@ -54,19 +59,18 @@ describe('profileForDevice', () => {
 		});
 		expect(data).not.toHaveProperty('band');
 		expect(data).not.toHaveProperty('bandCount');
+		expect(data).not.toHaveProperty('kind');
 
 		// Filled in, it passes CI's checks against the base it extends.
 		data.id = 'nicehck-pureaural';
 		data.device = { brand: 'NiceHCK', model: 'PureAural' };
 		data.meta.sources[0]!.ref = 'evidence/nicehck-pureaural/2026-10-03-abcdef.json';
 		const path = authoringPath(data);
-		const base = 'data/bases/walkplay-peq-10-band-10db-full-shelves.json';
+		const bases = ['walkplay-peq-10-band-10db-full-shelves', 'walkplay-hid'];
 		const result = checkEdited({
 			path,
 			text: await formatAuthoring(data),
-			chain: [
-				{ path: base, text: readFileSync(new URL(`../../../../${base}`, import.meta.url), 'utf8') }
-			],
+			chain: bases.map(baseFile),
 			others: [],
 			evidence: new Set(['evidence/nicehck-pureaural/2026-10-03-abcdef.json']),
 			schema: schemaValidator()
@@ -126,13 +130,11 @@ describe('profileForDevice', () => {
 		data.device = { brand: 'CrinEar', model: 'Protocol Micro' };
 		data.meta.status = 'community-verified';
 		data.meta.sources[0]!.ref = 'evidence/crinear-protocol-micro/2026-10-03-abcdef.json';
-		const base = 'data/bases/walkplay-peq-10-band-10db-full-shelves.json';
+		const bases = ['walkplay-peq-10-band-10db-full-shelves', 'walkplay-hid'];
 		const result = checkEdited({
 			path: authoringPath(data),
 			text: await formatAuthoring(data),
-			chain: [
-				{ path: base, text: readFileSync(new URL(`../../../../${base}`, import.meta.url), 'utf8') }
-			],
+			chain: bases.map(baseFile),
 			others: [],
 			evidence: new Set(['evidence/crinear-protocol-micro/2026-10-03-abcdef.json']),
 			schema: schemaValidator()

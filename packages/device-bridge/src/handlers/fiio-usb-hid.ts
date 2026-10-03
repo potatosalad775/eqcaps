@@ -19,8 +19,6 @@ export interface FiioUsbHidOptions {
 	reportId?: number;
 	/** Command that saves to a preset. Default 0x19; 0x21 on newer models. */
 	saveCommand?: number;
-	/** Preset that means "EQ off"; reading it reports no current slot. */
-	disabledPresetId?: number;
 }
 
 const BAND = 0x15;
@@ -113,13 +111,14 @@ function ask(ctx: Ctx, cmd: number, data: number[] = []) {
 	);
 }
 
-const presetOf = (ctx: Ctx, d: Uint8Array) =>
-	d[6] === ctx.options.disabledPresetId ? undefined : d[6];
+/** The current preset; reading the bypass preset ("EQ off") reports none. */
+const presetOf = (ctx: Ctx, d: Uint8Array) => (d[6] === ctx.bypass ? undefined : d[6]);
 
 export const fiioUsbHid: HidHandler<FiioUsbHidOptions> = {
 	id: 'fiio-usb-hid',
 	transport: 'hid',
 	codec: fiioUsbHidCodec,
+	bypassPreset: true,
 
 	capabilities: () => ({
 		canRead: true,
@@ -159,7 +158,7 @@ export const fiioUsbHid: HidHandler<FiioUsbHidOptions> = {
 	},
 
 	async setEnabled(ctx, enabled, slot) {
-		const id = enabled ? slot : ctx.options.disabledPresetId;
+		const id = enabled ? slot : ctx.bypass;
 		if (id === undefined) {
 			throw new BridgeError(
 				'invalid-request',

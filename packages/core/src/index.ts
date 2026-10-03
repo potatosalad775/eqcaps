@@ -13,6 +13,8 @@ export { COUNTING_SOURCE_KINDS, isCountingSource, validateProfile } from './vali
 export { MAX_EXTENDS_DEPTH, PROFILE_SCHEMA_URL, flattenProfile } from './flatten.ts';
 export type { FlattenResult } from './flatten.ts';
 export { checkDatabase } from './database.ts';
+export { expandBluetoothMatch, expandMatch, expandUsbMatch, matchValues } from './match.ts';
+export type { ScalarBluetoothMatch, ScalarUsbMatch } from './match.ts';
 export { indexFields } from './published.ts';
 export type { DataBundle, DataIndex, IndexEntry } from './published.ts';
 

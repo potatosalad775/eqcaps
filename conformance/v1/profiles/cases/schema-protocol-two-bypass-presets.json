@@ -1,0 +1,14 @@
+{
+	"description": "At most one preset is the bypass preset.",
+	"spec": "§9",
+	"profile": {
+		"protocol": {
+			"handler": "chip-hid",
+			"presets": [
+				{ "id": 0, "name": "Off", "bypass": true },
+				{ "id": 240, "name": "Bypass", "bypass": true }
+			]
+		}
+	},
+	"expect": [{ "code": "schema", "path": "/protocol/presets" }]
+}

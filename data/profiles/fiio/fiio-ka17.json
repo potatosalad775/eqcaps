@@ -2,20 +2,15 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-all-filters-7",
 	"id": "fiio-ka17",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "KA17" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x2972", "productId": "0x0093", "productName": "FIIO KA17" },
-			{ "vendorId": "0x2972", "productName": "FIIO KA17" },
-			{ "vendorId": "0x2972", "productName": "FIIO KA17 (MQA HID)" },
-			{ "vendorId": "0x0a12", "productName": "FIIO KA17" },
-			{ "vendorId": "0x0a12", "productName": "FIIO KA17 (MQA HID)" }
+			{ "vendorId": ["0x0a12", "0x2972"], "productName": ["FIIO KA17", "FIIO KA17 (MQA HID)"] }
 		]
 	},
 	"protocol": {
-		"options": { "reportId": 1, "disabledPresetId": 10 },
+		"options": { "reportId": 1 },
 		"presets": [
 			{ "id": 0, "name": "Jazz" },
 			{ "id": 1, "name": "Pop" },
@@ -27,7 +22,7 @@
 			{ "id": 4, "name": "USER1" },
 			{ "id": 8, "name": "USER2" },
 			{ "id": 9, "name": "USER3" },
-			{ "id": 10, "name": "BYPASS" }
+			{ "id": 10, "name": "BYPASS", "bypass": true }
 		]
 	},
 	"meta": {
@@ -44,6 +39,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Reported quirk, not corrected (D39): devicePEQ reports that peaking filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40))."
+		"notes": "Reported quirk, not corrected (D39): devicePEQ reports that peaking filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40))."
 	}
 }

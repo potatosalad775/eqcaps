@@ -125,17 +125,37 @@
 			"type": "string",
 			"pattern": "^0x[0-9a-f]{4}$"
 		},
+		"usbIds": {
+			"description": "One USB id, or a list of them: any one of them matches (SPEC §3).",
+			"oneOf": [
+				{ "$ref": "#/$defs/usbId" },
+				{
+					"type": "array",
+					"items": { "$ref": "#/$defs/usbId" },
+					"minItems": 1,
+					"uniqueItems": true
+				}
+			]
+		},
+		"names": {
+			"description": "One name, or a list of them: any one of them matches (SPEC §3). Compared exactly, case and whitespace included.",
+			"oneOf": [
+				{ "type": "string", "minLength": 1 },
+				{
+					"type": "array",
+					"items": { "type": "string", "minLength": 1 },
+					"minItems": 1,
+					"uniqueItems": true
+				}
+			]
+		},
 		"usbMatch": {
-			"description": "vendorId plus productId and/or productName. Vendor-only matching is too broad (SPEC §3).",
+			"description": "vendorId plus productId and/or productName. Vendor-only matching is too broad. A field that lists several values matches any of them (SPEC §3).",
 			"type": "object",
 			"properties": {
-				"vendorId": { "$ref": "#/$defs/usbId" },
-				"productId": { "$ref": "#/$defs/usbId" },
-				"productName": {
-					"description": "Compared exactly, case and whitespace included.",
-					"type": "string",
-					"minLength": 1
-				}
+				"vendorId": { "$ref": "#/$defs/usbIds" },
+				"productId": { "$ref": "#/$defs/usbIds" },
+				"productName": { "$ref": "#/$defs/names" }
 			},
 			"patternProperties": { "^x-": true },
 			"additionalProperties": false,
@@ -143,11 +163,11 @@
 			"anyOf": [{ "required": ["productId"] }, { "required": ["productName"] }]
 		},
 		"bluetoothMatch": {
-			"description": "name or namePrefix is required; serviceUuid alone is never sufficient (SPEC §3).",
+			"description": "name or namePrefix is required; serviceUuid alone is never sufficient. A field that lists several values matches any of them (SPEC §3).",
 			"type": "object",
 			"properties": {
-				"name": { "type": "string", "minLength": 1 },
-				"namePrefix": { "type": "string", "minLength": 1 },
+				"name": { "$ref": "#/$defs/names" },
+				"namePrefix": { "$ref": "#/$defs/names" },
 				"serviceUuid": {
 					"type": "string",
 					"pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
@@ -383,10 +403,17 @@
 					"type": "object"
 				},
 				"presets": {
-					"description": "The EQ presets (memories) the device offers, by their ids on the device.",
+					"description": "The EQ presets (memories) the device offers, by their ids on the device. At most one is the bypass preset.",
 					"type": "array",
 					"items": { "$ref": "#/$defs/preset" },
-					"minItems": 1
+					"minItems": 1,
+					"contains": {
+						"type": "object",
+						"properties": { "bypass": { "const": true } },
+						"required": ["bypass"]
+					},
+					"minContains": 0,
+					"maxContains": 1
 				},
 				"disconnectOnSave": {
 					"description": "The device drops the connection after a write that saves.",
@@ -410,7 +437,11 @@
 			"type": "object",
 			"properties": {
 				"id": { "type": "integer", "minimum": 0 },
-				"name": { "type": "string", "minLength": 1 }
+				"name": { "type": "string", "minLength": 1 },
+				"bypass": {
+					"description": "Selecting this preset turns the EQ off: it holds no filters of its own (SPEC §9).",
+					"type": "boolean"
+				}
 			},
 			"patternProperties": { "^x-": true },
 			"additionalProperties": false,
@@ -501,10 +532,17 @@
 					"type": "object"
 				},
 				"presets": {
-					"description": "The EQ presets (memories) the device offers, by their ids on the device.",
+					"description": "The EQ presets (memories) the device offers, by their ids on the device. At most one is the bypass preset.",
 					"type": "array",
 					"items": { "$ref": "#/$defs/preset" },
-					"minItems": 1
+					"minItems": 1,
+					"contains": {
+						"type": "object",
+						"properties": { "bypass": { "const": true } },
+						"required": ["bypass"]
+					},
+					"minContains": 0,
+					"maxContains": 1
 				},
 				"disconnectOnSave": {
 					"description": "The device drops the connection after a write that saves.",

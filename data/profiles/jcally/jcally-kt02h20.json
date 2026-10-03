@@ -2,8 +2,6 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
 	"id": "jcally-kt02h20",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "JCally", "model": "KT02H20" },
 	"match": {
 		"usb": [
@@ -26,6 +24,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ overrides its shared constraints with {\"supportsLSFilter\":false,\"supportsHSFilter\":false}. Reported quirk, not corrected (D39): devicePEQ halves frequencies before sending them to this device, because older KT Micro firmware doubles the frequency it's given, but its own capture of this device was recorded with the halving off."
+		"notes": "devicePEQ overrides its shared constraints with {\"supportsLSFilter\":false,\"supportsHSFilter\":false}. Reported quirk, not corrected (D39): devicePEQ halves frequencies before sending them to this device, because older KT Micro firmware doubles the frequency it's given, but its own capture of this device was recorded with the halving off."
 	}
 }

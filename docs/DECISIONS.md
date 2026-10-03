@@ -505,6 +505,10 @@ refuses to overwrite it without `--force`.
   the block, because devicePEQ doesn't record which vendor id goes with which product id. A
   product id in two groups stays with the first, which devicePEQ checks first. Bluetooth SPP
   devices get a name prefix marked as a placeholder (SPEC example A did the same).
+  *2026-10-04:* the seed wrote one match entry per (vendor id, product id or name) pair, 7,521 in
+  all. They are now written as list-valued entries (D43), 117 in all, matching the same pairs. A
+  device matched by name ties with its group at specificity 3 when the capture's exact pair isn't
+  the one it is read under; the group now yields (D43).
 - **Names and ids** are curated in `tables.ts`. Name variants of one device (`FIIO BTR17`,
   `BTR17`) become one profile. Where they disagree, the narrower constraints win and the notes say
   so. Products with generic USB names (`CS43131 HiFi Audio DSP`) get the brand Walkplay.
@@ -783,6 +787,10 @@ declaring 1.1 would only confuse.
 same reason.
 *2026-10-03, amended before first publication:* the evidence-ref rule covers every `ref` that
 starts with `evidence/` (D41), for the same reason.
+*2026-10-04, amended before first publication:* match fields take lists, and group profiles yield
+at equal specificity (D43); presets may be marked `bypass` (D44). Same reason. Lists are not
+additive (a 1.0 consumer reading one would match nothing), so `/next/`, which client 0.1.x
+reads, publishes them expanded into single-valued entries.
 **Rejected:** dropping `/next/` at the freeze (breaks every 0.1.x client's default); keeping the
 file name SPEC-DRAFT.md (a frozen definition called a draft misleads readers; links inside the
 repository were updated, and old links to the file on GitHub break).
@@ -800,6 +808,10 @@ dongles of many brands report, and KT Micro's KT0211L group. `device.group: true
 - **Matching doesn't change.** A device profile with a more specific entry wins by specificity.
   The flag lets apps tell the user the match is generic, and lets the inspector offer to add the
   device rather than only to fix the group.
+  *2026-10-04, superseded by D43:* matching does change: at equal specificity a group profile
+  yields to a device profile. A device matched by name ties with a group matched by product id
+  (both 3), which happened for 109 of the 210 (vendor id, product id, name) combinations the seeded
+  device profiles claim.
 - **Device profiles extend the group's base**, not the group: groups shrink as devices get their
   own profiles (Q11) and may be deprecated.
 - **Hardware only** (the schema forbids it on software profiles, which are selected by id), and
@@ -1096,6 +1108,9 @@ registers, disconnect on save). D37 helped only devices that match a group profi
 "Add my device") writes the profile, CI checks it against the codec, and the deployed bridge
 drives it once the data is published. A new bridge release is needed only for a new handler,
 which is new code anyway. Inheritance removes the 60 redundant entries rather than moving them.
+*2026-10-04:* the "EQ off" preset is no longer a handler option (`disabledPresetId`,
+`disabledSlot`) but a `bypass` mark on the preset itself (D44), and the Walkplay and FiiO USB HID
+bases share a protocol-family base (D44).
 **Rejected:** a `device.platform` field mapped to handlers in the bridge (removes the redundant
 entries, but FiiO's per-device slots and options would still need a release); generating the
 table from the profiles' bases at build time (still a release per device, and couples the bridge
@@ -1103,24 +1118,66 @@ build to authoring files); separate protocol files beside the profiles (two file
 inheritance mechanism per device); defining every handler's options in the profile schema (ties
 the format to the bridge's handler list; the bridge validates its own vocabulary).
 
+### D43. Match fields take lists; group profiles yield at equal specificity (accepted, 2026-10-04)
+devicePEQ identifies a chip family as "vendor id in this list, product id in that list" (19 Walkplay
+vendor ids, up to 135 product ids per firmware scheme). Format 1.0 could only spell that as one
+entry per pair, so the seed (D31) wrote 7,521 USB entries, 2,565 of them in one profile, and
+match data was 334 KB of the 376 KB `index.json` every app downloads. Q11 deferred it.
+- **Lists.** `vendorId`, `productId`, `productName`, `name` and `namePrefix` take one value or a
+  non-empty list of distinct values (SPEC §3). A field holds if any listed value matches, and an
+  entry stands for every combination of its fields' values: lists are notation, not new
+  semantics. Specificity counts the fields an entry has, as before. The collision check expands
+  entries and compares combinations. `expandMatch` in core gives the single-valued form.
+- **The data.** Every profile's entries were regrouped by product key and vendor set and checked to
+  expand to exactly the pairs they replace: 7,521 entries became 117, the index 376 KB → 61 KB and
+  the bundle 488 KB → 161 KB.
+- **Groups yield.** At equal specificity a non-group profile beats a group profile (`device.group`,
+  D37); a tie between two device profiles or two groups is still a choice. Before, a device
+  profile matched by vendor id and name (3) tied with its scheme group matched by vendor id and
+  product id (3) whenever the device was read under a vendor id other than its capture's: 109 of
+  the 210 such combinations in the seed were ambiguous. Now all 210 resolve to the device.
+- **`/next/` stays single-valued.** Client 0.1.x reads `/next/` and compares fields with `===`, so a
+  list would silently match nothing. The build writes that channel with `--single-valued-match`.
+  The bridge's chooser and the inspector read lists.
+**Why:** the pairs a list claims are the same pairs the expanded entries claimed (most of which
+don't exist, D31); the format just stops making that cost 5× the index. Lists in every field,
+not only `productId` as Q11 suggested, because name variants (`"FIIO BTR17"`, `"BTR17"`) under
+FiiO's two vendor ids are the same shape. The tie was a consequence of the same encoding: a
+group's pairs reach into vendor ids its members' captures never used.
+**Rejected:** named vendor sets defined once and referenced from entries (a second mechanism, and
+`match` is never inherited, D3); inheriting `match` from bases (provenance of identity shouldn't
+transfer silently, SPEC §11); ranking `productId` above `productName` (the order is arbitrary, and
+groups match by name too: "CS43131 HiFi Audio DSP"); dropping the group profiles (loses most
+Walkplay devices).
+
+### D44. The bypass preset is marked in the data; protocol-family bases (accepted, 2026-10-04)
+Two leftovers of devicePEQ's per-device configs, after D42.
+- **`bypass` on a preset.** devicePEQ names the preset that turns the EQ off in a handler option
+  (`disabledPresetId`) beside the preset list, which on 18 of 21 devices already held that
+  preset ("BYPASS", "Close EQ"); on 3 the id wasn't in the list. A preset now says it with
+  `"bypass": true` (SPEC §9), at most one per list (schema `maxContains`). Apps learn which preset
+  is the off switch without knowing handler options, and the bridge passes it to the handlers
+  that switch EQ off by preset (`fiio-usb-hid`, `ktmicro-usb-hid`) instead of an option; others
+  refuse a bypass preset. The three missing presets were added as "Close EQ", the name other FiiO
+  models give it, noted as assumed.
+- **Protocol-family bases.** The shape bases came from devicePEQ's `peqConstraintsConfig.json`
+  (`walkplayPeq8Band10dBFullShelves`) and each repeated its vendor's wire grids, preamp and,
+  since D42, its handler. `walkplay-hid` and `fiio-usb-hid` now hold those, and the shape bases
+  extend them with only band count, types and what differs (FiiO's wide gain, presets). The
+  handler's `handler-code` source moved with them. Single-shape vendors keep one base.
+- **Device files inherit `kind` and `schemaVersion`**, and the seed's per-device boilerplate note
+  ("Seeded from devicePEQ…") is gone: `draft` and the inherited `handler-code` sources say it.
+  Apart from the bypass marks, the flattened profiles are unchanged except for notes and the
+  order of inherited sources.
+**Rejected:** merging preset lists by id across `extends` (FiiO lists differ in order, names and
+gaps, so it would need a way to delete entries, which costs more than the 341 entries it saves);
+keeping `disabledPresetId` beside a `bypass` mark (two ways to say one thing).
+
 ---
 
 ## Open questions for the owner
 
 A new question gets a number, a recommendation and an entry here.
-
-### Q11. Compact USB match entries? (open, 2026-10-02)
-devicePEQ identifies Walkplay-chip devices as "vendor id in this list, product id in that list".
-The format can only spell that as one entry per pair, which makes the index about 5× larger than it
-needs to be and claims thousands of pairs that don't exist (D31).
-**Recommendation:** leave the format as it is for now. 32 KB gzipped is acceptable, and the right
-fix is data: as devices get identified, give them their real (vendor id, product id) and drop
-pairs from the group profiles. If the index grows past ~100 KB gzipped, allow `productId` to be
-an array in a `usb` entry (a v1 minor, additive). Alternatives: allow both `vendorId` and
-`productId` arrays (more compact, but keeps encoding the non-existent pairs), or drop the group
-profiles (loses most Walkplay devices).
-*2026-10-03:* group profiles are now marked (`device.group`, D37), which makes the ones to shrink
-easy to find.
 
 ### Answered 2026-10-02
 
@@ -1136,3 +1193,4 @@ easy to find.
 | Q8 Governance | as recommended, plus two verified levels | D28 |
 | Q9 Licenses | MIT code, CC0 data; checked against devicePEQ | D25 |
 | Q10 Written vs realized values | domains are written values; realization laws in profiles from v1 (removed again, D39) | D29, D39 |
+| Q11 Compact USB match entries (answered 2026-10-04) | lists in every match field, in format 1.0 | D43 |

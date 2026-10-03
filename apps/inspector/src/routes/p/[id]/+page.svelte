@@ -9,6 +9,7 @@
 	import { catalog } from '$lib/data.svelte';
 	import { dataUrl } from '$lib/channel';
 	import { profileSourceUrl, sourceHref } from '$lib/repo';
+	import { bluetoothEntryText, usbEntryText } from '$lib/identity';
 	import SlotChart from '$lib/components/SlotChart.svelte';
 	import GroupBadge from '$lib/components/GroupBadge.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
@@ -177,14 +178,9 @@
 					{#if p.match.usb?.length}
 						<div>
 							<div class="text-zinc-500">USB ({p.match.usb.length})</div>
-							<div class="max-h-48 overflow-y-auto font-mono text-xs">
+							<div class="max-h-48 space-y-1 overflow-y-auto font-mono text-xs break-words">
 								{#each p.match.usb as u, i (i)}
-									<div>
-										{u.vendorId}{u.productId ? `:${u.productId}` : ''}
-										{#if u.productName !== undefined}<span class="text-zinc-500"
-												>"{u.productName}"</span
-											>{/if}
-									</div>
+									<div>{usbEntryText(u, Infinity)}</div>
 								{/each}
 							</div>
 						</div>
@@ -194,7 +190,7 @@
 							<div class="text-zinc-500">Bluetooth</div>
 							{#each p.match.bluetooth as b, i (i)}
 								<div class="font-mono text-xs">
-									{b.name !== undefined ? `"${b.name}"` : `"${b.namePrefix}…"`}
+									{bluetoothEntryText(b, Infinity, false)}
 									{#if b.serviceUuid}<span class="text-zinc-500">service {b.serviceUuid}</span>{/if}
 								</div>
 							{/each}

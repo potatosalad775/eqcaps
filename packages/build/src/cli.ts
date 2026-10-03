@@ -11,6 +11,8 @@
 //                        --data-version <v>  default: date and short sha of HEAD
 //                        --generated-at <t>  default: now (ISO 8601)
 //                        --schema-url <url>  `$schema` of published profiles (default: the v1 URL)
+//                        --single-valued-match  write each match entry with one value per field,
+//                                            for clients that predate lists (the /next/ channel)
 //
 // Exit code 1 on any error. Inside GitHub Actions, issues are also printed as annotations, so
 // they show up on the offending line of a pull request.
@@ -58,7 +60,8 @@ function main(argv: string[]): number {
 			out: { type: 'string' },
 			'data-version': { type: 'string' },
 			'generated-at': { type: 'string' },
-			'schema-url': { type: 'string' }
+			'schema-url': { type: 'string' },
+			'single-valued-match': { type: 'boolean' }
 		}
 	});
 	const command = positionals[0];
@@ -87,7 +90,8 @@ function main(argv: string[]): number {
 		conformance: readConformance(),
 		dataVersion: values['data-version'] ?? gitDataVersion(),
 		generatedAt: values['generated-at'] ?? new Date().toISOString(),
-		...(values['schema-url'] ? { schemaUrl: values['schema-url'] } : {})
+		...(values['schema-url'] ? { schemaUrl: values['schema-url'] } : {}),
+		...(values['single-valued-match'] ? { singleValuedMatch: true } : {})
 	});
 	rmSync(out, { recursive: true, force: true });
 	for (const a of artifacts) {

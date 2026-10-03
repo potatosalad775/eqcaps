@@ -57,10 +57,7 @@ test('every hardware profile has a protocol', () => {
 
 describe('protocolOf', () => {
 	test('reads hex strings as numbers', () => {
-		expect(protocolOf(profile('fiio-btr17'))?.options).toEqual({
-			saveCommand: 0x21,
-			disabledPresetId: 240
-		});
+		expect(protocolOf(profile('fiio-btr17'))?.options).toEqual({ saveCommand: 0x21 });
 		expect(
 			protocolOf({
 				protocol: {
@@ -91,7 +88,19 @@ describe('protocolOf', () => {
 					{ id: 1, name: 'B' }
 				]
 			},
-			'bad baud rate': { handler: 'fiio-usb-serial', baudRate: 0 }
+			'bad baud rate': { handler: 'fiio-usb-serial', baudRate: 0 },
+			'option the presets say': { handler: 'fiio-usb-hid', options: { disabledPresetId: 240 } },
+			'two bypass presets': {
+				handler: 'fiio-usb-hid',
+				presets: [
+					{ id: 11, name: 'Off', bypass: true },
+					{ id: 240, name: 'BYPASS', bypass: true }
+				]
+			},
+			'bypass the handler has no use for': {
+				handler: 'walkplay-hid',
+				presets: [{ id: 0, name: 'Off', bypass: true }]
+			}
 		};
 		for (const [what, protocol] of Object.entries(bad)) {
 			expect(protocolOf({ protocol }), what).toBeUndefined();
@@ -100,6 +109,26 @@ describe('protocolOf', () => {
 		expect(protocolProblem({ handler: 'walkplay-bt' })).toMatch(/no handler "walkplay-bt"/);
 		expect(protocolOf({})).toBeUndefined();
 		expect(protocolOf(undefined)).toBeUndefined();
+	});
+
+	test('keeps the bypass preset, for handlers that turn the EQ off with one', () => {
+		const presets = [
+			{ id: 0, name: 'Jazz' },
+			{ id: 240, name: 'BYPASS', bypass: true }
+		];
+		expect(protocolOf({ protocol: { handler: 'fiio-usb-hid', presets } })).toEqual({
+			handler: 'fiio-usb-hid',
+			presets
+		});
+		expect(protocolOf(profile('fiio-btr17'))?.presets).toContainEqual({
+			id: 240,
+			name: 'BYPASS',
+			bypass: true
+		});
+		const off = [{ id: 1, name: 'A', bypass: false }];
+		expect(protocolOf({ protocol: { handler: 'fiio-usb-hid', presets: off } })?.presets).toEqual([
+			{ id: 1, name: 'A' }
+		]);
 	});
 
 	test('ignores extension keys in options', () => {

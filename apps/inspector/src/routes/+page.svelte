@@ -2,9 +2,10 @@
 	import { page } from '$app/state';
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import type { IndexEntry, Meta, Profile } from '@potatosalad775/eqcaps-core';
+	import type { Meta, Profile } from '@potatosalad775/eqcaps-core';
 	import { catalog } from '$lib/data.svelte';
 	import { FEATURES, searchEntries, type Feature } from '$lib/search';
+	import { identitySummary } from '$lib/identity';
 	import GroupBadge from '$lib/components/GroupBadge.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 
@@ -49,18 +50,6 @@
 
 	function toggle(f: Feature) {
 		features = features.includes(f) ? features.filter((x) => x !== f) : [...features, f];
-	}
-
-	function identity(e: IndexEntry): string {
-		const usb = (e.match?.usb ?? []).map(
-			(u) =>
-				`${u.vendorId}${u.productId ? `:${u.productId}` : ''}${u.productName ? ` "${u.productName}"` : ''}`
-		);
-		const bt = (e.match?.bluetooth ?? []).map((b) => `BT ${b.name ?? `${b.namePrefix}…`}`);
-		const all = [...usb, ...bt];
-		return all.length > 3
-			? `${all.slice(0, 2).join(', ')} +${all.length - 2} more`
-			: all.join(', ');
 	}
 </script>
 
@@ -149,8 +138,8 @@
 							<span class="text-xs text-zinc-500 uppercase">software</span>
 						{/if}
 						<span class="ml-auto font-mono text-xs text-zinc-500">{e.id}</span>
-						{#if identity(e)}
-							<span class="w-full font-mono text-xs text-zinc-500">{identity(e)}</span>
+						{#if identitySummary(e.match)}
+							<span class="w-full font-mono text-xs text-zinc-500">{identitySummary(e.match)}</span>
 						{/if}
 					</a>
 				</li>

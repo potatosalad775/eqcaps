@@ -75,6 +75,58 @@ describe('matchDevice', () => {
 		).toEqual(['bt-name:2', 'bt-prefix:1']);
 		expect(ids(matchDevice(entries, { bluetooth: { name: 'EH13' } }))).toEqual(['bt-name:2']);
 	});
+
+	it('matches any value a field lists, at the same specificity', () => {
+		const listed = [
+			entry('family', {
+				usb: [{ vendorId: ['0x0001', '0x0002'], productId: ['0x0010', '0x0011'] }]
+			}),
+			entry('names', { usb: [{ vendorId: '0x0003', productName: ['A', 'B'] }] }),
+			entry('bt', { bluetooth: [{ namePrefix: ['W830', 'W820'] }, { name: ['X1', 'X2'] }] })
+		];
+		const usb = (vendorId: string, productId?: string, productName?: string) =>
+			ids(
+				matchDevice(listed, {
+					usb: {
+						vendorId,
+						...(productId !== undefined ? { productId } : {}),
+						...(productName !== undefined ? { productName } : {})
+					}
+				})
+			);
+		expect(usb('0x0002', '0x0011')).toEqual(['family:3']);
+		expect(usb('0x0002', '0x0012')).toEqual([]);
+		expect(usb('0x0001')).toEqual([]);
+		expect(usb('0x0003', undefined, 'B')).toEqual(['names:3']);
+		expect(ids(matchDevice(listed, { bluetooth: { name: 'W820NB' } }))).toEqual(['bt:1']);
+		expect(ids(matchDevice(listed, { bluetooth: { name: 'X2' } }))).toEqual(['bt:2']);
+	});
+
+	it('prefers a device profile over a group profile of equal specificity', () => {
+		const family = entry(
+			'group',
+			{ usb: [{ vendorId: ['0x0001', '0x0002'], productId: '0x0010' }] },
+			{ group: true }
+		);
+		const device = entry('device', { usb: [{ vendorId: '0x0002', productName: 'Device' }] });
+		const other = entry('other', { usb: [{ vendorId: '0x0002', productName: 'Device' }] });
+		const identity = { usb: { vendorId: '0x0002', productId: '0x0010', productName: 'Device' } };
+
+		const r = matchDevice([family, device], identity);
+		expect(r.matches.map((m) => `${m.id}:${m.specificity}:${m.group}`)).toEqual([
+			'device:3:false',
+			'group:3:true'
+		]);
+		expect(r).toMatchObject({ best: { id: 'device' }, ambiguous: false });
+		// Whole profiles carry the flag in device.group.
+		const asProfile = { id: 'group', match: family.match!, device: { group: true } };
+		expect(matchDevice([asProfile, device], identity).best?.id).toBe('device');
+		// Two device profiles still tie.
+		expect(matchDevice([family, device, other], identity)).toMatchObject({
+			best: null,
+			ambiguous: true
+		});
+	});
 });
 
 // --- client -----------------------------------------------------------------------------------

@@ -82,12 +82,12 @@ why a block can't be driven: an unknown handler (data newer than this bridge) or
 
 | Handler | Transports | Options |
 | --- | --- | --- |
-| `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`; `0x21` on newer models), `disabledPresetId` (the "EQ off" preset) |
+| `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`; `0x21` on newer models) |
 | `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101) |
 | `moondrop-usb-hid` | HID | – |
 | `moondrop-old-fashioned-hid` | HID | – |
 | `conexant-usb-hid` | HID | – |
-| `ktmicro-usb-hid` | HID | `baseRegister` (default `0x26`), `bandRegisters` (`[{ "freq", "q" }]` per band, for models that skip or reorder registers), `disabledSlot` (default 2), `customSlot` (default 3) |
+| `ktmicro-usb-hid` | HID | `baseRegister` (default `0x26`), `bandRegisters` (`[{ "freq", "q" }]` per band, for models that skip or reorder registers), `customSlot` (default 3) |
 | `fosi-audio-usb-hid` | HID | `reportId` (default 1), `bandwidth` (default 0), `defaultSlot` (default 7) |
 | `qudelix-usb-hid` | HID | – (the report comes from the descriptor) |
 | `jds-labs-usb-serial` | serial | – |
@@ -101,7 +101,10 @@ why a block can't be driven: an unknown handler (data newer than this bridge) or
 
 The rest of the block is the same for every handler: `presets` (`[{ "id", "name" }]`, the
 device's EQ memories), `disconnectOnSave`, `baudRate` (serial; default 115200 over USB, 9600 over
-Bluetooth) and `experimental`. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
+Bluetooth) and `experimental`. A preset marked `"bypass": true` is the one that turns the EQ off:
+`setEnabled(false)` selects it, and reading it back reports no current slot. Only `fiio-usb-hid`
+and `ktmicro-usb-hid` turn the EQ off with a preset (KT Micro's default is slot 2); the others
+refuse a `bypass` preset. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,
 `timeout`, `bad-response`, `rejected`, `transport` or `invalid-request`.

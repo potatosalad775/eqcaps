@@ -2,14 +2,11 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
 	"id": "tanchjim-fission",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Tanchjim", "model": "Fission" },
 	"match": {
 		"usb": [
 			{ "vendorId": "0x31b2", "productId": "0x1119", "productName": "TANCHJIM-FISSION  DSP" },
-			{ "vendorId": "0x31b2", "productName": "TANCHJIM FISSION" },
-			{ "vendorId": "0x31b2", "productName": "TANCHJIM-FISSION  DSP" }
+			{ "vendorId": "0x31b2", "productName": ["TANCHJIM FISSION", "TANCHJIM-FISSION  DSP"] }
 		]
 	},
 	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127, "step": 1 } },
@@ -27,6 +24,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ overrides its shared constraints with {\"deviceHandlesPregain\":false}."
+		"notes": "devicePEQ overrides its shared constraints with {\"deviceHandlesPregain\":false}."
 	}
 }
