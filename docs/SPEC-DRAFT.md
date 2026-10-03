@@ -660,6 +660,7 @@ type FitResult = {
   preamp: number;
   changes: Change[];             // where the result differs from what was wanted
   unassigned: Filter[];          // wanted filters that got no slot
+  slotOf: (number | null)[];     // slot of wanted filter k; null if inactive, flat or unassigned
   feasible: boolean;             // validate(slots, preamp) = []
 };
 type Change = {

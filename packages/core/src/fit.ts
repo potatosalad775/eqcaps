@@ -28,6 +28,8 @@ export interface FitResult {
 	changes: Change[];
 	/** Wanted filters that got no slot. */
 	unassigned: Filter[];
+	/** Slot of each wanted filter: null when inactive, projected flat or unassigned. */
+	slotOf: (number | null)[];
 	/** validate(slots, preamp) is empty. */
 	feasible: boolean;
 }
@@ -107,6 +109,7 @@ export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): F
 		preamp: pre,
 		changes,
 		unassigned: wanted.filter((_, k) => lost.get(k) === 'unassigned'),
+		slotOf: [...slotOf],
 		feasible: cur.violations.length === 0
 	};
 }

@@ -96,8 +96,20 @@ export function checkNoAddedBands(profile: Profile, filters: Filter[], preamp: n
 	expect(activeCount(r.slots) + r.unassigned.length).toBeLessThanOrEqual(activeCount(filters));
 }
 
+/** slotOf pairs every filled slot with exactly one wanted filter, the one its changes name. */
+export function checkSlotOf(profile: Profile, filters: Filter[], preamp: number): void {
+	const r = fit(profile, filters, preamp);
+	expect(r.slotOf).toHaveLength(filters.length);
+	const used = r.slotOf.filter((s): s is number => s !== null);
+	expect(new Set(used).size).toBe(used.length);
+	expect(used.every((s) => r.slots[s])).toBe(true);
+	expect(used.length).toBe(r.slots.filter(Boolean).length);
+	for (const c of r.changes) if (c.filter !== null) expect(c.slot).toBe(r.slotOf[c.filter]);
+}
+
 export function checkFit(profile: Profile, filters: Filter[], preamp: number): void {
 	checkSound(profile, filters, preamp);
+	checkSlotOf(profile, filters, preamp);
 	checkFaithful(profile, filters, preamp);
 	checkIdempotent(profile, filters, preamp);
 	checkNoAddedBands(profile, filters, preamp);
