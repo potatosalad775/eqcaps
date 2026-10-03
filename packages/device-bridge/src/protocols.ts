@@ -191,6 +191,7 @@ export const PROTOCOLS: Readonly<Record<string, Protocol>> = {
 	'moondrop-quark2': walkplay(),
 	'bgvp-mx1': walkplay({ experimental: true }),
 	'crinear-protocol-max': walkplay(),
+	'crinear-protocol-micro': walkplay(),
 	'ddhifi-dsp-cable': walkplay(),
 	'ddhifi-hifi-dsp-audio-with-pd': walkplay(),
 	'letshuoer-dt04': walkplay({ experimental: true }),

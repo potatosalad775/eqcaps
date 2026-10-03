@@ -1,0 +1,29 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-peq-8-band-10db-ls-lowpass",
+	"id": "crinear-protocol-micro",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "CrinEar", "model": "Protocol Micro" },
+	"match": {
+		"usb": [{ "vendorId": "0x3302", "productId": "0xc20f", "productName": "Protocol Micro" }]
+	},
+	"bandCount": 8,
+	"band": { "gain": { "min": -15, "max": 15, "step": 0.00390625 } },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "evidence/crinear-protocol-micro/2026-10-03-3f3bd4.json",
+				"date": "2026-10-03"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "Crinacle EQ tool: gain slider from -15 to +15 dB",
+				"date": "2026-10-03"
+			}
+		],
+		"notes": "Guided read with the eqcaps inspector on 2026-10-03 in peq.szwalkplay.com: its buttons move gain and Q by 0.1, but typed values reach the device as they are, rounded onto the 1/256 wire grid, so the steps are 0.00390625 (the evidence file's own summary, 0.01, predates that reading; INSPECTOR §3.3). Bands 2–7 not checked: assumed to match band 1.\npeq.szwalkplay.com caps gain at ±10 dB; the Crinacle EQ tool allows ±15."
+	}
+}
