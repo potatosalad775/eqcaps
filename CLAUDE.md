@@ -70,6 +70,9 @@ for v2. Don't define format details anywhere except SPEC.md.
   validate it. `<brand>` is `brandSlug(device.brand)`. Abstract bases: `data/bases/<id>.json`.
 - `data/` was seeded once by `scripts/import/seed.ts` (D31) and is now edited by hand. Don't re-run
   the importer over it.
+- No calibration (D39): profiles hold the value the device is told, and nothing corrects firmware
+  quirks (no `realization` in `data/`, no factors folded into domains, no scaling in codecs). Put a
+  reported quirk in `meta.notes` as a warning.
 - Device bridge (D33): handlers see only the transport interfaces in `src/transport.ts`, never
   browser APIs (those are in `src/browser/`, typed structurally). Codecs write exactly the written
   values they're given: round onto the wire grid, never clamp, pad or convert types; anything the

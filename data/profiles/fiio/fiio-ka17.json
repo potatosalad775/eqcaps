@@ -14,16 +14,6 @@
 			{ "vendorId": "0x0a12", "productName": "FIIO KA17 (MQA HID)" }
 		]
 	},
-	"realization": {
-		"laws": [{ "law": "gainScaledQ", "types": ["PK"] }],
-		"sources": [
-			{
-				"kind": "community",
-				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/compensation.js",
-				"date": "2026-10-02"
-			}
-		]
-	},
 	"meta": {
 		"status": "draft",
 		"sources": [
@@ -38,6 +28,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Reported quirk, not corrected (D39): devicePEQ reports that peaking filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40))."
 	}
 }

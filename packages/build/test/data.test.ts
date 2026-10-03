@@ -54,11 +54,9 @@ describe('published data', () => {
 		});
 		expect(errors).toEqual([]);
 		expect(result?.id).toBe('fiio-ka17');
-		// 3150.55 Hz is off the KA17's 1 Hz grid and -14 dB is outside its ±12 dB. Its gainScaledQ
-		// law turns the wanted Q 2 into a written Q of 2·10^(14/40) ≈ 4.477, off the 0.01 grid.
+		// 3150.55 Hz is off the KA17's 1 Hz grid and -14 dB is outside its ±12 dB.
 		expect(result?.problems.map((v) => `${v.filter}:${v.field}:${v.code}`)).toEqual([
 			'1:freq:off-grid',
-			'1:q:off-grid',
 			'1:gain:out-of-range'
 		]);
 		expect(result?.written.feasible).toBe(true);

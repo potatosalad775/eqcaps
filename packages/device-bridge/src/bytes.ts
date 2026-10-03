@@ -86,11 +86,6 @@ export function tidyF32(v: number): number {
 	return Number(v.toPrecision(7));
 }
 
-/** A wire value times a non-integer factor, without the float noise (31 × 0.9775 → 30.3025). */
-export function scaled(raw: number, factor: number): number {
-	return Number((raw * factor).toPrecision(12));
-}
-
 /** The wire field `round(value · scale)` in `range`, as canonical min, max and step. */
 export function grid(scale: number, range: readonly [number, number]) {
 	return { min: range[0] / scale, max: range[1] / scale, step: 1 / scale };

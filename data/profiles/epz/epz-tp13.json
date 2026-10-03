@@ -29,17 +29,6 @@
 			{ "vendorId": "0xb44d", "productName": "EPZ TP13 AI ENC audio" }
 		]
 	},
-	"band": { "freq": { "min": 20.5275, "max": 19999.65, "step": 0.9775 } },
-	"realization": {
-		"laws": [{ "law": "nyquistScaledQ", "types": ["PK", "LSC"], "designRate": 96000 }],
-		"sources": [
-			{
-				"kind": "community",
-				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/compensation.js",
-				"date": "2026-10-02"
-			}
-		]
-	},
 	"meta": {
 		"status": "draft",
 		"sources": [
@@ -64,6 +53,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Registered by modernGraphTool only. Constraints are devicePEQ's \"SchemeNo11\" group, which its recorded capture's product id belongs to. The engine realizes 0.9775 × the frequency on the wire, so frequencies are multiples of 0.9775 Hz; the codec divides by 0.9775. devicePEQ configures nyquistScaledQ with a design rate of 96000 Hz, while its own comments derive about 49152 Hz from measurements. Unresolved upstream."
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Registered by modernGraphTool only. Constraints are devicePEQ's \"SchemeNo11\" group, which its recorded capture's product id belongs to. Reported quirk, not corrected (D39): devicePEQ measured an EPZ TP13 placing bands about 2.25% below the frequency sent, with Q coming out lower toward high frequencies, and applies both to every SchemeNo11 device. Vendor apps send and show frequencies as they are, and so does this profile."
 	}
 }

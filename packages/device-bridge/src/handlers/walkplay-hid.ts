@@ -4,25 +4,20 @@
 // Report 0x4B; requests [0x80 read | 0x01 write, <cmd>, …]. A band write (cmd 0x09) carries the
 // band twice: as Q2.30 biquad coefficients at 96 kHz (bytes 7–26), and as metadata from byte 27:
 // freq u16 LE, q u16 LE ×256, gain s16 LE ×256, type, 0, slot. Reads answer in the same layout.
-// Both forms carry the wire frequency: where the firmware runs off 96 kHz (`freqScale`), the
-// coefficients are computed at the frequency sent, so the device's response lands on the value.
+// Both forms carry the frequency as given, in Hz. Some firmware is reported to place a band off
+// that frequency (SchemeNo11 about 2.25% low); the codec doesn't correct for it (D39).
 // Preamp: cmd 0x03, s8 dB. A write ends with a commit: [1,5,0], [1,0x17,0], [1,0x0A,4,0,0,FF,FF,0],
 // [1,1,1,0] (persist, PEQ on).
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { biquadQ30, coefficientBytes } from '../biquad.ts';
-import { field, grid, I16, I8, le16, readI16le, readI8, readU16le, scaled, U8 } from '../bytes.ts';
+import { field, grid, I16, I8, le16, readI16le, readI8, readU16le, U8 } from '../bytes.ts';
 import { BridgeError } from '../errors.ts';
 import type { Codec, HandlerContext, HidFrame, HidHandler, WriteState } from '../handler.ts';
 import { hidFrame, hidRequest, sendFrame, typeCodes, waitForInput } from '../io.ts';
 import type { HidTransport } from '../transport.ts';
 
 export interface WalkplayHidOptions {
-	/**
-	 * Hz per frequency unit on the wire. SchemeNo11 firmware places a band 2.25% below the number
-	 * it's given, so its written grid is 0.9775 Hz (D29, D31). Default 1.
-	 */
-	freqScale?: number;
 	/** Slot byte of a write that names no slot. Default 101 ("Custom"). */
 	defaultSlot?: number;
 }
@@ -42,27 +37,26 @@ const COMMIT = [
 export const WALKPLAY_TYPES = typeCodes('walkplay', { PK: 2, LSC: 1, HSC: 3, LPQ: 4, HPQ: 5 });
 
 /** The band of a read answer or write frame; null for an unset band. */
-export function decodeWalkplayBand(d: ArrayLike<number>, freqScale = 1): Filter | null {
+export function decodeWalkplayBand(d: ArrayLike<number>): Filter | null {
 	const freq = readU16le(d, 27);
 	const q = readU16le(d, 29);
 	if (freq === 0 || freq === 0xffff || q === 0) return null;
 	return {
 		type: WALKPLAY_TYPES.decode(d[33] ?? 0),
-		freq: scaled(freq, freqScale),
+		freq,
 		q: q / 256,
 		gain: readI16le(d, 31) / 256
 	};
 }
 
-const scale = (o: WalkplayHidOptions) => o.freqScale ?? 1;
 /** 0 and 0xFFFF in freq, and 0 in q, read back as an unset band. */
 const FREQ = [1, 0xfffe] as const;
 const Q = [1, 0xffff] as const;
 
 export const walkplayHidCodec: Codec<WalkplayHidOptions, HidFrame> = {
 	types: WALKPLAY_TYPES.types,
-	wire: (o) => ({
-		freq: { min: scaled(FREQ[0], scale(o)), max: scaled(FREQ[1], scale(o)), step: scale(o) },
+	wire: () => ({
+		freq: grid(1, FREQ),
 		q: grid(256, Q),
 		gain: grid(256, I16),
 		preamp: grid(1, I8)
@@ -70,7 +64,7 @@ export const walkplayHidCodec: Codec<WalkplayHidOptions, HidFrame> = {
 	encode({ filters, preamp, slot }, o) {
 		const slotByte = field(slot ?? o.defaultSlot ?? 101, 1, U8, 'slot');
 		const frames = filters.map((f, i) => {
-			const freq = field(f.freq / scale(o), 1, FREQ, 'freq');
+			const freq = field(f.freq, 1, FREQ, 'freq');
 			const type = WALKPLAY_TYPES.encode(f.type);
 			const coeffs = biquadQ30(f.type, freq, f.gain, f.q, 96000);
 			return [
@@ -96,12 +90,12 @@ export const walkplayHidCodec: Codec<WalkplayHidOptions, HidFrame> = {
 		}
 		return [...frames, ...COMMIT].map((d) => hidFrame(REPORT_ID, d));
 	},
-	decode(frames, o) {
+	decode(frames) {
 		const state: WriteState = { filters: [] };
 		for (const { data: d } of frames) {
 			if (d[0] !== WRITE) continue;
 			if (d[1] === BAND) {
-				state.filters[d[4]!] = decodeWalkplayBand(d, scale(o));
+				state.filters[d[4]!] = decodeWalkplayBand(d);
 				state.slot = d[35]!;
 			} else if (d[1] === PREAMP) state.preamp = readI8(d, 4);
 		}
@@ -142,7 +136,7 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 				2000,
 				`Walkplay band ${i}`
 			);
-			filters.push(decodeWalkplayBand(answer, scale(ctx.options)));
+			filters.push(decodeWalkplayBand(answer));
 		}
 		const result: { filters: (Filter | null)[]; preamp?: number } = { filters };
 		try {

@@ -17,19 +17,6 @@
 		"q": { "min": 0.1, "max": 10 },
 		"gain": { "min": -12, "max": 12 }
 	},
-	"realization": {
-		"laws": [
-			{ "law": "gainScaledQ", "types": ["PK", "LSC", "HSC"] },
-			{ "law": "shelfFrequencyShift", "types": ["LSC", "HSC"], "designRate": 48000 }
-		],
-		"sources": [
-			{
-				"kind": "community",
-				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/compensation.js",
-				"date": "2026-10-02"
-			}
-		]
-	},
 	"preamp": { "mode": "none" },
 	"meta": {
 		"status": "draft",
@@ -45,6 +32,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ also lists band-stop and constant-Q peaking filters. Band-stop is the notch (NO); constant-Q peaking has no code in the format."
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ also lists band-stop and constant-Q peaking filters. Band-stop is the notch (NO); constant-Q peaking has no code in the format. Reported quirk, not corrected (D39): devicePEQ reports that filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40)), and that shelf frequencies move with gain."
 	}
 }

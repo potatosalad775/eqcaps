@@ -259,7 +259,7 @@ also needs reconnection after saves.
 | Public ids/URLs churn | Home fixed under the owner's account (D24); custom domain before any move; ids permanent, with `deprecated` + `replacedBy` |
 | Device tiers are Chromium-only | T0/T4 work everywhere; the UI explains instead of hiding |
 | Android USB access (WebView has no WebHID, Web Serial or WebUSB) | Native plugin stays protocol-free and lives in the app repo; codecs never touch browser APIs (D27). A Kotlin device bridge remains out of scope. |
-| Realization laws are wrong or missing for a device | Laws carry their own sources, and unmeasured ones are shown as such (SPEC §8); `measurement` evidence verifies them; no `realization` key means unknown, not exact |
+| Realization laws are wrong or missing for a device | The database ships none (D39): devices get the values the user asks for, and reported quirks are warnings in the notes; no `realization` key means unknown, not exact |
 
 ## 7. Immediate next steps
 

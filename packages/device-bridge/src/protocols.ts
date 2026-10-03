@@ -100,8 +100,6 @@ const walkplay = (
 	slots: WALKPLAY,
 	...extra
 });
-/** Walkplay SchemeNo11: bands land 2.25% below the frequency sent. */
-const SCHEME_NO11 = { options: { freqScale: 0.9775 } };
 
 const moondrop: Protocol = { handler: 'moondrop-usb-hid' };
 
@@ -174,7 +172,7 @@ export const PROTOCOLS: Readonly<Record<string, Protocol>> = {
 
 	// Walkplay chipset: product id groups, then named devices
 	'walkplay-schemeno10-devices': walkplay(),
-	'walkplay-schemeno11-devices': walkplay(SCHEME_NO11),
+	'walkplay-schemeno11-devices': walkplay(),
 	'walkplay-schemeno13-devices': walkplay(),
 	'walkplay-schemeno15-devices': walkplay(),
 	'walkplay-schemeno16-devices': walkplay(),
@@ -183,14 +181,14 @@ export const PROTOCOLS: Readonly<Record<string, Protocol>> = {
 	'walkplay-schemeno19-devices': walkplay(),
 	'walkplay-schemeno20-devices': walkplay(),
 	'walkplay-schemeno21-devices': walkplay(),
-	'walkplay-cs43131-hifi-audio-dsp': walkplay(SCHEME_NO11),
+	'walkplay-cs43131-hifi-audio-dsp': walkplay(),
 	'walkplay-cs43198-hifi-dsp-audio': walkplay(),
 	'walkplay-cs431xx': walkplay({ experimental: true }),
 	'walkplay-dual-cs43198': walkplay({ experimental: true }),
 	'walkplay-es9039': walkplay({ experimental: true }),
 	'walkplay-es9039-hifi-dsp-audio': walkplay({ experimental: true }),
-	'epz-tp13': walkplay(SCHEME_NO11),
-	'moondrop-quark2': walkplay(SCHEME_NO11),
+	'epz-tp13': walkplay(),
+	'moondrop-quark2': walkplay(),
 	'bgvp-mx1': walkplay({ experimental: true }),
 	'crinear-protocol-max': walkplay(),
 	'ddhifi-dsp-cable': walkplay(),
@@ -224,7 +222,7 @@ export const PROTOCOLS: Readonly<Record<string, Protocol>> = {
 	'moondrop-echo-b': { handler: 'conexant-usb-hid' },
 
 	// KT Micro
-	'jcally-kt02h20': ktmicro({ options: { freqScale: 2 } }),
+	'jcally-kt02h20': ktmicro(),
 	'kiwi-ears-allegro-pro': ktmicro({ disconnectOnSave: true }),
 	'kiwi-ears-allegro-mini': ktmicro({ disconnectOnSave: true }),
 	'kiwi-ears-kt0211l-devices': ktmicro({ disconnectOnSave: true }),
@@ -358,8 +356,7 @@ const HID_VENDORS: readonly { vendorIds: readonly number[]; protocol: Protocol }
 		],
 		protocol: walkplay()
 	},
-	// Most older KT Micro firmware doubles the frequency it's given.
-	{ vendorIds: [0x31b2], protocol: ktmicro({ options: { freqScale: 2 } }) },
+	{ vendorIds: [0x31b2], protocol: ktmicro() },
 	{ vendorIds: [0x152a], protocol: { handler: 'fosi-audio-usb-hid' } }
 ];
 

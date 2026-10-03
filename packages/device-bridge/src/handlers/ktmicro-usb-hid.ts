@@ -5,32 +5,17 @@
 // write, 'S' 0x53 commit; answers echo register and cmd. A band has two registers: gain s16 LE ×10
 // and freq u16 LE, then q u16 LE ×1000 and type. Register 0x24 is the EQ slot, 0x66 the preamp
 // (s8 dB). Not every model acknowledges register writes; the commit makes them take effect.
+// Older firmware is reported to double the frequency it's given; the codec doesn't correct for it
+// (D39).
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
-import {
-	field,
-	grid,
-	I16,
-	I8,
-	le16,
-	readI16le,
-	readI8,
-	readU16le,
-	scaled,
-	U16,
-	U8
-} from '../bytes.ts';
+import { field, grid, I16, I8, le16, readI16le, readI8, readU16le, U16, U8 } from '../bytes.ts';
 import { BridgeError } from '../errors.ts';
 import type { Codec, HandlerContext, HidFrame, HidHandler, WriteState } from '../handler.ts';
 import { hidFrame, hidRequest, refuseUncarried, sendFrame, typeCodes } from '../io.ts';
 import type { HidTransport } from '../transport.ts';
 
 export interface KtmicroHidOptions {
-	/**
-	 * Hz per frequency unit on the wire. Older firmware doubles the frequency it's given, so its
-	 * written grid is 2 Hz (D29). Default 1.
-	 */
-	freqScale?: number;
 	/** First band register; band i uses base + 2i and base + 2i + 1. Default 0x26. */
 	baseRegister?: number;
 	/** Explicit (gain/freq, q/type) registers per band, for models that skip or reorder them. */
@@ -71,12 +56,10 @@ const packet = (register: number, cmd: number, data: number[] = []) => {
 	return bytes;
 };
 
-const scale = (o: KtmicroHidOptions) => o.freqScale ?? 1;
-
 export const ktmicroCodec: Codec<KtmicroHidOptions, HidFrame> = {
 	types: KTMICRO_TYPES.types,
-	wire: (o) => ({
-		freq: { min: 0, max: scaled(0xffff, scale(o)), step: scale(o) },
+	wire: () => ({
+		freq: grid(1, U16),
 		q: grid(1000, U16),
 		gain: grid(10, I16),
 		preamp: grid(1, I8)
@@ -86,7 +69,7 @@ export const ktmicroCodec: Codec<KtmicroHidOptions, HidFrame> = {
 		const { filters, preamp } = request;
 		const frames = filters.flatMap((f, i) => {
 			const regs = ktmicroRegisters(o, i);
-			const freq = field(f.freq / scale(o), 1, U16, 'freq');
+			const freq = field(f.freq, 1, U16, 'freq');
 			return [
 				packet(regs.freq, WRITE, [...le16(field(f.gain, 10, I16, 'gain') & 0xffff), ...le16(freq)]),
 				packet(regs.q, WRITE, [
@@ -113,7 +96,7 @@ export const ktmicroCodec: Codec<KtmicroHidOptions, HidFrame> = {
 			if (!a || !b) break;
 			state.filters.push({
 				type: KTMICRO_TYPES.decode(b[8]!),
-				freq: scaled(readU16le(a, 8), scale(o)),
+				freq: readU16le(a, 8),
 				q: readU16le(b, 6) / 1000,
 				gain: readI16le(a, 6) / 10
 			});
@@ -169,7 +152,7 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 			const b = await request(ctx, packet(regs.q, READ), `KT Micro band ${i} q`);
 			filters.push({
 				type: KTMICRO_TYPES.decode(b[8] ?? 0),
-				freq: scaled(readU16le(a, 8), scale(ctx.options)),
+				freq: readU16le(a, 8),
 				q: readU16le(b, 6) / 1000,
 				gain: readI16le(a, 6) / 10
 			});

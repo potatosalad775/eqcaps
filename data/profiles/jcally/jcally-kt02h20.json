@@ -11,7 +11,7 @@
 			{ "vendorId": "0x31b2", "productName": "KT02H20 HIFI Audio" }
 		]
 	},
-	"band": { "types": ["PK"], "freq": { "min": 20, "max": 20000, "step": 2 } },
+	"band": { "types": ["PK"] },
 	"meta": {
 		"status": "draft",
 		"sources": [
@@ -26,6 +26,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ overrides its shared constraints with {\"supportsLSFilter\":false,\"supportsHSFilter\":false}. The engine realizes 2 × the frequency on the wire, so frequencies are multiples of 2 Hz; the codec divides by 2."
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ overrides its shared constraints with {\"supportsLSFilter\":false,\"supportsHSFilter\":false}. Reported quirk, not corrected (D39): devicePEQ halves frequencies before sending them to this device, because older KT Micro firmware doubles the frequency it's given, but its own capture of this device was recorded with the halving off."
 	}
 }

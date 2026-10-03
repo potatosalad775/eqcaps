@@ -22,9 +22,11 @@
 **Units are fixed:** `freq` in Hz, `gain` and `preamp` in dB, and `q` dimensionless as defined by
 the RBJ Audio EQ Cookbook for the filter type. Profiles never carry device-native units. Authors
 fold in every conversion that depends only on the value itself: bandwidth in octaves → Q, raw
-register values → dB, a constant factor the engine always applies. If the native grid becomes
-non-uniform after conversion, enumerate it with `values`. A deviation that depends on another field
-isn't a unit; it's a realization law (§8, DECISIONS D29).
+register values → dB. If the native grid becomes non-uniform after conversion, enumerate it with
+`values`. A deviation that depends on another field isn't a unit; it's a realization law (§8,
+DECISIONS D29). A difference between the value the engine is told and the filter it produces is
+never folded in, even a constant one: domains hold what the engine is told, as its own software
+means it (DECISIONS D39).
 
 ## 2. Top level
 
@@ -290,8 +292,8 @@ always lie inside, because of the rule below.
   `gain → freq` under `shelfFrequencyShift`. Together with the variant edges of §6, the graph MUST
   stay acyclic. The graph is checked per slot (after merging, §5.2), and a law adds its edge only
   in slots whose `types` include one of the law's types.
-- A constant factor, such as a frequency the engine always realizes ×0.9775, is not a law. It
-  depends only on the value itself, so authors fold it into the domains (§1).
+- A constant factor, such as a frequency the engine always realizes ×0.9775, is not a law, and
+  authors don't fold it into the domains either (§1). Profiles don't record it.
 
 **Provenance.** Probes and read-back see written values, so they can't show realization; only a
 measurement can. `realization` therefore carries its own `sources` (non-empty, source objects as in

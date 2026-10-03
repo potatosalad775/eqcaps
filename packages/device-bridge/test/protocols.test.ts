@@ -155,14 +155,9 @@ test('a profile with a manual preamp has a protocol that writes it', () => {
 	expect(wrong.map(([id]) => id)).toEqual([]);
 });
 
-const freqStep = (id: string) => (resolveSlot(profile(id), 0).freq as { step?: number }).step ?? 1;
-
-test("a constant frequency factor is the profile's frequency step (D29)", () => {
-	for (const [id, p] of driven) {
-		if (p.handler !== 'walkplay-hid' && p.handler !== 'ktmicro-usb-hid') continue;
-		const scale = (p.options as { freqScale?: number } | undefined)?.freqScale ?? 1;
-		expect(scale, id).toBe(freqStep(id));
-	}
+test('the database corrects no quirks: no profile has realization laws (D39)', () => {
+	const calibrated = [...profiles.values()].filter((p) => p.realization).map((p) => p.id);
+	expect(calibrated).toEqual([]);
 });
 
 /** Where a profile domain isn't inside the codec's wire field. */
@@ -222,10 +217,7 @@ test('profile domains the wire cannot carry', () => {
 describe('devices without a profile', () => {
 	test('a known vendor gets its usual protocol, marked experimental', () => {
 		expect(guessProtocol(0x2972)).toMatchObject({ handler: 'fiio-usb-hid', experimental: true });
-		expect(guessProtocol(0x31b2)).toMatchObject({
-			handler: 'ktmicro-usb-hid',
-			options: { freqScale: 2 }
-		});
+		expect(guessProtocol(0x31b2)).toMatchObject({ handler: 'ktmicro-usb-hid' });
 		expect(guessProtocol(0x1234)).toBeUndefined();
 	});
 
