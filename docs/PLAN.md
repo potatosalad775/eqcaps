@@ -70,8 +70,8 @@ eqcaps/
 ├── packages/
 │   ├── core/                     types, semantic validator, engine (zero deps, sync)
 │   ├── client/                   fetch/cache index, profiles, bundle; matchDevice()
-│   ├── build/                    structural validation (Ajv) and the validation pipeline; later
-│   │                             compile, index, bundle, hashes and the CI CLI
+│   ├── build/                    structural validation (Ajv), the validation pipeline, publishing
+│   │                             (flatten, index, bundle, hashes) and the data CLI
 │   ├── device-bridge/            codecs, sessions, profiles' protocols checked, transport interface and
 │   │                             browser transports (WebHID/Web Serial/Web Bluetooth); from devicePEQ (D20, D33)
 │   └── kotlin/                   (not scheduled, D15) Kotlin port of core
@@ -275,11 +275,11 @@ on hardware; reconnecting for a phone or desktop vendor app is built but not yet
 
 | Risk | Mitigation |
 | --- | --- |
-| Format frozen before real-world use reveals gaps | `/next/` channel; the freeze gate requires ≥ 10 profiles at `community-verified` or better across all hard cases; later additions arrive as minors |
+| Format frozen before real-world use reveals gaps | Frozen 2026-10-03 with the verified-profiles gate waived by the owner (D36); gaps arrive as additive minors (SPEC §15) or wait for v2 |
 | Few contributions | Seed import makes the DB useful on day one; the inspector makes contributing a guided flow; "draft" lowers the bar |
-| Probing harms hearing or hardware | Opt-in, mute/headphones-off gate, EQ commands only, backup → restore with verification, write budget shown, rate limiting, maintainers' own devices first |
+| A guided read harms hearing or hardware | The inspector never writes (D40): the user sets values in the vendor app, a hearing notice comes first, and a final read confirms the EQ is back as it was (INSPECTOR §3.5) |
 | Bridge drifts between modernGraphTool and this repo during extraction | Moving is decided (D20): freeze device-peq changes in modernGraphTool or sync with a script until it consumes the package; take upstream devicePEQ changes at one pinned commit |
-| Upstream devicePEQ keeps changing after the seed import | The importer records the upstream commit; review upstream diffs by hand now and then (D26) |
+| Upstream devicePEQ keeps changing after the seed import | The seed and the bridge come from one pinned commit, `0617f38` (D31, D33); review upstream diffs by hand now and then (D26) |
 | Wrong data writes bad EQ to devices | Consumers always run `fit` on the hard path; `status` visible; device firmware usually clamps anyway; "wrong constraint" issue form |
 | Public ids/URLs churn | Home fixed under the owner's account (D24); custom domain before any move; ids permanent, with `deprecated` + `replacedBy` |
 | Device tiers are Chromium-only | T0/T4 work everywhere; the UI explains instead of hiding |

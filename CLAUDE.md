@@ -27,7 +27,7 @@ Never edit `schema/v1/source.schema.json`,
 | --- | --- |
 | `docs/PLAN.md` | goal, consumers, architecture, repo layout, phased roadmap with exit criteria, risks |
 | `docs/SPEC.md` | **the** format definition (v1, frozen) and engine semantics. Single source of truth. |
-| `docs/INSPECTOR.md` | inspector web app: capability tiers, device probing methodology, safety, privacy |
+| `docs/INSPECTOR.md` | inspector web app: capability tiers, guided reads, safety, privacy |
 | `docs/DECISIONS.md` | every design decision with rationale, review of the original concept draft, **open questions for the owner** |
 | `docs/research/prior-art.md` | evidence: existing constraint models + what real device handlers encode |
 

@@ -421,7 +421,7 @@ scope, like `@potatosalad775/turboeq`:
 | What | Where |
 | --- | --- |
 | Repository | `github.com/potatosalad775/eqcaps` |
-| Pages (inspector at `/`, data at `/v1/` and `/next/`) | `https://potatosalad775.github.io/eqcaps/` |
+| Pages (inspector at `/`, data at `/v1/`; `/next/` until D36) | `https://potatosalad775.github.io/eqcaps/` |
 | `$schema` in profiles | `https://potatosalad775.github.io/eqcaps/v1/schema/profile.schema.json` |
 | npm, data files (mirrored by jsDelivr) | `@potatosalad775/eqcaps` |
 | npm, code | `@potatosalad775/eqcaps-core`, `@potatosalad775/eqcaps-client`, `@potatosalad775/eqcaps-device-bridge` |
