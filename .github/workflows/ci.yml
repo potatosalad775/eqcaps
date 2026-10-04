@@ -3,8 +3,9 @@ name: CI
 # Lint, typecheck, test and build on every PR and every push to main.
 #
 # Runs on Windows as well as Linux on purpose: line-ending drift only shows up on a Windows
-# checkout (Git for Windows rewrites line endings unless .gitattributes pins them), and the
-# maintainer works on Windows.
+# checkout (Git for Windows rewrites line endings unless .gitattributes pins them), path handling
+# differs, and the maintainer works on Windows. Lint and typecheck don't depend on the OS, so they
+# run on Linux only. A successful run on main triggers the Pages deploy (deploy.yml).
 
 on:
   push:
@@ -46,12 +47,15 @@ jobs:
       # First, so a contributor's data mistakes are the first thing the PR shows. Each issue is
       # also an annotation on the offending line of the diff.
       - name: Validate data
+        if: runner.os == 'Linux'
         run: npm run data:validate
 
       - name: Lint (Prettier + ESLint)
+        if: runner.os == 'Linux'
         run: npm run lint
 
       - name: Typecheck
+        if: runner.os == 'Linux'
         run: npm run check
 
       - name: Test
@@ -63,7 +67,7 @@ jobs:
       - name: Build data (/v1/)
         run: npm run data:build
 
-      # After a clean checkout, an install, a type generation check and a build, nothing tracked
+      # After a clean checkout, an install, the checks and a build, nothing tracked
       # may have changed. If .gitattributes ever stops pinning LF, this fails on Windows only.
       - name: Working tree must be clean
         shell: bash

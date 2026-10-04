@@ -1,14 +1,16 @@
 name: Deploy
 
-# Publishes the data to GitHub Pages on every push to main (DECISIONS D18):
+# Publishes the data to GitHub Pages after every push to main that passes CI (DECISIONS D18):
 #   /v1/     the format's channel: profiles/, index.json, bundle.json, schema/, conformance/
 #   /        the inspector (apps/inspector), reading /v1/ from the same origin
 # Needs Pages enabled with "GitHub Actions" as its source.
 
 on:
-  push:
-    branches:
-      - main
+  # Only a successful CI run of a push to main deploys, and it deploys the commit CI tested.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -22,10 +24,18 @@ concurrency:
 jobs:
   build:
     name: Build site
+    # `branches` above filters on the head branch name, which a fork's pull request can share, so
+    # the event is checked too.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
