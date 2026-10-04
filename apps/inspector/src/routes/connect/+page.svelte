@@ -181,11 +181,7 @@
 		try {
 			if (!device) {
 				const transport =
-					chosen.kind === 'hid'
-						? chosen.transport
-						: chosen.kind === 'serial'
-							? await chosen.choice.open(protocol)
-							: await chosen.choice.open(protocol);
+					chosen.kind === 'hid' ? chosen.transport : await chosen.choice.open(protocol);
 				const bandCount = profile?.bandCount ?? bandsWanted;
 				device = openReadOnly(transport, protocol, { profile: { bandCount } });
 			}
