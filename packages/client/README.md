@@ -18,7 +18,9 @@ const profile = best && (await client.loadProfile(best.id));
 if (profile) {
 	const problems = validateList(profile, filters); // while editing: flag, don't rewrite
 	const result = fit(profile, filters, preamp); // before writing: what to send
-	const slots = complete(profile, result.slots).filters; // every slot, neutral fillers included
+	// Every slot filled. Given what the device holds (if it can be read), empty slots keep that
+	// layout, written flat, instead of neutral fillers.
+	const slots = complete(profile, result.slots, { hints: readBack }).filters;
 }
 ```
 

@@ -33,6 +33,8 @@ const { best, matches } = await client.matchDevice(identityOf(transport));
 const { protocol } = protocolForMatches(matches);  // from the data: no bridge release per device
 const device = openDevice(transport, protocol, { profile });
 const state = await device.pull();                // written values, band order
+// Empty slots keep the device's layout, written flat, instead of neutral fillers.
+const bands = complete(profile, fit(profile, wanted, preamp).slots, { hints: state.filters }).filters;
 await device.push({ filters: bands });            // exactly what you give it: fit + complete first`;
 </script>
 

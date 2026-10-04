@@ -46,10 +46,11 @@ if (transport) {
 		// Read: written values, as the device holds them.
 		const state = await device.pull();
 
-		// Write: what the user wants, fitted to the device, every band filled.
+		// Write: what the user wants, fitted to the device, every band filled. With the read-back
+		// as hints, bands the user left empty keep what the device holds, written flat.
 		if (profile) {
 			const result = fit(profile, wantedFilters, wantedPreamp);
-			const filters = complete(profile, result.slots).filters;
+			const filters = complete(profile, result.slots, { hints: state.filters }).filters;
 			const preamp = profile.preamp.mode === 'manual' ? result.preamp : undefined;
 			await device.push({ filters, ...(preamp === undefined ? {} : { preamp }) });
 		}

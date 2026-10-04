@@ -12,7 +12,8 @@ environment types, synchronous.
 - **Types** generated from the JSON Schema, including the published `index.json` and
   `bundle.json`.
 
-Writing to a device: `fit` → `complete` → encode the written values. Reading from one: decode.
+Writing to a device: `fit` → `complete` → encode the written values; pass what the device holds
+as `complete`'s `hints` and empty slots keep its layout. Reading from one: decode.
 While editing: `validateList`.
 
 To load profiles, use [`@potatosalad775/eqcaps-client`](https://www.npmjs.com/package/@potatosalad775/eqcaps-client).
