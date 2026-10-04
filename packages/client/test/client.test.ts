@@ -266,6 +266,33 @@ describe('createClient', () => {
 		expect(m.best?.id).toBe('a');
 	});
 
+	it('hands the app objects of its own, which it may edit', async () => {
+		const { s, client } = setup({
+			'index.json': [index()],
+			'profiles/a.json': [profile('a')]
+		});
+		const first = await client.loadIndex();
+		first?.profiles.splice(0);
+		expect((await client.loadIndex())?.profiles).toHaveLength(1);
+		expect((await client.loadProfile('a'))?.id).toBe('a');
+		expect(s.requests).toEqual(['index.json', 'profiles/a.json']);
+	});
+
+	it('aborts a request that times out', async () => {
+		const signals: unknown[] = [];
+		const client = createClient({
+			baseUrl: 'https://x/',
+			timeout: 5,
+			fetch: (_url, init) => {
+				signals.push(init.signal);
+				return new Promise(() => {});
+			}
+		});
+		expect(await client.loadIndex()).toBeNull();
+		expect(signals).toHaveLength(1);
+		expect((signals[0] as AbortSignal).aborted).toBe(true);
+	});
+
 	it('persists through a web storage store', async () => {
 		const map = new Map<string, string>();
 		const storage = {

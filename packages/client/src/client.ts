@@ -11,10 +11,10 @@ import { matchDevice, type DeviceIdentity, type MatchResult } from './match.ts';
 /** The format's channel (SPEC §14), the default. */
 export const V1_URL = 'https://potatosalad775.github.io/eqcaps/v1/';
 
-/** The subset of `fetch` the client uses. */
+/** The subset of `fetch` the client uses. `signal` is an AbortSignal, where the platform has one. */
 export type FetchLike = (
 	url: string,
-	init: { headers: Record<string, string> }
+	init: { headers: Record<string, string>; signal?: unknown }
 ) => Promise<{
 	status: number;
 	ok: boolean;
@@ -62,6 +62,7 @@ type Platform = {
 	fetch?: FetchLike;
 	setTimeout?: (fn: () => void, ms: number) => unknown;
 	clearTimeout?: (handle: unknown) => void;
+	AbortController?: new () => { signal: unknown; abort(): void };
 };
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
@@ -155,6 +156,24 @@ export function createClient(options: ClientOptions = {}): EqcapsClient {
 			return null;
 		}
 	};
+	/**
+	 * `parse` for the client's own reads, remembered per key while the body stays the same, so a
+	 * revalidation or a profile lookup doesn't parse the whole index or bundle again. Never handed
+	 * to the app: its objects are shared, and apps may edit what they get.
+	 */
+	const parsed = new Map<string, { body: string; value: unknown }>();
+	const parseShared = <T>(
+		key: string,
+		body: string,
+		read: (v: unknown) => T | null,
+		what: string
+	): T | null => {
+		const hit = parsed.get(key);
+		if (hit?.body === body) return hit.value as T;
+		const value = parse(body, read, what);
+		if (value !== null) parsed.set(key, { body, value });
+		return value;
+	};
 
 	/** GET with If-None-Match. `null` body means 304. Undefined on any failure. */
 	const get = async (path: string, etag?: string) => {
@@ -163,15 +182,20 @@ export function createClient(options: ClientOptions = {}): EqcapsClient {
 			return undefined;
 		}
 		let timer: unknown;
+		// Aborted on timeout, so a request that took too long stops downloading.
+		const controller = platform.AbortController ? new platform.AbortController() : undefined;
 		try {
 			const timedOut = new Promise<never>((_, reject) => {
-				timer = platform.setTimeout?.(
-					() => reject(new Error(`timed out after ${timeout} ms`)),
-					timeout
-				);
+				timer = platform.setTimeout?.(() => {
+					controller?.abort();
+					reject(new Error(`timed out after ${timeout} ms`));
+				}, timeout);
 			});
 			const res = await Promise.race([
-				doFetch(baseUrl + path, { headers: etag ? { 'If-None-Match': etag } : {} }),
+				doFetch(baseUrl + path, {
+					headers: etag ? { 'If-None-Match': etag } : {},
+					...(controller ? { signal: controller.signal } : {})
+				}),
 				timedOut
 			]);
 			if (res.status === 304) return { body: null, etag };
@@ -186,32 +210,30 @@ export function createClient(options: ClientOptions = {}): EqcapsClient {
 		}
 	};
 
-	/** TTL + ETag revalidation for index.json and bundle.json. */
+	/**
+	 * TTL + ETag revalidation for index.json and bundle.json. Resolves to a body that reads as
+	 * `read` accepts (its value is in `parsed`), or null.
+	 */
 	const loadDocument = async <T>(
 		key: string,
 		path: string,
 		read: (v: unknown) => T | null
-	): Promise<T | null> => {
+	): Promise<string | null> => {
+		const valid = (body: string) => parseShared(key, body, read, path) !== null;
 		const cached = await cacheGet(key);
-		if (cached && now() - cached.fetchedAt < ttl) {
-			const value = parse(cached.body, read, path);
-			if (value) return value;
-		}
+		if (cached && now() - cached.fetchedAt < ttl && valid(cached.body)) return cached.body;
 		const res = await get(path, cached?.etag);
 		if (res?.body === null && cached) {
 			await cacheSet(key, { ...cached, fetchedAt: now() });
-			return parse(cached.body, read, path);
+			return valid(cached.body) ? cached.body : null;
 		}
-		if (res?.body) {
-			const value = parse(res.body, read, path);
-			if (value) {
-				const entry: CacheEntry = { body: res.body, fetchedAt: now() };
-				if (res.etag) entry.etag = res.etag;
-				await cacheSet(key, entry);
-				return value;
-			}
+		if (res?.body && valid(res.body)) {
+			const entry: CacheEntry = { body: res.body, fetchedAt: now() };
+			if (res.etag) entry.etag = res.etag;
+			await cacheSet(key, entry);
+			return res.body;
 		}
-		return cached ? parse(cached.body, read, path) : null;
+		return cached && valid(cached.body) ? cached.body : null;
 	};
 
 	const inFlight = new Map<string, Promise<unknown>>();
@@ -224,20 +246,34 @@ export function createClient(options: ClientOptions = {}): EqcapsClient {
 		return p;
 	};
 
-	const loadIndex = () =>
-		once('index', async () => {
-			const index = await loadDocument('index', 'index.json', readIndex);
-			return index ?? (options.snapshot ? indexOfBundle(options.snapshot) : null);
-		});
+	const indexBody = () => once('index', () => loadDocument('index', 'index.json', readIndex));
+	let snapshotIndex: DataIndex | undefined;
 
-	const loadBundle = () =>
-		once('bundle', async () => {
-			const bundle = await loadDocument('bundle', 'bundle.json', readBundle);
-			return bundle ?? options.snapshot ?? null;
-		});
+	/** The index for the client's own lookups: shared, never handed to the app. */
+	const sharedIndex = async (): Promise<DataIndex | null> => {
+		const body = await indexBody();
+		if (body !== null) return parseShared('index', body, readIndex, 'index.json');
+		if (!options.snapshot) return null;
+		snapshotIndex ??= indexOfBundle(options.snapshot);
+		return snapshotIndex;
+	};
+
+	const loadIndex = async (): Promise<DataIndex | null> => {
+		const body = await indexBody();
+		if (body !== null) return parse(body, readIndex, 'index.json');
+		return options.snapshot ? indexOfBundle(options.snapshot) : null;
+	};
+
+	const loadBundle = async (): Promise<DataBundle | null> => {
+		const body = await once('bundle', () => loadDocument('bundle', 'bundle.json', readBundle));
+		return (
+			(body !== null ? parse(body, readBundle, 'bundle.json') : null) ?? options.snapshot ?? null
+		);
+	};
 
 	const fromBundles = async (id: string) => {
 		const cached = await cacheGet('bundle');
+		// Parsed afresh: the profile found goes to the app. Only reached when the network fails.
 		const bundle = cached ? parse(cached.body, readBundle, 'bundle.json') : null;
 		return (
 			bundle?.profiles.find((p) => p.id === id) ??
@@ -248,7 +284,7 @@ export function createClient(options: ClientOptions = {}): EqcapsClient {
 
 	const loadProfile = (id: string) =>
 		once(`profile:${id}`, async (): Promise<Profile | null> => {
-			const index = await loadIndex();
+			const index = await sharedIndex();
 			const entry = index?.profiles.find((e) => e.id === id);
 			if (index && !entry) return null;
 			const key = `profile:${id}`;
