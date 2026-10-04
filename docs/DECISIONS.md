@@ -479,7 +479,9 @@ AutoEQ hasn't been updated in years, and devicePEQ's maintainer is focused on ot
 `scripts/import/seed.ts` ran once against devicePEQ `0617f38` (2026-08-26), with facts from
 modernGraphTool `fd55b9f8` and AutoEQ `7ae0f56` transcribed in `scripts/import/tables.ts`. It
 wrote 98 `draft` profiles and 15 bases. From now on `data/` is edited by hand (D26); the script
-refuses to overwrite it without `--force`.
+refuses to overwrite it without `--force`. *2026-10-04:* the importer is removed from the
+repository: it predates D42 and D43 and no longer writes the format as `data/` holds it. Its last
+version is in commit `1b3dc3c` (`scripts/import/`).
 - **Bases** are per codec family and devicePEQ shape (`walkplay-peq-8-band-10db-pk-only`), because
   wire grids differ per handler even where devicePEQ shares a shape. A base is written only when
   two or more profiles use it; otherwise its content goes into the profile.

@@ -70,8 +70,8 @@ for v2. Don't define format details anywhere except SPEC.md.
   and at least one case in `conformance/v1/profiles/cases/` that triggers it. A test enforces it.
 - One JSON file per profile: `data/profiles/<brand>/<id>.json`, starting with `"$schema"` so editors
   validate it. `<brand>` is `brandSlug(device.brand)`. Abstract bases: `data/bases/<id>.json`.
-- `data/` was seeded once by `scripts/import/seed.ts` (D31) and is now edited by hand. Don't re-run
-  the importer over it.
+- `data/` was seeded once by an importer (D31, removed; last in commit `1b3dc3c`) and is now edited
+  by hand.
 - No calibration (D39): profiles hold the value the device is told, and nothing corrects firmware
   quirks (no factors folded into domains, no scaling in codecs). Put a reported quirk in
   `meta.notes` as a warning.

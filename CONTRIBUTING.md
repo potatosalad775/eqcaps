@@ -51,8 +51,8 @@ before it leaves the page. Attach that file to the pull request; a maintainer co
 `data/evidence/`. A read-back is cited as a `community` source: it shows values the device holds,
 not its limits, so it supports a fix but doesn't verify a profile.
 
-Most profiles were seeded from devicePEQ, modernGraphTool and AutoEQ by
-[`scripts/import/seed.ts`](scripts/import/seed.ts) and are `draft`. Their notes say what is known
+Most profiles were seeded from devicePEQ, modernGraphTool and AutoEQ by a one-off importer
+(DECISIONS D31) and are `draft`. Their notes say what is known
 to be uncertain. Checking one against your device is one of the most useful things you can do.
 
 ## Adding a device to the bridge

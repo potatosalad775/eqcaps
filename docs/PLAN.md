@@ -78,7 +78,9 @@ eqcaps/
 ├── apps/inspector/               Svelte 5 + Vite static SPA
 ├── scripts/
 │   ├── codegen.ts                source.schema.json + TS types from profile.schema.json (D13)
-│   └── import/                   one-off importers: seed data (devicePEQ, modernGraphTool, AutoEQ)
+│   ├── conformance.ts            engine vectors in conformance/v1/
+│   ├── release.ts                npm packages, tag and GitHub Release (D32)
+│   └── sample-consumer.ts        fetch, match and fit against the built data, as an app would
 ├── LICENSE                       MIT: packages/, apps/, scripts/
 ├── LICENSE-DATA                  CC0-1.0: data/, schema/, conformance/ and all published JSON (D25)
 ├── THIRD-PARTY-NOTICES.md        devicePEQ (0BSD), modernGraphTool (MIT), AutoEQ (MIT)

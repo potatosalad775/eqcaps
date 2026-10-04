@@ -26,7 +26,6 @@
 		"conformance": "node scripts/conformance.ts",
 		"data:validate": "node --conditions=eqcaps:source packages/build/src/cli.ts validate",
 		"data:build": "node --conditions=eqcaps:source packages/build/src/cli.ts build --out dist/site/v1",
-		"data:import": "node scripts/import/seed.ts",
 		"release": "node scripts/release.ts",
 		"inspector:dev": "npm run dev -w apps/inspector"
 	},
