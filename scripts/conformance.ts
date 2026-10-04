@@ -499,7 +499,7 @@ const files: Record<string, { description: string; vectors: Vector[] }> = {
 	},
 	complete: {
 		description:
-			'complete(profile, slots) (SPEC §13.7). Property op: runners check its properties on every vector; expect.warnings lists the warning codes per slot this input must give.',
+			'complete(profile, slots, { hints }) (SPEC §13.7). Property op: runners check its properties on every vector; expect.warnings lists the warning codes per slot this input must give.',
 		vectors: [
 			completeVector('fillers at the log centre', BASE, [pk(1000, 3), null]),
 			completeVector('fillers spread between neighbours under ascendingFrequency', ASCENDING, [
@@ -517,7 +517,19 @@ const files: Record<string, { description: string; vectors: Vector[] }> = {
 			completeVector('gainless types only', { bandCount: 1, band: { types: ['HPQ', 'AP'] } }, []),
 			completeVector('no room for a filler', LOCKED_MIDDLE, [pk(2000, 1), null, pk(5000, 1)]),
 			completeVector('partitioned windows', PARTITIONED, [null, pk(300, 1), null, null]),
-			completeVector('unbounded: only the filters', APO, [pk(100, 1), null, pk(200, 1)])
+			completeVector('unbounded: only the filters', APO, [pk(100, 1), null, pk(200, 1)]),
+			completeVector(
+				'hints written flat in empty slots',
+				BASE,
+				[pk(1000, 3), null, null],
+				[pk(31, 6, 0.7), pk(62, -2, 0.7), pk(125, 1, 0.7), pk(250, 0, 0.7)]
+			),
+			completeVector(
+				'a hint that would break ascendingFrequency is ignored',
+				ASCENDING,
+				[pk(1000, 3), null, pk(4000, 1), null],
+				[null, pk(500, 2), null, pk(8000, 2)]
+			)
 		]
 	}
 };
@@ -551,14 +563,15 @@ function fitVector(
 function completeVector(
 	description: string,
 	profile: ProfileRef,
-	slots: (Filter | null)[]
+	slots: (Filter | null)[],
+	hints?: (Filter | null)[]
 ): Vector {
-	const r = complete(resolveProfile(profile), slots);
+	const r = complete(resolveProfile(profile), slots, hints ? { hints } : {});
 	return {
 		description,
 		profile,
 		op: 'complete',
-		input: { slots },
+		input: hints ? { slots, hints } : { slots },
 		expect: { warnings: r.warnings }
 	};
 }

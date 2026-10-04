@@ -33,6 +33,6 @@ export type { AssignResult } from './assign.ts';
 export { fit } from './fit.ts';
 export type { Change, FitResult } from './fit.ts';
 export { complete } from './complete.ts';
-export type { CompleteResult, CompleteWarning } from './complete.ts';
+export type { CompleteOptions, CompleteResult, CompleteWarning } from './complete.ts';
 export { describe, describeDomain, isGraphic, unsupported } from './describe.ts';
 export type { ProfileDescription, SlotGroupDescription } from './describe.ts';

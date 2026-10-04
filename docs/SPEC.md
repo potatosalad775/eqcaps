@@ -699,7 +699,7 @@ the result is at distance 0 from them.
 re-optimizing against the target response (AutoEQ's job), using the per-slot domains this format
 provides.
 
-### 13.7 `complete(profile, slots) → { filters, warnings }` (hardware write path)
+### 13.7 `complete(profile, slots, { hints? }) → { filters, warnings }` (hardware write path)
 
 Returns exactly `bandCount` written filters (the non-null ones when unbounded). Filled slots pass
 through unchanged, and each empty slot gets a **neutral** filler, its fields in evaluation order:
@@ -713,11 +713,18 @@ through unchanged, and each empty slot gets a **neutral** filler, its fields in 
   it (or the domain bounds), within what the slot's domain and the slots after it allow.
   Otherwise, the geometric centre of the domain, projected.
 
+**Hints.** `hints[i]`, when given, is what slot `i` held before (typically read back from the
+engine). An empty slot with a hint takes it written flat instead of the filler above: type, `freq`
+and `q` projected onto the slot in evaluation order, with a wanted `gain` of 0. A hint that comes
+out active is ignored. Under `ascendingFrequency`, all hints are kept if together they add no
+break; otherwise each one, in slot order, that adds none. Kept hints then count as filled slots
+for the fillers that remain. A write keeps the engine's own layout this way, as vendor apps do.
+
 `warnings` holds `{ slot, code }`: `not-neutral` when the filler is active (the slot can't take
 0 dB, or allows only gainless types), and `no-room` when no frequency satisfies
 `ascendingFrequency` (the filler then takes its default frequency).
 
-**Properties:** fillers are in their domains, neutral unless a warning says otherwise, and if
+**Properties:** fillers, hints included, are in their domains, neutral unless a warning says otherwise, and if
 `validate(slots)` reports no `ascendingFrequency` violation, neither does
 `validate(complete(slots).filters)`.
 

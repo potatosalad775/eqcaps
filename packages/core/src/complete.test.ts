@@ -56,4 +56,29 @@ describe('complete (SPEC §13.7)', () => {
 			pk(200, 1)
 		]);
 	});
+
+	it('writes a hint flat in its empty slot instead of the neutral filler', () => {
+		const hints = [pk(31, 6, 0.7), pk(62, -2, 0.7), pk(125, 1, 0.7), pk(250, 0, 0.7)];
+		const r = complete(profile(), [pk(1000, 3), null, null], { hints });
+		expect(r.filters).toEqual([pk(1000, 3), pk(62, 0, 0.7), pk(125, 0, 0.7), pk(250, 0, 0.7)]);
+		expect(r.warnings).toEqual([]);
+	});
+
+	it('ignores a hint that cannot be flat', () => {
+		const shifted = profile({ bandCount: 2, bands: [{ index: 1, gain: { min: 1, max: 6 } }] });
+		const r = complete(shifted, [], { hints: [pk(100, 3), pk(200, 3)] });
+		expect(r.filters[0]).toEqual(pk(100, 0));
+		expect(r.filters[1]?.freq).toBeCloseTo(Math.sqrt(20 * 20000), 9);
+		expect(r.warnings).toEqual([{ slot: 1, code: 'not-neutral' }]);
+	});
+
+	it('ignores a hint that would break ascendingFrequency', () => {
+		const p = profile({ rules: [{ type: 'ascendingFrequency' }] });
+		const r = complete(p, [pk(1000, 3), null, pk(4000, 1), null], {
+			hints: [null, pk(500, 2), null, pk(8000, 2)]
+		});
+		expect(r.filters[1]?.freq).toBeCloseTo(2000, 9);
+		expect(r.filters[3]).toEqual(pk(8000, 0));
+		expect(r.warnings).toEqual([]);
+	});
 });

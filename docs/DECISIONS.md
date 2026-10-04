@@ -1193,6 +1193,16 @@ untouched, and every §13.6 property holds with "filters" read as "active filter
 would redo projection and the rule checks); placing flat filters in `assign` (it would change
 `validateList`).
 
+### D46. complete takes hints: empty slots keep the engine's layout (accepted, 2026-10-04)
+After D45, a slot the app leaves empty still gets the neutral filler, which a read-back shows as
+a band at the log centre of the range, Q 1, whatever the device held there. Profiles carry no
+default layout (format v1 is frozen, D36), but an app that can read the engine knows it.
+`complete` now takes optional per-slot `hints` and writes each one flat (type, freq and q
+projected, gain 0) where the filler would go, unless it can't be flat or adds an
+`ascendingFrequency` break (SPEC §13.7). The properties are unchanged, with hints counted as
+fillers. **Rejected:** a default layout in profiles (a format change, and the vendor's layout
+often differs by firmware); hints in `fit` (they aren't wanted filters and must never cost one).
+
 ---
 
 ## Open questions for the owner

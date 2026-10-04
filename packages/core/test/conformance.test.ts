@@ -91,8 +91,11 @@ function runProperty(v: Vector): void {
 		expect(fit(p, filters, preamp).feasible).toBe((v.expect as { feasible: boolean }).feasible);
 	} else {
 		const slots = i['slots'] as (Filter | null)[];
-		checkComplete(p, slots);
-		expect(complete(p, slots).warnings).toEqual((v.expect as { warnings: unknown[] }).warnings);
+		const hints = i['hints'] as (Filter | null)[] | undefined;
+		checkComplete(p, slots, hints);
+		expect(complete(p, slots, hints ? { hints } : {}).warnings).toEqual(
+			(v.expect as { warnings: unknown[] }).warnings
+		);
 	}
 }
 

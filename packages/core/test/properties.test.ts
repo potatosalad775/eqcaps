@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { domainViolation, fit, near, project } from '../src/index.ts';
 import {
 	caseArb,
+	filterArb,
 	freqDomain,
 	gainDomain,
 	profileArb,
@@ -78,6 +79,21 @@ describe('complete properties (SPEC §13.7)', () => {
 			fc.property(caseArb, (c) =>
 				checkComplete(c.profile, fit(c.profile, c.filters, c.preamp).slots)
 			),
+			{ numRuns: RUNS }
+		);
+	});
+
+	it('keeps those properties with hints, and writes every hint it keeps flat', () => {
+		const withHints = caseArb.chain((c) =>
+			fc
+				.array(fc.option(filterArb(c.profile), { nil: null }), { maxLength: 12 })
+				.map((hints) => ({ ...c, hints }))
+		);
+		fc.assert(
+			fc.property(withHints, (c) => {
+				const slots = fit(c.profile, c.filters, c.preamp).slots;
+				checkComplete(c.profile, slots, c.hints);
+			}),
 			{ numRuns: RUNS }
 		);
 	});

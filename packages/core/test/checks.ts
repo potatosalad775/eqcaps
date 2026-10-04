@@ -140,8 +140,12 @@ export function checkAssign(profile: Profile, filters: Filter[], valid: boolean)
  * and neutral unless a warning says otherwise, and ascendingFrequency kept whenever validate
  * found room for the fillers.
  */
-export function checkComplete(profile: Profile, slots: (Filter | null)[]): void {
-	const r = complete(profile, slots);
+export function checkComplete(
+	profile: Profile,
+	slots: (Filter | null)[],
+	hints?: (Filter | null)[]
+): void {
+	const r = complete(profile, slots, hints ? { hints } : {});
 	if (profile.bandCount === null) {
 		expect(r.filters).toEqual(present(slots).map(normalizeFilter));
 		return;

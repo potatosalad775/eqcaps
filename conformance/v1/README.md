@@ -52,7 +52,7 @@ Filters are `{ "type", "freq", "q", "gain" }`, and `slots` arrays use `null` for
 | `validate` | `slots`, optional `preamp` | the `Violation[]`, in order |
 | `assign` | `filters` | `{ "valid" }`: whether an assignment exists in which every active filter has a slot that accepts it as is |
 | `fit` | `filters`, `preamp` | `{ "feasible" }` |
-| `complete` | `slots` | `{ "warnings" }`: the `{ slot, code }` warnings, in slot order |
+| `complete` | `slots`, and `hints` when given | `{ "warnings" }`: the `{ slot, code }` warnings, in slot order |
 
 JSON has no NaN or infinities, so `project` inputs spell them `"NaN"`, `"Infinity"` and
 `"-Infinity"`.
@@ -68,8 +68,8 @@ JSON has no NaN or infinities, so `project` inputs spell them `"NaN"`, `"Infinit
     and domains accept it.
   - `fit`: sound, safe, faithful (on active filters), idempotent, and no added active filters;
     `feasible` as given.
-  - `complete`: exactly `bandCount` filters, filled slots unchanged, fillers in their domains and
-    neutral unless warned, `ascendingFrequency` kept when `validate` found room; `warnings` as
+  - `complete`: exactly `bandCount` filters, filled slots unchanged, fillers (hints included) in
+    their domains and neutral unless warned, `ascendingFrequency` kept when `validate` found room; `warnings` as
     given.
 
 The reference runner is

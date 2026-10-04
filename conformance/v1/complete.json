@@ -1,5 +1,5 @@
 {
-	"description": "complete(profile, slots) (SPEC §13.7). Property op: runners check its properties on every vector; expect.warnings lists the warning codes per slot this input must give.",
+	"description": "complete(profile, slots, { hints }) (SPEC §13.7). Property op: runners check its properties on every vector; expect.warnings lists the warning codes per slot this input must give.",
 	"vectors": [
 		{
 			"description": "fillers at the log centre",
@@ -69,6 +69,41 @@
 					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
 					null,
 					{ "type": "PK", "freq": 200, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": { "warnings": [] }
+		},
+		{
+			"description": "hints written flat in empty slots",
+			"profile": {},
+			"op": "complete",
+			"input": {
+				"slots": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }, null, null],
+				"hints": [
+					{ "type": "PK", "freq": 31, "q": 0.7, "gain": 6 },
+					{ "type": "PK", "freq": 62, "q": 0.7, "gain": -2 },
+					{ "type": "PK", "freq": 125, "q": 0.7, "gain": 1 },
+					{ "type": "PK", "freq": 250, "q": 0.7, "gain": 0 }
+				]
+			},
+			"expect": { "warnings": [] }
+		},
+		{
+			"description": "a hint that would break ascendingFrequency is ignored",
+			"profile": { "rules": [{ "type": "ascendingFrequency" }] },
+			"op": "complete",
+			"input": {
+				"slots": [
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 },
+					null,
+					{ "type": "PK", "freq": 4000, "q": 1, "gain": 1 },
+					null
+				],
+				"hints": [
+					null,
+					{ "type": "PK", "freq": 500, "q": 1, "gain": 2 },
+					null,
+					{ "type": "PK", "freq": 8000, "q": 1, "gain": 2 }
 				]
 			},
 			"expect": { "warnings": [] }
