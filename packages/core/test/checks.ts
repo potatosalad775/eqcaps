@@ -54,7 +54,10 @@ export function checkSound(profile: Profile, filters: Filter[], preamp: number):
 	expect(violations.filter((v) => !RESIDUAL.has(v.code))).toEqual([]);
 }
 
-/** Faithful: validateList(x) = [] ⇒ the slots hold x, with no changes. Returns whether it applied. */
+/**
+ * Faithful: validateList(x) = [] ⇒ the slots' active filters are x's, with no changes. Returns
+ * whether it applied.
+ */
 export function checkFaithful(profile: Profile, filters: Filter[], preamp: number): boolean {
 	if (validateList(profile, filters, preamp).length > 0) return false;
 	const r = fit(profile, filters, preamp);
@@ -62,7 +65,8 @@ export function checkFaithful(profile: Profile, filters: Filter[], preamp: numbe
 	expect(r.unassigned).toEqual([]);
 	expect(r.feasible).toBe(true);
 	const wanted = filters.map(normalizeFilter).filter(isActive);
-	expect(sameMultiset(present(r.slots), wanted), JSON.stringify({ r, wanted })).toBe(true);
+	const written = present(r.slots).filter(isActive);
+	expect(sameMultiset(written, wanted), JSON.stringify({ r, wanted })).toBe(true);
 	return true;
 }
 

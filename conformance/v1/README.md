@@ -66,7 +66,8 @@ JSON has no NaN or infinities, so `project` inputs spell them `"NaN"`, `"Infinit
   every vector, plus the facts in `expect`:
   - `assign`: inactive filters get no slot; if `valid`, every active filter gets a slot whose types
     and domains accept it.
-  - `fit`: sound, safe, faithful, idempotent, and no added filters; `feasible` as given.
+  - `fit`: sound, safe, faithful (on active filters), idempotent, and no added active filters;
+    `feasible` as given.
   - `complete`: exactly `bandCount` filters, filled slots unchanged, fillers in their domains and
     neutral unless warned, `ascendingFrequency` kept when `validate` found room; `warnings` as
     given.

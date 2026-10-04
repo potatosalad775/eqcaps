@@ -104,6 +104,31 @@ describe('fit (SPEC §13.6)', () => {
 		expect(r.feasible).toBe(true);
 	});
 
+	it('writes flat bands as given, in list order, as vendor apps do', () => {
+		const p = profile({ bandCount: 10, band: { gain: { min: -12, max: 12, step: 0.1 } } });
+		const bands = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+		const wanted = bands.map((f, i) => pk(f, i === 1 ? 3 : 0, 0.75));
+		const r = fit(p, wanted);
+		expect(r.slots).toEqual(wanted);
+		expect(r.slotOf).toEqual(bands.map((_, i) => i));
+		expect(r.changes).toEqual([]);
+		expect(r.feasible).toBe(true);
+	});
+
+	it('keeps a band projected flat in its slot and reports the gain', () => {
+		const r = fit(profile(), [pk(100, 0.04), pk(200, 3)]);
+		expect(r.slots.slice(0, 2)).toEqual([pk(100, 0), pk(200, 3)]);
+		expect(r.slotOf).toEqual([0, 1]);
+		expect(r.changes).toEqual([{ filter: 0, slot: 0, field: 'gain', wanted: 0.04, written: 0 }]);
+	});
+
+	it('never lets a flat band take a slot an active one needs', () => {
+		const filters = [pk(100, 0), pk(200, 1), pk(400, -6), pk(800, 2), pk(1600, 1)];
+		const r = fit(profile(), filters);
+		expect(r.slots).toEqual(filters.slice(1));
+		expect(r.slotOf[0]).toBeNull();
+	});
+
 	it('never adds filters, and lists the ones left out', () => {
 		const filters = [pk(100, 3), pk(200, 0.5), pk(400, -6), pk(800, 2), pk(1600, 1), pk(3200, 0)];
 		const r = fit(profile(), filters);

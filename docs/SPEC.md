@@ -632,7 +632,7 @@ type FitResult = {
   preamp: number;
   changes: Change[];             // where the result differs from what was wanted
   unassigned: Filter[];          // wanted filters that got no slot
-  slotOf: (number | null)[];     // slot of wanted filter k; null if inactive, flat or unassigned
+  slotOf: (number | null)[];     // slot of wanted filter k, flat ones included; null if it got none
   feasible: boolean;             // validate(slots, preamp) = []
 };
 type Change = {
@@ -645,29 +645,42 @@ type Change = {
 
 Input: the app's filters, i.e. the response the user wants, and its preamp.
 
-1. `assign` the filters.
+1. `assign` the filters. Then give the inactive (flat) filters the slots `assign` left empty, so
+   a flat band reaches the engine as written, as vendor apps write it, rather than as a neutral
+   filler (§13.7). They only fill in: they never take a slot from an active filter. On a
+   homogeneous engine all filters keep list order (frequency order under `ascendingFrequency`),
+   and the latest flat filters are left out when there are too many. Elsewhere, the flat filters
+   go to the empty slots by min-cost matching, with leaving one out costing less than a type
+   change.
 2. Per slot, starting again from the wanted filter: project the type. Then project each field, in
-   evaluation order, onto its domain resolved against the fields already final. A filter whose gain projects to 0
-   is flat: its slot is left empty, and a `gain` change with `slot: null` reports it.
+   evaluation order, onto its domain resolved against the fields already final. A flat filter
+   that projects active (the slot can't take 0 dB or a gain-using type) is left out. An active
+   filter whose gain projects to 0 keeps its slot, written flat, and a `gain` change reports it.
+   On an unbounded engine there are no empty slots to keep: flat filters get none, and one that
+   projects flat is left out, with `slot: null` on its `gain` change.
 3. Rules. `minSpacing`: walk the active filters by ascending freq; if a gap is
    too small, move the higher filter to the lowest freq its domain allows at or above
    `prev · 2^octaves`, and re-evaluate the fields after `freq`. If that doesn't get it far
    enough, leave the filter as it is; the result is infeasible. `ascendingFrequency`: if the result
    breaks it, redo steps 2–3 with a frequency-ordered assignment, and take that one only if it keeps
-   at least as many filters and has fewer violations. Rule compliance is never bought by
-   silently dropping a filter.
+   at least as many active filters and has fewer violations. Rule compliance is never bought by
+   silently dropping a filter. Flat filters come last: those that add a violation are left out (in
+   slot order, each kept if it adds none), and if the result still breaks more than the active
+   filters alone would, the active filters are written alone. A filter projected flat that is
+   left out this way gets a `gain` change with `slot: null`.
 4. Project the preamp: `manual` projects onto its `gain` domain, `none` gives 0, and `auto` and
    `unknown` keep the value.
 
-`changes` compares each wanted filter with its written result, field by field, then the preamp.
+`changes` compares each active wanted filter with its written result, field by field, then the
+preamp. A flat filter's fields aren't compared: written anywhere, it does nothing.
 
 **Normative properties**, enforced by property tests and conformance vectors. With `F = fit(x)`:
 
 - Sound: `F.feasible ⇔ validate(F.slots, F.preamp) = []`.
 - Safe: every type and value in `F.slots`, and `F.preamp`, is in its domain. Only
   `rule-violated`, `unknown-rule` and `unknown-type` violations can remain.
-- Faithful: `validateList(x) = [] ⇒ F.slots` holds exactly the active filters of `x` (within ε,
-  in slot order), with no changes and nothing unassigned.
+- Faithful: `validateList(x) = [] ⇒` the active filters of `F.slots` are exactly the active
+  filters of `x` (within ε, in slot order), with no changes and nothing unassigned.
 - Idempotent: `fit(F.slots)` (its non-empty slots) has the same `slots`, `preamp` and `feasible` as
   `F`, and, when `F` is feasible, no changes.
 - `fit` never increases the number of active filters.

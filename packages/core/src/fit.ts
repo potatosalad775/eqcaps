@@ -1,4 +1,10 @@
-import { assignEngine, hungarian, orderedAssignEngine, type AssignResult } from './assign.ts';
+import {
+	assignEngine,
+	hungarian,
+	orderedAssignEngine,
+	withFlat,
+	type AssignResult
+} from './assign.ts';
 import { compareNear, near } from './domain.ts';
 import { fitToSlot } from './fit-slot.ts';
 import { isActive, normalizeFilter, usesGain, type Filter } from './filter.ts';
@@ -21,11 +27,17 @@ export interface FitResult {
 	/** Written values, one per slot: what to send to the engine. */
 	slots: (Filter | null)[];
 	preamp: number;
-	/** Every field of an assigned filter that came out different, in input order; then the preamp. */
+	/**
+	 * Every field of an assigned active filter that came out different, in input order; then the
+	 * preamp. A flat filter's fields aren't reported: whatever they are written as, it does nothing.
+	 */
 	changes: Change[];
 	/** Wanted filters that got no slot. */
 	unassigned: Filter[];
-	/** Slot of each wanted filter: null when inactive, projected flat or unassigned. */
+	/**
+	 * Slot of each wanted filter, flat ones included: null when it got none (no slot left, or a
+	 * flat filter the slots or rules couldn't take).
+	 */
 	slotOf: (number | null)[];
 	/** validate(slots, preamp) is empty. */
 	feasible: boolean;
@@ -85,10 +97,11 @@ export function fit(profile: Profile, filters: readonly Filter[], preamp = 0): F
 		const add = (field: Change['field'], from: number | FilterType, to: number | FilterType) =>
 			changes.push({ filter: k, slot: s, field, wanted: from, written: to });
 		if (s === null) {
-			// Projected flat: its slot is left empty.
+			// Projected flat, and the rules left no room to write it flat: its slot is left empty.
 			if (lost.get(k) === 'flattened') add('gain', w.gain, 0);
 			return;
 		}
+		if (!isActive(w)) return;
 		const r = slots[s] as Filter;
 		if (w.type !== r.type) add('type', w.type, r.type);
 		for (const field of ['freq', 'q', 'gain'] as const) {
@@ -122,7 +135,7 @@ function closest(p: EngineProfile, wanted: readonly Filter[], passes: readonly P
 		x,
 		d: distance(
 			active,
-			x.slots.flatMap((s) => (s ? [s] : []))
+			x.slots.flatMap((s) => (s && isActive(s) ? [s] : []))
 		)
 	}));
 	scored.sort(
@@ -194,7 +207,7 @@ interface Pass {
 	slots: (Filter | null)[];
 	/** For each input filter, its slot in `slots`. */
 	slotOf: (number | null)[];
-	/** Active input filters without a slot: no slot left, or projected flat (gain 0). */
+	/** Active input filters without a slot: no slot left, or projected flat with no room to stay. */
 	lost: Map<number, 'unassigned' | 'flattened'>;
 	violations: Violation[];
 }
@@ -205,7 +218,7 @@ function pass(p: EngineProfile, wanted: readonly Filter[], preamp: number): Pass
 	let best = attempt(p, wanted, assignEngine(p, wanted), preamp);
 	if (best.violations.some((v) => v.rule === 'ascendingFrequency')) {
 		const other = attempt(p, wanted, orderedAssignEngine(p, wanted), preamp);
-		const kept = (a: Pass) => a.slotOf.filter((s) => s !== null).length;
+		const kept = (a: Pass) => a.slots.filter((f) => f && isActive(f)).length;
 		if (kept(other) >= kept(best) && other.violations.length < best.violations.length) best = other;
 	}
 	return best;
@@ -220,9 +233,24 @@ function fitPreamp(mode: Preamp, preamp: number): number {
 function attempt(
 	p: EngineProfile,
 	wanted: readonly Filter[],
+	activeOnly: AssignResult,
+	preamp: number
+): Pass {
+	const assigned = withFlat(p, wanted, activeOnly);
+	if (assigned === activeOnly) return place(p, wanted, activeOnly, preamp);
+	// Flat filters only fill in: if laying them out costs a rule, write the active ones alone.
+	const flat = place(p, wanted, assigned, preamp);
+	const bare = place(p, wanted, activeOnly, preamp);
+	return flat.violations.length <= bare.violations.length ? flat : bare;
+}
+
+function place(
+	p: EngineProfile,
+	wanted: readonly Filter[],
 	assigned: AssignResult,
 	preamp: number
 ): Pass {
+	const bounded = p.bandCount !== null;
 	const filterIn = new Map<number, number>();
 	assigned.slotOf.forEach((s, k) => {
 		if (s !== null) filterIn.set(s, k);
@@ -235,8 +263,12 @@ function attempt(
 	let slots = assigned.slots.map((f, s) => {
 		if (!f) return null;
 		const k = filterIn.get(s) as number;
-		const g = fitToSlot(slotAt(s), wanted[k] as Filter);
-		if (isActive(g)) return g;
+		const w = wanted[k] as Filter;
+		const g = fitToSlot(slotAt(s), w);
+		// A flat filter that can only be written active is left out: fit never adds one.
+		if (!isActive(w)) return isActive(g) ? null : g;
+		// One projected flat keeps its slot, written flat, where the engine has slots to keep.
+		if (isActive(g) || bounded) return g;
 		lost.set(k, 'flattened');
 		return null;
 	});
@@ -257,7 +289,42 @@ function attempt(
 	for (const rule of p.profile.rules ?? []) {
 		if (rule.type === 'minSpacing') spread(p, slots, wantedIn, slotAt, rule.octaves);
 	}
-	return { slots, slotOf, lost, violations: validateEngine(p, slots, preamp) };
+	if (!bounded) return { slots, slotOf, lost, violations: validateEngine(p, slots, preamp) };
+	const kept = keepFlatWithinRules(p, slots, preamp);
+	slotOf = slotOf.map((s, k) => {
+		if (s === null || kept.slots[s]) return s;
+		if (isActive(wanted[k] as Filter)) lost.set(k, 'flattened');
+		return null;
+	});
+	return { slots: kept.slots, slotOf, lost, violations: kept.violations };
+}
+
+/**
+ * The slots with as many flat filters as the rules allow: all of them when they add no violation,
+ * otherwise each one, in slot order, that doesn't add one. Flat filters never move an active one,
+ * and minSpacing ignores them, so spreading first and deciding here is safe.
+ */
+function keepFlatWithinRules(
+	p: EngineProfile,
+	slots: (Filter | null)[],
+	preamp: number
+): { slots: (Filter | null)[]; violations: Violation[] } {
+	const all = validateEngine(p, slots, preamp);
+	const flat = slots.flatMap((f, s) => (f && !isActive(f) ? [s] : []));
+	if (flat.length === 0) return { slots, violations: all };
+	let out = slots.map((f) => (f && isActive(f) ? f : null));
+	let violations = validateEngine(p, out, preamp);
+	if (all.length <= violations.length) return { slots, violations: all };
+	for (const s of flat) {
+		const trial = [...out];
+		trial[s] = slots[s] as Filter;
+		const v = validateEngine(p, trial, preamp);
+		if (v.length <= violations.length) {
+			out = trial;
+			violations = v;
+		}
+	}
+	return { slots: out, violations };
 }
 
 /**

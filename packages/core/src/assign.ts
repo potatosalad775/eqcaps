@@ -112,6 +112,64 @@ export function orderedAssignEngine(p: EngineProfile, input: readonly Filter[]):
 	return result(filters, m, normalize(c, ordered(c, filters), true).slotOf);
 }
 
+/** Cost of leaving a flat filter out: above any move, below a type change; later ones go first. */
+const flatDropCost = (k: number) => 1e5 - 1e-3 * k;
+/** A slot an active filter holds: never offered to a flat one. */
+const OCCUPIED = 1e15;
+
+/**
+ * fit's assignment (SPEC §13.6 step 1): `assigned`, the active filters' assignment, plus the
+ * inactive (flat) filters in the slots it left empty, so a flat band reaches the engine as
+ * written instead of as a neutral filler. Active filters keep their claim: a flat one only takes
+ * a slot no active filter wanted. Homogeneous engines lay all of them out in list order
+ * (frequency order under ascendingFrequency), dropping the latest flat ones when they don't fit;
+ * otherwise flat ones go to the free slots by min-cost matching.
+ */
+export function withFlat(
+	p: EngineProfile,
+	input: readonly Filter[],
+	assigned: AssignResult
+): AssignResult {
+	const filters = input.map(normalizeFilter);
+	const flat = filters.flatMap((f, k) => (isActive(f) ? [] : [k]));
+	const m = p.bandCount;
+	if (m === null || flat.length === 0) return assigned;
+	const placed = assigned.slotOf.flatMap((s, k) => (s === null ? [] : [k]));
+	const room = m - placed.length;
+
+	let slotOf: Map<number, number>;
+	if (p.homogeneous) {
+		const keep = new Set([...placed, ...flat.slice(0, room)]);
+		let order = [...keep].sort((a, b) => a - b);
+		if ((p.profile.rules ?? []).some((r) => r.type === 'ascendingFrequency')) {
+			order = order.sort(
+				(a, b) => compareNear(freqKey(filters[a] as Filter), freqKey(filters[b] as Filter)) || a - b
+			);
+		}
+		slotOf = new Map(order.map((k, s) => [k, s]));
+	} else {
+		const taken = new Set(placed.map((k) => assigned.slotOf[k] as number));
+		const c: Costs = {
+			active: flat,
+			cost: flat.map((k) =>
+				p.slots.map((slot, s) => (taken.has(s) ? OCCUPIED : cost(slot, filters[k] as Filter)))
+			),
+			drop: flat.map(flatDropCost),
+			slots: p.slots.length
+		};
+		const at = (r: number, j: number) =>
+			j < c.slots ? (c.cost[r]?.[j] as number) : (c.drop[r] as number);
+		const rowToCol = hungarian(flat.length, c.slots + flat.length, at);
+		const chosen = new Map<number, number>();
+		rowToCol.forEach((j, r) => {
+			if (j < c.slots) chosen.set(flat[r] as number, j);
+		});
+		slotOf = new Map(placed.map((k) => [k, assigned.slotOf[k] as number]));
+		for (const [k, s] of normalize(c, { slotOf: chosen }, false).slotOf) slotOf.set(k, s);
+	}
+	return result(filters, m, slotOf);
+}
+
 function result(filters: Filter[], m: number, slotOf: Map<number, number>): AssignResult {
 	const slots: (Filter | null)[] = new Array<Filter | null>(m).fill(null);
 	for (const [k, s] of slotOf) slots[s] = { ...(filters[k] as Filter) };

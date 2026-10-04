@@ -318,7 +318,7 @@ the draft left room, these choices were made (all now in SPEC §6–§8 and §13
   data. Laws with a `designRate` are the identity outside `0 < f < designRate/2`, which keeps
   `toRealized`/`toWritten` total and mutually inverse. In-domain values are never affected.
 - **`fit` never trades a filter for a rule, and is a fixpoint.** A wanted filter whose gain
-  projects to 0 leaves its slot empty (a flat filter is no filter). `minSpacing` moves a filter to
+  projects to 0 leaves its slot empty (a flat filter is no filter; *2026-10-04:* no longer, D45). `minSpacing` moves a filter to
   the lowest allowed frequency at or above the target, where projecting the target could round it
   back down. The frequency-ordered assignment replaces the min-cost one only if it keeps as many
   filters. The reference repeats its pass on its own realized output until the slots stop
@@ -1177,6 +1177,21 @@ Two leftovers of devicePEQ's per-device configs, after D42.
 **Rejected:** merging preset lists by id across `extends` (FiiO lists differ in order, names and
 gaps, so it would need a way to delete entries, which costs more than the 341 entries it saves);
 keeping `disabledPresetId` beside a `bypass` mark (two ways to say one thing).
+
+### D45. fit writes flat bands; a flat filter is a band, not nothing (accepted, 2026-10-04)
+D30 had `fit` drop inactive filters and leave a band projected to 0 dB empty, for `complete` to
+fill with a neutral filler at the domain's log centre, Q 1. The sound is the same, but the device
+no longer holds the bands the user wrote: a 10-band layout with one band boosted read back from an
+OSHUN Deco as nine fillers at 632 Hz, and vendor apps (Walkplay's among them) write 0 dB bands as
+given. `fit` now gives flat filters the slots the active ones left, in list order on homogeneous
+engines; a band projected flat keeps its slot, written flat, with its `gain` change. Flat filters
+never cost an active filter its slot or a rule (SPEC §13.6), `changes` skips their fields
+(inaudible), and `slotOf` gives their slots. `assign` and `validateList` are unchanged, so editing
+UIs don't get violations about bands that do nothing. Engine semantics only: format v1 (D36) is
+untouched, and every §13.6 property holds with "filters" read as "active filters" where it counts.
+**Rejected:** keeping the old drop and having apps re-insert flat bands after `fit` (each app
+would redo projection and the rule checks); placing flat filters in `assign` (it would change
+`validateList`).
 
 ---
 
