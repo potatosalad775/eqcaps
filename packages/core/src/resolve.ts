@@ -1,7 +1,7 @@
 import { fieldOrder, type NumericField } from './dependencies.ts';
 import { isLockedDomain, near } from './domain.ts';
 import { normalizeFilter, type Filter } from './filter.ts';
-import { mergeSlotFields, slotOverrides } from './slots.ts';
+import { mergeSlotFields, slotOverrides, type SlotOverride } from './slots.ts';
 import type {
 	Domain,
 	FilterType,
@@ -36,27 +36,30 @@ export interface EngineProfile {
 	homogeneous: boolean;
 }
 
+/** Slot `i` of the profile, merged. Throws when it lacks a field (an invalid profile). */
+function mergedSlot(profile: Profile, overrides: Map<number, SlotOverride>, i: number): EngineSlot {
+	const merged = mergeSlotFields(profile.band, overrides.get(i)?.entry);
+	const { label, types, freq, q, gain, variants = [] } = merged;
+	if (!types || !freq || !q || !gain) {
+		throw new Error(
+			`profile "${profile.id}" is invalid: slot ${i} lacks types, freq, q or gain (run validateProfile)`
+		);
+	}
+	return {
+		...(label !== undefined && { label }),
+		types,
+		freq,
+		q,
+		gain,
+		variants,
+		order: fieldOrder(merged)
+	};
+}
+
 export function engineProfile(profile: Profile): EngineProfile {
 	const overrides = slotOverrides(profile);
 	const slots: EngineSlot[] = [];
-	for (let i = 0; i < (profile.bandCount ?? 1); i++) {
-		const merged = mergeSlotFields(profile.band, overrides.get(i)?.entry);
-		const { label, types, freq, q, gain, variants = [] } = merged;
-		if (!types || !freq || !q || !gain) {
-			throw new Error(
-				`profile "${profile.id}" is invalid: slot ${i} lacks types, freq, q or gain (run validateProfile)`
-			);
-		}
-		slots.push({
-			...(label !== undefined && { label }),
-			types,
-			freq,
-			q,
-			gain,
-			variants,
-			order: fieldOrder(merged)
-		});
-	}
+	for (let i = 0; i < (profile.bandCount ?? 1); i++) slots.push(mergedSlot(profile, overrides, i));
 	const key = (s: EngineSlot) => JSON.stringify([s.types, s.freq, s.q, s.gain, s.variants]);
 	const first = key(slots[0] as EngineSlot);
 	return {
@@ -67,12 +70,12 @@ export function engineProfile(profile: Profile): EngineProfile {
 	};
 }
 
-export function engineSlot(p: EngineProfile, i: number): EngineSlot {
-	const bounded = p.bandCount !== null;
-	if (!Number.isInteger(i) || i < 0 || (bounded && i >= (p.bandCount as number))) {
-		throw new RangeError(`slot ${i} does not exist (bandCount is ${p.bandCount})`);
+/** Which merged slot slot `i` uses: `i`, or 0 (the template) when unbounded. */
+function slotIndex(bandCount: number | null, i: number): number {
+	if (!Number.isInteger(i) || i < 0 || (bandCount !== null && i >= bandCount)) {
+		throw new RangeError(`slot ${i} does not exist (bandCount is ${bandCount})`);
 	}
-	return p.slots[bounded ? i : 0] as EngineSlot;
+	return bandCount === null ? 0 : i;
 }
 
 function numericHolds(c: NumericCondition, x: number | undefined): boolean {
@@ -130,7 +133,9 @@ export interface EffectiveSlot {
  * (SPEC §13.1). Exact and normative. Throws a RangeError for a slot that doesn't exist.
  */
 export function resolveSlot(profile: Profile, i: number, filter?: Filter): EffectiveSlot {
-	return effectiveSlot(engineSlot(engineProfile(profile), i), filter);
+	// Only this slot is merged, so resolving every slot of a profile stays linear.
+	const slot = mergedSlot(profile, slotOverrides(profile), slotIndex(profile.bandCount, i));
+	return effectiveSlot(slot, filter);
 }
 
 export function effectiveSlot(slot: EngineSlot, filter?: Filter): EffectiveSlot {

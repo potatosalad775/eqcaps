@@ -2,13 +2,12 @@ import { isLockedDomain } from './domain.ts';
 import { isKnownType } from './filter.ts';
 import { engineProfile, type EngineSlot } from './resolve.ts';
 import type { Domain, FilterType, Profile, Variant } from './types/schema.generated.ts';
+import { KNOWN_RULES } from './validate.ts';
 
 /** Every slot is freq-locked: a graphic EQ (SPEC §5.4). */
 export function isGraphic(profile: Profile): boolean {
 	return engineProfile(profile).slots.every((s) => isLockedDomain(s.freq));
 }
-
-const KNOWN_RULES: ReadonlySet<string> = new Set(['ascendingFrequency', 'minSpacing']);
 
 /**
  * What this engine can't model in a profile written for a newer format minor (SPEC §15). A

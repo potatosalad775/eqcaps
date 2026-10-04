@@ -31,7 +31,8 @@ export interface Violation {
 	filter?: number;
 }
 
-const KNOWN_RULES: ReadonlySet<string> = new Set(['ascendingFrequency', 'minSpacing']);
+/** The v1 rule types (SPEC §7). Any other is an unknown rule. */
+export const KNOWN_RULES: ReadonlySet<string> = new Set(['ascendingFrequency', 'minSpacing']);
 
 /**
  * Check an assigned array of written filters, one per slot, null for empty (SPEC §13.4). Exact
