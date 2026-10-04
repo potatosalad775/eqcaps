@@ -46,6 +46,9 @@ export interface ValidateSourcesOptions {
  * A file that fails its schema is reported once and its descendants are not checked further,
  * so one broken base doesn't bury the report in follow-on errors.
  */
+/** Warnings are reported but never stop a file: only errors do. */
+const hasError = (list: readonly Issue[]) => list.some((i) => i.severity === 'error');
+
 export function validateSources(
 	files: readonly AuthoringFile[],
 	options: ValidateSourcesOptions
@@ -64,7 +67,7 @@ export function validateSources(
 		add(file.path, schemaIssues);
 		const id = (file.data as { id?: unknown } | null)?.id;
 		if (typeof id !== 'string') continue;
-		if (schemaIssues.length > 0) broken.add(id);
+		if (hasError(schemaIssues)) broken.add(id);
 		const prior = byId.get(id);
 		if (prior) {
 			add(file.path, [
@@ -100,10 +103,10 @@ export function validateSources(
 		if (!flat.profile) continue;
 		const schemaIssues = options.schema.published(flat.profile);
 		add(file.path, schemaIssues, id);
-		if (schemaIssues.length > 0) continue;
+		if (hasError(schemaIssues)) continue;
 		const semantic = validateProfile(flat.profile);
 		add(file.path, semantic, id);
-		if (semantic.length > 0) continue;
+		if (hasError(semantic)) continue;
 		profiles.set(id, flat.profile);
 		fileOf.set(id, file.path);
 	}

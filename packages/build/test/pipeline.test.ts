@@ -149,6 +149,26 @@ describe('reports', () => {
 	});
 });
 
+describe('validateSources', () => {
+	const schema = createSchemaValidator(loadSchemas());
+
+	it('publishes a profile that has only warnings', () => {
+		const warning = {
+			code: 'schema' as const,
+			severity: 'warning' as const,
+			path: '/device/model',
+			message: 'test warning'
+		};
+		const warns = { ...schema, published: (d: unknown) => [...schema.published(d), warning] };
+		const report = validateSources(
+			[{ path: 'data/profiles/acme-audio/x.json', data: profile('x') }],
+			{ schema: warns }
+		);
+		expect(report.issues).toMatchObject([{ severity: 'warning', path: '/device/model' }]);
+		expect([...report.profiles.keys()]).toEqual(['x']);
+	});
+});
+
 describe('publish', () => {
 	const flat = (id: string, status = 'draft') => {
 		const { $schema: _s, ...p } = profile(id);
