@@ -501,7 +501,7 @@ const files: Record<string, { description: string; vectors: Vector[] }> = {
 		description:
 			'complete(profile, slots, { hints }) (SPEC §13.7). Property op: runners check its properties on every vector; expect.warnings lists the warning codes per slot this input must give.',
 		vectors: [
-			completeVector('fillers at the log centre', BASE, [pk(1000, 3), null]),
+			completeVector('fillers spread between the filled slots', BASE, [pk(1000, 3), null]),
 			completeVector('fillers spread between neighbours under ascendingFrequency', ASCENDING, [
 				null,
 				pk(1000, 3),

@@ -2,7 +2,7 @@
 	"description": "complete(profile, slots, { hints }) (SPEC §13.7). Property op: runners check its properties on every vector; expect.warnings lists the warning codes per slot this input must give.",
 	"vectors": [
 		{
-			"description": "fillers at the log centre",
+			"description": "fillers spread between the filled slots",
 			"profile": {},
 			"op": "complete",
 			"input": { "slots": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }, null] },

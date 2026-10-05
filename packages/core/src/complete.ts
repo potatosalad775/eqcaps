@@ -2,9 +2,9 @@ import { fitToSlot } from './fit-slot.ts';
 import {
 	ascendingBreaks,
 	ascendingFillerFreqs,
-	defaultFillerFreq,
 	fillerFinish,
 	fillerStart,
+	spreadFillerFreqs,
 	type FillerStart
 } from './filler.ts';
 import { isActive, normalizeFilter, type Filter } from './filter.ts';
@@ -65,7 +65,7 @@ export function complete(
 		freqs = chosen.freqs;
 		for (const slot of chosen.noRoom) warnings.push({ slot, code: 'no-room' });
 	} else {
-		freqs = new Map([...starts].map(([i, s]) => [i, defaultFillerFreq(s.freqDomain)]));
+		freqs = spreadFillerFreqs(filled, starts);
 	}
 
 	const filters: Filter[] = [];

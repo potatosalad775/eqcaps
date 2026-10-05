@@ -711,7 +711,11 @@ through unchanged, and each empty slot gets a **neutral** filler, its fields in 
 - freq: the locked value if locked. Otherwise, under `ascendingFrequency`, a value between its
   neighbours: each run of empty slots is spread evenly in log frequency between the filters around
   it (or the domain bounds), within what the slot's domain and the slots after it allow.
-  Otherwise, the geometric centre of the domain, projected.
+  Otherwise, any value of the domain; the reference spreads the fillers evenly in log frequency
+  over the gaps between the filled slots, widest gap first, and hands them to the empty slots in
+  ascending order. Either way, a filler SHOULD then move to a nearby ISO 266 one-third-octave
+  nominal frequency (… 500, 630, 800, 1000, 1250 …) that its domain holds and that keeps the
+  order, so a read-back shows round numbers.
 
 **Hints.** `hints[i]`, when given, is what slot `i` held before (typically read back from the
 engine). An empty slot with a hint takes it written flat instead of the filler above: type, `freq`

@@ -1205,6 +1205,22 @@ projected, gain 0) where the filler would go, unless it can't be flat or adds an
 fillers. **Rejected:** a default layout in profiles (a format change, and the vendor's layout
 often differs by firmware); hints in `fit` (they aren't wanted filters and must never cost one).
 
+### D47. Fillers spread out and sit on nominal frequencies (accepted, 2026-10-05)
+A filler's frequency was its log-spread target as is under `ascendingFrequency`, and the domain's
+log centre otherwise, so a read-back showed bands at 2714 Hz, or every empty slot at 632 Hz: a
+layout nobody chose (modernGraphTool's own band padding had the same problem). Nothing needed the
+stacking: a filler is flat, so its frequency is inaudible, and D30's reasons cover only the
+ordered case. Without the rule, `complete` now spreads the fillers over the gaps between the
+filled slots, widest first, in ascending slot order. Every filler then moves to the nearest ISO 266
+one-third-octave nominal frequency within 1/3 octave of its target that the slot's domain holds (a
+stepped domain may move it by up to 1/12 octave) and that keeps the order; otherwise the target
+stays. Under the rule, a run's targets are spread from where the run starts, so one filler's move
+doesn't shift the rest. 8 empty slots over 20 Hz–20 kHz become 40, 100, 200 … 4000, 10000 Hz with
+or without the rule. Engine semantics only (SPEC §13.7, a SHOULD), and every property holds.
+**Rejected:** 0 Hz (no domain holds it, and projection stacks the fillers at the minimum); the 1-2-5
+series (too coarse for spreads between close neighbours); a fixed octave ladder (fits only some
+band counts).
+
 ---
 
 ## Open questions for the owner

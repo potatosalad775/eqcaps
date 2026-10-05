@@ -1,5 +1,5 @@
 import type { NumericField } from './dependencies.ts';
-import { domainBounds, near } from './domain.ts';
+import { compareNear, domainBounds, near } from './domain.ts';
 import { isKnownType, usesGain, type Filter } from './filter.ts';
 import { normalizeDecimal, project } from './project.ts';
 import { resolveField, type EngineProfile, type EngineSlot } from './resolve.ts';
@@ -48,10 +48,43 @@ export function fillerFinish(slot: EngineSlot, start: FillerStart, freq: number)
 	return values as Filter;
 }
 
-/** The filler frequency when no rule constrains it: locked value, or the log centre, projected. */
+/** ISO 266 one-third-octave nominal frequencies (R10), per decade: 1, 1.25, 1.6, … 8. */
+const NOMINAL = [1, 1.25, 1.6, 2, 2.5, 3.15, 4, 5, 6.3, 8];
+/** How far a filler may move from its target to land on a nominal frequency: 1/3 octave. */
+const NOMINAL_REACH = Math.LN2 / 3;
+/** How far a stepped or set domain may move a nominal frequency it contains: 1/12 octave. */
+const NOMINAL_SLACK = Math.LN2 / 12;
+
+/**
+ * The member of `d` at the nominal frequency within its bounds nearest `target` that `fits`
+ * accepts, or null if none is within reach. Fillers read back as 630 Hz rather than 632 Hz.
+ */
+function nominalNear(target: number, d: Domain, fits: (x: number) => boolean): number | null {
+	const { min, max } = domainBounds(d);
+	const decade = Math.floor(Math.log10(target));
+	const candidates = [decade - 1, decade, decade + 1]
+		.flatMap((k) => NOMINAL.map((n) => normalizeDecimal(n * 10 ** k)))
+		.filter((c) => (c > min || near(c, min)) && (c < max || near(c, max)))
+		.filter((c) => Math.abs(Math.log(c / target)) <= NOMINAL_REACH)
+		.map((c) => ({ c, distance: Math.abs(Math.log(c / target)) }))
+		// Ties go to the lower frequency, as in project.
+		.sort((a, b) => compareNear(a.distance, b.distance) || a.c - b.c)
+		.map(({ c }) => c);
+	for (const c of candidates) {
+		const x = project(c, d, 'freq');
+		if (Math.abs(Math.log(x / c)) <= NOMINAL_SLACK && fits(x)) return x;
+	}
+	return null;
+}
+
+/**
+ * The filler frequency when no rule constrains it: locked value, or the log centre, moved to a
+ * nominal frequency where the domain has one nearby, projected.
+ */
 export function defaultFillerFreq(d: Domain): number {
 	const { min, max } = domainBounds(d);
-	return project(Math.sqrt(min * max), d, 'freq');
+	const centre = Math.sqrt(min * max);
+	return nominalNear(centre, d, () => true) ?? project(centre, d, 'freq');
 }
 
 // --- Bounds ------------------------------------------------------------------------------------
@@ -164,8 +197,9 @@ export function ascendingBreaks(p: EngineProfile, slots: Slots, strict: boolean)
 
 /**
  * Frequencies for the fillers of the empty slots under `ascendingFrequency`. A run of empty slots
- * is spread evenly in log frequency between its neighbours, within what each filler's domain and
- * the slots after it allow. Slots with no room at all get their default frequency and are listed
+ * is spread evenly in log frequency between its neighbours, each moved to a nearby nominal
+ * frequency where one keeps the order, within what each filler's domain and the slots after it
+ * allow. Slots with no room at all get their default frequency and are listed
  * in `noRoom`.
  */
 export function ascendingFillerFreqs(
@@ -190,11 +224,15 @@ export function ascendingFillerFreqs(
 
 	const freqs = new Map<number, number>();
 	const noRoom: number[] = [];
+	// The even spread a run of empty slots started with, so that moving one filler to a nominal
+	// frequency doesn't shift the targets of the rest.
+	let spread: { from: number; to: number; first: number; run: number } | null = null;
 	let lb = NO_LOWER;
 	for (let i = 0; i < n; i++) {
 		const f = slots[i];
 		if (f) {
 			lb = { v: f.freq, open: strict };
+			spread = null;
 			continue;
 		}
 		const d = (starts.get(i) as FillerStart).freqDomain;
@@ -212,17 +250,76 @@ export function ascendingFillerFreqs(
 			noRoom.push(i);
 			freqs.set(i, x);
 			lb = { v: x, open: strict };
+			spread = null;
 			continue;
 		}
 		// Empty slots from here up to the next filter, this one included.
 		let run = 1;
 		while (i + run < n && !slots[i + run]) run++;
-		const target = lo.v * (hi.v / lo.v) ** (1 / (run + 1));
-		let x = project(target, d, 'freq');
+		spread ??= { from: lo.v, to: hi.v, first: i, run };
+		const planned =
+			spread.from * (spread.to / spread.from) ** ((i - spread.first + 1) / (spread.run + 1));
+		const target =
+			planned > lo.v && planned < hi.v ? planned : lo.v * (hi.v / lo.v) ** (1 / (run + 1));
+		let x =
+			nominalNear(target, d, (v) => above(lb, v) && below(hiBound, v)) ??
+			project(target, d, 'freq');
 		if (!above(lb, x)) x = lo.attained ? lo.v : target;
 		if (!below(hiBound, x)) x = hi.attained ? hi.v : target;
 		freqs.set(i, x);
 		lb = { v: x, open: strict };
 	}
 	return { freqs, noRoom };
+}
+
+/**
+ * Frequencies for the fillers of the empty slots when no rule orders them. They share out the gaps
+ * between the filled slots (and the ends of the fillers' domains), widest gap first, spread evenly
+ * in log frequency within each, and go to the empty slots in ascending order. Each moves to a
+ * nearby nominal frequency above the filler before it, where its domain has one.
+ */
+export function spreadFillerFreqs(
+	slots: Slots,
+	starts: ReadonlyMap<number, FillerStart>
+): Map<number, number> {
+	const empty = [...starts.keys()].sort((a, b) => a - b);
+	const domain = (i: number) => (starts.get(i) as FillerStart).freqDomain;
+	const freqs = new Map<number, number>();
+	let lo = Infinity;
+	let hi = -Infinity;
+	for (const i of empty) {
+		const b = domainBounds(domain(i));
+		lo = Math.min(lo, b.min);
+		hi = Math.max(hi, b.max);
+	}
+	if (!(lo > 0 && hi > lo)) {
+		for (const i of empty) freqs.set(i, defaultFillerFreq(domain(i)));
+		return freqs;
+	}
+
+	const filled = slots.flatMap((f) => (f && f.freq > lo && f.freq < hi ? [f.freq] : []));
+	const edges = [...new Set([lo, ...filled, hi])].sort((a, b) => a - b);
+	const counts = edges.slice(1).map(() => 0);
+	const share = (g: number) =>
+		Math.log((edges[g + 1] as number) / (edges[g] as number)) / ((counts[g] as number) + 1);
+	for (let n = 0; n < empty.length; n++) {
+		let widest = 0;
+		for (let g = 1; g < counts.length; g++) if (share(g) > share(widest)) widest = g;
+		counts[widest] = (counts[widest] as number) + 1;
+	}
+	const targets = counts.flatMap((count, g) => {
+		const [a, b] = [edges[g] as number, edges[g + 1] as number];
+		return Array.from({ length: count }, (_, k) => a * (b / a) ** ((k + 1) / (count + 1)));
+	});
+
+	let prev = 0;
+	empty.forEach((i, k) => {
+		const target = targets[k] as number;
+		const d = domain(i);
+		const x =
+			nominalNear(target, d, (v) => v > prev && !near(v, prev)) ?? project(target, d, 'freq');
+		freqs.set(i, x);
+		prev = x;
+	});
+	return freqs;
 }

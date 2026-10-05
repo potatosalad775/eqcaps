@@ -3,21 +3,41 @@ import { example, pk, profile } from '../test/fixtures.ts';
 import { complete } from './complete.ts';
 
 describe('complete (SPEC §13.7)', () => {
-	it('fills empty slots with neutral filters at the log centre of their domain', () => {
+	it('spreads neutral fillers between the filled slots at nominal frequencies', () => {
 		const r = complete(profile(), [pk(1000, 3), null]);
 		expect(r.warnings).toEqual([]);
-		expect(r.filters).toHaveLength(4);
-		expect(r.filters[0]).toEqual(pk(1000, 3));
-		expect(r.filters[1]).toEqual({ type: 'PK', freq: Math.sqrt(20 * 20000), q: 1, gain: 0 });
+		expect(r.filters).toEqual([pk(1000, 3), pk(80, 0), pk(250, 0), pk(4000, 0)]);
+		const empty = complete(profile({ bandCount: 8 }), []).filters.map((f) => f.freq);
+		expect(empty).toEqual([40, 100, 200, 400, 1000, 2000, 4000, 10000]);
 	});
 
 	it('spreads fillers evenly in log frequency between neighbours under ascendingFrequency', () => {
 		const p = profile({ rules: [{ type: 'ascendingFrequency' }] });
 		const freqs = complete(p, [null, pk(1000, 3), null, null]).filters.map((f) => f.freq);
-		expect(freqs[0]).toBeCloseTo(Math.sqrt(20 * 1000), 9);
-		expect(freqs[1]).toBe(1000);
-		expect(freqs[2]).toBeCloseTo(1000 * 20 ** (1 / 3), 6);
-		expect(freqs[3]).toBeCloseTo(1000 * 20 ** (2 / 3), 6);
+		expect(freqs).toEqual([125, 1000, 2500, 8000]);
+		const empty = profile({ bandCount: 8, rules: [{ type: 'ascendingFrequency' }] });
+		expect(complete(empty, []).filters.map((f) => f.freq)).toEqual([
+			40, 100, 200, 400, 1000, 2000, 4000, 10000
+		]);
+	});
+
+	it('keeps the order when nominal frequencies are scarce between neighbours', () => {
+		const p = profile({ rules: [{ type: 'ascendingFrequency' }] });
+		const freqs = complete(p, [pk(100, 3), null, null, null]).filters.map((f) => f.freq);
+		const tight = complete(p, [pk(100, 3), null, null, pk(200, 1)]).filters.map((f) => f.freq);
+		expect(freqs).toEqual([100, 400, 1250, 5000]);
+		expect(tight).toEqual([100, 125, 160, 200]);
+	});
+
+	it('projects nominal frequencies onto a stepped domain, or keeps the spread', () => {
+		const stepped = profile({ band: { freq: { min: 20, max: 20000, step: 10 } } });
+		const freqs = complete(stepped, [pk(1000, 3), null]).filters.map((f) => f.freq);
+		expect(freqs).toEqual([1000, 80, 250, 4000]);
+		const narrow = profile({ band: { freq: { min: 1010, max: 1100 } } });
+		const [, a, b, c] = complete(narrow, [pk(1050, 3), null]).filters.map((f) => f.freq);
+		expect(a).toBeCloseTo(Math.sqrt(1010 * 1050), 9);
+		expect(b).toBeCloseTo(1050 * (1100 / 1050) ** (1 / 3), 9);
+		expect(c).toBeCloseTo(1050 * (1100 / 1050) ** (2 / 3), 9);
 	});
 
 	it('uses locked frequencies of a graphic EQ', () => {
@@ -68,7 +88,7 @@ describe('complete (SPEC §13.7)', () => {
 		const shifted = profile({ bandCount: 2, bands: [{ index: 1, gain: { min: 1, max: 6 } }] });
 		const r = complete(shifted, [], { hints: [pk(100, 3), pk(200, 3)] });
 		expect(r.filters[0]).toEqual(pk(100, 0));
-		expect(r.filters[1]?.freq).toBeCloseTo(Math.sqrt(20 * 20000), 9);
+		expect(r.filters[1]?.freq).toBe(1250);
 		expect(r.warnings).toEqual([{ slot: 1, code: 'not-neutral' }]);
 	});
 
