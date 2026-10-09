@@ -27,7 +27,7 @@ filters, mic gain…).
 | Consumer | Uses | Needs from us |
 | --- | --- | --- |
 | modernGraphTool (browser) | client + core, npm or CDN; later device-bridge | lazy fetch, match by connected device, fit before push, per-slot UI hints |
-| Android hardware PEQ app (Ionic + Capacitor prototype, USB) | core + client + device-bridge from npm, `bundle.json` snapshot + periodic refresh, native USB transport plugin of its own | transport-agnostic bridge, offline bundle, stable ids, matching by USB identity (D27) |
+| Android hardware PEQ app (uniPEQ: SvelteKit + Capacitor, USB) | core + client + device-bridge from npm, `bundle.json` snapshot + periodic refresh, native USB transport plugin of its own | transport-agnostic bridge, offline bundle, stable ids, matching by USB identity (D27) |
 | devicePEQ, AutoEQ, others | data and schema, if they choose to (no outreach planned, D26) | neutral format, CC0 data, software targets |
 | Contributors | inspector | read, guided read, author, one-click PR |
 

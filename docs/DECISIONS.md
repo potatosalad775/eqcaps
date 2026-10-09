@@ -89,9 +89,9 @@ already maintains exactly this list, so it's a seed source and a potential consu
 This repo maintains the software-target list from then on (D26).
 
 ### D27. Android consumer: a Capacitor app on the TypeScript stack (accepted as direction, 2026-10-02; was Q6)
-The Android app is a **hardware** PEQ app that pushes EQ to devices over USB. The prototype uses
-Ionic + Capacitor so it can run the TypeScript engine. It's early: the stack may change, and it
-hasn't been confirmed to run on a device yet.
+The Android app (uniPEQ) is a **hardware** PEQ app that pushes EQ to devices over USB. It is a
+SvelteKit + Capacitor app, so it runs the TypeScript engine; the same build serves desktop Chrome
+and Edge.
 - It consumes `core`, `client` and `device-bridge` from npm, as modernGraphTool does, and embeds a
   `bundle.json` snapshot so it works offline (invariant 8).
 - Capacitor runs in Android System WebView, which has no WebHID, Web Serial or WebUSB. USB access
@@ -106,7 +106,11 @@ hasn't been confirmed to run on a device yet.
 **Why:** one engine and one bridge serve the inspector, modernGraphTool and the Android app, and
 native code is limited to a thin transport.
 **Watch:** Android's kernel HID driver may already hold a device's HID interface. The plugin has to
-claim it with `force` or fail with a clear message. Untested until the prototype runs on hardware.
+claim it with `force` or fail with a clear message.
+*2026-10-06:* the force claim works on a real phone (Samsung, walkplay dongle over `walkplay-hid`);
+feature reports are still untried on Android.
+*2026-10-09:* the app's Ionic Vue prototype was replaced by SvelteKit + Capacitor (uniPEQ
+`docs/rebuild-plan.md`); nothing here changed.
 **Superseded:** the earlier assumption that Android needs a Kotlin engine (and, if it controls
 hardware, a Kotlin device bridge).
 
@@ -1236,7 +1240,7 @@ A new question gets a number, a recommendation and an entry here.
 | Q3 Upstream outreach | none; do our own thing | D26 |
 | Q4 Filter type codes | `LSC`/`HSC` | D22 |
 | Q5 Hosting | GitHub Pages | D18 |
-| Q6 Android app | hardware PEQ over USB; Ionic + Capacitor prototype on the TS engine | D27 |
+| Q6 Android app | hardware PEQ over USB; SvelteKit + Capacitor app on the TS engine | D27 |
 | Q7 Kotlin port | `packages/kotlin` if ever; not a priority | D15 |
 | Q8 Governance | as recommended, plus two verified levels | D28 |
 | Q9 Licenses | MIT code, CC0 data; checked against devicePEQ | D25 |
