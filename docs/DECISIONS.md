@@ -1225,6 +1225,28 @@ or without the rule. Engine semantics only (SPEC §13.7, a SHOULD), and every pr
 series (too coarse for spreads between close neighbours); a fixed octave ladder (fits only some
 band counts).
 
+### D48. Writable presets are marked in the data: format 1.1 (accepted, 2026-10-10)
+Device preset lists mix user memories ("USER1"…"USER10", "Custom 1") with the vendor's built-in
+curves ("Jazz", "Hip-hop"), and an app that writes filters needs to know which is which: writing
+to a built-in curve fails or replaces it. devicePEQ said it with `firstWritableEQSlot` /
+`maxWritableEQSlots`, which assume the memories are contiguous and are wrong where they aren't
+(KA17: USER1 is id 4, USER2–3 are 8–9; `first=7, max=3` picks "Hip-hop"). The SvelteKit Android
+app (D27) kept its own table of writable ids per profile until the data could say it.
+- **`writable: true` on a preset** (SPEC §9), the first additive minor (format 1.1, SPEC §15).
+  Once any preset in a list is marked, the unmarked ones are built-in curves; with none marked the
+  data doesn't say, which keeps every 1.0 profile and every all-memories list ("Custom") meaning
+  what it did. The bypass preset is never writable (schema `not`).
+- **Data**: the 30 profiles whose lists mix memories with built-ins (FiiO, Fosi Audio DS3, JadeAudio
+  JA11, Nothing Headphone 1, SnowSky) mark their user memories, sorted by name and matching the
+  app's table. None is confirmed on hardware yet; the profiles stay `draft`.
+- **`version-too-low`**: a profile that uses a 1.1 field must declare `schemaVersion` 1.1, so the
+  declared minimum stays true. Files that mark presets declare it; children inherit it (D44).
+- **Old consumers** ignore the key (SPEC §15): bridge 0.2.x drops it when reading presets, and
+  client 0.2.x accepts a `1.1` index and bundle.
+**Rejected:** `writable: false` on built-ins (most lists would then mark more entries, and an
+unmarked list would read as all-writable by accident); a first/count pair (the KA17 case); a
+handler option (presets are data, D42); waiting for v2 (the gap is additive).
+
 ---
 
 ## Open questions for the owner

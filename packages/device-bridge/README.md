@@ -105,7 +105,9 @@ device's EQ memories), `disconnectOnSave`, `baudRate` (serial; default 115200 ov
 Bluetooth) and `experimental`. A preset marked `"bypass": true` is the one that turns the EQ off:
 `setEnabled(false)` selects it, and reading it back reports no current slot. Only `fiio-usb-hid`
 and `ktmicro-usb-hid` turn the EQ off with a preset (KT Micro's default is slot 2); the others
-refuse a `bypass` preset. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
+refuse a `bypass` preset. Presets marked `"writable": true` (format 1.1) are the user memories a
+write may target; once any preset is marked, the unmarked ones are built-in curves (SPEC §9). The
+bridge passes the mark on in `capabilities.slots` and doesn't enforce it. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,
 `timeout`, `bad-response`, `rejected`, `transport` or `invalid-request`.

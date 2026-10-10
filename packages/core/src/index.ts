@@ -1,5 +1,5 @@
 /** Format version this package implements (SPEC §15). */
-export const SCHEMA_VERSION = '1.0';
+export const SCHEMA_VERSION = '1.1';
 
 export type * from './types/schema.generated.ts';
 export { ISSUE_CODES } from './issues.ts';

@@ -2,6 +2,7 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-all-filters-7",
 	"id": "snowsky-melody",
+	"schemaVersion": "1.1",
 	"device": { "brand": "Snowsky", "model": "Melody" },
 	"match": {
 		"usb": [
@@ -18,9 +19,9 @@
 			{ "id": 4, "name": "R&B" },
 			{ "id": 5, "name": "Classic" },
 			{ "id": 6, "name": "Hip-hop" },
-			{ "id": 160, "name": "USER1" },
-			{ "id": 161, "name": "USER2" },
-			{ "id": 162, "name": "USER3" },
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true },
 			{ "id": 240, "name": "Close EQ", "bypass": true }
 		]
 	},

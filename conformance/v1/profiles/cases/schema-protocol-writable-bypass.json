@@ -1,0 +1,15 @@
+{
+	"description": "The bypass preset holds no filters, so it can't be writable.",
+	"spec": "§9",
+	"profile": {
+		"schemaVersion": "1.1",
+		"protocol": {
+			"handler": "chip-hid",
+			"presets": [
+				{ "id": 160, "name": "USER1", "writable": true },
+				{ "id": 240, "name": "Off", "bypass": true, "writable": true }
+			]
+		}
+	},
+	"expect": [{ "code": "schema", "path": "/protocol/presets/1" }]
+}

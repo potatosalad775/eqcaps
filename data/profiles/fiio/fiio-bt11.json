@@ -2,6 +2,7 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-wide-all-filters",
 	"id": "fiio-bt11",
+	"schemaVersion": "1.1",
 	"device": { "brand": "FiiO", "model": "BT11" },
 	"match": {
 		"usb": [
@@ -17,9 +18,9 @@
 			{ "id": 5, "name": "R&B" },
 			{ "id": 6, "name": "Classic" },
 			{ "id": 7, "name": "Hip-hop" },
-			{ "id": 4, "name": "USER1" },
-			{ "id": 8, "name": "USER2" },
-			{ "id": 9, "name": "USER3" },
+			{ "id": 4, "name": "USER1", "writable": true },
+			{ "id": 8, "name": "USER2", "writable": true },
+			{ "id": 9, "name": "USER3", "writable": true },
 			{ "id": 11, "name": "Close EQ", "bypass": true }
 		]
 	},

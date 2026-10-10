@@ -8,7 +8,10 @@ import type { Slot } from './handler.ts';
 import { HANDLERS, type HandlerId, type HandlerOptions } from './handlers/index.ts';
 
 interface ProtocolBase {
-	/** EQ preset slots the device offers; the one marked `bypass` turns the EQ off. */
+	/**
+	 * EQ preset slots the device offers; the one marked `bypass` turns the EQ off, and those marked
+	 * `writable` are the ones a user may write to.
+	 */
 	presets?: readonly Slot[];
 	/** The device drops the connection after a push that saves. */
 	disconnectOnSave?: boolean;
@@ -117,15 +120,21 @@ function read(raw: unknown): Protocol {
 		const ids = new Set<number>();
 		let bypassed = false;
 		out.presets = (Array.isArray(presets) ? presets : fail('presets: not a list')).map((p) => {
-			const { id: slot, name, bypass } = isObject(p) ? p : fail('presets: not an object');
+			const { id: slot, name, bypass, writable } = isObject(p) ? p : fail('presets: not an object');
 			if (typeof slot !== 'number' || !Number.isInteger(slot) || slot < 0) {
 				fail(`presets: id ${JSON.stringify(slot)}`);
 			}
 			if (typeof name !== 'string' || !name) fail(`presets: name of ${String(slot)}`);
 			if (ids.has(slot as number)) fail(`presets: id ${String(slot)} twice`);
 			ids.add(slot as number);
-			if (bypass === undefined || bypass === false) return { id: slot, name };
+			if (writable !== undefined && typeof writable !== 'boolean') {
+				fail(`presets: writable of ${String(slot)} is not a boolean`);
+			}
+			if (bypass === undefined || bypass === false) {
+				return writable ? { id: slot, name, writable: true } : { id: slot, name };
+			}
 			if (bypass !== true) fail(`presets: bypass of ${String(slot)} is not a boolean`);
+			if (writable) fail(`presets: bypass preset ${String(slot)} is writable`);
 			if (bypassed) fail('presets: more than one bypass preset');
 			if (!HANDLERS[id].bypassPreset) fail(`presets: ${id} turns the EQ off without a preset`);
 			bypassed = true;

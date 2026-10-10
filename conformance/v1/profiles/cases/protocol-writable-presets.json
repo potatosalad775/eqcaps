@@ -1,0 +1,16 @@
+{
+	"description": "A protocol may mark the presets the user can write; the unmarked ones are built-in curves. Format 1.1.",
+	"spec": "§9",
+	"profile": {
+		"schemaVersion": "1.1",
+		"protocol": {
+			"handler": "chip-hid",
+			"presets": [
+				{ "id": 0, "name": "Jazz" },
+				{ "id": 160, "name": "USER1", "writable": true },
+				{ "id": 240, "name": "Off", "bypass": true }
+			]
+		}
+	},
+	"expect": []
+}

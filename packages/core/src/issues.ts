@@ -21,6 +21,8 @@ export const ISSUE_CODES = {
 	'evidence-ref-invalid':
 		'§10: a measurement source, or a ref starting with evidence/, that is not an evidence file path.',
 	'replaced-by-self': '§10: a deprecated profile replaced by itself.',
+	'version-too-low':
+		'§15: the profile uses a field from a later format minor than its schemaVersion.',
 	'extends-missing': '§11: `extends` names a file that does not exist.',
 	'extends-cycle': '§11: an `extends` chain loops.',
 	'extends-too-deep': '§11: an `extends` chain is deeper than 4.',

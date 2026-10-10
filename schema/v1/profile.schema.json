@@ -460,11 +460,20 @@
 				"bypass": {
 					"description": "Selecting this preset turns the EQ off: it holds no filters of its own (SPEC §9).",
 					"type": "boolean"
+				},
+				"writable": {
+					"description": "The user may write filters to this preset (a user memory). Once any preset in the list is marked, the unmarked ones are built-in curves (SPEC §9). Format 1.1.",
+					"type": "boolean"
 				}
 			},
 			"patternProperties": { "^x-": true },
 			"additionalProperties": false,
-			"required": ["id", "name"]
+			"required": ["id", "name"],
+			"not": {
+				"description": "The bypass preset holds no filters, so it is never writable.",
+				"properties": { "bypass": { "const": true }, "writable": { "const": true } },
+				"required": ["bypass", "writable"]
+			}
 		},
 		"githubHandle": {
 			"type": "string",

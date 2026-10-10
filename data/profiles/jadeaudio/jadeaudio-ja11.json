@@ -2,6 +2,7 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-5-band-12db-full-shelves",
 	"id": "jadeaudio-ja11",
+	"schemaVersion": "1.1",
 	"device": { "brand": "JadeAudio", "model": "JA11" },
 	"match": {
 		"usb": [
@@ -15,7 +16,7 @@
 			{ "id": 0, "name": "Vocal" },
 			{ "id": 1, "name": "Classic" },
 			{ "id": 2, "name": "Bass" },
-			{ "id": 3, "name": "USER1" },
+			{ "id": 3, "name": "USER1", "writable": true },
 			{ "id": 4, "name": "Close EQ", "bypass": true }
 		],
 		"disconnectOnSave": true

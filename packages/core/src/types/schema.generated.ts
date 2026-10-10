@@ -230,6 +230,8 @@ export interface Preset {
 	name: string;
 	/** Selecting this preset turns the EQ off: it holds no filters of its own (SPEC §9). */
 	bypass?: boolean;
+	/** The user may write filters to this preset (a user memory). Once any preset in the list is marked, the unmarked ones are built-in curves (SPEC §9). Format 1.1. */
+	writable?: boolean;
 }
 
 export type GithubHandle = string;

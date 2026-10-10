@@ -37,7 +37,8 @@ export function validateProfile(profile: Profile): Issue[] {
 		...checkBands(profile),
 		...checkDependencies(profile),
 		...checkMatch(profile),
-		...checkMeta(profile)
+		...checkMeta(profile),
+		...checkVersion(profile)
 	];
 }
 
@@ -309,4 +310,24 @@ function checkMeta(profile: Profile): Issue[] {
 		issues.push(error('replaced-by-self', '/meta/replacedBy', 'a profile cannot replace itself'));
 	}
 	return issues;
+}
+
+// §15 -----------------------------------------------------------------------------------------
+
+/** The format minor each field arrived in, past 1.0: a profile using one must declare it. */
+function checkVersion(profile: Profile): Issue[] {
+	const declared = Number(profile.schemaVersion.split('.')[1]);
+	const needs: { minor: number; field: string }[] = [];
+	if (profile.protocol?.presets?.some((p) => p.writable !== undefined)) {
+		needs.push({ minor: 1, field: 'protocol.presets[].writable' });
+	}
+	return needs
+		.filter((n) => n.minor > declared)
+		.map((n) =>
+			error(
+				'version-too-low',
+				'/schemaVersion',
+				`${n.field} needs schemaVersion 1.${n.minor}, but the profile declares ${profile.schemaVersion}`
+			)
+		);
 }

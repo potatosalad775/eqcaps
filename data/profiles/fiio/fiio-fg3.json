@@ -1,7 +1,7 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
 	"id": "fiio-fg3",
-	"schemaVersion": "1.0",
+	"schemaVersion": "1.1",
 	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "FG3" },
 	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO FG3" }] },
@@ -28,16 +28,16 @@
 			{ "id": 14, "name": "MOBA" },
 			{ "id": 15, "name": "ACT" },
 			{ "id": 16, "name": "MUG" },
-			{ "id": 160, "name": "USER1" },
-			{ "id": 161, "name": "USER2" },
-			{ "id": 162, "name": "USER3" },
-			{ "id": 163, "name": "USER4" },
-			{ "id": 164, "name": "USER5" },
-			{ "id": 165, "name": "USER6" },
-			{ "id": 166, "name": "USER7" },
-			{ "id": 167, "name": "USER8" },
-			{ "id": 168, "name": "USER9" },
-			{ "id": 169, "name": "USER10" }
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true },
+			{ "id": 163, "name": "USER4", "writable": true },
+			{ "id": 164, "name": "USER5", "writable": true },
+			{ "id": 165, "name": "USER6", "writable": true },
+			{ "id": 166, "name": "USER7", "writable": true },
+			{ "id": 167, "name": "USER8", "writable": true },
+			{ "id": 168, "name": "USER9", "writable": true },
+			{ "id": 169, "name": "USER10", "writable": true }
 		]
 	},
 	"meta": {

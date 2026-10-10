@@ -3,6 +3,7 @@
 	"extends": "fiio-usb-hid",
 	"abstract": true,
 	"id": "fiio-peq-5-band-12db-all-filters-7",
+	"schemaVersion": "1.1",
 	"bandCount": 5,
 	"band": { "types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "AP"] },
 	"protocol": {
@@ -14,9 +15,9 @@
 			{ "id": 4, "name": "R&B" },
 			{ "id": 5, "name": "Classic" },
 			{ "id": 6, "name": "Hip-hop" },
-			{ "id": 160, "name": "USER1" },
-			{ "id": 161, "name": "USER2" },
-			{ "id": 162, "name": "USER3" },
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true },
 			{ "id": 240, "name": "Close EQ", "bypass": true }
 		]
 	},

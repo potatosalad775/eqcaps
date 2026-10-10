@@ -199,7 +199,7 @@ describe('publish', () => {
 
 	it('indexes every profile with its hash, and bundles the live ones', () => {
 		const index = JSON.parse(byPath.get('index.json')!) as DataIndex;
-		expect(index).toMatchObject({ schemaVersion: '1.0', dataVersion: '2026.10.02-abc1234' });
+		expect(index).toMatchObject({ schemaVersion: '1.1', dataVersion: '2026.10.02-abc1234' });
 		const a = byPath.get('profiles/a.json')!;
 		expect(index.profiles[0]).toEqual({
 			id: 'a',

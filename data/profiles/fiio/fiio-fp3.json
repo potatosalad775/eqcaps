@@ -2,6 +2,7 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-wide-shelves",
 	"id": "fiio-fp3",
+	"schemaVersion": "1.1",
 	"device": { "brand": "FiiO", "model": "FP3" },
 	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO FP3" }] },
 	"protocol": {
@@ -13,7 +14,7 @@
 			{ "id": 4, "name": "R&B" },
 			{ "id": 5, "name": "Classic" },
 			{ "id": 6, "name": "Hip-hop" },
-			{ "id": 160, "name": "USER1" }
+			{ "id": 160, "name": "USER1", "writable": true }
 		]
 	},
 	"meta": {

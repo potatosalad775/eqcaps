@@ -1,7 +1,7 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
 	"id": "nothing-headphone-1",
-	"schemaVersion": "1.0",
+	"schemaVersion": "1.1",
 	"kind": "hardware",
 	"device": { "brand": "Nothing", "model": "Headphone (1)" },
 	"match": {
@@ -24,7 +24,7 @@
 			{ "id": 1, "name": "Voice" },
 			{ "id": 2, "name": "More Treble" },
 			{ "id": 3, "name": "More Bass" },
-			{ "id": 5, "name": "Custom" }
+			{ "id": 5, "name": "Custom", "writable": true }
 		]
 	},
 	"meta": {

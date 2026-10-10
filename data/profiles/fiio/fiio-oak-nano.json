@@ -2,6 +2,7 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-10-band-12db-wide-shelves",
 	"id": "fiio-oak-nano",
+	"schemaVersion": "1.1",
 	"device": { "brand": "FiiO", "model": "Oak Nano" },
 	"match": {
 		"usb": [
@@ -18,7 +19,7 @@
 			{ "id": 4, "name": "R&B" },
 			{ "id": 5, "name": "Classic" },
 			{ "id": 6, "name": "Hip-hop" },
-			{ "id": 160, "name": "USER1" }
+			{ "id": 160, "name": "USER1", "writable": true }
 		]
 	},
 	"meta": {

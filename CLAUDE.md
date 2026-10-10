@@ -8,7 +8,7 @@ profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor
 who adopts the format.
 
 **Status: Phases 0–5 done; format v1 frozen 2026-10-03 (D36), published under `/v1/` (the
-pre-freeze `/next/` channel is dropped). `core`, `client` and `device-bridge` 0.2.0 on npm (0.1.0
+pre-freeze `/next/` channel is dropped); format 1.1 adds `writable` presets (D48). `core`, `client` and `device-bridge` 0.2.0 on npm (0.1.0
 deprecated). Phase 5 is guided reads (INSPECTOR §3), which replaced the probe (D40). Next: PLAN
 §7.** Read `docs/PLAN.md` first.
 

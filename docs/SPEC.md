@@ -1,8 +1,9 @@
 # EQ Constraint Profile Format: v1
 
-> **Status: frozen as v1 (format 1.0) on 2026-10-03** ([DECISIONS D36](DECISIONS.md)). This file is
-> the single place the format is defined. From here on it changes only by minors that add
-> (§15); anything else needs v2. Published under `/v1/`.
+> **Status: frozen as v1 (format 1.0) on 2026-10-03** ([DECISIONS D36](DECISIONS.md)); **format
+> 1.1** (2026-10-10, D48) adds `writable` presets (§9). This file is the single place the format is
+> defined. From here on it changes only by minors that add (§15); anything else needs v2.
+> Published under `/v1/`.
 > MUST / SHOULD / MAY are used as in RFC 2119. Rationale for each choice is in
 > [DECISIONS.md](DECISIONS.md), and the evidence is in [research/prior-art.md](research/prior-art.md).
 
@@ -292,7 +293,8 @@ wire grids are the handler's (D42).
 "protocol": {
   "handler": "fiio-usb-hid",                     // required: a bridge handler id
   "options": { "reportId": 1, "saveCommand": "0x21" }, // the handler's settings for this device
-  "presets": [{ "id": 0, "name": "Jazz" }, { "id": 160, "name": "USER1" },  // EQ memories
+  "presets": [{ "id": 0, "name": "Jazz" },                        // EQ memories
+              { "id": 160, "name": "USER1", "writable": true },  // format 1.1
               { "id": 240, "name": "BYPASS", "bypass": true }],
   "disconnectOnSave": false,                     // the device drops the connection after a save
   "baudRate": 57600,                             // serial devices, where the default doesn't fit
@@ -307,6 +309,12 @@ wire grids are the handler's (D42).
 - `bypass: true` marks the preset that turns the EQ off: it holds no filters, and selecting it is
   how the device's EQ is switched off. At most one preset is marked. An app offers it as an off
   switch, not as a memory to write filters to.
+- `writable: true` (format 1.1) marks a preset the user may write filters to: a user memory
+  ("USER1", "Custom"). When any preset in the list is marked, the unmarked ones are built-in
+  curves ("Jazz"), and an app SHOULD NOT write filters to them: the write fails, or replaces the
+  vendor's curve. An app MAY still select and read them. When no preset is marked, the data doesn't
+  say, and an app MAY treat every preset but the bypass one as writable. The bypass preset is never
+  `writable` (schema). A list of user memories only needs no marks.
 - A consumer that doesn't know the handler, or an option, MUST treat the device as having no
   protocol it can drive (never guess one), and MUST NOT reject the profile for it (§15).
 - A hardware profile without `protocol` is one no handler drives (the RME ADI-2 series is
@@ -783,7 +791,12 @@ the host app: the database enhances an app and never blocks it. The reference cl
 ## 15. Versioning and compatibility
 
 - **Major** (`v1` → `v2`): new URL prefix. The old prefix stays frozen and served for ≥ 12 months.
-- **Minor** (`1.0` → `1.1`): additive only (new optional fields, rule types, filter types). Each profile's `schemaVersion` states the minimum it needs.
+- **Minor** (`1.0` → `1.1`): additive only (new optional fields, rule types, filter types). Each profile's `schemaVersion` states the minimum it needs; a profile that uses a later minor's field than it declares is an error (`version-too-low`).
+
+| Minor | Date | Adds |
+| --- | --- | --- |
+| 1.0 | 2026-10-03 | the frozen v1 format (D36) |
+| 1.1 | 2026-10-10 | `protocol.presets[].writable` (§9, D48) |
 - Consumers run **lenient** structural checks at runtime, never the strict CI schema, so newer
   minors don't break older apps. Unknown keys are ignored. Unknown **rule** types and **filter**
   types are surfaced to the user (§7), never silently dropped.

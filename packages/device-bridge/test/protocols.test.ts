@@ -100,6 +100,14 @@ describe('protocolOf', () => {
 			'bypass the handler has no use for': {
 				handler: 'walkplay-hid',
 				presets: [{ id: 0, name: 'Off', bypass: true }]
+			},
+			'writable bypass preset': {
+				handler: 'fiio-usb-hid',
+				presets: [{ id: 240, name: 'Off', bypass: true, writable: true }]
+			},
+			'writable not a boolean': {
+				handler: 'walkplay-hid',
+				presets: [{ id: 1, name: 'Custom', writable: 'yes' }]
 			}
 		};
 		for (const [what, protocol] of Object.entries(bad)) {
@@ -109,6 +117,23 @@ describe('protocolOf', () => {
 		expect(protocolProblem({ handler: 'walkplay-bt' })).toMatch(/no handler "walkplay-bt"/);
 		expect(protocolOf({})).toBeUndefined();
 		expect(protocolOf(undefined)).toBeUndefined();
+	});
+
+	test('keeps the writable marks: user memories apart from built-in curves', () => {
+		const presets = [
+			{ id: 0, name: 'Jazz' },
+			{ id: 4, name: 'USER1', writable: true },
+			{ id: 10, name: 'BYPASS', bypass: true }
+		];
+		expect(protocolOf({ protocol: { handler: 'fiio-usb-hid', presets } })?.presets).toEqual(
+			presets
+		);
+		const marked = protocolOf(profile('fiio-ka17'))?.presets?.filter((p) => p.writable);
+		expect(marked?.map((p) => p.id)).toEqual([4, 8, 9]);
+		const unmarked = [{ id: 1, name: 'A', writable: false }];
+		expect(
+			protocolOf({ protocol: { handler: 'walkplay-hid', presets: unmarked } })?.presets
+		).toEqual([{ id: 1, name: 'A' }]);
 	});
 
 	test('keeps the bypass preset, for handlers that turn the EQ off with one', () => {

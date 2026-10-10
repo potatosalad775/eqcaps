@@ -1,7 +1,7 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
 	"id": "fosi-audio-ds3",
-	"schemaVersion": "1.0",
+	"schemaVersion": "1.1",
 	"kind": "hardware",
 	"device": { "brand": "Fosi Audio", "model": "DS3" },
 	"match": {
@@ -22,11 +22,11 @@
 		"handler": "fosi-audio-usb-hid",
 		"presets": [
 			{ "id": 0, "name": "Bypass" },
-			{ "id": 7, "name": "Custom 1" },
-			{ "id": 8, "name": "Custom 2" },
-			{ "id": 9, "name": "Custom 3" },
-			{ "id": 10, "name": "Custom 4" },
-			{ "id": 11, "name": "Custom 5" }
+			{ "id": 7, "name": "Custom 1", "writable": true },
+			{ "id": 8, "name": "Custom 2", "writable": true },
+			{ "id": 9, "name": "Custom 3", "writable": true },
+			{ "id": 10, "name": "Custom 4", "writable": true },
+			{ "id": 11, "name": "Custom 5", "writable": true }
 		]
 	},
 	"meta": {

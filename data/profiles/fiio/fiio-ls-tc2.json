@@ -2,6 +2,7 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "fiio-peq-5-band-12db-full-shelves",
 	"id": "fiio-ls-tc2",
+	"schemaVersion": "1.1",
 	"device": { "brand": "FiiO", "model": "LS-TC2" },
 	"match": {
 		"usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": ["FIIO LS-TC2", "LS-TC2"] }]
@@ -15,7 +16,7 @@
 			{ "id": 4, "name": "R&B" },
 			{ "id": 5, "name": "Classic" },
 			{ "id": 6, "name": "Hip-hop" },
-			{ "id": 160, "name": "USER1" }
+			{ "id": 160, "name": "USER1", "writable": true }
 		],
 		"experimental": true
 	},

@@ -7,6 +7,11 @@ export interface Slot {
 	name: string;
 	/** Selecting this slot turns the EQ off (`setEnabled(false)` selects it). */
 	bypass?: boolean;
+	/**
+	 * The user may write filters here (a user memory). Once any slot of a device is marked, the
+	 * unmarked ones are built-in curves; with none marked, the data doesn't say (SPEC §9).
+	 */
+	writable?: boolean;
 }
 
 export interface PullRequest {
