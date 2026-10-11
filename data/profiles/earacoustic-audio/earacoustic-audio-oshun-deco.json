@@ -9,12 +9,13 @@
 	"bandCount": 10,
 	"band": { "types": ["PK", "HSC", "LSC", "HPQ", "LPQ"] },
 	"meta": {
-		"status": "draft",
+		"status": "maintainer-verified",
 		"sources": [
 			{
 				"kind": "vendor-app",
 				"ref": "evidence/earacoustic-audio-oshun-deco/2026-10-04-245292.json",
-				"date": "2026-10-04"
+				"date": "2026-10-04",
+				"by": "potatosalad775"
 			}
 		],
 		"notes": "Guided read with the eqcaps inspector on 2026-10-04: the values were set in https://peq.szwalkplay.com/ and read back from the device. The EQ at the end differs from the EQ at the start. Bands 2–10 not checked: assumed to match band 1. Preamp not checked: from walkplay-schemeno16-devices."
