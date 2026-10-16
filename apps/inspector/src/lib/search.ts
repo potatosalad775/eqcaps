@@ -8,6 +8,7 @@ import {
 	type Meta,
 	type Profile
 } from '@potatosalad775/eqcaps-core';
+import { handlerTransports } from '@potatosalad775/eqcaps-device-bridge';
 
 /** Profile traits a user can filter by (INSPECTOR §2 T0). */
 export const FEATURES = {
@@ -33,6 +34,34 @@ function domainsOf(p: Profile): Domain[] {
 	return out;
 }
 
+/** How the device bridge reaches a hardware entry, from its protocol's handler (D42). */
+export const CONNECTIONS = {
+	hid: 'USB HID',
+	'usb-serial': 'USB serial',
+	bluetooth: 'Bluetooth',
+	none: 'No protocol'
+} as const;
+
+export type Connection = keyof typeof CONNECTIONS;
+
+/**
+ * The connections a hardware entry's protocol runs over. Serial is USB serial with a USB match
+ * and Bluetooth serial (RFCOMM) with a Bluetooth one. Software has none; hardware without a
+ * protocol the bridge knows is `none`.
+ */
+export function connectionsOf(e: IndexEntry): Set<Connection> {
+	const out = new Set<Connection>();
+	if (e.kind !== 'hardware') return out;
+	const kinds = e.protocol ? handlerTransports(e.protocol.handler) : [];
+	const usb = (e.match?.usb ?? []).length > 0;
+	const bluetooth = (e.match?.bluetooth ?? []).length > 0;
+	if (usb && kinds.includes('hid')) out.add('hid');
+	if (usb && kinds.includes('serial')) out.add('usb-serial');
+	if (bluetooth && (kinds.includes('ble') || kinds.includes('serial'))) out.add('bluetooth');
+	if (out.size === 0) out.add('none');
+	return out;
+}
+
 export function featuresOf(p: Profile): Set<Feature> {
 	const out = new Set<Feature>();
 	const domains = domainsOf(p);
@@ -52,6 +81,7 @@ export interface SearchFilters {
 	query: string;
 	status: Meta['status'] | '';
 	kind: Profile['kind'] | '';
+	connection: Connection | '';
 	features: readonly Feature[];
 	/** Deprecated profiles are hidden unless asked for, or unless the query is their exact id. */
 	showDeprecated: boolean;
@@ -70,7 +100,8 @@ function usbQuery(q: string): { vendorId: string; productId?: string } | null {
 }
 
 function haystack(e: IndexEntry): string {
-	const parts = [e.id, e.brand, e.model, e.engine ?? '', ...(e.aliases ?? [])];
+	const parts = [e.id, e.brand, e.model, e.engine ?? '', e.protocol?.handler ?? ''];
+	parts.push(...(e.aliases ?? []));
 	for (const u of e.match?.usb ?? []) parts.push(...matchValues(u.productName));
 	for (const b of e.match?.bluetooth ?? []) {
 		parts.push(...matchValues(b.name), ...matchValues(b.namePrefix));
@@ -102,6 +133,7 @@ export function searchEntries(
 	for (const e of entries) {
 		if (f.status && e.status !== f.status) continue;
 		if (f.kind && e.kind !== f.kind) continue;
+		if (f.connection && !connectionsOf(e).has(f.connection)) continue;
 		if (f.features.length > 0) {
 			const has = features.get(e.id);
 			if (!has || !f.features.every((x) => has.has(x))) continue;

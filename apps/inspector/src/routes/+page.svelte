@@ -4,7 +4,14 @@
 	import { resolve } from '$app/paths';
 	import type { Meta, Profile } from '@potatosalad775/eqcaps-core';
 	import { catalog } from '$lib/data.svelte';
-	import { FEATURES, searchEntries, type Feature } from '$lib/search';
+	import {
+		CONNECTIONS,
+		connectionsOf,
+		FEATURES,
+		searchEntries,
+		type Connection,
+		type Feature
+	} from '$lib/search';
 	import { identitySummary } from '$lib/identity';
 	import GroupBadge from '$lib/components/GroupBadge.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
@@ -13,6 +20,10 @@
 	let query = $state(params.get('q') ?? '');
 	let status = $state((params.get('status') ?? '') as Meta['status'] | '');
 	let kind = $state((params.get('kind') ?? '') as Profile['kind'] | '');
+	const connectionParam = params.get('connection') ?? '';
+	let connection = $state<Connection | ''>(
+		connectionParam in CONNECTIONS ? (connectionParam as Connection) : ''
+	);
 	let features = $state(
 		(params.get('features') ?? '').split(',').filter((f): f is Feature => f in FEATURES)
 	);
@@ -23,6 +34,7 @@
 			query,
 			status,
 			kind,
+			connection,
 			features,
 			showDeprecated
 		})
@@ -41,6 +53,7 @@
 		set('q', query.trim());
 		set('status', status);
 		set('kind', kind);
+		set('connection', connection);
 		set('features', features.join(','));
 		set('deprecated', showDeprecated ? '1' : '');
 		// Same page, new query: there is no route to resolve.
@@ -59,8 +72,8 @@
 	<div>
 		<h1 class="text-2xl font-semibold">What does your EQ accept?</h1>
 		<p class="mt-1 text-zinc-600 dark:text-zinc-400">
-			Search the database by brand, model, alias or USB id (<code>0x2972</code>,
-			<code>2972:0047</code>).
+			Search the database by brand, model, alias, USB id (<code>0x2972</code>,
+			<code>2972:0047</code>) or bridge handler (<code>walkplay-hid</code>).
 		</p>
 		<p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
 			Not listed, or wrong? <a href={resolve('/connect')}>Connect your device</a> to check it, or
@@ -95,6 +108,17 @@
 			<option value="">Hardware and software</option>
 			<option value="hardware">Hardware</option>
 			<option value="software">Software</option>
+		</select>
+		<select
+			bind:value={connection}
+			aria-label="Connection"
+			title="How the device bridge reaches the device, from its profile's protocol"
+			class="rounded border border-zinc-300 bg-white px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+		>
+			<option value="">Any connection</option>
+			{#each Object.entries(CONNECTIONS) as [key, label] (key)}
+				<option value={key}>{label}</option>
+			{/each}
 		</select>
 	</div>
 
@@ -134,6 +158,9 @@
 						{#if e.engine}<span class="text-sm text-zinc-500">{e.engine}</span>{/if}
 						<StatusBadge status={e.status} />
 						{#if e.group}<GroupBadge />{/if}
+						{#each [...connectionsOf(e)].filter((c) => c !== 'none') as c (c)}
+							<span class="text-xs text-zinc-500">{CONNECTIONS[c]}</span>
+						{/each}
 						{#if e.kind === 'software'}
 							<span class="text-xs text-zinc-500 uppercase">software</span>
 						{/if}

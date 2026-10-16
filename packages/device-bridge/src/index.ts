@@ -48,5 +48,5 @@ export { identityOf, usbHex } from './identity.ts';
 export type { DeviceIdentity } from './identity.ts';
 export { analyzeCodec, handlerCodeUrl, MAX_ANALYSED_BANDS } from './analysis.ts';
 export type { CodecAnalysis } from './analysis.ts';
-export { openDevice, transportsOf } from './device.ts';
+export { handlerTransports, openDevice, transportsOf } from './device.ts';
 export type { BridgeDevice, DeviceCapabilities, OpenOptions } from './device.ts';

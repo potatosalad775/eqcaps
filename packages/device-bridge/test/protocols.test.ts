@@ -15,6 +15,7 @@ import { describe, expect, test } from 'vitest';
 import {
 	chooserFilters,
 	guessProtocol,
+	handlerTransports,
 	HANDLERS,
 	KNOWN_HID_VENDORS,
 	protocolForMatches,
@@ -294,4 +295,11 @@ describe('chooser filters', () => {
 		expect(f.bleNames).toContainEqual({ name: 'FIIO EH13' });
 		expect(f.bleNames).not.toContainEqual({ namePrefix: 'Nothing Headphone' }); // SPP only
 	});
+});
+
+test('handlerTransports names a handler’s transports by id', () => {
+	expect(handlerTransports('walkplay-hid')).toEqual(['hid']);
+	expect(handlerTransports('airoha')).toEqual(['serial', 'ble']);
+	expect(handlerTransports('no-such-handler')).toEqual([]);
+	expect(handlerTransports('toString')).toEqual([]);
 });

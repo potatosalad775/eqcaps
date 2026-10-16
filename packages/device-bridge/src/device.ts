@@ -62,6 +62,10 @@ export const transportsOf = (h: AnyHandler): readonly Transport['kind'][] =>
 		? [h.transport as Transport['kind']]
 		: (h.transport as readonly Transport['kind'][]);
 
+/** The transport kinds a handler runs over, by its id; empty for a handler this bridge lacks. */
+export const handlerTransports = (id: string): readonly Transport['kind'][] =>
+	Object.hasOwn(HANDLERS, id) ? transportsOf(HANDLERS[id as keyof typeof HANDLERS]) : [];
+
 /**
  * Drives `transport` with `protocol`: `protocolOf(profile)` (or `protocolForMatches`) for a device
  * the database knows, `guessProtocol(vendorId)` otherwise. Operations run one at a time.
