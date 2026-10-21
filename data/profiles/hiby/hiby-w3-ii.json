@@ -3,19 +3,11 @@
 	"id": "hiby-w3-ii",
 	"schemaVersion": "1.0",
 	"kind": "hardware",
-	"device": {
-		"brand": "HiBy",
-		"model": "W3 II"
-	},
-	"match": {
-		"bluetooth": [{ "namePrefix": "HiBy W3 II" }]
-	},
+	"device": { "brand": "HiBy", "model": "W3 II" },
 	"engine": "Graphic EQ",
+	"match": { "bluetooth": [{ "namePrefix": "HiBy W3 II" }] },
 	"bandCount": 5,
-	"band": {
-		"types": ["PK"],
-		"gain": { "min": -12, "max": 12, "step": 0.1 }
-	},
+	"band": { "types": ["PK"], "gain": { "min": -12, "max": 12, "step": 0.1 } },
 	"bands": [
 		{ "index": 0, "label": "100 Hz", "freq": { "value": 100 }, "q": { "value": 0.7 } },
 		{ "index": 1, "label": "315 Hz", "freq": { "value": 315 }, "q": { "value": 0.7 } },
