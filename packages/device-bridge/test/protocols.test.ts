@@ -32,12 +32,6 @@ const driven = Object.entries(PROTOCOLS);
 const handlerOf = (id: string) => HANDLERS[PROTOCOLS[id]!.handler] as AnyHandler;
 const profile = (id: string) => profiles.get(id) as Profile;
 
-/**
- * Hardware the bridge doesn't drive, listed so a missing protocol is always a decision. The RME
- * ADI-2 series is controlled over MIDI SysEx, which no handler speaks.
- */
-const WITHOUT_PROTOCOL = new Set(['rme-adi-2-dac-fs', 'rme-adi-2-dac-fs-bass-treble']);
-
 test('every protocol in the data is one this bridge can drive', () => {
 	const problems = [...profiles.values()]
 		.filter((p) => p.protocol !== undefined)
@@ -48,12 +42,17 @@ test('every protocol in the data is one this bridge can drive', () => {
 	expect(problems).toEqual([]);
 });
 
-test('every hardware profile has a protocol', () => {
+// A hardware profile without a protocol is one no handler drives (SPEC §9), such as the RME ADI-2
+// series (MIDI SysEx). It's a mistake only when the bridge knows the vendor's protocol, which is
+// what a forgotten `extends` of the vendor's base looks like.
+test('every hardware profile from a vendor the bridge knows has a protocol', () => {
 	const missing = [...profiles.values()].filter(
-		(p) => p.kind === 'hardware' && !(p.id in PROTOCOLS) && !WITHOUT_PROTOCOL.has(p.id)
+		(p) =>
+			p.kind === 'hardware' &&
+			!(p.id in PROTOCOLS) &&
+			(p.match?.usb ?? []).some((u) => guessProtocol(Number(u.vendorId)) !== undefined)
 	);
 	expect(missing.map((p) => p.id)).toEqual([]);
-	expect([...WITHOUT_PROTOCOL].filter((id) => id in PROTOCOLS || !profiles.has(id))).toEqual([]);
 });
 
 describe('protocolOf', () => {
