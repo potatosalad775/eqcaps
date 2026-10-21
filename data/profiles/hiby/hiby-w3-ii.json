@@ -1,0 +1,33 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "hiby-w3-ii",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "HiBy", "model": "W3 II" },
+	"engine": "Graphic EQ",
+	"match": { "bluetooth": [{ "namePrefix": "HiBy W3 II" }] },
+	"bandCount": 5,
+	"band": { "types": ["PK"], "gain": { "min": -12, "max": 12, "step": 0.1 } },
+	"bands": [
+		{ "index": 0, "label": "100 Hz", "freq": { "value": 100 }, "q": { "value": 0.7 } },
+		{ "index": 1, "label": "315 Hz", "freq": { "value": 315 }, "q": { "value": 0.7 } },
+		{ "index": 2, "label": "1 kHz", "freq": { "value": 1000 }, "q": { "value": 0.7 } },
+		{ "index": 3, "label": "3.2 kHz", "freq": { "value": 3200 }, "q": { "value": 0.7 } },
+		{ "index": 4, "label": "10 kHz", "freq": { "value": 10000 }, "q": { "value": 0.6 } }
+	],
+	"rules": [],
+	"preamp": { "mode": "auto" },
+	"channels": "linked",
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "community",
+				"ref": "https://eqpractice.pp.ua/en/hiby-w3-ii-equalizer-measurements/",
+				"date": "2026-03-13"
+			}
+		],
+		"contributors": ["reallystate"],
+		"notes": "Five-band graphic EQ, Bluetooth-only. Frequencies and Q values taken from acoustic measurements by EQ Practice, which reports the bands behave like PK filters with Q≈0.7 (100 Hz, 315 Hz, 1 kHz, 3.2 kHz) and Q≈0.6 (10 kHz). Bluetooth namePrefix is a placeholder until a real capture confirms the advertised name. No protocol block: the device bridge has no handler for HiBy W3 II yet. Preamp is auto; the source notes the device's own preamp calculation underestimates the cumulative boost, which is a realization quirk (D39) and is deliberately not modelled here."
+	}
+}
