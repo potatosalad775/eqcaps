@@ -24,7 +24,7 @@ export interface PullRequest {
 	bands?: number;
 }
 
-/** What the device holds, in canonical units: written values (D29, D39). */
+/** What the device holds, in canonical units: written values (D39). */
 export interface PullResult {
 	/** One entry per band in band order; null for a band the device reports as off or unset. */
 	filters: (Filter | null)[];

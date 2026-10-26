@@ -7,10 +7,10 @@ identity and provenance. The repo also holds the tooling to author, verify, vali
 profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor), and anyone else
 who adopts the format.
 
-**Status: Phases 0–5 done; format v1 frozen 2026-10-03 (D36), published under `/v1/` (the
-pre-freeze `/next/` channel is dropped); format 1.1 adds `writable` presets (D48). `core`, `client` and `device-bridge` 0.2.0 on npm (0.1.0
-deprecated). Phase 5 is guided reads (INSPECTOR §3), which replaced the probe (D40). Next: PLAN
-§7.** Read `docs/PLAN.md` first.
+**Status: in production.** Format v1 frozen 2026-10-03 (D36), published under `/v1/`; format 1.1
+adds `writable` presets (D48). `core`, `client` and `device-bridge` 0.2.x on npm. The first app
+built on it, uniPEQ (unipeq.com, `potatosalad775/uniPEQ`), is public. Open work: ARCHITECTURE §11.
+Read `docs/ARCHITECTURE.md` first.
 
 Commands: `npm run lint` · `npm run check` (codegen and vector drift + typecheck) · `npm test` ·
 `npm run build` · `npm run codegen` after editing `schema/v1/profile.schema.json` ·
@@ -25,11 +25,15 @@ Never edit `schema/v1/source.schema.json`,
 
 | File | Contents |
 | --- | --- |
-| `docs/PLAN.md` | goal, consumers, architecture, repo layout, phased roadmap with exit criteria, risks |
+| `docs/ARCHITECTURE.md` | goal, consumers, layout, package boundaries, invariants, data flow, roadmap, risks |
 | `docs/SPEC.md` | **the** format definition (v1, frozen) and engine semantics. Single source of truth. |
-| `docs/INSPECTOR.md` | inspector web app: capability tiers, guided reads, safety, privacy |
-| `docs/DECISIONS.md` | every design decision with rationale, review of the original concept draft, **open questions for the owner** |
+| `docs/INSPECTOR.md` | inspector web app: capability tiers, guided reads, safety, privacy. Code cites its § numbers; keep them stable. |
+| `docs/DECISIONS.md` | the decisions in force, one short entry each, by stable D-number |
+| `docs/history/` | archived full decision log and build-out plan. Read for background; don't edit. |
 | `docs/research/prior-art.md` | evidence: existing constraint models + what real device handlers encode |
+
+README.md and CONTRIBUTING.md are for the public: keep README short and user-facing, and put
+developer detail in CONTRIBUTING or ARCHITECTURE.
 
 When a decision changes, edit its entry in DECISIONS.md with a dated note, and update SPEC.md
 in the same change. v1 is frozen: a format change must be an additive minor (SPEC §15) or wait
@@ -70,8 +74,8 @@ for v2. Don't define format details anywhere except SPEC.md.
   and at least one case in `conformance/v1/profiles/cases/` that triggers it. A test enforces it.
 - One JSON file per profile: `data/profiles/<brand>/<id>.json`, starting with `"$schema"` so editors
   validate it. `<brand>` is `brandSlug(device.brand)`. Abstract bases: `data/bases/<id>.json`.
-- `data/` was seeded once by an importer (D31, removed; last in commit `1b3dc3c`) and is now edited
-  by hand.
+- `data/` was seeded once by an importer (D26; details in `docs/history/decisions.md` D31; last in
+  commit `1b3dc3c`) and is now edited by hand.
 - No calibration (D39): profiles hold the value the device is told, and nothing corrects firmware
   quirks (no factors folded into domains, no scaling in codecs). Put a reported quirk in
   `meta.notes` as a warning.
@@ -98,7 +102,7 @@ for v2. Don't define format details anywhere except SPEC.md.
   trailing spaces included. A match field takes a list rather than one entry per combination
   (D43).
 - Name is **eqcaps** (D24): repo `potatosalad775/eqcaps`, Pages `potatosalad775.github.io/eqcaps`,
-  npm `@potatosalad775/eqcaps` (data) and `@potatosalad775/eqcaps-{core,client,device-bridge}`.
+  npm `@potatosalad775/eqcaps-{core,client,device-bridge}`. No data package is planned (D32).
   The local folder is still named `eqDeviceInfo`.
 - Filter type codes are Equalizer APO's: `PK LSC HSC LPQ HPQ BP NO AP` (D22). modernGraphTool and
   devicePEQ write `LSQ`/`HSQ`; convert at the boundary, never in profiles.

@@ -1,10 +1,12 @@
 # Inspector web app
 
-A static web app where users, contributors and developers can browse the database, connect their
-own PEQ hardware, see what the database says about it, check that against the device itself, and
-contribute the result back. It is the main *authoring and verification* tool for the database.
+A static web app at [potatosalad775.github.io/eqcaps](https://potatosalad775.github.io/eqcaps/)
+where users, contributors and developers can browse the database, connect their own PEQ hardware,
+see what the database says about it, check that against the device itself, and contribute the
+result back. It is the main *authoring and verification* tool for the database.
 
-Format semantics referenced here are defined in [SPEC.md](SPEC.md).
+Format semantics referenced here are defined in [SPEC.md](SPEC.md); code comments cite this file's
+sections (`INSPECTOR §3.3`), so their numbers stay put.
 
 ## 1. Who it's for
 
@@ -48,21 +50,21 @@ Each tier works without the ones above it. The inspector **never writes to a dev
 - Show what the handler's codec can represent (if the handler exposes a codec, §4), which explains
   read-back rounding.
 
-### T3: Guided read (read-only, replaces the probe)
+### T3: Guided read (read-only)
 
 The user changes the EQ in the vendor's own app, step by step as the inspector asks, and the
 inspector reads the device back after each step. What the vendor app let the user set becomes
 `vendor-app` evidence for the profile. Details in §3.
 
-*2026-10-03:* this tier was the probe, which wrote test values to the device itself (D38). It
-was built and removed the same day (D40): on a CrinEar Protocol Micro, writes past the device's
-8 bands corrupted its stored EQ, and the restore failed.
-
 ### T4: Author and submit
 
-- Schema-aware editor (form + JSON) with live semantic validation and a diff against the existing
-  profile.
-- Start from: an existing profile, a read-back or guided read, a base (`extends`), or blank.
+- Editor (form + JSON) for **authoring files**, read from the repository (bases aren't
+  published), that runs CI's own checks as the user types and shows a diff against the existing
+  file (DECISIONS D35).
+- Start from: an existing profile, a read-back or guided read, a base (`extends`), or blank. A
+  device the database lacks starts from its protocol's wire limits, cited as `handler-code`. A
+  device matched only by a group profile is offered **Add my device**: a profile of its own that
+  extends the group's base, prefilled from its identity and read-back (D37).
 - Submit without any backend:
   1. **Pull request:** open `https://github.com/potatosalad775/eqcaps/new/main?filename=data/profiles/<brand>/<id>.json&value=<urlencoded>`.
      GitHub forks automatically for non-collaborators and offers "Propose new file".
@@ -70,26 +72,18 @@ was built and removed the same day (D40): on a CrinEar Protocol Micro, writes pa
   2. **Issue** (fallback, and the route for large evidence files): issue form URL with prefilled
      fields; the evidence JSON is downloaded and attached by the user.
 - Both routes are subject to URL length (~8 KB practical). The profile goes in the URL and evidence
-  is always attached separately.
+  is always attached separately, since one link can only create one file.
+- A read from the connect page arrives with its evidence file cited and is re-checked against
+  every edit.
 - The submit screen states that data contributions are CC0-1.0 (DECISIONS D25).
-
-*2026-10-03:* built (DECISIONS D35) except "start from a probe result", which comes with T3.
-*2026-10-03, later:* a probe result started a profile too (D38), until the probe was removed
-(D40); a guided read's findings will take its place. A device the database lacks, taken to the editor from a
-read, starts from its protocol's wire limits, cited as `handler-code`.
-A device matched only by a group profile is offered "Add my device": a profile of its own that
-extends the group's base, prefilled from its identity and read-back. The
-editor works on authoring files, read from the repository (bases aren't published), and runs
-CI's own checks as the user types. A read from the connect page arrives with its evidence file
-cited and is re-checked against every edit. Evidence files are attached to the pull request,
-since one link can only create one file.
 
 ## 3. Guided reads (T3)
 
-The probe learned limits by writing values and reading back what stuck. That needed the firmware
-to check what it is sent, and many don't (Walkplay stores anything), and every firmware bug became
-a risk to the user's device and hearing. Guided reads turn it around: **the vendor's app does the
-writing**, inside its own limits, and the inspector only reads. The limits found are the vendor's
+Learning a device's limits by writing test values and reading back what stuck needs firmware
+that checks what it is sent, and many don't (Walkplay stores anything); every firmware bug also
+becomes a risk to the user's device and hearing. An early "probe" mode did this and was removed
+(DECISIONS D40). Guided reads turn it around: **the vendor's app does the writing**, inside its
+own limits, and the inspector only reads. The limits found are the vendor's
 UI limits, which SPEC §10 already treats as `vendor-app` evidence: a safe subset of what the
 firmware accepts, not necessarily all of it.
 
@@ -142,16 +136,12 @@ the wire's, however coarse the app's buttons, and the bounds are the values the 
 rounded to the app's step, the app's step stands. Where the app's step is the wire's, the two
 can't be told apart and don't need to be. Without a grid check (an app with sliders only), the
 step is the app's; the wire may carry finer values, but nothing the vendor offers sends them, so
-the profile describes what the vendor supports.
+the profile describes what the vendor supports. (Walkplay's web app, for one, has 0.1 dB buttons
+but passes a typed 1.111111 through as the wire's 1.109375.)
 
 A value that disagrees with the matched profile is a finding, as in T2. The result is a set of
 constraints (band count, per-band domains, types, preamp), with notes for what wasn't asked or
 didn't settle.
-
-*2026-10-03:* the owner's guided read of a CrinEar Protocol Micro in Walkplay's web app found
-0.1 dB buttons for gain and Q, and a typed 1.111111 held as 1.109375. The first inference took
-1.109375 for the app's 1.11 and made the step 0.01; the pass-through rule above replaced it
-(DECISIONS D41).
 
 ### 3.4 Connection
 
@@ -165,7 +155,7 @@ The vendor app and the inspector may not share the device:
 
 The design must work in the second case too: one read per step, the device reconnected for each.
 Change detection reports every change since the last read, not only the one asked for: a user
-may touch other controls (the owner moved the preamp during the check).
+may touch other controls (a preamp moved during the first check on hardware).
 
 ### 3.5 Safety
 
@@ -184,30 +174,19 @@ may touch other controls (the owner moved the preamp during the check).
 - **Vendor-app limits are a subset.** The firmware may accept more than the app allows. A profile
   from a guided read describes what the vendor supports, which is what apps should send.
 
-## 4. Device bridge requirements
+## 4. Device bridge
 
-The inspector uses `packages/device-bridge`, extracted from modernGraphTool's `src/lib/device-peq`
-(MIT, based on devicePEQ 0BSD). The extraction adds:
+The inspector drives devices through `packages/device-bridge` (DECISIONS D33), and only reads:
 
-| Need | Change |
+| Need | What the bridge gives |
 | --- | --- |
-| Identify unknown devices | connectors accept "any device" mode; identity separated from handler lookup |
-| T2 attribution | **split each handler into a pure codec** (`encode(bands) → bytes`, `decode(bytes) → bands`) and transport I/O. The codec alone can be analysed offline (encode→decode) to learn wire-level limits with no hardware, which feeds `handler-code` sources automatically. |
-| Raw push | push sends written values straight to the codec: no `normalizeFiltersForDevice`, no clamping. Nothing corrects firmware quirks (DECISIONS D39), so the bridge has no compensation to bypass, unlike devicePEQ, which needed a verification-only switch. Every push is raw; consumers fit first (DECISIONS D33). |
-| Portable transports | handlers talk to a transport interface (open, send/receive reports or bytes, close) with no browser types. WebHID, Web Serial and Web Bluetooth are the browser implementations. The Android app supplies a native USB one (DECISIONS D27). |
-| Capability flags | `canRead`, `canWrite`, `slots`, `disconnectOnSave`, `supportsPreamp` exposed per handler |
-| Link to DB | registrations reference a profile **id** instead of carrying `minGain`/`maxGain`/`maxFilters`/`supportsLSHSFilters`. Protocol-only fields (`reportId`, `schemeNo`, `baudRate`, slots…) stay in the bridge. |
+| Identify unknown devices | "any device" connect, and identity separate from the protocol: the client matches a device, the profile's `protocol` says which handler drives it (D42), and an unknown device gets its vendor's usual protocol, marked experimental |
+| T2 attribution | every handler is a pure codec (`encode`, `decode`, `wire()`: the range and resolution each field can carry) plus a session, so the inspector can say what a value becomes on the wire without a device, and start a `handler-code` draft from the codec's limits |
+| Descriptor dump | HID collections, usages and report sizes from the transport |
+| Capability flags | whether a protocol reads, how many bands it needs told, whether it reports the preamp and the current preset |
 
-Handlers are migrated incrementally: an unmigrated handler still supports T1. Upstream devicePEQ's recorded device captures (`tests/captures/`, real device exchanges
-per model) become codec regression tests and seed the virtual device.
-
-*2026-10-02:* the bridge exists (DECISIONS D33): portable transports with browser implementations,
-"any device" WebHID connect, identity extraction, the descriptor as `collections`, capability
-flags, raw push, and the captures as regression tests. Every handler is split into a pure codec
-(`encode`, `decode`, and `wire()`: the range and resolution each field can carry) and a session,
-so offline analysis can start from the codecs. Protocols are carried by the profiles (D42)
-rather than by registrations: the device is identified once, by the client against the
-database, and an unknown device gets its vendor's usual protocol, marked experimental.
+The bridge also has `push` and `setEnabled` for apps. The inspector imports neither, and a test
+(`no-writes.test.ts`) checks that.
 
 ## 5. Architecture
 
@@ -220,7 +199,8 @@ apps/inspector (Svelte 5 + Vite, static SPA)
 ```
 
 - Deployed with the published data on the same origin (`/` = app, `/v1/…` = data).
-- Works offline for T0 once the data is cached (service worker, optional).
+- The client caches the index and bundle in `localStorage`, revalidated after 5 minutes so
+  contributors see their merged changes quickly.
 - Browser support: device features need Chromium (WebHID/WebSerial/Web Bluetooth) over HTTPS.
   T0 and T4 work in every browser, and the UI says why device tiers are unavailable instead of
   hiding them.
@@ -249,9 +229,6 @@ A read (T2) is recorded as one experiment:
 
 A profile cites it as a `community` source: it shows values the device holds, not its limits
 (SPEC §10, DECISIONS D35). The file is named `<date>-<first 6 hex of its SHA-256>.json`.
-
-*2026-10-03:* a probe's file (D38) had more fields (pushes, backup, derived constraints); the probe
-is gone (D40).
 
 A guided read (§3) adds the vendor app and one experiment per step (DECISIONS D41):
 
@@ -298,11 +275,3 @@ Stored at `data/evidence/<profile-id>/<date>-<short hash>.json`, referenced from
 | `/connect` | T1 identify → T2 read → T3 guided read |
 | `/edit/<id?>` | T4 editor + submit |
 | `/docs` | consumer guide (how to use the CDN, client, engine) |
-
-*2026-10-02:* built so far (DECISIONS D34): `/`, `/p/<id>`, `/playground`, and `/connect` with T1
-and T2 (no probing yet). `/edit` and `/docs` are next.
-*2026-10-03:* `/edit/<id?>` and `/docs` are built (D35); `/connect` exports evidence. Probing (T3)
-is Phase 5.
-*2026-10-03, later:* `/connect` probes (T3, D38). Removed again the same day (D40); guided reads
-(§3) are planned in its place.
-*2026-10-03, later still:* `/connect` runs guided reads (T3, D41), offered after a read.

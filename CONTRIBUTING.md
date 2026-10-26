@@ -51,8 +51,8 @@ before it leaves the page. Attach that file to the pull request; a maintainer co
 `data/evidence/`. A read-back is cited as a `community` source: it shows values the device holds,
 not its limits, so it supports a fix but doesn't verify a profile.
 
-Most profiles were seeded from devicePEQ, modernGraphTool and AutoEQ by a one-off importer
-(DECISIONS D31) and are `draft`. Their notes say what is known
+Most profiles were seeded once from devicePEQ, modernGraphTool and AutoEQ
+([DECISIONS D26](docs/DECISIONS.md)) and are `draft`. Their notes say what is known
 to be uncertain. Checking one against your device is one of the most useful things you can do.
 
 ## Adding a device to the bridge
@@ -80,6 +80,28 @@ npm test
 ```
 
 CI runs the same checks on every pull request and marks each problem on its line in the diff.
+
+## Working on the code
+
+How the packages fit together is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), and the
+invariants there hold for every change.
+
+```sh
+npm run lint           # Prettier + ESLint
+npm run check          # generated files and conformance vectors up to date + typecheck
+npm test
+npm run build
+npm run codegen        # after editing schema/v1/profile.schema.json
+npm run conformance    # after changing engine behaviour or scripts/conformance.ts
+npm run data:build     # publish /v1/ into dist/site/
+npm run inspector:dev  # the inspector, reading the local dist/site/v1/ and data/
+npm run release -- 0.3.0-rc.1 --pack  # package tarballs in dist/pack/, to try in another app
+```
+
+Never edit `schema/v1/source.schema.json`, `*.generated.ts` or the engine vectors in
+`conformance/v1/*.json` by hand: they are generated, and `npm run check` fails on drift. Every
+semantic validation rule needs an issue code in `packages/core/src/issues.ts` and a case in
+`conformance/v1/profiles/cases/` that triggers it. A test checks both.
 
 ## Review
 
