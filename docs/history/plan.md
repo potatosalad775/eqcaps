@@ -1,5 +1,8 @@
 # Plan
 
+> **Archived 2026-10-26.** The build-out plan and phase log (Phases 0–5, 2026-10-02 to
+> 2026-10-04). What is still true is in [../ARCHITECTURE.md](../ARCHITECTURE.md).
+
 ## 1. Goal
 
 A shared, vendor-neutral system that answers one question for any EQ app:
@@ -11,12 +14,12 @@ It covers band count, filter types per slot, frequency/Q/gain domains including 
 value sets, conditional domains, cross-band rules, preamp, device identity and provenance. It
 consists of:
 
-1. **A format**: [SPEC.md](SPEC.md), JSON Schema, conformance vectors.
+1. **A format**: [SPEC.md](../SPEC.md), JSON Schema, conformance vectors.
 2. **A database**: community-maintained profiles, CI-validated, published as static JSON.
 3. **A reference engine**: resolve / validate / fit / assign / complete, in TypeScript, portable
    by spec.
 4. **An inspector web app**: browse, connect a device, read, guided reads, author, submit.
-   See [INSPECTOR.md](INSPECTOR.md).
+   See [INSPECTOR.md](../INSPECTOR.md).
 
 Non-goals (v1): per-channel (L/R) EQ, protocol sharing for non-JS platforms, coefficient
 quantization and bridge-computed biquads, a submission backend, non-EQ device features (DAC
@@ -135,7 +138,7 @@ Every property runs on 10k random profiles in `npm test` and passed at 100k
 - `packages/build` + CLI: `validate`, `build` (flatten, index, bundle, sha256), `check-collisions`.
 - `scripts/import/`: devicePEQ registry + device configs, modernGraphTool registrations, AutoEQ
   `PEQ_CONFIGS` → `draft` profiles, enriched with wire grids from
-  [research/prior-art.md §2](research/prior-art.md#2-what-the-device-handlers-actually-encode).
+  [research/prior-art.md §2](../research/prior-art.md#2-what-the-device-handlers-actually-encode).
   Records the upstream commit it read (D26), maps devicePEQ's `peqConstraintsRef` /
   `peqConstraintsOverride` to bases + `extends`, maps filter codes (D22), turns compensation
   settings into `realization` blocks (D29), and reads only devicePEQ's own 0BSD files (D25).

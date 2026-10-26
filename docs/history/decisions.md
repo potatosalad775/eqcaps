@@ -1,5 +1,9 @@
 # Decisions
 
+> **Archived 2026-10-26.** The full decision log from the project's build-out (2026-10-02 to
+> 2026-10-10), kept as written, with superseded and removed decisions. The decisions that still
+> apply are summarized, under the same numbers, in [../DECISIONS.md](../DECISIONS.md).
+
 Why the plan looks the way it does. Each entry: the decision, the reason, and what was rejected.
 Change a decision by editing its entry and adding a dated note. Don't silently rewrite.
 
@@ -12,7 +16,7 @@ confirmation (see [Open questions](#open-questions-for-the-owner)).
 
 The original draft was written as a modernGraphTool issue. Most of its schema ideas hold up. The
 main changes come from (a) making the project standalone and multi-consumer, and (b) what the real
-device handlers turned out to do ([research/prior-art.md](research/prior-art.md)).
+device handlers turned out to do ([research/prior-art.md](../research/prior-art.md)).
 
 | Draft element | Verdict | What changed |
 | --- | --- | --- |
