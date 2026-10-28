@@ -40,6 +40,11 @@ export default defineConfig(
 		languageOptions: { globals: { ...globals.browser } }
 	},
 	{
+		// Userscripts run in the vendor app's page.
+		files: ['tools/userscripts/**'],
+		languageOptions: { globals: { ...globals.browser } }
+	},
+	{
 		files: ['**/*.svelte', '**/*.svelte.ts'],
 		languageOptions: {
 			parserOptions: {
