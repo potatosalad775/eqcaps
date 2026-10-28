@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
+	"extends": "tanchjim-ktmicro-half-frequency",
 	"id": "tanchjim-one-dsp",
 	"device": { "brand": "Tanchjim", "model": "One DSP" },
 	"match": {
@@ -13,6 +13,11 @@
 		"status": "draft",
 		"sources": [
 			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper",
+				"date": "2026-10-28"
+			},
+			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
@@ -22,6 +27,7 @@
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/ktmicro_tanchjim_one_dsp.json",
 				"date": "2026-10-02"
 			}
-		]
+		],
+		"notes": "The app names it \"TANCHJIM-ONE DSP\" and halves the frequencies it sends. devicePEQ's capture holds 30, 200 and 800 in the frequency registers, 60, 400 and 1600 Hz as the app reads them; devicePEQ sends whole Hz."
 	}
 }

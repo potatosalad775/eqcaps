@@ -79,7 +79,8 @@ for v2. Don't define format details anywhere except SPEC.md.
   commit `1b3dc3c`) and is now edited by hand.
 - No calibration (D39): profiles hold the value the device is told, and nothing corrects firmware
   quirks (no factors folded into domains, no scaling in codecs). Put a reported quirk in
-  `meta.notes` as a warning.
+  `meta.notes` as a warning. The exception is a conversion the vendor's own app makes on the way
+  to the device: the handler makes it too, as a `protocol` option (Tanchjim's `freqUnit`).
 - Device bridge (D33): handlers see only the transport interfaces in `src/transport.ts`, never
   browser APIs (those are in `src/browser/`, typed structurally). Codecs write exactly the written
   values they're given: round onto the wire grid, never clamp, pad or convert types; anything the

@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
+	"extends": "tanchjim-ktmicro",
 	"id": "tanchjim-fission",
 	"device": { "brand": "Tanchjim", "model": "Fission" },
 	"match": {
@@ -9,10 +9,14 @@
 			{ "vendorId": "0x31b2", "productName": ["TANCHJIM FISSION", "TANCHJIM-FISSION  DSP"] }
 		]
 	},
-	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127, "step": 1 } },
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper",
+				"date": "2026-10-28"
+			},
 			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
@@ -24,6 +28,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "devicePEQ overrides its shared constraints with {\"deviceHandlesPregain\":false}."
+		"notes": "The app names it \"TANCHJIM-FISSION  DSP\" (two spaces, as the device reports it). \"TANCHJIM FISSION\" is devicePEQ's. devicePEQ gives it a pre-gain (the preamp register 0x66); Tanchjim's app doesn't."
 	}
 }

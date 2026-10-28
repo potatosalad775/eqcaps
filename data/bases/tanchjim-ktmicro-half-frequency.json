@@ -1,0 +1,21 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "tanchjim-ktmicro",
+	"abstract": true,
+	"id": "tanchjim-ktmicro-half-frequency",
+	"band": { "freq": { "min": 30, "max": 20000, "step": 2 } },
+	"protocol": {
+		"options": { "slotRegister": false, "preampRegister": false, "frameDelay": 400, "freqUnit": 2 }
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DSPCommand.getHalfOrDoubleFre, DSPProductType",
+				"date": "2026-10-28"
+			}
+		],
+		"notes": "Tanchjim's app sends these models half the frequency (whole Hz divided by 2, rounded down) and doubles what it reads back (D39), so the frequency register counts 2 Hz steps."
+	}
+}

@@ -11,3 +11,4 @@ decisions are recorded in [../DECISIONS.md](../DECISIONS.md), and what the proje
 | [fosi-audio.md](fosi-audio.md) | Device controls (format 1.2), the DS3 and the WebHID recorder done on `feat/device-controls`; recording a real DS3 and inspector support next |
 | [nicehck.md](nicehck.md) | Walkplay firmware and controls, four NICEHCK profiles and the recorder adapter done on `feat/device-controls`; recording each device next |
 | [walkplay.md](walkplay.md) | Walkplay's own app read against walkplay-hid: six disagreements (the commit first), unconfirmed until a device is recorded; recorder adapter done |
+| [tanchjim.md](tanchjim.md) | Tanchjim's KT Micro devices follow the vendor app (handler options, two bases, 8 new profiles); identifying the FOLA and the app's Walkplay-chip devices next; Luna has no EQ |

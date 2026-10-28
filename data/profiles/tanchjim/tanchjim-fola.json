@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "tanchjim-ktmicro",
+	"id": "tanchjim-fola",
+	"device": { "brand": "Tanchjim", "model": "FOLA" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productName": "TANCHJIM-FOLA" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper",
+				"date": "2026-10-28"
+			}
+		],
+		"notes": "The app names it \"TANCHJIM-FOLA\". Its USB ids aren't known yet: it matches by KT Micro's vendor id, which every Tanchjim KT Micro device recorded so far has, and that name, which the app compares as a substring and this profile exactly. An earphone with a USB-C DSP cable. The app's \"virtual channel\" settings for it are its own 5-band presets, written as an ordinary EQ."
+	}
+}

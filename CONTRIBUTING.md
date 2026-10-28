@@ -27,7 +27,8 @@ The format is defined in [docs/SPEC.md](docs/SPEC.md). In short:
 3. Write the values the engine is **told**, in Hz, dB and RBJ-cookbook Q, the way its own software
    means them. Fold in unit conversions (register units, octaves → Q). Don't correct for how the
    device sounds: if it's reported to place filters off what it's told, say so in `meta.notes`
-   (DECISIONS D39).
+   (DECISIONS D39). If the vendor's own app converts a value before sending it, the handler does
+   too, through the profile's `protocol` options.
 4. Say where every claim comes from in `meta.sources`, and pick the `meta.status` your evidence
    supports (SPEC §10):
    - `draft`: no evidence beyond handler code or a report;

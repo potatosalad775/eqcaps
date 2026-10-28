@@ -279,6 +279,76 @@ describe('devices without a profile', () => {
 	});
 });
 
+describe('KT Micro as Tanchjim drives it', () => {
+	/** Registers that answer a read with what was last written to them. */
+	function ktmicro(productName: string) {
+		const sent: number[][] = [];
+		const registers = new Map<number, number[]>();
+		const listeners = new Set<(id: number, d: Uint8Array) => void>();
+		const t: HidTransport = {
+			kind: 'hid',
+			vendorId: 0x31b2,
+			productId: 0x0111,
+			productName,
+			collections: [],
+			sendReport: async (_id, d) => {
+				sent.push([...d]);
+				if (d[4] === 0x57) registers.set(d[0]!, [...d]);
+				if (d[4] !== 0x52) return;
+				const answer = [...(registers.get(d[0]!) ?? d)];
+				answer[4] = 0x52;
+				for (const l of listeners) l(0x4b, Uint8Array.from(answer));
+			},
+			sendFeatureReport: async () => {},
+			receiveFeatureReport: async () => new Uint8Array(64),
+			onInputReport: (listener) => {
+				listeners.add(listener);
+				return () => listeners.delete(listener);
+			},
+			close: async () => {}
+		};
+		return { t, sent };
+	}
+
+	test('a push writes the bands 400 ms apart and commits, without the slot or preamp register', async () => {
+		const { t, sent } = ktmicro('TANCHJIM-FOLA');
+		const sleeps: number[] = [];
+		const device = openDevice(t, protocol('tanchjim-fola'), {
+			sleep: async (ms) => void sleeps.push(ms)
+		});
+		expect(device.capabilities).toMatchObject({
+			readsPreamp: false,
+			writesPreamp: false,
+			readsCurrentSlot: false,
+			canEnable: false
+		});
+		await device.push({ filters: [pk(100, -3), { type: 'LPQ', freq: 8000, gain: 0, q: 0.7 }] });
+		expect(sent.map((d) => d[0])).toEqual([0x26, 0x27, 0x28, 0x29, 0]);
+		expect(sent.at(-1)![4]).toBe(0x53);
+		expect(sent[3]![8]).toBe(1); // low-pass
+		expect(sleeps).toEqual([400, 400, 400, 400, 1000]);
+		await expect(device.push({ filters: [pk(100, 1)], preamp: -3 })).rejects.toMatchObject({
+			code: 'invalid-request'
+		});
+		await expect(device.setEnabled(false)).rejects.toMatchObject({ code: 'unsupported' });
+		expect(await device.currentSlot()).toBeNull();
+	});
+
+	test('the Zero, One and Tanya are sent half the frequency and read back whole', async () => {
+		const { t, sent } = ktmicro('TANCHJIM-ONE DSP');
+		const device = openDevice(t, protocol('tanchjim-one-dsp'), {
+			sleep: noSleep,
+			profile: { bandCount: 1 }
+		});
+		await device.push({ filters: [pk(1000, 2)] });
+		expect(sent[0]!.slice(8, 10)).toEqual([500 & 0xff, 500 >> 8]);
+		const { filters, preamp } = await device.pull();
+		expect(filters).toEqual([pk(1000, 2)]);
+		expect(preamp).toBeUndefined();
+		expect(sent.some((d) => d[0] === 0x24 || d[0] === 0x66)).toBe(false);
+	});
+});
+
 describe('JDS Labs', () => {
 	const describeAnswer = {
 		Configuration: {

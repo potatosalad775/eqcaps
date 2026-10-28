@@ -70,6 +70,16 @@ const BANDS: Partial<Record<Protocol['handler'], (f: HidFrame) => number | undef
 	'fosi-audio-usb-hid': (f) => (f.feature && f.data[1] === 0x8d ? f.data[3] : undefined)
 };
 
+/**
+ * Recorded writes to a register the profile's protocol leaves alone: devicePEQ writes KT Micro's
+ * pre-gain register on devices whose own app never does (Tanchjim's).
+ */
+const uncarried = (protocol: Protocol, { data: d }: HidFrame) =>
+	protocol.handler === 'ktmicro-usb-hid' &&
+	protocol.options?.preampRegister === false &&
+	d[0] === 0x66 &&
+	d[4] === 0x57;
+
 /** The frames of the first write: some captures hold two, the second rewriting the same bands. */
 function firstWrite(frames: HidFrame[], key: (f: HidFrame) => number | undefined): HidFrame[] {
 	const seen = new Set<number>();
@@ -121,7 +131,9 @@ describe.each(loadCaptures().map((c) => [c.file, c] as const))('%s', (_file, cap
 		const key = BANDS[protocol!.handler]!;
 		const codec = (HANDLERS[protocol!.handler] as AnyHandler).codec;
 		const options = protocol!.options ?? {};
-		const recorded = firstWrite(recordedFrames(capture), key);
+		const recorded = firstWrite(recordedFrames(capture), key).filter(
+			(f) => !uncarried(protocol!, f)
+		);
 		const state = codec.decode(recorded, options);
 		if (state.filters.length === 0) return; // the capture holds no write
 		const walkplay = protocol!.handler === 'walkplay-hid';

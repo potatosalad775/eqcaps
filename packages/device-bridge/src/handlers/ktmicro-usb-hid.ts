@@ -1,12 +1,12 @@
 // KT Micro register protocol (Kiwi Ears, Tanchjim, JCally, Moondrop CDSP and Chu 2 DSP; devicePEQ
-// ktmicroUsbHidHandler.js, 0BSD, at 0617f38).
+// ktmicroUsbHidHandler.js, 0BSD, at 0617f38; Tanchjim's Android app, which calls it "FeiFan").
 //
 // 10-byte packets on report 0x4B: [register, 0, 0, 0, cmd, 0, data…], cmd 'R' 0x52 read, 'W' 0x57
 // write, 'S' 0x53 commit; answers echo register and cmd. A band has two registers: gain s16 LE ×10
 // and freq u16 LE, then q u16 LE ×1000 and type. Register 0x24 is the EQ slot, 0x66 the preamp
 // (s8 dB). Not every model acknowledges register writes; the commit makes them take effect.
-// Older firmware is reported to double the frequency it's given; the codec doesn't correct for it
-// (D39).
+// Tanchjim's app never touches 0x24 or 0x66, paces its writes 400 ms apart, and stores half the
+// frequency on its Zero, One and Tanya (D39): the options below say so per device.
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { field, grid, I16, I8, le16, readI16le, readI8, readU16le, U16, U8 } from '../bytes.ts';
@@ -22,6 +22,14 @@ export interface KtmicroHidOptions {
 	bandRegisters?: readonly { freq: number; q: number }[];
 	/** Slot of the custom EQ. Default 3. */
 	customSlot?: number;
+	/** Hz per unit of the frequency field: 2 on firmware that stores half the frequency. Default 1. */
+	freqUnit?: number;
+	/** The EQ slot register 0x24 selects the slot and turns the EQ off. Default true. */
+	slotRegister?: boolean;
+	/** The preamp register 0x66 is read and written. Default true. */
+	preampRegister?: boolean;
+	/** Milliseconds between the frames of a push. Default 0. */
+	frameDelay?: number;
 }
 
 const REPORT_ID = 0x4b;
@@ -31,7 +39,7 @@ const COMMIT = 0x53;
 const SLOT = 0x24;
 const PREAMP = 0x66;
 
-export const KTMICRO_TYPES = typeCodes('ktmicro', { PK: 0, LSC: 3, HSC: 4 });
+export const KTMICRO_TYPES = typeCodes('ktmicro', { PK: 0, LPQ: 1, HPQ: 2, LSC: 3, HSC: 4 });
 
 export function ktmicroRegisters(o: KtmicroHidOptions, band: number) {
 	if (o.bandRegisters) {
@@ -54,20 +62,32 @@ const packet = (register: number, cmd: number, data: number[] = []) => {
 	return bytes;
 };
 
+const hasPreamp = (o: KtmicroHidOptions) => o.preampRegister !== false;
+const hasSlots = (o: KtmicroHidOptions) => o.slotRegister !== false;
+const freqUnit = (o: KtmicroHidOptions) => o.freqUnit ?? 1;
+
+/** One band from its two register answers or writes. */
+const band = (a: ArrayLike<number>, b: ArrayLike<number>, o: KtmicroHidOptions): Filter => ({
+	type: KTMICRO_TYPES.decode(b[8] ?? 0),
+	freq: readU16le(a, 8) * freqUnit(o),
+	q: readU16le(b, 6) / 1000,
+	gain: readI16le(a, 6) / 10
+});
+
 export const ktmicroCodec: Codec<KtmicroHidOptions, HidFrame> = {
 	types: KTMICRO_TYPES.types,
-	wire: () => ({
-		freq: grid(1, U16),
+	wire: (o) => ({
+		freq: grid(1 / freqUnit(o), U16),
 		q: grid(1000, U16),
 		gain: grid(10, I16),
-		preamp: grid(1, I8)
+		...(hasPreamp(o) ? { preamp: grid(1, I8) } : {})
 	}),
 	encode(request, o) {
-		refuseUncarried('ktmicro-usb-hid', request, { preamp: true });
+		refuseUncarried('ktmicro-usb-hid', request, { preamp: hasPreamp(o) });
 		const { filters, preamp } = request;
 		const frames = filters.flatMap((f, i) => {
 			const regs = ktmicroRegisters(o, i);
-			const freq = field(f.freq, 1, U16, 'freq');
+			const freq = field(f.freq, 1 / freqUnit(o), U16, 'freq');
 			return [
 				packet(regs.freq, WRITE, [...le16(field(f.gain, 10, I16, 'gain') & 0xffff), ...le16(freq)]),
 				packet(regs.q, WRITE, [
@@ -92,15 +112,10 @@ export const ktmicroCodec: Codec<KtmicroHidOptions, HidFrame> = {
 			const a = byRegister.get(regs.freq);
 			const b = byRegister.get(regs.q);
 			if (!a || !b) break;
-			state.filters.push({
-				type: KTMICRO_TYPES.decode(b[8]!),
-				freq: readU16le(a, 8),
-				q: readU16le(b, 6) / 1000,
-				gain: readI16le(a, 6) / 10
-			});
+			state.filters.push(band(a, b, o));
 		}
 		const preamp = byRegister.get(PREAMP);
-		if (preamp) state.preamp = readI8(preamp, 6);
+		if (preamp && hasPreamp(o)) state.preamp = readI8(preamp, 6);
 		return state;
 	}
 };
@@ -132,14 +147,14 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 	capabilities: (_transport, o) => ({
 		canRead: true,
 		canWrite: true,
-		readsPreamp: true,
+		readsPreamp: hasPreamp(o),
 		readsSlot: false,
-		writesPreamp: true,
+		writesPreamp: hasPreamp(o),
 		writesSlot: false,
 		...(o.bandRegisters ? { bands: o.bandRegisters.length } : {}),
 		needsBandCount: !o.bandRegisters,
-		readsCurrentSlot: true,
-		canEnable: true
+		readsCurrentSlot: hasSlots(o),
+		canEnable: hasSlots(o)
 	}),
 
 	async pull(ctx, { bands }) {
@@ -149,13 +164,9 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 			const regs = ktmicroRegisters(ctx.options, i);
 			const a = await request(ctx, packet(regs.freq, READ), `KT Micro band ${i}`);
 			const b = await request(ctx, packet(regs.q, READ), `KT Micro band ${i} q`);
-			filters.push({
-				type: KTMICRO_TYPES.decode(b[8] ?? 0),
-				freq: readU16le(a, 8),
-				q: readU16le(b, 6) / 1000,
-				gain: readI16le(a, 6) / 10
-			});
+			filters.push(band(a, b, ctx.options));
 		}
+		if (!hasPreamp(ctx.options)) return { filters };
 		const preamp = await request(ctx, packet(PREAMP, READ), 'KT Micro preamp');
 		return { filters, preamp: readI8(preamp, 6) };
 	},
@@ -163,20 +174,28 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 	async push(ctx, request) {
 		const frames = ktmicroCodec.encode(request, ctx.options);
 		// Writes don't take while EQ is off: switch the custom slot on first.
-		if ((await readSlot(ctx)) === (ctx.bypass ?? 2)) {
+		if (hasSlots(ctx.options) && (await readSlot(ctx)) === (ctx.bypass ?? 2)) {
 			await selectSlot(ctx, ctx.options.customSlot ?? 3);
 		}
-		for (const frame of frames) await sendFrame(ctx.transport, frame);
+		const delay = ctx.options.frameDelay ?? 0;
+		for (const [i, frame] of frames.entries()) {
+			if (i > 0 && delay > 0) await ctx.sleep(delay);
+			await sendFrame(ctx.transport, frame);
+		}
 		await ctx.sleep(1000);
 		return { reconnect: false };
 	},
 
 	async currentSlot(ctx) {
+		if (!hasSlots(ctx.options)) return null;
 		const slot = await readSlot(ctx);
 		return slot === (ctx.bypass ?? 2) ? null : slot;
 	},
 
 	async setEnabled(ctx, enabled, slot) {
+		if (!hasSlots(ctx.options)) {
+			throw new BridgeError('unsupported', 'ktmicro-usb-hid: this device has no EQ switch');
+		}
 		await selectSlot(ctx, enabled ? (slot ?? ctx.options.customSlot ?? 3) : (ctx.bypass ?? 2));
 	}
 };

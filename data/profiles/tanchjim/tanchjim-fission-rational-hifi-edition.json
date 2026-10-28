@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "tanchjim-ktmicro",
+	"id": "tanchjim-fission-rational-hifi-edition",
+	"device": { "brand": "Tanchjim", "model": "Fission Rational HiFi Edition" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productName": "FISSION-Rational HiFi Edition" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper",
+				"date": "2026-10-28"
+			}
+		],
+		"notes": "The app names it \"FISSION-Rational HiFi Edition\". Its USB ids aren't known yet: it matches by KT Micro's vendor id, which every Tanchjim KT Micro device recorded so far has, and that name, which the app compares as a substring and this profile exactly. The only name in the app without the \"TANCHJIM\" prefix."
+	}
+}

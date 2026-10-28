@@ -109,6 +109,13 @@ Reported quirks go in `meta.notes` as warnings. **Why:** the evidence for correc
 firmware changes them without notice, only acoustic measurement can see them, and vendor apps
 don't correct. A correction applied to firmware that doesn't need it makes the sound worse.
 
+*2026-10-28:* the vendor's app comes first. Where it converts a value on the way to the device,
+that conversion is the wire format: the handler does the same, as a `protocol` option on the
+profiles of the devices the app converts for (D42), and the domain stays in the app's units.
+Tanchjim's app sends its Zero, One and Tanya DSP half the frequency (`freqUnit: 2` on
+`ktmicro-usb-hid`). A correction no vendor app makes is still only a note. **Why:** the vendor's
+app is how the device is meant to be driven; a conversion it applies is one its firmware expects.
+
 ### D42. Profiles name their protocol
 A hardware profile may carry `protocol`: the bridge handler, its options, its presets, and
 transport details (SPEC §9). It is inherited from the base, so a device on a protocol the bridge

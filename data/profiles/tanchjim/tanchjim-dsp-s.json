@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "tanchjim-ktmicro",
+	"id": "tanchjim-dsp-s",
+	"device": { "brand": "Tanchjim", "model": "DSP S" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productName": "TANCHJIM-DSP S" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper",
+				"date": "2026-10-28"
+			}
+		],
+		"notes": "The app names it \"TANCHJIM-DSP S\". Its USB ids aren't known yet: it matches by KT Micro's vendor id, which every Tanchjim KT Micro device recorded so far has, and that name, which the app compares as a substring and this profile exactly. A DSP cable; the app lets the user pick which earphone it drives."
+	}
+}

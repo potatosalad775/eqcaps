@@ -738,29 +738,7 @@ exports[`ktmicro_tanchjim_bunny_dsp.json > pull decodes the recorded answers 1`]
       "type": "PK",
     },
   ],
-  "findings": [
-    {
-      "allowed": {
-        "max": 5,
-        "min": 0.1,
-        "step": 0.001,
-      },
-      "code": "out-of-range",
-      "field": "q",
-      "slot": 0,
-    },
-    {
-      "allowed": {
-        "max": 5,
-        "min": 0.1,
-        "step": 0.001,
-      },
-      "code": "out-of-range",
-      "field": "q",
-      "slot": 4,
-    },
-  ],
-  "preamp": -6,
+  "findings": [],
   "protocol": "ktmicro-usb-hid",
 }
 `;
@@ -800,7 +778,6 @@ exports[`ktmicro_tanchjim_fission_dsp.json > pull decodes the recorded answers 1
     },
   ],
   "findings": [],
-  "preamp": -2,
   "protocol": "ktmicro-usb-hid",
 }
 `;
@@ -809,59 +786,37 @@ exports[`ktmicro_tanchjim_one_dsp.json > pull decodes the recorded answers 1`] =
 {
   "filters": [
     {
-      "freq": 30,
+      "freq": 60,
       "gain": -4,
       "q": 3,
       "type": "LSC",
     },
     {
-      "freq": 200,
+      "freq": 400,
       "gain": -3,
       "q": 8,
       "type": "PK",
     },
     {
-      "freq": 800,
+      "freq": 1600,
       "gain": -0.3,
       "q": 0.5,
       "type": "PK",
     },
     {
-      "freq": 1700,
+      "freq": 3400,
       "gain": -4,
       "q": 0.6,
       "type": "PK",
     },
     {
-      "freq": 4500,
+      "freq": 9000,
       "gain": -5,
       "q": 6,
       "type": "PK",
     },
   ],
-  "findings": [
-    {
-      "allowed": {
-        "max": 5,
-        "min": 0.1,
-        "step": 0.001,
-      },
-      "code": "out-of-range",
-      "field": "q",
-      "slot": 1,
-    },
-    {
-      "allowed": {
-        "max": 5,
-        "min": 0.1,
-        "step": 0.001,
-      },
-      "code": "out-of-range",
-      "field": "q",
-      "slot": 4,
-    },
-  ],
-  "preamp": 0,
+  "findings": [],
   "protocol": "ktmicro-usb-hid",
 }
 `;

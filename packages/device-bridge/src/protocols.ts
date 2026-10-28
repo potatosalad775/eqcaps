@@ -50,6 +50,21 @@ const byte: Read = (v) => {
 const number: Read = (v) =>
 	typeof v === 'number' && Number.isFinite(v) ? v : fail(`${JSON.stringify(v)} is not a number`);
 
+/** A number above 0. */
+const positive: Read = (v) =>
+	typeof v === 'number' && Number.isFinite(v) && v > 0
+		? v
+		: fail(`${JSON.stringify(v)} is not above 0`);
+
+/** A number of 0 or more. */
+const nonNegative: Read = (v) =>
+	typeof v === 'number' && Number.isFinite(v) && v >= 0
+		? v
+		: fail(`${JSON.stringify(v)} is not 0 or more`);
+
+const flag: Read = (v) =>
+	typeof v === 'boolean' ? v : fail(`${JSON.stringify(v)} is not a boolean`);
+
 const isObject = (v: unknown): v is Record<string, unknown> =>
 	typeof v === 'object' && v !== null && !Array.isArray(v);
 
@@ -78,7 +93,11 @@ const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOption
 	'ktmicro-usb-hid': {
 		baseRegister: byte,
 		bandRegisters: registers,
-		customSlot: byte
+		customSlot: byte,
+		freqUnit: positive,
+		slotRegister: flag,
+		preampRegister: flag,
+		frameDelay: nonNegative
 	},
 	'fosi-audio-usb-hid': { reportId: byte, bandwidth: number, defaultSlot: byte },
 	'qudelix-usb-hid': {},

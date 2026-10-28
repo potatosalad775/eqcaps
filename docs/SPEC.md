@@ -270,7 +270,9 @@ another field (a Q that narrows as gain grows)
 records neither: such behaviour changes with firmware and vendor customization, only acoustic
 measurement shows it, and vendor apps don't correct for it. Domains hold what the engine is told
 (§1), and consumers send the values the user asks for. A reported quirk may be noted in
-`meta.notes` (DECISIONS D39).
+`meta.notes` (DECISIONS D39). Where the vendor's own app converts a value before sending it (sends
+half the frequency, say), that conversion is wire format: the profile's `protocol` options say so
+and the device bridge applies it (§9); the domain stays in the app's units.
 
 ## 9. Preamp, channels and protocol
 
