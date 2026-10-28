@@ -21,9 +21,13 @@ const WANTED: Filter[] = [
 	{ type: 'HSC', freq: 9000, q: 0.7, gain: -4 }
 ];
 
-/** A HID device that echoes every report back as an input report (enough for KT Micro's acks). */
+/**
+ * A HID device that echoes every report back as an input report (enough for KT Micro's acks), and
+ * answers the last one's command on the feature report with zeros (enough for Fosi Audio).
+ */
 function hidSink(): HidTransport & { count: number } {
 	const listeners = new Set<(id: number, d: Uint8Array) => void>();
+	let last = new Uint8Array(63);
 	return {
 		kind: 'hid',
 		vendorId: 0,
@@ -42,12 +46,18 @@ function hidSink(): HidTransport & { count: number } {
 		count: 0,
 		async sendReport(id, data) {
 			this.count++;
+			last = Uint8Array.from(data);
 			queueMicrotask(() => listeners.forEach((l) => l(id, data)));
 		},
-		async sendFeatureReport() {
+		async sendFeatureReport(_id, data) {
 			this.count++;
+			last = Uint8Array.from(data);
 		},
-		receiveFeatureReport: async () => new Uint8Array(63),
+		async receiveFeatureReport() {
+			const answer = new Uint8Array(63);
+			answer.set(last.subarray(0, 2));
+			return answer;
+		},
 		onInputReport(l) {
 			listeners.add(l);
 			return () => void listeners.delete(l);

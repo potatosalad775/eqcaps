@@ -19,6 +19,7 @@ export type {
 	Handler,
 	HandlerCapabilities,
 	HandlerContext,
+	HandlerControl,
 	PullRequest,
 	PullResult,
 	PushRequest,
@@ -49,4 +50,9 @@ export type { DeviceIdentity } from './identity.ts';
 export { analyzeCodec, handlerCodeUrl, MAX_ANALYSED_BANDS } from './analysis.ts';
 export type { CodecAnalysis } from './analysis.ts';
 export { handlerTransports, openDevice, transportsOf } from './device.ts';
-export type { BridgeDevice, DeviceCapabilities, OpenOptions } from './device.ts';
+export type {
+	BridgeDevice,
+	ControlWriteResult,
+	DeviceCapabilities,
+	OpenOptions
+} from './device.ts';

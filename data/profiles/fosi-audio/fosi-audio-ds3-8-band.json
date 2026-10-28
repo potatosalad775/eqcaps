@@ -1,0 +1,26 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fosi-audio-ds3",
+	"id": "fosi-audio-ds3-8-band",
+	"device": { "brand": "Fosi Audio", "model": "DS3" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x152a", "productId": ["0x80d5", "0x889b"], "productName": "Fosi Audio DS3" },
+			{ "vendorId": "0x152a", "productName": "Fosi Audio DS3" }
+		],
+		"firmware": { "max": "1.4.15" }
+	},
+	"bandCount": 8,
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "vendor-app", "ref": "https://cc.fosiaudio.com/", "date": "2026-10-28" },
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/fosi_audio_ds3.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Firmware before 1.4.15, where every preset holds 8 bands; otherwise as fosi-audio-ds3. Upsampling needs firmware 1.4.9 or later. Not yet checked on a device: the preset ids (taken from the web control center, which treats 7 to 9 as the user presets on every firmware; devicePEQ listed 7 to 11) and the pre-gain range (an owner remembers -25 to 0 dB in an earlier version of the web app)."
+	}
+}

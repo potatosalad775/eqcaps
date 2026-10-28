@@ -1,37 +1,106 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
 	"id": "fosi-audio-ds3",
-	"schemaVersion": "1.1",
+	"schemaVersion": "1.2",
 	"kind": "hardware",
 	"device": { "brand": "Fosi Audio", "model": "DS3" },
 	"match": {
 		"usb": [
-			{ "vendorId": "0x152a", "productId": "0x889b", "productName": "Fosi Audio DS3" },
+			{ "vendorId": "0x152a", "productId": ["0x80d5", "0x889b"], "productName": "Fosi Audio DS3" },
 			{ "vendorId": "0x152a", "productName": "Fosi Audio DS3" }
-		]
+		],
+		"firmware": { "min": "1.4.15" }
 	},
-	"bandCount": 8,
+	"bandCount": 32,
 	"band": {
 		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "NO", "AP"],
 		"freq": { "min": 20, "max": 20000 },
-		"q": { "min": 0.1, "max": 10 },
-		"gain": { "min": -12, "max": 12 }
+		"q": { "min": 0.1, "max": 20 },
+		"gain": { "min": -30, "max": 30 }
 	},
-	"preamp": { "mode": "none" },
+	"preamp": { "mode": "manual", "gain": { "min": -24, "max": 0, "step": 1 } },
 	"protocol": {
 		"handler": "fosi-audio-usb-hid",
 		"presets": [
-			{ "id": 0, "name": "Bypass" },
-			{ "id": 7, "name": "Custom 1", "writable": true },
-			{ "id": 8, "name": "Custom 2", "writable": true },
-			{ "id": 9, "name": "Custom 3", "writable": true },
-			{ "id": 10, "name": "Custom 4", "writable": true },
-			{ "id": 11, "name": "Custom 5", "writable": true }
+			{ "id": 7, "name": "Custom1", "writable": true },
+			{ "id": 8, "name": "Custom2", "writable": true },
+			{ "id": 9, "name": "Custom3", "writable": true }
+		],
+		"controls": [
+			{
+				"id": "uacMode",
+				"name": "UAC",
+				"kind": "choice",
+				"role": "usb-mode",
+				"values": [
+					{ "value": 0, "name": "UAC 2.0" },
+					{ "value": 1, "name": "UAC 1.0" }
+				],
+				"reconnect": true
+			},
+			{
+				"id": "filterMode",
+				"name": "Filter",
+				"kind": "choice",
+				"role": "dac-filter",
+				"values": [
+					{ "value": 0, "name": "Min Phase" },
+					{ "value": 1, "name": "Apodizing" },
+					{ "value": 2, "name": "Fast Linear" },
+					{ "value": 3, "name": "Fast Linear LR" },
+					{ "value": 4, "name": "Slow Linear" },
+					{ "value": 5, "name": "Fast Min" },
+					{ "value": 6, "name": "Slow Min" },
+					{ "value": 7, "name": "Low Dispersion" }
+				],
+				"when": { "control": "uacMode", "values": [0] }
+			},
+			{
+				"id": "upsample",
+				"name": "Upsample",
+				"kind": "toggle",
+				"role": "upsampling",
+				"when": { "control": "uacMode", "values": [0] },
+				"firmware": { "min": "1.4.9" },
+				"disablesEq": [1]
+			},
+			{
+				"id": "gameMode",
+				"name": "GAME",
+				"kind": "choice",
+				"role": "sound-mode",
+				"values": [
+					{ "value": 0, "name": "NONE" },
+					{ "value": 1, "name": "FPS" },
+					{ "value": 2, "name": "7.1" }
+				],
+				"when": { "control": "uacMode", "values": [1] },
+				"reconnect": true
+			},
+			{
+				"id": "gainMode",
+				"name": "Gain",
+				"kind": "choice",
+				"role": "output-gain",
+				"values": [
+					{ "value": 0, "name": "L" },
+					{ "value": 1, "name": "H" }
+				]
+			},
+			{
+				"id": "volume",
+				"name": "Volume",
+				"kind": "range",
+				"role": "volume",
+				"range": { "min": 0, "max": 60, "step": 1 }
+			},
+			{ "id": "led", "name": "LED", "kind": "toggle", "role": "light" }
 		]
 	},
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{ "kind": "vendor-app", "ref": "https://cc.fosiaudio.com/", "date": "2026-10-28" },
 			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
@@ -43,6 +112,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. devicePEQ also lists band-stop and constant-Q peaking filters. Band-stop is the notch (NO); constant-Q peaking has no code in the format. Reported quirk, not corrected (D39): devicePEQ reports that filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40)), and that shelf frequencies move with gain."
+		"notes": "Firmware 1.4.15 and later: user presets hold 32 bands (fosi-audio-ds3-8-band covers older firmware). Limits are those of Fosi's web control center: freq 20 to 20000 Hz, Q 0.1 to 20, gain ±30 dB, pre-gain -24 to 0 dB in whole dB (the pre-gain command itself takes -50 to 0). The 7 built-in presets (ids 0 to 6, 8 bands each, names from the device) aren't listed yet. The web app offers the DAC filter and upsampling in UAC 2.0 mode, upsampling from firmware 1.4.9, and game mode in UAC 1.0 mode; it turns upsampling off before turning the EQ on, and the reverse. Switching the UAC mode, or game mode to FPS or 7.1, reconnects the device. In UAC 1.0 mode the DS3 is 0x152a:0x80d5, in UAC 2.0 mode 0x152a:0x889b, which the ZH3 shares. Reported quirk, not corrected (D39): devicePEQ reports that filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40)), and that shelf frequencies move with gain."
 	}
 }

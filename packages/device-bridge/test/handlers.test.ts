@@ -29,6 +29,7 @@ import {
 	type StreamTransport
 } from '../src/index.ts';
 import { protocolFor } from './data.ts';
+import { FakeDs3 } from './fake-ds3.ts';
 import { noSleep } from './replay.ts';
 
 const pk = (freq: number, gain: number, q = 1): Filter => ({ type: 'PK', freq, gain, q });
@@ -489,5 +490,90 @@ describe('Bluetooth codecs', () => {
 		expect(airohaCodec.decode([spp!], {})).toEqual({ filters, slot: 2 });
 		const [ble] = airohaCodec.encode({ filters }, { ble: true });
 		expect(decodeAirohaRecords(ble!, 10)).toEqual(filters);
+	});
+});
+
+describe('Fosi Audio DS3', () => {
+	const ds3 = (t: FakeDs3) => open(t, 'fosi-audio-ds3', 32);
+
+	test('reads the firmware version once', async () => {
+		const t = new FakeDs3();
+		const device = ds3(t);
+		expect(device.capabilities.readsFirmware).toBe(true);
+		expect(await device.firmware()).toBe('1.5.8');
+		t.firmware = [0x01, 0x04, 0x15];
+		expect(await device.firmware()).toBe('1.5.8');
+		expect(t.sent.filter((c) => c === 0xa6)).toHaveLength(1);
+		expect(await ds3(t).firmware()).toBe('1.4.15');
+	});
+
+	test('reads the controls the device has now', async () => {
+		const t = new FakeDs3();
+		expect(await ds3(t).readControls()).toEqual({
+			uacMode: 0,
+			gainMode: 0,
+			volume: 20,
+			led: 1,
+			filterMode: 0,
+			upsample: 0,
+			gameMode: null
+		});
+		t.values.uacMode = 1;
+		t.values.gameMode = 2;
+		const uac1 = await ds3(t).readControls();
+		expect([uac1.filterMode, uac1.upsample, uac1.gameMode]).toEqual([null, null, 2]);
+		const old = new FakeDs3();
+		old.firmware = [0x01, 0x04, 0x08];
+		expect((await ds3(old).readControls()).upsample).toBeNull();
+	});
+
+	test('writes a control and reads it back; refuses what the profile does not list', async () => {
+		const t = new FakeDs3();
+		const device = ds3(t);
+		expect(await device.writeControl('volume', 30)).toEqual({ reconnect: false });
+		expect(t.values.volume).toBe(30);
+		await expect(device.writeControl('volume', 61)).rejects.toMatchObject({
+			code: 'invalid-request'
+		});
+		await expect(device.writeControl('volume', 30.5)).rejects.toMatchObject({
+			code: 'invalid-request'
+		});
+		await expect(device.writeControl('bass', 0)).rejects.toMatchObject({ code: 'invalid-request' });
+		await expect(device.writeControl('gameMode', 1)).rejects.toMatchObject({ code: 'unsupported' });
+		t.stuck = 'gainMode';
+		await expect(device.writeControl('gainMode', 1)).rejects.toMatchObject({ code: 'rejected' });
+		expect(await device.writeControl('led', 0)).toEqual({ reconnect: false });
+		expect(t.values.led).toBe(0);
+		expect(await device.writeControl('uacMode', 1)).toEqual({ reconnect: true });
+		expect(t.values.uacMode).toBe(1);
+	});
+
+	test('reads 8 bands of a built-in preset, all of a user preset, and the pre-gain', async () => {
+		const t = new FakeDs3();
+		const device = ds3(t);
+		const builtIn = await device.pull({ slot: 2 });
+		expect(builtIn.filters).toHaveLength(8);
+		expect(builtIn.preamp).toBe(-3);
+		const user = await device.pull({ slot: 7 });
+		expect(user.filters).toHaveLength(32);
+		expect(user.filters[0]).toEqual({ type: 'PK', freq: 1000, q: 1, gain: 0 });
+	});
+
+	test('writes the pre-gain and keeps the preset name', async () => {
+		const t = new FakeDs3();
+		const device = ds3(t);
+		await device.push({ filters: [pk(100, 3), pk(1000, -2)], preamp: -6, slot: 7 });
+		expect(t.presets.get(7)).toEqual({ gain: -6, name: 'MyCurve' });
+		const back = await device.pull({ slot: 7, bands: 2 });
+		expect(back).toEqual({ filters: [pk(100, 3), pk(1000, -2)], slot: 7, preamp: -6 });
+	});
+
+	test('pull and push never touch the controls', async () => {
+		const t = new FakeDs3();
+		const device = ds3(t);
+		await device.pull({ slot: 7 });
+		await device.push({ filters: [pk(100, 3)], slot: 7 });
+		const controlCommands = [0x93, 0xa0, 0xa2, 0xa4, 0x80, 0x9b, 0x96];
+		expect(t.sent.filter((c) => controlCommands.includes(c))).toEqual([]);
 	});
 });

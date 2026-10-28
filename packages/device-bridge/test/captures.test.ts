@@ -27,13 +27,40 @@ const RECORDED_WITH: Record<string, Protocol> = {
 	'walkplay_default_moondrop_marigold.json': { handler: 'walkplay-hid' }
 };
 
+/**
+ * Captures whose device matches several profiles that only its firmware tells apart, which the
+ * recording doesn't give: the profile an app's user would pick.
+ */
+const CHOSEN: Record<string, string> = {
+	// devicePEQ read 8 bands of user preset 7; firmware before 1.4.15 has 8.
+	'fosi_audio_ds3.json': 'fosi-audio-ds3-8-band'
+};
+
+/**
+ * Requests the handler now makes that the recording predates, by first byte pair: the replay has
+ * no answer for them, and the handler reads on without one.
+ */
+const NEVER_ASKED: Record<string, readonly (readonly [number, number])[]> = {
+	// The preset count (0x91) and a preset's pre-gain and name (0x8B), from Fosi's web app.
+	'fosi_audio_ds3.json': [
+		[0x77, 0x91],
+		[0x77, 0x8b]
+	]
+};
+
 function setup(capture: Capture) {
 	const transport = new ReplayHid(capture);
 	const best = matchDevice(all, identityOf(transport)).best;
-	const profile = best ? (profiles.get(best.id) as Profile) : undefined;
-	const protocol = RECORDED_WITH[capture.file] ?? (best ? protocolFor(best.id) : undefined);
+	const id = CHOSEN[capture.file] ?? best?.id;
+	const profile = id ? (profiles.get(id) as Profile) : undefined;
+	const protocol = RECORDED_WITH[capture.file] ?? (id ? protocolFor(id) : undefined);
 	return { transport, profile, protocol };
 }
+
+const unexpected = (capture: Capture, frames: readonly HidFrame[]) =>
+	frames.filter(
+		({ data: d }) => !(NEVER_ASKED[capture.file] ?? []).some(([a, b]) => d[0] === a && d[1] === b)
+	);
 
 /** The band frames of a write, and the key that tells two writes of one band apart. */
 const BANDS: Partial<Record<Protocol['handler'], (f: HidFrame) => number | undefined>> = {
@@ -82,7 +109,7 @@ describe.each(loadCaptures().map((c) => [c.file, c] as const))('%s', (_file, cap
 		const { transport, profile, protocol } = setup(capture);
 		const device = openDevice(transport, protocol!, { sleep: noSleep, profile: profile! });
 		const result = await device.pull();
-		expect(transport.unmatched).toEqual([]);
+		expect(unexpected(capture, transport.unmatched)).toEqual([]);
 		// Values the device holds that its draft profile doesn't allow are findings about the
 		// data, kept visible here.
 		const findings = validate(profile!, result.filters, result.preamp);

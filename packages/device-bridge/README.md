@@ -66,7 +66,8 @@ share: ask the user which device it is.
 
 `device.capabilities` says what the protocol can do (`canRead`, `canWrite`, `readsPreamp`,
 `readsSlot`, `writesPreamp`, `writesSlot`, `needsBandCount`, the filter `types` it has wire codes for, the
-`wire` grid it can carry, preset `slots`, `disconnectOnSave`, `experimental`). A push with a
+`wire` grid it can carry, preset `slots`, `disconnectOnSave`, `experimental`, `readsFirmware`, and
+the device `controls` it drives). A push with a
 `preamp` or `slot` the protocol can't write is refused, not sent without it, and so is a pull of
 a `slot` the protocol can't read. Each handler's `codec`
 turns a push request into frames and back without a device, for checking what a value becomes on
@@ -108,6 +109,37 @@ and `ktmicro-usb-hid` turn the EQ off with a preset (KT Micro's default is slot 
 refuse a `bypass` preset. Presets marked `"writable": true` (format 1.1) are the user memories a
 write may target; once any preset is marked, the unmarked ones are built-in curves (SPEC §9). The
 bridge passes the mark on in `capabilities.slots` and doesn't enforce it. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
+
+## Device controls
+
+A profile's `protocol.controls` (format 1.2, SPEC §9.1) lists the device's settings besides the EQ:
+volume, gain, DAC filter, upsampling, USB mode, sound modes, lights. They are opt-in: `pull`,
+`push` and `setEnabled` never touch them.
+
+```ts
+const firmware = await device.firmware(); // "1.5.8", or null; read once
+const values = await device.readControls(); // { uacMode: 0, upsample: 0, gameMode: null, … }
+const off = eqDisabledBy(device.capabilities.controls, values); // from eqcaps-core
+await device.writeControl('volume', 24); // only when the user changed it
+```
+
+`capabilities.controls` holds the profile's controls this bridge drives. `readControls()` gives
+null for a control the device doesn't have now: its `firmware` range doesn't hold (unknown firmware
+counts as outside it), or the control its `when` names holds another value. `writeControl` refuses
+a value the control doesn't take (`invalid-request`) and a control the device doesn't have now
+(`unsupported`), then reads the value back (`rejected` if it didn't take). For a control marked
+`reconnect` it skips the read-back and returns `{ reconnect: true }`: the device may drop the
+connection or come back as another USB device, so match it again. `firmware()` also lets an app
+pick between profiles that only the firmware tells apart: match without it, open the device with
+the protocol they share, read the firmware, and match again.
+
+Control ids are each handler's vocabulary. `protocolProblem` refuses a control the handler doesn't
+drive, or a kind or role this bridge doesn't know; `protocolOf` leaves such a control out (or just
+its role), so data newer than the bridge still drives the rest.
+
+| Handler | Controls |
+| --- | --- |
+| `fosi-audio-usb-hid` | `volume`, `gainMode`, `filterMode`, `gameMode`, `upsample`, `uacMode`, `led` (one byte each, the device's own values) |
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,
 `timeout`, `bad-response`, `rejected`, `transport` or `invalid-request`.

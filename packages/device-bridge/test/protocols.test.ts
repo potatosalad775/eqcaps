@@ -55,6 +55,67 @@ test('every hardware profile from a vendor the bridge knows has a protocol', () 
 	expect(missing.map((p) => p.id)).toEqual([]);
 });
 
+describe('controls (SPEC §9.1)', () => {
+	const volume = {
+		id: 'volume',
+		name: 'Volume',
+		kind: 'range',
+		range: { min: 0, max: 60, step: 1 }
+	};
+
+	test("keep the profile's controls, in order", () => {
+		const controls = protocolOf(profile('fosi-audio-ds3'))?.controls;
+		expect(controls?.map((c) => c.id)).toEqual([
+			'uacMode',
+			'filterMode',
+			'upsample',
+			'gameMode',
+			'gainMode',
+			'volume',
+			'led'
+		]);
+		expect(controls?.find((c) => c.id === 'upsample')).toEqual(
+			profile('fosi-audio-ds3').protocol?.controls?.find((c) => c.id === 'upsample')
+		);
+	});
+
+	test('a control the handler lacks: CI refuses it, an app leaves it out', () => {
+		for (const c of [
+			{ id: 'bass', name: 'Bass', kind: 'range', range: { min: -10, max: 10 } },
+			{ ...volume, kind: 'dial' }
+		]) {
+			const raw = { handler: 'fosi-audio-usb-hid', controls: [volume, c] };
+			expect(protocolProblem(raw), c.kind).toBeTypeOf('string');
+			expect(protocolOf({ protocol: raw })?.controls?.map((x) => x.id)).toEqual(['volume']);
+		}
+		const unknownRole = {
+			handler: 'fosi-audio-usb-hid',
+			controls: [{ ...volume, role: 'loudness' }]
+		};
+		expect(protocolProblem(unknownRole)).toMatch(/unknown role/);
+		expect(protocolOf({ protocol: unknownRole })?.controls).toEqual([
+			{ id: 'volume', name: 'Volume', kind: 'range', range: { min: 0, max: 60, step: 1 } }
+		]);
+		const none = { handler: 'walkplay-hid', controls: [volume] };
+		expect(protocolOf({ protocol: none })).toEqual({ handler: 'walkplay-hid' });
+	});
+
+	test('a malformed control makes the protocol unreadable', () => {
+		const bad = [
+			{ ...volume, range: { min: 0 } },
+			{ id: 'gainMode', name: 'Gain', kind: 'choice', values: [{ value: 0, name: 'L' }] },
+			{ ...volume, kind: 'toggle' },
+			{ ...volume, when: { control: 'uacMode' } },
+			{ ...volume, reconnect: 'yes' }
+		];
+		for (const c of bad) {
+			expect(
+				protocolOf({ protocol: { handler: 'fosi-audio-usb-hid', controls: [c] } })
+			).toBeUndefined();
+		}
+	});
+});
+
 describe('protocolOf', () => {
 	test('reads hex strings as numbers', () => {
 		expect(protocolOf(profile('fiio-btr17'))?.options).toEqual({ saveCommand: 0x21 });

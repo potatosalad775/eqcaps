@@ -4,7 +4,8 @@
 // checks what the data says against the handlers this bridge has. The wire formats themselves are
 // in the handlers (invariant 2).
 
-import type { Slot } from './handler.ts';
+import type { Control } from '@potatosalad775/eqcaps-core';
+import type { AnyHandler, Slot } from './handler.ts';
 import { HANDLERS, type HandlerId, type HandlerOptions } from './handlers/index.ts';
 
 interface ProtocolBase {
@@ -19,6 +20,8 @@ interface ProtocolBase {
 	experimental?: boolean;
 	/** Serial ports: the baud rate. Default 115200 over USB, 9600 over Bluetooth. */
 	baudRate?: number;
+	/** The device's controls besides the EQ that this bridge's handler drives (SPEC §9.1). */
+	controls?: readonly Control[];
 }
 
 /** How to drive one device: a handler and its settings. */
@@ -89,12 +92,117 @@ const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOption
 	airoha: {}
 };
 
-function read(raw: unknown): Protocol {
+const KINDS: ReadonlySet<string> = new Set(['toggle', 'choice', 'range']);
+const ROLES: ReadonlySet<string> = new Set([
+	'volume',
+	'output-gain',
+	'dac-filter',
+	'upsampling',
+	'usb-mode',
+	'sound-mode',
+	'light',
+	'tone-bass',
+	'tone-treble'
+]);
+
+const numbers = (v: unknown, what: string): number[] =>
+	Array.isArray(v) && v.length > 0 && v.every((x) => typeof x === 'number' && Number.isFinite(x))
+		? v
+		: fail(`${what}: not a list of numbers`);
+
+/**
+ * A profile's controls. Strict (CI): every control must be one this bridge's handler drives,
+ * with a kind and role it knows. Lenient (apps, SPEC §9.1): such controls are left out, and an
+ * unknown role alone is dropped, so newer data never stops a device from being driven.
+ */
+function readControls(raw: unknown, id: HandlerId, strict: boolean): Control[] {
+	const driven: object = (HANDLERS[id] as AnyHandler).controls ?? {};
+	const out: Control[] = [];
+	for (const c of Array.isArray(raw) ? raw : fail('controls: not a list')) {
+		if (!isObject(c)) fail('controls: not an object');
+		const {
+			id: key,
+			name,
+			kind,
+			role,
+			values,
+			range,
+			unit,
+			when,
+			firmware,
+			disablesEq,
+			reconnect
+		} = c as Record<string, unknown>;
+		if (typeof key !== 'string' || !/^[a-z][A-Za-z0-9]*$/.test(key)) {
+			fail(`controls: id ${JSON.stringify(key)}`);
+		}
+		const at = `controls.${key as string}`;
+		const skip = (why: string) => (strict ? fail(`${at}: ${why}`) : undefined);
+		if (!Object.hasOwn(driven, key as string)) {
+			skip(`${id} has no control "${key as string}"`);
+			continue;
+		}
+		if (typeof kind !== 'string' || !KINDS.has(kind)) {
+			skip(`unknown kind ${JSON.stringify(kind)}`);
+			continue;
+		}
+		if (typeof name !== 'string' || !name) fail(`${at}: name`);
+		const control: Control = {
+			id: key as string,
+			name: name as string,
+			kind: kind as Control['kind']
+		};
+		if (role !== undefined) {
+			if (typeof role === 'string' && ROLES.has(role))
+				control.role = role as NonNullable<Control['role']>;
+			else skip(`unknown role ${JSON.stringify(role)}`);
+		}
+		if (kind === 'choice') {
+			if (!Array.isArray(values) || values.length < 2) fail(`${at}: values`);
+			control.values = (values as unknown[]).map((v) => {
+				const { value, name: label } = isObject(v) ? v : fail(`${at}: values`);
+				if (typeof value !== 'number' || !Number.isFinite(value))
+					fail(`${at}: value ${String(value)}`);
+				if (typeof label !== 'string' || !label) fail(`${at}: name of value ${String(value)}`);
+				return { value: value as number, name: label as string };
+			});
+		} else if (values !== undefined) fail(`${at}: values on a ${kind}`);
+		if (kind === 'range') {
+			const { min, max, step } = isObject(range) ? range : fail(`${at}: range`);
+			const [lo, hi] = numbers([min, max], `${at}: range`);
+			if (step !== undefined && !(typeof step === 'number' && step > 0)) fail(`${at}: step`);
+			control.range =
+				step === undefined ? { min: lo!, max: hi! } : { min: lo!, max: hi!, step: step as number };
+			if (unit !== undefined) control.unit = unit === 'dB' ? 'dB' : fail(`${at}: unit`);
+		} else if (range !== undefined || unit !== undefined) fail(`${at}: range on a ${kind}`);
+		if (when !== undefined) {
+			const { control: other, values: held } = isObject(when) ? when : fail(`${at}: when`);
+			if (typeof other !== 'string') fail(`${at}: when.control`);
+			control.when = { control: other as string, values: numbers(held, `${at}: when.values`) };
+		}
+		if (firmware !== undefined) {
+			const { min, max } = isObject(firmware) ? firmware : fail(`${at}: firmware`);
+			if ([min, max].some((v) => v !== undefined && typeof v !== 'string') || (!min && !max)) {
+				fail(`${at}: firmware`);
+			}
+			control.firmware = {
+				...(min !== undefined ? { min: min as string } : {}),
+				...(max !== undefined ? { max: max as string } : {})
+			};
+		}
+		if (disablesEq !== undefined) control.disablesEq = numbers(disablesEq, `${at}: disablesEq`);
+		if (reconnect !== undefined) {
+			control.reconnect = typeof reconnect === 'boolean' ? reconnect : fail(`${at}: reconnect`);
+		}
+		out.push(control);
+	}
+	return out;
+}
+
+function read(raw: unknown, strict = false): Protocol {
 	if (!isObject(raw)) fail('not an object');
-	const { handler, options, presets, disconnectOnSave, experimental, baudRate } = raw as Record<
-		string,
-		unknown
-	>;
+	const { handler, options, presets, disconnectOnSave, experimental, baudRate, controls } =
+		raw as Record<string, unknown>;
 	if (typeof handler !== 'string' || !Object.hasOwn(HANDLERS, handler)) {
 		fail(`this bridge has no handler "${String(handler)}"`);
 	}
@@ -153,16 +261,21 @@ function read(raw: unknown): Protocol {
 				? baudRate
 				: fail('baudRate: not a positive integer');
 	}
+	if (controls !== undefined) {
+		const list = readControls(controls, id, strict);
+		if (list.length) out.controls = list;
+	}
 	return out as unknown as Protocol;
 }
 
 /**
  * Why this bridge can't drive a profile's `protocol`, or undefined when it can: a handler it
- * doesn't have (data newer than the bridge), or settings that handler doesn't take.
+ * doesn't have (data newer than the bridge), or settings that handler doesn't take. Strict about
+ * controls, which `protocolOf` leaves out when it doesn't know them.
  */
 export function protocolProblem(raw: unknown): string | undefined {
 	try {
-		read(raw);
+		read(raw, true);
 		return undefined;
 	} catch (e) {
 		return (e as Error).message;
