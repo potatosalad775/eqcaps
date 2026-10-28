@@ -18,10 +18,14 @@ Pages it knows:
 | --- | --- | --- |
 | Fosi Audio control center, `https://cc.fosiaudio.com` | `fosi-cc` | DS3 (checked); C1, C3, ZH1, ZH3 (recorded, not yet checked) |
 | NICEHCK web app, `https://app.nicehck.cn` | `nicehck-app` | PureAural, StringSnow, Tears, 10th Anniversary Edition, Octave (checked against a simulated device only) |
+| Walkplay web app, `https://peq.szwalkplay.com` | `walkplay-peq` | Walkplay-chipset devices (writes checked; snapshots recorded, not checked) |
 
 On NICEHCK's app, **Read all** runs the reads the app makes when it connects (firmware, every band,
 pre-gain, every control), and waits for the answers, which arrive as input reports. Open the
 device's page first (Device or Equalizer); the connect page doesn't have the read action.
+
+Walkplay's app has no **Read all**: it reads the device when it connects, so start the recording
+before you connect, then use the app and press **Snapshot**.
 
 ### Recording a device
 

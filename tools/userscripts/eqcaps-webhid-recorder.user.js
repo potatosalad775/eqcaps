@@ -5,6 +5,7 @@
 // @description  Records a vendor web app's WebHID traffic, and what the app made of it, for eqcaps' protocol tests. It sends nothing to the device itself.
 // @match        https://cc.fosiaudio.com/*
 // @match        https://app.nicehck.cn/*
+// @match        https://peq.szwalkplay.com/*
 // @run-at       document-start
 // @grant        none
 // @license      MIT
@@ -224,7 +225,41 @@
 		}
 	};
 
-	const adapter = [fosi, nicehck].find((a) => a.matches());
+	/**
+	 * Walkplay's web app (peq.szwalkplay.com): Vue with Pinia stores. It picks a chip class from the
+	 * product's SchemeNo and reads the device when it connects; that class isn't reachable from the
+	 * page, so there is no Read all: record, connect, use the app, snapshot.
+	 */
+	const walkplay = {
+		id: 'walkplay-peq',
+		matches: () => location.hostname === 'peq.szwalkplay.com',
+		snapshot() {
+			const stores = fosi.pinia()?._s;
+			const device = stores?.get('device');
+			if (!device?.deviceConnect) throw new Error('no device: connect it in the app first');
+			const state = (id, keys) => {
+				const s = stores.get(id)?.$state ?? {};
+				return Object.fromEntries(keys.filter((k) => k in s).map((k) => [k, s[k]]));
+			};
+			const eq = ['currentEQ', 'eqType', 'currentEqType'];
+			return {
+				store: 'pinia',
+				state: JSON.parse(
+					JSON.stringify({
+						device: { ...device.$state, device: undefined },
+						product: stores.get('product')?.$state?.productInfo ?? null,
+						eq: state('eq', eq),
+						eqADC: state('eqADC', eq),
+						filter: stores.get('filter')?.$state ?? null,
+						micphone: stores.get('micphone')?.$state ?? null,
+						mf: stores.get('mf')?.$state ?? null
+					})
+				)
+			};
+		}
+	};
+
+	const adapter = [fosi, nicehck, walkplay].find((a) => a.matches());
 
 	function takeSnapshot(label) {
 		if (!adapter) throw new Error('no adapter for this page');
@@ -318,7 +353,7 @@
 			};
 			if (!adapter) {
 				for (const id of ['read', 'snap']) root.getElementById(id).disabled = true;
-			}
+			} else if (!adapter.readAll) root.getElementById('read').disabled = true;
 			document.body.append(host);
 			update();
 		}

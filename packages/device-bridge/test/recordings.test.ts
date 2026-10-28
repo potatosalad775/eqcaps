@@ -22,10 +22,19 @@ const CHECKS: Record<string, typeof fosi | typeof nicehck> = {
 	'nicehck-app': nicehck
 };
 
+/**
+ * Apps whose writes are checked but whose snapshots aren't yet: Walkplay's own app sends the band
+ * and control frames NICEHCK's does (docs/plans/walkplay.md).
+ */
+const WRITES_ONLY: Record<string, (recording: Recording) => Promise<string[]>> = {
+	'walkplay-peq': nicehck.checkWrites
+};
+
 /** The checks for each snapshot: the profile it picks, then every disagreement; then the writes. */
 async function check(recording: Recording) {
 	const out: string[] = [];
 	for (const snapshot of recording.snapshots) {
+		if (WRITES_ONLY[snapshot.adapter]) continue;
 		const checks = CHECKS[snapshot.adapter];
 		if (!checks) {
 			out.push(`${snapshot.label} at ${snapshot.t} ms: no checks for adapter ${snapshot.adapter}`);
@@ -43,7 +52,7 @@ async function check(recording: Recording) {
 		);
 	}
 	const adapter = recording.snapshots[0]?.adapter;
-	const writes = adapter ? CHECKS[adapter]?.checkWrites : undefined;
+	const writes = adapter ? (CHECKS[adapter]?.checkWrites ?? WRITES_ONLY[adapter]) : undefined;
 	return [...out, ...(writes ? await writes(recording) : [])];
 }
 

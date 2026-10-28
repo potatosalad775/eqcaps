@@ -48,7 +48,7 @@ and cited as a `vendor-app` source.
    `test/recordings/`. Expected disagreements to settle:
    - the product names: add `productName` to each match entry, which also makes room to give
      `0x4322` back to the SchemeNo16 group for other vendors' devices;
-   - the commit: the app ends a write with `[1,0x0A,4,0,0,FF,FF]`, `[1,0x01]`, the pre-gain,
+   - the commit (Walkplay's own app agrees with NICEHCK's; see [walkplay.md](walkplay.md)): the app ends a write with `[1,0x0A,4,0,0,FF,FF]`, `[1,0x01]`, the pre-gain,
      `[1,0x04]`; the handler sends devicePEQ's `[1,5,0]`, `[1,0x17,0]`, `[1,0x0A,…]`, `[1,1,1,0]`.
      The app calls `[1,0x01]` (padded `[1,1,0,0]`) "save to flash", and the handler's
      `setEnabled(false)` sends the same bytes, so it may save rather than turn the EQ off. Check by
