@@ -17,6 +17,11 @@ Pages it knows:
 | Page | Adapter | Devices |
 | --- | --- | --- |
 | Fosi Audio control center, `https://cc.fosiaudio.com` | `fosi-cc` | DS3 (checked); C1, C3, ZH1, ZH3 (recorded, not yet checked) |
+| NICEHCK web app, `https://app.nicehck.cn` | `nicehck-app` | PureAural, StringSnow, Tears, 10th Anniversary Edition, Octave (checked against a simulated device only) |
+
+On NICEHCK's app, **Read all** runs the reads the app makes when it connects (firmware, every band,
+pre-gain, every control), and waits for the answers, which arrive as input reports. Open the
+device's page first (Device or Equalizer); the connect page doesn't have the read action.
 
 ### Recording a device
 
@@ -72,6 +77,8 @@ recorded before it.
 
 ### Adding a vendor app
 
-Add an `@match` line for the app's origin and an adapter next to `fosi`: how to find the app's
-state for the connected device, its read actions, and how to snapshot the state. Then add a
-checker next to `test/recording-fosi.ts` that maps the app's state onto the handler's results.
+Add an `@match` line for the app's origin and an adapter next to `fosi` and `nicehck`: how to find
+the app's state for the connected device, its read actions, and how to snapshot the state (`fosi`
+reads Vue's Pinia stores; `nicehck` walks React's hooks for a zustand store). Then add a checker
+next to `test/recording-fosi.ts` that maps the app's state onto the handler's results, and list it
+under the adapter's id in `recordings.test.ts`.

@@ -96,8 +96,8 @@ describe('controls (SPEC §9.1)', () => {
 		expect(protocolOf({ protocol: unknownRole })?.controls).toEqual([
 			{ id: 'volume', name: 'Volume', kind: 'range', range: { min: 0, max: 60, step: 1 } }
 		]);
-		const none = { handler: 'walkplay-hid', controls: [volume] };
-		expect(protocolOf({ protocol: none })).toEqual({ handler: 'walkplay-hid' });
+		const none = { handler: 'moondrop-usb-hid', controls: [volume] };
+		expect(protocolOf({ protocol: none })).toEqual({ handler: 'moondrop-usb-hid' });
 	});
 
 	test('a malformed control makes the protocol unreadable', () => {

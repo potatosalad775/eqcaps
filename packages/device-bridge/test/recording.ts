@@ -3,7 +3,9 @@
 // recordings.test.ts against the handlers and the data.
 
 import { readdirSync, readFileSync } from 'node:fs';
-import type { HidTransport } from '../src/index.ts';
+import { matchDevice } from '@potatosalad775/eqcaps-client';
+import type { Profile } from '@potatosalad775/eqcaps-core';
+import { identityOf, type HidTransport } from '../src/index.ts';
 
 export interface RecordedDevice {
 	vendorId: number;
@@ -92,14 +94,18 @@ export function exchangesOf(recording: { events: RecordedEvent[] }, device = 0):
 	return out;
 }
 
+/** A report is padded with zeros to its size, so trailing zeros don't tell requests apart. */
 const key = (reportId: number, data: ArrayLike<number>) =>
-	`${reportId}:${Array.from(data, (b) => b.toString(16).padStart(2, '0')).join('')}`;
+	`${reportId}:${Array.from(data, (b) => b.toString(16).padStart(2, '0'))
+		.join('')
+		.replace(/(00)+$/, '')}`;
 
 /**
  * Replays a recording to a handler as the device it recorded. A request gets the last answer
  * recorded for the same bytes up to `until`: the device's state as the app saw it then. Output
- * and feature requests are one: the devices recorded so far answer both on the feature report.
- * Answers come back on the feature report; a request never recorded is answered with zeros.
+ * and feature requests are one. The answer comes back on the feature report, and as an input
+ * report to whoever listens (Walkplay devices answer that way); a request never recorded is
+ * answered with zeros on the feature report and not at all on input.
  */
 export class RecordingReplay implements HidTransport {
 	readonly kind = 'hid' as const;
@@ -109,6 +115,7 @@ export class RecordingReplay implements HidTransport {
 	readonly collections = [];
 	readonly unanswered: Uint8Array[] = [];
 	private readonly answers = new Map<string, Uint8Array>();
+	private readonly listeners = new Set<(reportId: number, data: Uint8Array) => void>();
 	private pending = new Uint8Array(64);
 
 	constructor(recording: Recording, { device = 0, until = Infinity } = {}) {
@@ -127,6 +134,7 @@ export class RecordingReplay implements HidTransport {
 		const answer = this.answers.get(key(reportId, data));
 		if (!answer) this.unanswered.push(Uint8Array.from(data));
 		this.pending = answer ? Uint8Array.from(answer) : new Uint8Array(64);
+		if (answer) for (const l of [...this.listeners]) l(reportId, Uint8Array.from(answer));
 	}
 
 	async sendReport(reportId: number, data: Uint8Array) {
@@ -138,8 +146,25 @@ export class RecordingReplay implements HidTransport {
 	async receiveFeatureReport() {
 		return this.pending;
 	}
-	onInputReport() {
-		return () => {};
+	onInputReport(listener: (reportId: number, data: Uint8Array) => void) {
+		this.listeners.add(listener);
+		return () => void this.listeners.delete(listener);
 	}
 	async close() {}
+}
+
+/** The profile an app would pick for the recorded device, given the firmware the app read. */
+export function matchProfile(
+	recording: Recording,
+	firmware: string | undefined,
+	profiles: Iterable<Profile>
+): Profile | string {
+	const identity = identityOf(new RecordingReplay(recording));
+	const result = matchDevice([...profiles], { ...identity, ...(firmware ? { firmware } : {}) });
+	if (!result.best) {
+		return result.ambiguous
+			? `matches ${result.matches.map((m) => m.id).join(', ')} equally`
+			: `no profile matches ${identity.usb?.productName} on firmware ${firmware}`;
+	}
+	return [...profiles].find((p) => p.id === result.best!.id)!;
 }

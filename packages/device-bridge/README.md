@@ -140,6 +140,7 @@ its role), so data newer than the bridge still drives the rest.
 | Handler | Controls |
 | --- | --- |
 | `fosi-audio-usb-hid` | `volume`, `gainMode`, `filterMode`, `gameMode`, `upsample`, `uacMode`, `led` (one byte each, the device's own values) |
+| `walkplay-hid` | `dacFilter`, `gainLevel`, `workMode`, `volume` (one byte each); `micGain`, `leftGain`, `rightGain` (dB, on a 1/256 grid). From NICEHCK's web app; `firmware()` too |
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,
 `timeout`, `bad-response`, `rejected`, `transport` or `invalid-request`.

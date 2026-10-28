@@ -9,3 +9,4 @@ decisions are recorded in [../DECISIONS.md](../DECISIONS.md), and what the proje
 | Plan | Status |
 | --- | --- |
 | [fosi-audio.md](fosi-audio.md) | Device controls (format 1.2), the DS3 and the WebHID recorder done on `feat/device-controls`; recording a real DS3 and inspector support next |
+| [nicehck.md](nicehck.md) | Walkplay firmware and controls, four NICEHCK profiles and the recorder adapter done on `feat/device-controls`; recording each device next |

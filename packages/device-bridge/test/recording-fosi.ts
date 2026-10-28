@@ -3,9 +3,8 @@
 // Each check returns disagreements as sentences; none means the handler, the data and the
 // vendor app agree.
 
-import { matchDevice } from '@potatosalad775/eqcaps-client';
 import { controlTakes, type Filter, type Profile } from '@potatosalad775/eqcaps-core';
-import { identityOf, openDevice, protocolOf, type HidHandler } from '../src/index.ts';
+import { openDevice, protocolOf, type HidHandler } from '../src/index.ts';
 import {
 	decodeFosiBand,
 	encodeFosiBand,
@@ -14,7 +13,13 @@ import {
 	fosiAudioCodec,
 	fosiAudioUsbHid
 } from '../src/handlers/fosi-audio-usb-hid.ts';
-import { exchangesOf, RecordingReplay, type Recording, type Snapshot } from './recording.ts';
+import {
+	exchangesOf,
+	matchProfile,
+	RecordingReplay,
+	type Recording,
+	type Snapshot
+} from './recording.ts';
 
 /** The parts of a Fosi store's device info (`ds3DeviceInfo` and alike) the checks read. */
 export interface FosiState {
@@ -70,15 +75,7 @@ export function profileFor(
 	state: FosiState,
 	profiles: Iterable<Profile>
 ): Profile | string {
-	const identity = identityOf(new RecordingReplay(recording));
-	const firmware = state.firmwareVersion || undefined;
-	const result = matchDevice([...profiles], { ...identity, ...(firmware ? { firmware } : {}) });
-	if (!result.best) {
-		return result.ambiguous
-			? `matches ${result.matches.map((m) => m.id).join(', ')} equally`
-			: `no profile matches ${identity.usb?.productName} on firmware ${firmware}`;
-	}
-	return [...profiles].find((p) => p.id === result.best!.id)!;
+	return matchProfile(recording, state.firmwareVersion || undefined, profiles);
 }
 
 /** Reads: what the handler reads from the answers the app got, against what the app shows. */

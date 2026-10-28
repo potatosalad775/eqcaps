@@ -8,12 +8,24 @@
 // that frequency (SchemeNo11 about 2.25% low); the codec doesn't correct for it (D39).
 // Preamp: cmd 0x03, s8 dB. A write ends with a commit: [1,5,0], [1,0x17,0], [1,0x0A,4,0,0,FF,FF,0],
 // [1,1,1,0] (persist, PEQ on).
+//
+// Firmware (0x0C) and the device controls come from NICEHCK's web app (app.nicehck.cn), which
+// drives its Walkplay devices with the same requests: the version is ASCII from byte 3; a control
+// is one byte at byte 3 of its answer, except the mic gain (0x02) and the per-channel gain (0x16,
+// channel at byte 3), which are s16 LE ×256 dB.
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { biquadQ30, coefficientBytes } from '../biquad.ts';
 import { field, grid, I16, I8, le16, readI16le, readI8, readU16le, U8 } from '../bytes.ts';
 import { BridgeError } from '../errors.ts';
-import type { Codec, HandlerContext, HidFrame, HidHandler, WriteState } from '../handler.ts';
+import type {
+	Codec,
+	HandlerContext,
+	HandlerControl,
+	HidFrame,
+	HidHandler,
+	WriteState
+} from '../handler.ts';
 import { hidFrame, hidRequest, sendFrame, typeCodes, waitForInput } from '../io.ts';
 import type { HidTransport } from '../transport.ts';
 
@@ -27,6 +39,10 @@ const READ = 0x80;
 const WRITE = 0x01;
 const BAND = 0x09;
 const PREAMP = 0x03;
+const MIC_GAIN = 0x02;
+const DAC_DONE = 0x04;
+const FIRMWARE = 0x0c;
+const CHANNEL_GAIN = 0x16;
 const COMMIT = [
 	[WRITE, 0x05, 0x00],
 	[WRITE, 0x17, 0x00],
@@ -53,6 +69,41 @@ export function decodeWalkplayBand(d: ArrayLike<number>): Filter | null {
 const FREQ = [1, 0xfffe] as const;
 const Q = [1, 0xffff] as const;
 
+/** The band write (cmd 0x09) of `filter` to band `index`, tagged with preset `slot`. */
+export function encodeWalkplayBand(index: number, filter: Filter, slot: number): number[] {
+	const freq = field(filter.freq, 1, FREQ, 'freq');
+	const type = WALKPLAY_TYPES.encode(filter.type);
+	const coeffs = biquadQ30(filter.type, freq, filter.gain, filter.q, 96000);
+	return [
+		WRITE,
+		BAND,
+		0x18,
+		0x00,
+		field(index, 1, U8, 'band index'),
+		0x00,
+		0x00,
+		...coefficientBytes(coeffs),
+		...le16(freq),
+		...le16(field(filter.q, 256, Q, 'q')),
+		...le16(field(filter.gain, 256, I16, 'gain') & 0xffff),
+		type,
+		0x00,
+		field(slot, 1, U8, 'slot'),
+		0x00
+	];
+}
+
+/** "1.6" from the 0x0C answer: the digits and dots of the ASCII from byte 3, up to a 0 byte. */
+export function decodeWalkplayFirmware(d: ArrayLike<number>): string | null {
+	if (d.length < 4 || d[0] !== READ || d[1] !== FIRMWARE) return null;
+	let version = '';
+	for (let i = 3; i < d.length && d[i] !== 0; i++) {
+		const c = String.fromCharCode(d[i]!);
+		if (/[0-9.]/.test(c)) version += c;
+	}
+	return version || null;
+}
+
 export const walkplayHidCodec: Codec<WalkplayHidOptions, HidFrame> = {
 	types: WALKPLAY_TYPES.types,
 	wire: () => ({
@@ -63,28 +114,7 @@ export const walkplayHidCodec: Codec<WalkplayHidOptions, HidFrame> = {
 	}),
 	encode({ filters, preamp, slot }, o) {
 		const slotByte = field(slot ?? o.defaultSlot ?? 101, 1, U8, 'slot');
-		const frames = filters.map((f, i) => {
-			const freq = field(f.freq, 1, FREQ, 'freq');
-			const type = WALKPLAY_TYPES.encode(f.type);
-			const coeffs = biquadQ30(f.type, freq, f.gain, f.q, 96000);
-			return [
-				WRITE,
-				BAND,
-				0x18,
-				0x00,
-				field(i, 1, U8, 'band index'),
-				0x00,
-				0x00,
-				...coefficientBytes(coeffs),
-				...le16(freq),
-				...le16(field(f.q, 256, Q, 'q')),
-				...le16(field(f.gain, 256, I16, 'gain') & 0xffff),
-				type,
-				0x00,
-				slotByte,
-				0x00
-			];
-		});
+		const frames = filters.map((f, i) => encodeWalkplayBand(i, f, slotByte));
 		if (preamp !== undefined) {
 			frames.push([WRITE, PREAMP, 0x02, 0x00, field(preamp, 1, I8, 'preamp') & 0xff]);
 		}
@@ -107,6 +137,73 @@ type Ctx = HandlerContext<HidTransport, WalkplayHidOptions>;
 
 const send = (ctx: Ctx, bytes: number[]) =>
 	ctx.transport.sendReport(REPORT_ID, Uint8Array.from(bytes));
+
+/** Sends the read [0x80, cmd, …rest] and returns the answer that repeats [0x80, cmd]. */
+const ask = (ctx: Ctx, cmd: number, rest: number[] = [], also = (_d: Uint8Array) => true) =>
+	hidRequest(
+		ctx.transport,
+		REPORT_ID,
+		[READ, cmd, ...rest],
+		(d) => d[0] === READ && d[1] === cmd && also(d),
+		1000,
+		`Walkplay 0x${cmd.toString(16)}`
+	);
+
+/**
+ * Each control's command, and how its value is carried: one byte, or s16 LE ×256 dB (`db`).
+ * `channel` addresses one channel of 0x16; NICEHCK's app sends a mic gain write with 0x04 after it.
+ */
+export const WALKPLAY_CONTROL_COMMANDS: Readonly<
+	Record<string, { cmd: number; db?: true; channel?: number; then?: number }>
+> = {
+	dacFilter: { cmd: 0x11 },
+	gainLevel: { cmd: 0x19 },
+	workMode: { cmd: 0x1d },
+	volume: { cmd: 0x85 },
+	micGain: { cmd: MIC_GAIN, db: true, then: DAC_DONE },
+	leftGain: { cmd: CHANNEL_GAIN, db: true, channel: 0 },
+	rightGain: { cmd: CHANNEL_GAIN, db: true, channel: 1 }
+};
+
+/** The write frame for a control (report id stripped): [0x01, cmd, length, (channel), value]. */
+export function encodeWalkplayControl(id: string, value: number): number[] {
+	const c = WALKPLAY_CONTROL_COMMANDS[id];
+	if (!c) throw new BridgeError('invalid-request', `Walkplay: no control ${id}`);
+	const lead = c.channel === undefined ? [] : [c.channel];
+	const data = c.db
+		? le16(field(value, 256, I16, id) & 0xffff)
+		: [field(value, 1, U8, 'control value')];
+	// 0x16 always says 4, as in its read; the others say how many bytes follow.
+	const length = c.channel === undefined ? data.length : 4;
+	return [WRITE, c.cmd, length, ...lead, ...data];
+}
+
+function control(id: string): HandlerControl<HidTransport, WalkplayHidOptions> {
+	const c = WALKPLAY_CONTROL_COMMANDS[id]!;
+	const channel = c.channel;
+	// The value follows the channel byte (3) where there is one.
+	const at = channel === undefined ? 3 : 4;
+	return {
+		async read(ctx) {
+			const d =
+				channel === undefined
+					? await ask(ctx, c.cmd)
+					: await ask(ctx, c.cmd, [4, channel], (a) => a[3] === channel);
+			if (d.length < at + (c.db ? 2 : 1)) {
+				throw new BridgeError('bad-response', `Walkplay: short answer to ${id}`);
+			}
+			return c.db ? readI16le(d, at) / 256 : d[at]!;
+		},
+		async write(ctx, value) {
+			await send(ctx, encodeWalkplayControl(id, value));
+			if (c.then !== undefined) {
+				await ctx.sleep(20);
+				await send(ctx, [WRITE, c.then]);
+			}
+			await ctx.sleep(30);
+		}
+	};
+}
 
 export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 	id: 'walkplay-hid',
@@ -177,5 +274,13 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 	async setEnabled(ctx, enabled, slot) {
 		const id = enabled ? (slot ?? ctx.options.defaultSlot ?? 101) : 0;
 		await send(ctx, [WRITE, 0x01, enabled ? 1 : 0, field(id, 1, U8, 'slot'), 0x00]);
-	}
+	},
+
+	async firmware(ctx) {
+		return decodeWalkplayFirmware(await ask(ctx, FIRMWARE, [0x00]));
+	},
+
+	controls: Object.fromEntries(
+		Object.keys(WALKPLAY_CONTROL_COMMANDS).map((id) => [id, control(id)])
+	)
 };

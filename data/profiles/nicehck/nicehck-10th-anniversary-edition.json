@@ -1,0 +1,17 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "nicehck-walkplay",
+	"id": "nicehck-10th-anniversary-edition",
+	"device": {
+		"brand": "NiceHCK",
+		"model": "10th Anniversary Edition",
+		"aliases": ["原道十周年纪念版"]
+	},
+	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0xc200" }] },
+	"bandCount": 8,
+	"meta": {
+		"status": "draft",
+		"sources": [{ "kind": "vendor-app", "ref": "https://app.nicehck.cn/", "date": "2026-10-28" }],
+		"notes": "The app tags it \"YUANDAO DSP Device\". Its official presets: 1 Default (flat), 2 Tears, 3 Rock Live, 4 POP, 5 ACG, 6 Balance, 7 Tuned by DSP Master, 8 bands each, with pre-gains from -2 to +3 dB. The product name the device reports over USB is not known yet, so it matches by vendor and product id."
+	}
+}

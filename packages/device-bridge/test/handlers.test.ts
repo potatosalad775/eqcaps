@@ -30,6 +30,7 @@ import {
 } from '../src/index.ts';
 import { protocolFor } from './data.ts';
 import { FakeDs3 } from './fake-ds3.ts';
+import { FakeWalkplay } from './fake-walkplay.ts';
 import { noSleep } from './replay.ts';
 
 const pk = (freq: number, gain: number, q = 1): Filter => ({ type: 'PK', freq, gain, q });
@@ -575,5 +576,63 @@ describe('Fosi Audio DS3', () => {
 		await device.push({ filters: [pk(100, 3)], slot: 7 });
 		const controlCommands = [0x93, 0xa0, 0xa2, 0xa4, 0x80, 0x9b, 0x96];
 		expect(t.sent.filter((c) => controlCommands.includes(c))).toEqual([]);
+	});
+});
+
+describe('Walkplay controls and firmware (NICEHCK PureAural)', () => {
+	const pureAural = (t: FakeWalkplay) => open(t, 'nicehck-pureaural', 10);
+
+	test('reads the firmware version from the ASCII answer', async () => {
+		const t = new FakeWalkplay();
+		const device = pureAural(t);
+		expect(device.capabilities.readsFirmware).toBe(true);
+		expect(await device.firmware()).toBe('1.0.3');
+	});
+
+	test('reads every control, the gains in dB', async () => {
+		expect(await pureAural(new FakeWalkplay()).readControls()).toEqual({
+			dacFilter: 2,
+			workMode: 0,
+			gainLevel: 1,
+			volume: 60,
+			micGain: 3,
+			leftGain: 0,
+			rightGain: -4
+		});
+	});
+
+	test('writes a control and reads it back; refuses what the profile does not list', async () => {
+		const t = new FakeWalkplay();
+		const device = pureAural(t);
+		expect(await device.writeControl('micGain', -5)).toEqual({ reconnect: false });
+		expect(t.values.micGain).toBe(-5);
+		// The app follows a mic gain write with 0x04.
+		expect(t.sent.slice(-3)).toEqual([
+			[0x01, 0x02],
+			[0x01, 0x04],
+			[0x80, 0x02]
+		]);
+		await device.writeControl('leftGain', -10);
+		expect([t.values.leftGain, t.values.rightGain]).toEqual([-10, -4]);
+		await expect(device.writeControl('dacFilter', 0)).rejects.toMatchObject({
+			code: 'invalid-request'
+		});
+		await expect(device.writeControl('rightGain', 1)).rejects.toMatchObject({
+			code: 'invalid-request'
+		});
+		t.stuck = 'volume';
+		await expect(device.writeControl('volume', 10)).rejects.toMatchObject({ code: 'rejected' });
+	});
+
+	test('pull and push never touch the controls', async () => {
+		const t = new FakeWalkplay();
+		const device = pureAural(t);
+		const pulled = await device.pull({ bands: 2 });
+		expect(pulled).toEqual({ filters: [pk(100, 3.5, 0.75), pk(3000, -1.25, 2)], preamp: -2 });
+		await device.push({ filters: [pk(200, 1, 1)], preamp: -3 });
+		expect(t.bands.get(0)).toEqual([200, 1, 1, 2, 101]);
+		expect(t.preamp).toBe(-3);
+		const controlCommands = [0x11, 0x19, 0x1d, 0x85, 0x02, 0x16];
+		expect(t.sent.filter(([, c]) => controlCommands.includes(c))).toEqual([]);
 	});
 });

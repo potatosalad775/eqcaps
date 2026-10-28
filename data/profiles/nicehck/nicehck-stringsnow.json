@@ -1,0 +1,13 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "nicehck-walkplay",
+	"id": "nicehck-stringsnow",
+	"device": { "brand": "NiceHCK", "model": "StringSnow", "aliases": ["弦雪"] },
+	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x1291" }] },
+	"bandCount": 8,
+	"meta": {
+		"status": "draft",
+		"sources": [{ "kind": "vendor-app", "ref": "https://app.nicehck.cn/", "date": "2026-10-28" }],
+		"notes": "The app tags it \"YUANDAO DSP Device\". Its official presets: 1 Default, 2 Tears, 3 Balanced, 4 Rock, 5 Game (game mode), 6 Sleep (sleep mode), 8 bands each, pre-gain 0. The product name the device reports over USB is not known yet, so it matches by vendor and product id."
+	}
+}

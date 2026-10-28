@@ -45,7 +45,6 @@
 					"0x4319",
 					"0x431d",
 					"0x4321",
-					"0x4322",
 					"0x4323",
 					"0x4324",
 					"0x4325",
@@ -121,6 +120,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Every product id devicePEQ assigns to its \"SchemeNo16\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified. 1 product id(s) of this group also appear in an earlier group, which devicePEQ checks first; they match that group's profile."
+		"notes": "Every product id devicePEQ assigns to its \"SchemeNo16\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified: 0x4322 is now nicehck-pureaural. 1 product id(s) of this group also appear in an earlier group, which devicePEQ checks first; they match that group's profile."
 	}
 }

@@ -8,28 +8,43 @@ import { describe, expect, test } from 'vitest';
 import { profiles } from './data.ts';
 import { FakeDs3 } from './fake-ds3.ts';
 import { exchangesOf, loadRecordings, type RecordedEvent, type Recording } from './recording.ts';
-import {
-	checkData,
-	checkReads,
-	checkWrites,
-	profileFor,
-	type FosiState
-} from './recording-fosi.ts';
+import { FakeWalkplay } from './fake-walkplay.ts';
+import * as fosi from './recording-fosi.ts';
+import { checkReads, checkWrites, type FosiState } from './recording-fosi.ts';
+import * as nicehck from './recording-nicehck.ts';
+import type { NicehckState } from './recording-nicehck.ts';
 
 const all = [...profiles.values()];
 
-/** The checks for one snapshot: the profile it picks, then every disagreement. */
+/** Each vendor app's checks, by the userscript adapter that recorded it. */
+const CHECKS: Record<string, typeof fosi | typeof nicehck> = {
+	'fosi-cc': fosi,
+	'nicehck-app': nicehck
+};
+
+/** The checks for each snapshot: the profile it picks, then every disagreement; then the writes. */
 async function check(recording: Recording) {
 	const out: string[] = [];
-	for (const snapshot of recording.snapshots.filter((s) => s.adapter === 'fosi-cc')) {
-		const profile = profileFor(recording, snapshot.state as FosiState, all);
+	for (const snapshot of recording.snapshots) {
+		const checks = CHECKS[snapshot.adapter];
+		if (!checks) {
+			out.push(`${snapshot.label} at ${snapshot.t} ms: no checks for adapter ${snapshot.adapter}`);
+			continue;
+		}
+		const state = snapshot.state as FosiState & NicehckState;
+		const profile = checks.profileFor(recording, state, all);
 		if (typeof profile === 'string') {
 			out.push(`${snapshot.label} at ${snapshot.t} ms: ${profile}`);
 			continue;
 		}
-		out.push(...(await checkReads(recording, snapshot, profile)), ...checkData(snapshot, profile));
+		out.push(
+			...(await checks.checkReads(recording, snapshot, profile)),
+			...checks.checkData(snapshot, profile)
+		);
 	}
-	return [...out, ...(await checkWrites(recording))];
+	const adapter = recording.snapshots[0]?.adapter;
+	const writes = adapter ? CHECKS[adapter]?.checkWrites : undefined;
+	return [...out, ...(writes ? await writes(recording) : [])];
 }
 
 /**
@@ -182,6 +197,217 @@ describe('the checks, on a synthetic recording', () => {
 		expect(await checkReads(recording, recording.snapshots[0]!, profile)).toEqual([
 			'preset 7 band 0: the handler reads PK 1000 Hz Q 1 0 dB, the app PK 1000 Hz Q 1 1 dB',
 			'control volume: the handler reads 20, the app 21'
+		]);
+	});
+});
+
+/** A peaking biquad as NICEHCK's app computes it: RBJ, normalised, [b0, b1, b2, -a1, -a2]. */
+function appCoefficients(freq: number, gain: number, q: number, rate = 96000) {
+	const w = (2 * Math.PI * freq) / rate;
+	const a = Math.sqrt(10 ** (gain / 20));
+	const alpha = Math.sin(w) / (2 * q);
+	const a0 = 1 + alpha / a;
+	return [1 + alpha * a, -2 * Math.cos(w), 1 - alpha * a, 2 * Math.cos(w), -(1 - alpha / a)].map(
+		(c) => Math.round((c / a0) * 2 ** 30)
+	);
+}
+
+const s16 = (v: DataView, at: number) => v.getInt16(at, true) / 256;
+const db16 = (db: number) => {
+	const v = Math.round(db * 256) & 0xffff;
+	return [v & 0xff, v >> 8];
+};
+
+/**
+ * Talks to a device as NICEHCK's web app does: output reports 0x4B, answers as input reports,
+ * logged as the userscript logs them. Decodes the answers on its own, into the app's store layout.
+ */
+class NicehckLikeApp {
+	readonly events: RecordedEvent[] = [];
+	readonly state: NicehckState = {
+		firmwareVersion: '0',
+		offset: 0,
+		bands: [],
+		micGainDb: 0,
+		channelBalance: 0,
+		equalizerSetting: {
+			minFrequency: 20,
+			maxFrequency: 20000,
+			frequencyNumber: 10,
+			minGain: -12,
+			maxGain: 12,
+			minQValue: 0.2,
+			maxQValue: 12,
+			minOffset: -12,
+			maxOffset: 8
+		},
+		capabilities: {
+			equalizer: true,
+			digitalFilter: true,
+			gainLevel: true,
+			workMode: true,
+			microphoneGain: true,
+			channelBalance: true,
+			deviceVolume: true
+		}
+	};
+	private t = 0;
+	private readonly device: FakeWalkplay;
+	constructor(device: FakeWalkplay) {
+		this.device = device;
+		device.onInputReport((_reportId, data) => {
+			this.log('input', data);
+			this.decode(new DataView(data.buffer, data.byteOffset, data.byteLength));
+		});
+	}
+
+	private log(op: RecordedEvent['op'], data: Uint8Array) {
+		const hex = Array.from(data, (b) => b.toString(16).padStart(2, '0')).join('');
+		this.events.push({ t: ++this.t, device: 0, op, reportId: 0x4b, data: hex });
+	}
+
+	private decode(v: DataView) {
+		if (v.getUint8(0) !== 0x80) return;
+		const s = this.state;
+		const byte = v.getUint8(3);
+		switch (v.getUint8(1)) {
+			case 0x0c: {
+				let text = '';
+				for (let i = 3; i < v.byteLength && v.getUint8(i) !== 0; i++) {
+					text += String.fromCharCode(v.getUint8(i));
+				}
+				s.firmwareVersion = text.replace(/[^0-9.]/g, '');
+				return;
+			}
+			case 0x09: {
+				const id = v.getUint8(4);
+				s.bands![id] = {
+					id,
+					frequency: v.getUint16(27, true),
+					qValue: Number(s16(v, 29).toFixed(2)),
+					gain: Number(s16(v, 31).toFixed(2))
+				};
+				s.eqIndex = v.getUint8(35);
+				return;
+			}
+			case 0x03:
+				s.offset = Math.round(s16(v, 3));
+				return;
+			case 0x11:
+				s.tkFilterTypeIndex = { value: byte };
+				return;
+			case 0x19:
+				s.gainLevel = byte;
+				return;
+			case 0x1d:
+				s.workMode = byte;
+				return;
+			case 0x85:
+				s.deviceVolume = byte;
+				return;
+			case 0x02:
+				s.micGainDb = s16(v, 3);
+				return;
+			case 0x16: {
+				const cut = Math.round(s16(v, 4));
+				if (cut !== 0) s.channelBalance = byte === 0 ? -cut : cut;
+				return;
+			}
+		}
+	}
+
+	async send(...data: number[]) {
+		const report = Uint8Array.from(data);
+		this.log('output', report);
+		await this.device.sendReport(0x4b, report);
+	}
+
+	async readAll() {
+		await this.send(0x80, 0x0c);
+		for (let i = 0; i < 10; i++) await this.send(0x80, 0x09, 0, 0, i);
+		for (const cmd of [0x03, 0x11, 0x19, 0x1d, 0x85, 0x02]) await this.send(0x80, cmd);
+		await this.send(0x80, 0x16, 4, 0);
+		await this.send(0x80, 0x16, 4, 1);
+		return structuredClone(this.state);
+	}
+
+	/** A band write as the app makes it: its own coefficients, the pre-gain at 34, the preset at 35. */
+	async writeBand(index: number, freq: number, gain: number, q: number, preset = 32, offset = 0) {
+		const d = new Array(36).fill(0);
+		d.splice(0, 5, 0x01, 0x09, 33, 0, index);
+		appCoefficients(freq, gain, q).forEach((c, i) => {
+			d.splice(7 + i * 4, 4, c & 0xff, (c >> 8) & 0xff, (c >> 16) & 0xff, (c >> 24) & 0xff);
+		});
+		d.splice(27, 9, freq & 0xff, freq >> 8, ...db16(q), ...db16(gain), 2, offset & 0xff, preset);
+		await this.send(...d);
+	}
+
+	recording(snapshots: Recording['snapshots']): Recording {
+		return {
+			file: 'synthetic',
+			recording: 'eqcaps-webhid',
+			version: 1,
+			recordedAt: '2026-10-28T00:00:00.000Z',
+			page: { origin: 'https://app.nicehck.cn', path: '/device' },
+			devices: [{ vendorId: 0x3302, productId: 0x4322, productName: 'PureAural' }],
+			snapshots,
+			events: this.events
+		};
+	}
+}
+
+describe('the NICEHCK checks, on a synthetic recording', () => {
+	async function recorded(edit?: (app: NicehckLikeApp) => Promise<void>) {
+		const app = new NicehckLikeApp(new FakeWalkplay());
+		await edit?.(app);
+		const state = await app.readAll();
+		return app.recording([{ t: 1e9, label: 'read all', adapter: 'nicehck-app', state }]);
+	}
+
+	test('the handler, the data and the app agree', async () => {
+		const recording = await recorded(async (app) => {
+			await app.writeBand(0, 120, 4.5, 0.71, 32, -3);
+			await app.writeBand(1, 8000, -2.25, 3);
+			await app.send(0x01, 0x85, 1, 40);
+			await app.send(0x01, 0x02, 2, ...db16(-6));
+			await app.send(0x01, 0x16, 4, 1, ...db16(-7));
+		});
+		expect(await check(recording)).toEqual([]);
+	});
+
+	test('a write the handler would send differently is reported', async () => {
+		const recording = await recorded(async (app) => {
+			await app.send(0x01, 0x85, 2, 40);
+		});
+		expect(await nicehck.checkWrites(recording)).toEqual([
+			expect.stringMatching(/^write 0x85 at \d+ ms: byte 2 is 2 from the app, 1 from the handler$/)
+		]);
+	});
+
+	test('a read the handler decodes differently is reported', async () => {
+		const recording = await recorded();
+		const state = recording.snapshots[0]!.state as NicehckState;
+		state.deviceVolume = 61;
+		state.bands![1]!.gain = -1;
+		state.channelBalance = 3;
+		const profile = profiles.get('nicehck-pureaural') as Profile;
+		expect(await nicehck.checkReads(recording, recording.snapshots[0]!, profile)).toEqual([
+			'band 1: the handler reads PK 3000 Hz Q 2 -1.25 dB, the app PK 3000 Hz Q 2 -1 dB',
+			'control volume: the handler reads 60, the app 61',
+			'control leftGain: the handler reads 0, the app -3',
+			'control rightGain: the handler reads -4, the app 0'
+		]);
+	});
+
+	test('the data is checked against the app config', async () => {
+		const recording = await recorded();
+		const state = recording.snapshots[0]!.state as NicehckState;
+		state.equalizerSetting!.maxGain = 15;
+		delete state.capabilities!.workMode;
+		const profile = profiles.get('nicehck-pureaural') as Profile;
+		expect(nicehck.checkData(recording.snapshots[0]!, profile)).toEqual([
+			'gain: the app allows -12 to 15, nicehck-pureaural -12 to 12',
+			"control workMode is in nicehck-pureaural, the app doesn't offer it"
 		]);
 	});
 });

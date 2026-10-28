@@ -1,0 +1,79 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "nicehck-walkplay",
+	"id": "nicehck-pureaural",
+	"schemaVersion": "1.2",
+	"device": { "brand": "NiceHCK", "model": "PureAural" },
+	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x4322" }] },
+	"bandCount": 10,
+	"protocol": {
+		"controls": [
+			{
+				"id": "dacFilter",
+				"name": "Filter Type",
+				"kind": "choice",
+				"role": "dac-filter",
+				"values": [
+					{ "value": 1, "name": "FAST-LL" },
+					{ "value": 2, "name": "FAST-PC" },
+					{ "value": 3, "name": "SLOW-LL" },
+					{ "value": 4, "name": "SLOW-PC" },
+					{ "value": 5, "name": "NON-OS" }
+				]
+			},
+			{
+				"id": "workMode",
+				"name": "Work Mode",
+				"kind": "choice",
+				"values": [
+					{ "value": 0, "name": "CLASS-H" },
+					{ "value": 1, "name": "CLASS-AB" }
+				]
+			},
+			{
+				"id": "gainLevel",
+				"name": "Gain Level",
+				"kind": "choice",
+				"role": "output-gain",
+				"values": [
+					{ "value": 0, "name": "Low" },
+					{ "value": 1, "name": "Medium" },
+					{ "value": 2, "name": "High" }
+				]
+			},
+			{
+				"id": "volume",
+				"name": "Device Volume",
+				"kind": "range",
+				"role": "volume",
+				"range": { "min": 0, "max": 100, "step": 1 }
+			},
+			{
+				"id": "micGain",
+				"name": "Microphone Gain",
+				"kind": "range",
+				"range": { "min": -12, "max": 12, "step": 1 },
+				"unit": "dB"
+			},
+			{
+				"id": "leftGain",
+				"name": "Channel Balance (left)",
+				"kind": "range",
+				"range": { "min": -50, "max": 0, "step": 1 },
+				"unit": "dB"
+			},
+			{
+				"id": "rightGain",
+				"name": "Channel Balance (right)",
+				"kind": "range",
+				"range": { "min": -50, "max": 0, "step": 1 },
+				"unit": "dB"
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [{ "kind": "vendor-app", "ref": "https://app.nicehck.cn/", "date": "2026-10-28" }],
+		"notes": "devicePEQ lists its product id in its SchemeNo16 group (walkplay-schemeno16-devices), which no longer matches it. Its official presets: 1 Default (flat), 2 Rock, 3 Vocal, 4 Instrumental, and the game presets 5 FPS Footsteps, 6 FPS Gunshots, 7 Vocal Boost, 8 Immersion Mode, 10 bands each, pre-gain 0. The app shows the channel balance as one slider from -50 to 50 and writes it as a cut of one channel (n > 0 cuts the left by n dB, n < 0 the right); the device holds a gain per channel, which are the two controls here. The product name the device reports over USB is not known yet, so it matches by vendor and product id."
+	}
+}

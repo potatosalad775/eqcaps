@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         eqcaps WebHID recorder
 // @namespace    https://github.com/potatosalad775/eqcaps
-// @version      1
+// @version      2
 // @description  Records a vendor web app's WebHID traffic, and what the app made of it, for eqcaps' protocol tests. It sends nothing to the device itself.
 // @match        https://cc.fosiaudio.com/*
+// @match        https://app.nicehck.cn/*
 // @run-at       document-start
 // @grant        none
 // @license      MIT
@@ -18,7 +19,7 @@
 (() => {
 	'use strict';
 
-	const RECORDER_VERSION = 1;
+	const RECORDER_VERSION = 2;
 	const start = performance.now();
 	const devices = [];
 	const events = [];
@@ -26,6 +27,7 @@
 	const deviceIndex = new WeakMap();
 
 	const ms = () => Math.round((performance.now() - start) * 10) / 10;
+	const wait = (t) => new Promise((resolve) => setTimeout(resolve, t));
 	const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
 	const bytes = (data) =>
 		data instanceof ArrayBuffer
@@ -165,7 +167,64 @@
 		}
 	};
 
-	const adapter = [fosi].find((a) => a.matches());
+	/**
+	 * NICEHCK's web app: React, with the connected device in a zustand store that its components
+	 * read through hooks. Answers come back as input reports, after the app's call returns.
+	 */
+	const nicehck = {
+		id: 'nicehck-app',
+		matches: () => location.hostname === 'app.nicehck.cn',
+		/** Each hook's state in React's committed tree. */
+		*hooks() {
+			const root = document.getElementById('root');
+			const key = root && Object.keys(root).find((k) => k.startsWith('__reactContainer$'));
+			const stack = key ? [root[key]] : [];
+			while (stack.length) {
+				const fiber = stack.pop();
+				for (let h = fiber.memoizedState; h && typeof h === 'object' && 'next' in h; h = h.next) {
+					yield h.memoizedState;
+				}
+				if (fiber.sibling) stack.push(fiber.sibling);
+				if (fiber.child) stack.push(fiber.child);
+			}
+		},
+		/** The store's state, as a component that reads all of it holds it. */
+		state() {
+			for (const v of this.hooks()) {
+				if (v && typeof v === 'object' && 'hidProductId' in v && v.deviceInfo) return v;
+			}
+			throw new Error('no device state: connect the device and open its page');
+		},
+		async readAll() {
+			this.state();
+			// The callback that sends every read the app makes on connect: firmware, bands,
+			// pre-gain, controls. It takes no argument; the one that connects takes the product id.
+			let read;
+			for (const v of this.hooks()) {
+				const fn = Array.isArray(v) ? v[0] : undefined;
+				if (typeof fn === 'function' && fn.length === 0 && /\.initInfo\(/.test(String(fn))) {
+					read = fn;
+					break;
+				}
+			}
+			if (!read) throw new Error("no read action: open the device's page");
+			await read();
+			// The answers arrive as input reports after the requests are sent.
+			const until = ms() + 5000;
+			let seen = -1;
+			while (ms() < until && seen !== events.length) {
+				seen = events.length;
+				await wait(400);
+			}
+		},
+		snapshot() {
+			// Measurement curves the app downloads for its graph: large, and not the device's.
+			const { curves: _curves, ...state } = this.state();
+			return { store: 'device', state: JSON.parse(JSON.stringify(state)) };
+		}
+	};
+
+	const adapter = [fosi, nicehck].find((a) => a.matches());
 
 	function takeSnapshot(label) {
 		if (!adapter) throw new Error('no adapter for this page');

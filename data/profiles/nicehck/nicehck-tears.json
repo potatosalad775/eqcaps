@@ -1,0 +1,13 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "nicehck-walkplay",
+	"id": "nicehck-tears",
+	"device": { "brand": "NiceHCK", "model": "Tears", "aliases": ["泪"] },
+	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x129e" }] },
+	"bandCount": 8,
+	"meta": {
+		"status": "draft",
+		"sources": [{ "kind": "vendor-app", "ref": "https://app.nicehck.cn/", "date": "2026-10-28" }],
+		"notes": "The app tags it \"YUANDAO DSP Device\". Its official presets: 1 Tears (flat), 2 Balanced, 3 Rock, 4 Game (game mode), 5 Diffusion (diffuse mode), 8 bands each, pre-gain 0. The product name the device reports over USB is not known yet, so it matches by vendor and product id."
+	}
+}
