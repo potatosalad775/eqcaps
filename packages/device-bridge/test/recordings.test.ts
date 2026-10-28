@@ -7,7 +7,13 @@ import { compareFirmware, type Profile } from '@potatosalad775/eqcaps-core';
 import { describe, expect, test } from 'vitest';
 import { profiles } from './data.ts';
 import { FakeDs3 } from './fake-ds3.ts';
-import { exchangesOf, loadRecordings, type RecordedEvent, type Recording } from './recording.ts';
+import {
+	deviceAt,
+	exchangesOf,
+	loadRecordings,
+	type RecordedEvent,
+	type Recording
+} from './recording.ts';
 import { FakeWalkplay } from './fake-walkplay.ts';
 import * as fosi from './recording-fosi.ts';
 import { checkReads, checkWrites, type FosiState } from './recording-fosi.ts';
@@ -41,7 +47,7 @@ async function check(recording: Recording) {
 			continue;
 		}
 		const state = snapshot.state as FosiState & NicehckState;
-		const profile = checks.profileFor(recording, state, all);
+		const profile = checks.profileFor(recording, state, all, deviceAt(recording, snapshot.t));
 		if (typeof profile === 'string') {
 			out.push(`${snapshot.label} at ${snapshot.t} ms: ${profile}`);
 			continue;
@@ -162,7 +168,7 @@ describe('the checks, on a synthetic recording', () => {
 		expect(x.every((e) => e.answers.length === 1 && !e.feature)).toBe(true);
 	});
 
-	test('the handler, the data and the app agree, but for the built-in presets', async () => {
+	test('the handler, the data and the app agree', async () => {
 		const recording = await recorded(async (app) => {
 			// Writes as the app makes them: a band (bandwidth 1), a pre-gain with the name, controls.
 			await app.send(0x8d, (v) => {
@@ -180,12 +186,7 @@ describe('the checks, on a synthetic recording', () => {
 			await app.send(0x93, (v) => v.setUint8(2, 33));
 			await app.send(0x96, (v) => (v.setUint8(2, 0), v.setUint8(3, 0)));
 		});
-		const builtIns = Array.from({ length: 7 }, (_, id) =>
-			id === 2
-				? `preset 2 (Rock) isn't in fosi-audio-ds3`
-				: `preset ${id} (no name) isn't in fosi-audio-ds3`
-		);
-		expect(await check(recording)).toEqual(builtIns);
+		expect(await check(recording)).toEqual([]);
 	});
 
 	test('a write the handler would send differently is reported', async () => {

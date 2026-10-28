@@ -31,22 +31,13 @@ const RECORDED_WITH: Record<string, Protocol> = {
  * Captures whose device matches several profiles that only its firmware tells apart, which the
  * recording doesn't give: the profile an app's user would pick.
  */
-const CHOSEN: Record<string, string> = {
-	// devicePEQ read 8 bands of user preset 7; firmware before 1.4.15 has 8.
-	'fosi_audio_ds3.json': 'fosi-audio-ds3-8-band'
-};
+const CHOSEN: Record<string, string> = {};
 
 /**
  * Requests the handler now makes that the recording predates, by first byte pair: the replay has
  * no answer for them, and the handler reads on without one.
  */
-const NEVER_ASKED: Record<string, readonly (readonly [number, number])[]> = {
-	// The preset count (0x91) and a preset's pre-gain and name (0x8B), from Fosi's web app.
-	'fosi_audio_ds3.json': [
-		[0x77, 0x91],
-		[0x77, 0x8b]
-	]
-};
+const NEVER_ASKED: Record<string, readonly (readonly [number, number])[]> = {};
 
 function setup(capture: Capture) {
 	const transport = new ReplayHid(capture);

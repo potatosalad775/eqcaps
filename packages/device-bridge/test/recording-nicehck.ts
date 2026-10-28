@@ -14,6 +14,7 @@ import {
 } from '../src/handlers/walkplay-hid.ts';
 import {
 	exchangesOf,
+	deviceAt,
 	matchProfile,
 	RecordingReplay,
 	type Recording,
@@ -84,11 +85,12 @@ const show = (f: Filter | null) => (f ? `${f.type} ${f.freq} Hz Q ${f.q} ${f.gai
 export function profileFor(
 	recording: Recording,
 	state: NicehckState,
-	profiles: Iterable<Profile>
+	profiles: Iterable<Profile>,
+	device = 0
 ): Profile | string {
 	const firmware =
 		state.firmwareVersion && state.firmwareVersion !== '0' ? state.firmwareVersion : undefined;
-	return matchProfile(recording, firmware, profiles);
+	return matchProfile(recording, firmware, profiles, device);
 }
 
 /** Reads: what the handler reads from the answers the app got, against what the app shows. */
@@ -100,10 +102,17 @@ export async function checkReads(
 	const state = snapshot.state as NicehckState;
 	const out: string[] = [];
 	const open = () =>
-		openDevice(new RecordingReplay(recording, { until: snapshot.t }), protocolOf(profile)!, {
-			profile,
-			sleep: () => Promise.resolve()
-		});
+		openDevice(
+			new RecordingReplay(recording, {
+				device: deviceAt(recording, snapshot.t),
+				until: snapshot.t
+			}),
+			protocolOf(profile)!,
+			{
+				profile,
+				sleep: () => Promise.resolve()
+			}
+		);
 
 	const firmware = await open().firmware();
 	if (
@@ -247,7 +256,7 @@ function coefficientBounds(filter: Filter) {
  */
 export async function checkWrites(recording: Recording): Promise<string[]> {
 	const out: string[] = [];
-	for (const x of exchangesOf(recording)) {
+	for (const x of recording.devices.flatMap((_, d) => exchangesOf(recording, d))) {
 		const d = x.request;
 		if (d[0] !== 0x01) continue;
 		let ours: number[];

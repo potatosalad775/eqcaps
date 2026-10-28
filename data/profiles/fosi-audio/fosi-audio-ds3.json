@@ -6,7 +6,8 @@
 	"device": { "brand": "Fosi Audio", "model": "DS3" },
 	"match": {
 		"usb": [
-			{ "vendorId": "0x152a", "productId": ["0x80d5", "0x889b"], "productName": "Fosi Audio DS3" },
+			{ "vendorId": "0x152a", "productId": "0x889b", "productName": "Fosi Audio DS3" },
+			{ "vendorId": "0x20b1", "productId": "0x80d5", "productName": "Fosi Audio DS3" },
 			{ "vendorId": "0x152a", "productName": "Fosi Audio DS3" }
 		],
 		"firmware": { "min": "1.4.15" }
@@ -22,6 +23,13 @@
 	"protocol": {
 		"handler": "fosi-audio-usb-hid",
 		"presets": [
+			{ "id": 0, "name": "JAZZ" },
+			{ "id": 1, "name": "POP" },
+			{ "id": 2, "name": "ROCK" },
+			{ "id": 3, "name": "CLASIC" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "3A Game" },
+			{ "id": 6, "name": "FPS" },
 			{ "id": 7, "name": "Custom1", "writable": true },
 			{ "id": 8, "name": "Custom2", "writable": true },
 			{ "id": 9, "name": "Custom3", "writable": true }
@@ -98,8 +106,15 @@
 		]
 	},
 	"meta": {
-		"status": "draft",
+		"status": "maintainer-verified",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "https://cc.fosiaudio.com/, read in UAC 2.0 and UAC 1.0 mode with the app's writes recorded, and the EQ heard in FPS and 7.1 game modes: packages/device-bridge/test/recordings/2026-10-28-fosi-audio-ds3-1.6.10.json",
+				"firmware": "1.6.10",
+				"date": "2026-10-28",
+				"by": "potatosalad775"
+			},
 			{ "kind": "vendor-app", "ref": "https://cc.fosiaudio.com/", "date": "2026-10-28" },
 			{
 				"kind": "handler-code",
@@ -112,6 +127,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Firmware 1.4.15 and later: user presets hold 32 bands (fosi-audio-ds3-8-band covers older firmware). Limits are those of Fosi's web control center: freq 20 to 20000 Hz, Q 0.1 to 20, gain ±30 dB, pre-gain -24 to 0 dB in whole dB (the pre-gain command itself takes -50 to 0). The 7 built-in presets (ids 0 to 6, 8 bands each, names from the device) aren't listed yet. The web app offers the DAC filter and upsampling in UAC 2.0 mode, upsampling from firmware 1.4.9, and game mode in UAC 1.0 mode; it turns upsampling off before turning the EQ on, and the reverse. Switching the UAC mode, or game mode to FPS or 7.1, reconnects the device. In UAC 1.0 mode the DS3 is 0x152a:0x80d5, in UAC 2.0 mode 0x152a:0x889b, which the ZH3 shares. Reported quirk, not corrected (D39): devicePEQ reports that filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40)), and that shelf frequencies move with gain."
+		"notes": "Firmware 1.4.15 and later: user presets hold 32 bands (fosi-audio-ds3-8-band covers older firmware). Limits are those of Fosi's web control center: freq 20 to 20000 Hz, Q 0.1 to 20, gain ±30 dB, pre-gain -24 to 0 dB in whole dB (checked in the app on 1.4.6) (the pre-gain command itself takes -50 to 0). Presets as read on 1.4.6 and 1.6.10: the 7 built-in ones (0 to 6) hold 8 bands on every firmware and are named by the device (\"CLASIC\" sic; the web app shows Classic); the user presets are 7 to 9. The web app offers the DAC filter and upsampling in UAC 2.0 mode, upsampling from firmware 1.4.9, and game mode in UAC 1.0 mode; it turns upsampling off before turning the EQ on, and the reverse. Switching the UAC mode, or game mode to FPS or 7.1, reconnects the device. The EQ still applies in FPS and 7.1 game modes (heard on 1.6.10). In UAC 2.0 mode the DS3 is 0x152a:0x889b, which the ZH3 shares; in UAC 1.0 mode it is 0x20b1:0x80d5 (XMOS's vendor id, read on firmware 1.4.6). Reported quirk, not corrected (D39): devicePEQ reports that filters come out wider than the Q sent as gain grows (Q / 10^(|gain|/40)), and that shelf frequencies move with gain."
 	}
 }

@@ -15,6 +15,7 @@ import {
 } from '../src/handlers/fosi-audio-usb-hid.ts';
 import {
 	exchangesOf,
+	deviceAt,
 	matchProfile,
 	RecordingReplay,
 	type Recording,
@@ -73,9 +74,10 @@ const show = (f: Filter | null) => (f ? `${f.type} ${f.freq} Hz Q ${f.q} ${f.gai
 export function profileFor(
 	recording: Recording,
 	state: FosiState,
-	profiles: Iterable<Profile>
+	profiles: Iterable<Profile>,
+	device = 0
 ): Profile | string {
-	return matchProfile(recording, state.firmwareVersion || undefined, profiles);
+	return matchProfile(recording, state.firmwareVersion || undefined, profiles, device);
 }
 
 /** Reads: what the handler reads from the answers the app got, against what the app shows. */
@@ -88,10 +90,17 @@ export async function checkReads(
 	const out: string[] = [];
 	const protocol = protocolOf(profile)!;
 	const open = () =>
-		openDevice(new RecordingReplay(recording, { until: snapshot.t }), protocol, {
-			profile,
-			sleep: () => Promise.resolve()
-		});
+		openDevice(
+			new RecordingReplay(recording, {
+				device: deviceAt(recording, snapshot.t),
+				until: snapshot.t
+			}),
+			protocol,
+			{
+				profile,
+				sleep: () => Promise.resolve()
+			}
+		);
 
 	const firmware = await open().firmware();
 	if (state.firmwareVersion && firmware !== state.firmwareVersion) {
@@ -230,7 +239,7 @@ const EMPTY = {
  */
 export async function checkWrites(recording: Recording): Promise<string[]> {
 	const out: string[] = [];
-	for (const x of exchangesOf(recording)) {
+	for (const x of recording.devices.flatMap((_, d) => exchangesOf(recording, d))) {
 		const ours = await oursFor(x.request);
 		if (ours === undefined) continue;
 		const cmd = `0x${x.request[1]!.toString(16)}`;

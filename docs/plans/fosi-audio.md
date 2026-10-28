@@ -27,19 +27,16 @@ copied (D25), and cited as a `vendor-app` source.
 
 ## Next
 
-1. **Record the DS3 in the control center** with the WebHID recorder userscript
-   (`tools/userscripts/`): first on the owner's 1.4.x, then again on 1.5.8. Each run is
-   **Read all** in UAC 2.0, then the same in UAC 1.0. Also check by ear whether the EQ still
-   applies in FPS or 7.1 mode on 1.5.8 (it does on 1.4.x); the bytes can't show that. Save the
-   recordings in `packages/device-bridge/test/recordings/`. `recordings.test.ts` then lists every
-   disagreement between the handler, the data and the app. Expected:
-   - the built-in presets 0–6 aren't in the data yet: add them with the names the device gives;
-   - the pre-gain range (−24 in the app, −25 remembered from an earlier version), and whether
-     firmware before 1.4.15 has pre-gain at all;
-   - whether the DAC filter answers in UAC 1.0.
+1. **Record the DS3.** Done on 2026-10-28, in UAC 2.0 and UAC 1.0, on the owner's device before and
+   after its update (`test/recordings/2026-10-28-fosi-audio-ds3.json` on 1.4.6,
+   `…-1.6.10.json` on 1.6.10, which also holds the app's writes from a by-ear test). Both DS3
+   profiles are maintainer-verified. Found: 10 presets on both firmwares, the built-in 0–6 named
+   JAZZ, POP, ROCK, CLASIC (sic), R&B, 3A Game and FPS with 8 bands each, user presets 7–9 with 8
+   or 32; pre-gain per preset already on 1.4.6, −24 to 0 dB in the app; the DAC filter answers in
+   UAC 1.0; in UAC 1.0 the DS3 is `0x20b1:0x80d5`; the EQ still applies in FPS and 7.1 on 1.6.10.
+   The app's band writes showed that `tidyF32` lost float32 values above 8192 Hz (fixed).
 
-   Once a recording exists, drop the devicePEQ capture's `CHOSEN` and `NEVER_ASKED` entries in
-   `captures.test.ts`, or the capture itself.
+   devicePEQ's DS3 capture is gone from `test/captures/`: the 1.6.10 recording holds band writes.
 2. **Inspector support.** T2 read also reads the firmware and the controls, shows them, and
    records both in the evidence file: `device.firmware` comes from the device rather than the
    user, and the read experiment gets a `controls` entry. `ReadOnlyDevice` gets `firmware` and
@@ -47,8 +44,8 @@ copied (D25), and cited as a `vendor-app` source.
    differ only by firmware, the inspector reads the firmware and matches again. INSPECTOR.md §2
    and §6 change to match. Raw recordings stay with the userscript, which records the vendor's
    own traffic; the inspector would only record ours.
-3. **Status.** Once a recording agrees with the data, the DS3 profiles become
-   `community-verified`. The control center source then counts toward verification (D28).
+3. **Status.** Done for the DS3 (maintainer-verified). Other devices recorded by contributors
+   become `community-verified` once their recording agrees with the data (D28).
 4. **More Fosi devices.** The C1, C3, ZH1 and ZH3 send the same commands in the control center,
    so each can be a data file, plus a handler fix where a command differs. The C1 has the same
    8/32-band split at 1.4.15. The C3 has 10 bands, bass and treble controls, and an FPS mode and
@@ -57,8 +54,9 @@ copied (D25), and cited as a `vendor-app` source.
 
 ## Notes from the control center
 
-- USB mode 0 is UAC 2.0 and 1 is UAC 1.0. In UAC 1.0 the DS3 is `0x152a:0x80d5`; in UAC 2.0 it is
-  `0x152a:0x889b`, which the ZH3 shares, so every Fosi match entry needs `productName`.
+- USB mode 0 is UAC 2.0 and 1 is UAC 1.0. In UAC 1.0 the DS3 is `0x20b1:0x80d5` (XMOS's vendor
+  id, as recorded; we had assumed `0x152a`); in UAC 2.0 it is `0x152a:0x889b`, which the ZH3
+  shares, so every Fosi match entry needs `productName`.
 - User presets are ids 7–9 on every firmware. The app calls them Custom1–3, whatever the device
   says. The device names the built-in presets; the app's name table knows Jazz, Pop, Rock,
   Classic, R&B, 3A Game and FPS.

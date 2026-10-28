@@ -384,64 +384,6 @@ exports[`fiio_snowsky_melody.json > pull decodes the recorded answers 1`] = `
 }
 `;
 
-exports[`fosi_audio_ds3.json > pull decodes the recorded answers 1`] = `
-{
-  "filters": [
-    {
-      "freq": 20,
-      "gain": 9.7,
-      "q": 1,
-      "type": "PK",
-    },
-    {
-      "freq": 88,
-      "gain": -4,
-      "q": 1,
-      "type": "PK",
-    },
-    {
-      "freq": 300,
-      "gain": 6.6,
-      "q": 1.9,
-      "type": "PK",
-    },
-    {
-      "freq": 390,
-      "gain": -5.2,
-      "q": 2,
-      "type": "PK",
-    },
-    {
-      "freq": 580,
-      "gain": 6,
-      "q": 2,
-      "type": "PK",
-    },
-    {
-      "freq": 980,
-      "gain": -8.7,
-      "q": 2,
-      "type": "PK",
-    },
-    {
-      "freq": 1700,
-      "gain": 4.8,
-      "q": 1.6,
-      "type": "PK",
-    },
-    {
-      "freq": 3500,
-      "gain": 8.6,
-      "q": 2,
-      "type": "PK",
-    },
-  ],
-  "findings": [],
-  "protocol": "fosi-audio-usb-hid",
-  "slot": 7,
-}
-`;
-
 exports[`ktmicro_chu2_dsp.json > pull decodes the recorded answers 1`] = `
 {
   "filters": [

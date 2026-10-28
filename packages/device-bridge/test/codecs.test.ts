@@ -20,6 +20,7 @@ import {
 	type WireField,
 	type WireGrid
 } from '../src/index.ts';
+import { tidyF32 } from '../src/bytes.ts';
 import { PROTOCOLS } from './data.ts';
 
 /** Each distinct handler and options pair, from the profiles and the vendor guesses. */
@@ -199,5 +200,18 @@ describe.each(
 				expect(close(back[field], v), `${field} ${v} reads back as ${back[field]}`).toBe(true);
 			}
 		}
+	});
+});
+
+describe('tidyF32', () => {
+	test('gives back the float32 it was given, as its shortest decimal', () => {
+		fc.assert(
+			fc.property(fc.float({ noNaN: true, noDefaultInfinity: true }), (v) => {
+				expect(Math.fround(tidyF32(v))).toBe(v === 0 ? 0 : v);
+			})
+		);
+		expect(tidyF32(Math.fround(0.71))).toBe(0.71);
+		// Recorded from Fosi's web app: 7 digits made this 11094.76, another float32.
+		expect(tidyF32(11094.7578125)).toBe(11094.758);
 	});
 });

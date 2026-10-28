@@ -81,9 +81,17 @@ export function hex(bytes: ArrayLike<number>): string {
 	return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join(' ');
 }
 
-/** Float32 values decoded from the wire, rounded to what a float32 field can mean. */
+/**
+ * Float32 values decoded from the wire, as the shortest decimal that encodes to the same float32
+ * (0.71, not 0.7099999785). Up to 9 digits: 7 lose values such as 11094.7578125.
+ */
 export function tidyF32(v: number): number {
-	return Number(v.toPrecision(7));
+	const f = Math.fround(v);
+	for (let digits = 1; digits < 9; digits++) {
+		const tidy = Number(f.toPrecision(digits));
+		if (Math.fround(tidy) === f) return tidy;
+	}
+	return Number(f.toPrecision(9));
 }
 
 /** The wire field `round(value · scale)` in `range`, as canonical min, max and step. */

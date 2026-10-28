@@ -18,7 +18,7 @@ export class FakeDs3 implements HidTransport {
 	values: Record<string, number> = { uacMode: 0, upsample: 0, volume: 20, gainMode: 0, led: 1 };
 	stuck?: string;
 	readonly presets = new Map([
-		[2, { gain: -3, name: 'Rock' }],
+		[2, { gain: -3, name: 'ROCK' }],
 		[7, { gain: 0, name: 'MyCurve' }]
 	]);
 	readonly bands = new Map<string, number[]>();

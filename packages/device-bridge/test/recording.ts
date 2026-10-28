@@ -94,6 +94,16 @@ export function exchangesOf(recording: { events: RecordedEvent[] }, device = 0):
 	return out;
 }
 
+/**
+ * The device a snapshot at `t` describes: the last one with traffic before it. A device that
+ * reconnects (a DS3 switching USB modes) is a new device in the recording.
+ */
+export function deviceAt(recording: { events: RecordedEvent[] }, t: number): number {
+	let device = 0;
+	for (const e of recording.events) if (e.t <= t) device = e.device;
+	return device;
+}
+
 /** A report is padded with zeros to its size, so trailing zeros don't tell requests apart. */
 const key = (reportId: number, data: ArrayLike<number>) =>
 	`${reportId}:${Array.from(data, (b) => b.toString(16).padStart(2, '0'))
@@ -157,9 +167,10 @@ export class RecordingReplay implements HidTransport {
 export function matchProfile(
 	recording: Recording,
 	firmware: string | undefined,
-	profiles: Iterable<Profile>
+	profiles: Iterable<Profile>,
+	device = 0
 ): Profile | string {
-	const identity = identityOf(new RecordingReplay(recording));
+	const identity = identityOf(new RecordingReplay(recording, { device }));
 	const result = matchDevice([...profiles], { ...identity, ...(firmware ? { firmware } : {}) });
 	if (!result.best) {
 		return result.ambiguous
