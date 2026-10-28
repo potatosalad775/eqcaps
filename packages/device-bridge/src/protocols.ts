@@ -86,7 +86,7 @@ const registers: Read = (v) =>
  */
 const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOptions<K>]?: Read } } = {
 	'fiio-usb-hid': { reportId: byte, saveCommand: byte },
-	'walkplay-hid': { defaultSlot: byte },
+	'walkplay-hid': { defaultSlot: byte, enableCommand: flag },
 	'moondrop-usb-hid': {},
 	'moondrop-old-fashioned-hid': {},
 	'conexant-usb-hid': {},

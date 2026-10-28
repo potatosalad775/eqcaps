@@ -3,11 +3,19 @@
 	"extends": "nicehck-walkplay",
 	"id": "nicehck-tears",
 	"device": { "brand": "NiceHCK", "model": "Tears", "aliases": ["泪"] },
-	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x129e" }] },
+	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x129e", "productName": "Tears DSP" }] },
 	"bandCount": 8,
 	"meta": {
-		"status": "draft",
-		"sources": [{ "kind": "vendor-app", "ref": "https://app.nicehck.cn/", "date": "2026-10-28" }],
-		"notes": "The app tags it \"YUANDAO DSP Device\". Its official presets: 1 Tears (flat), 2 Balanced, 3 Rock, 4 Game (game mode), 5 Diffusion (diffuse mode), 8 bands each, pre-gain 0. The product name the device reports over USB is not known yet, so it matches by vendor and product id."
+		"status": "maintainer-verified",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "https://app.nicehck.cn/, read with a preset, game mode, a band and the pre-gain changed and the app's writes recorded: packages/device-bridge/test/recordings/2026-10-28-nicehck-tears.json",
+				"firmware": "0.2",
+				"date": "2026-10-28",
+				"by": "potatosalad775"
+			}
+		],
+		"notes": "The app tags it \"YUANDAO DSP Device\" and files it under YUANDAO; it is sold as a NiceHCK product, so that is its brand here. Its official presets: 1 Tears (flat), 2 Balanced, 3 Rock, 4 Game (game mode), 5 Diffusion (diffuse mode), 8 bands each, pre-gain 0. Game mode on writes preset 4 and off writes the preset that was on before, as the app's special modes do; there is no mode command. Like the PureAural it leaves stale bytes in its answers, so the app shows its firmware (0.2) as \"0.\"."
 	}
 }

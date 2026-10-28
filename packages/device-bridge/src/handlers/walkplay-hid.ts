@@ -7,12 +7,14 @@
 // Both forms carry the frequency as given, in Hz. Some firmware is reported to place a band off
 // that frequency (SchemeNo11 about 2.25% low); the codec doesn't correct for it (D39).
 // Preamp: cmd 0x03, s8 dB. A write ends with a commit: [1,5,0], [1,0x17,0], [1,0x0A,4,0,0,FF,FF,0],
-// [1,1,1,0] (persist, PEQ on).
+// [1,1,1,0] (persist, PEQ on). A push then reads its bands back and sends a lost one again.
 //
 // Firmware (0x0C) and the device controls come from NICEHCK's web app (app.nicehck.cn), which
 // drives its Walkplay devices with the same requests: the version is ASCII from byte 3; a control
 // is one byte at byte 3 of its answer, except the mic gain (0x02) and the per-channel gain (0x16,
-// channel at byte 3), which are s16 LE ×256 dB.
+// channel at byte 3), which are written as s16 LE ×256 dB. The device only overwrites the bytes
+// it fills in an answer: a 0x16 answer carries the whole dB at byte 5 and leaves byte 4 as it was
+// (PureAural, test/recordings/2026-10-28-nicehck-pureaural.json).
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { biquadQ30, coefficientBytes } from '../biquad.ts';
@@ -32,6 +34,11 @@ import type { HidTransport } from '../transport.ts';
 export interface WalkplayHidOptions {
 	/** Slot byte of a write that names no slot. Default 101 ("Custom"). */
 	defaultSlot?: number;
+	/**
+	 * Whether [1,1,0,…] turns the EQ off (`setEnabled`). Default true; false where it doesn't:
+	 * the NICEHCK PureAural keeps its EQ, and NICEHCK's app calls the frame "save to flash".
+	 */
+	enableCommand?: boolean;
 }
 
 const REPORT_ID = 0x4b;
@@ -96,8 +103,10 @@ export function encodeWalkplayBand(index: number, filter: Filter, slot: number):
 /** "1.6" from the 0x0C answer: the digits and dots of the ASCII from byte 3, up to a 0 byte. */
 export function decodeWalkplayFirmware(d: ArrayLike<number>): string | null {
 	if (d.length < 4 || d[0] !== READ || d[1] !== FIRMWARE) return null;
+	// The device leaves the rest of its answer buffer as it was, so the version ends at the first
+	// byte that isn't printable ASCII. Byte 2 is left over too, not a length.
 	let version = '';
-	for (let i = 3; i < d.length && d[i] !== 0; i++) {
+	for (let i = 3; i < d.length && d[i]! >= 0x20 && d[i]! < 0x7f; i++) {
 		const c = String.fromCharCode(d[i]!);
 		if (/[0-9.]/.test(c)) version += c;
 	}
@@ -192,6 +201,8 @@ function control(id: string): HandlerControl<HidTransport, WalkplayHidOptions> {
 			if (d.length < at + (c.db ? 2 : 1)) {
 				throw new BridgeError('bad-response', `Walkplay: short answer to ${id}`);
 			}
+			// A 0x16 answer sets only the whole dB (byte 5); byte 4 is left from an earlier answer.
+			if (channel !== undefined) return readI8(d, at + 1);
 			return c.db ? readI16le(d, at) / 256 : d[at]!;
 		},
 		async write(ctx, value) {
@@ -205,12 +216,66 @@ function control(id: string): HandlerControl<HidTransport, WalkplayHidOptions> {
 	};
 }
 
+/** Band `index` as the device reads it back; undefined if it doesn't answer. */
+async function readBand(ctx: HandlerContext<HidTransport, WalkplayHidOptions>, index: number) {
+	try {
+		const answer = await hidRequest(
+			ctx.transport,
+			REPORT_ID,
+			[READ, BAND, 0x00, 0x00, index, 0x00],
+			(d) => d[1] === BAND && d[4] === index && d.length >= 34,
+			300,
+			`Walkplay band ${index}`
+		);
+		return decodeWalkplayBand(answer);
+	} catch (error) {
+		ctx.log(`Walkplay: band ${index} not read back (${String(error)})`);
+		return undefined;
+	}
+}
+
+const sameBand = (a: Filter | null, b: Filter | null) =>
+	a === b ||
+	(a !== null &&
+		b !== null &&
+		a.type === b.type &&
+		a.freq === b.freq &&
+		a.q === b.q &&
+		a.gain === b.gain);
+
+/**
+ * The band frames the device didn't take, from reading each back. A PureAural lost the first
+ * band write after it had been idle for some minutes, and once just after a replug. If a band
+ * isn't read back, the rest aren't checked and count as taken: a device that doesn't answer reads
+ * is written to as before.
+ */
+async function untaken(ctx: HandlerContext<HidTransport, WalkplayHidOptions>, frames: HidFrame[]) {
+	const out: HidFrame[] = [];
+	for (const frame of frames) {
+		if (frame.data[1] !== BAND) continue;
+		const read = await readBand(ctx, frame.data[4]!);
+		if (read === undefined) break;
+		if (!sameBand(read, decodeWalkplayBand(frame.data))) out.push(frame);
+	}
+	return out;
+}
+
+async function sendFrames(
+	ctx: HandlerContext<HidTransport, WalkplayHidOptions>,
+	frames: readonly HidFrame[]
+) {
+	for (const frame of frames) {
+		await sendFrame(ctx.transport, frame);
+		await ctx.sleep(frame.data[1] === BAND ? 20 : 50);
+	}
+}
+
 export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 	id: 'walkplay-hid',
 	transport: 'hid',
 	codec: walkplayHidCodec,
 
-	capabilities: () => ({
+	capabilities: (_t, o) => ({
 		canRead: true,
 		canWrite: true,
 		readsPreamp: true,
@@ -219,7 +284,7 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 		writesSlot: true,
 		needsBandCount: true,
 		readsCurrentSlot: true,
-		canEnable: true
+		canEnable: o.enableCommand ?? true
 	}),
 
 	async pull(ctx, { bands = 0 }) {
@@ -254,9 +319,20 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 
 	async push(ctx, request) {
 		const frames = walkplayHidCodec.encode(request, ctx.options);
-		for (const frame of frames) {
-			await sendFrame(ctx.transport, frame);
-			await ctx.sleep(frame.data[1] === BAND ? 20 : 50);
+		await sendFrames(ctx, frames);
+		// A band the device lost is sent again with the commit, once.
+		const commit = frames.filter((f) => f.data[1] !== BAND);
+		let lost = await untaken(ctx, frames);
+		if (lost.length) {
+			ctx.log(`Walkplay: band(s) ${lost.map((f) => f.data[4]).join(', ')} not taken, sent again`);
+			await sendFrames(ctx, [...lost, ...commit]);
+			lost = await untaken(ctx, lost);
+		}
+		if (lost.length) {
+			throw new BridgeError(
+				'rejected',
+				`Walkplay: band(s) ${lost.map((f) => f.data[4]).join(', ')} not taken`
+			);
 		}
 		return { reconnect: false };
 	},

@@ -93,7 +93,15 @@ export function profileFor(
 	return matchProfile(recording, firmware, profiles, device);
 }
 
-/** Reads: what the handler reads from the answers the app got, against what the app shows. */
+/** The exchanges of `device` before `t`. */
+const exchangesBefore = (recording: Recording, device: number, t: number) =>
+	exchangesOf(recording, device).filter((x) => x.t < t);
+
+/**
+ * Reads: what the handler reads from the answers the app got, against what the app shows. Not
+ * checked when the app wrote after its last read: it then shows what it wrote, which no answer
+ * holds (the writes are checked by `checkWrites`).
+ */
 export async function checkReads(
 	recording: Recording,
 	snapshot: Snapshot,
@@ -101,10 +109,14 @@ export async function checkReads(
 ): Promise<string[]> {
 	const state = snapshot.state as NicehckState;
 	const out: string[] = [];
+	const device = deviceAt(recording, snapshot.t);
+	const before = exchangesBefore(recording, device, snapshot.t);
+	const last = before.findLast((x) => x.request[0] === 0x80);
+	if (!last || before.some((x) => x.t > last.t && x.request[0] === 0x01)) return out;
 	const open = () =>
 		openDevice(
 			new RecordingReplay(recording, {
-				device: deviceAt(recording, snapshot.t),
+				device,
 				until: snapshot.t
 			}),
 			protocolOf(profile)!,
@@ -115,10 +127,12 @@ export async function checkReads(
 		);
 
 	const firmware = await open().firmware();
+	// The app takes byte 2 as the version's length, which the device leaves from an earlier
+	// report, so it may show the version cut short.
 	if (
 		state.firmwareVersion &&
 		state.firmwareVersion !== '0' &&
-		firmware !== state.firmwareVersion
+		!firmware?.startsWith(state.firmwareVersion)
 	) {
 		out.push(`firmware: the handler reads ${firmware}, the app ${state.firmwareVersion}`);
 	}
@@ -152,8 +166,19 @@ export async function checkReads(
 		}
 	}
 
+	// The app reads a channel gain as s16 at byte 4, which a 0x16 answer leaves from an earlier
+	// report; where that byte isn't 0, the app's balance isn't the device's.
+	const stale = (channel: number) => {
+		const x = before.findLast(
+			(x) => x.request[0] === 0x80 && x.request[1] === 0x16 && x.request[3] === channel
+		);
+		return (x?.answers.at(-1)?.[4] ?? 0) !== 0;
+	};
+	const balanceRead = !stale(0) && !stale(1);
+
 	const values = await open().readControls();
 	for (const [id, value] of Object.entries(values)) {
+		if (!balanceRead && (id === 'leftGain' || id === 'rightGain')) continue;
 		const app = STATE_OF[id]?.(state);
 		if (value !== null && app !== undefined && value !== app) {
 			out.push(`control ${id}: the handler reads ${value}, the app ${app}`);

@@ -671,6 +671,38 @@ describe('Walkplay controls and firmware (NICEHCK PureAural)', () => {
 		});
 	});
 
+	test('sends a band the device lost again, with the commit', async () => {
+		const t = new FakeWalkplay();
+		t.asleep = true;
+		await pureAural(t).push({ filters: [pk(200, 1, 1), pk(300, 2, 1)], preamp: -3 });
+		expect(t.bands.get(0)).toEqual([200, 1, 1, 2, 101]);
+		expect(t.bands.get(1)).toEqual([300, 1, 2, 2, 101]);
+		// Band 0 is sent again; band 1 isn't.
+		expect(t.sent.filter(([op, cmd]) => op === 0x01 && cmd === 0x09)).toHaveLength(3);
+	});
+
+	test('a band the device never takes is an error', async () => {
+		const t = new FakeWalkplay();
+		t.stuck = 'band';
+		await expect(pureAural(t).push({ filters: [pk(200, 1, 1)] })).rejects.toMatchObject({
+			code: 'rejected'
+		});
+	});
+
+	test('does not offer to turn the EQ off, which the PureAural ignores', () => {
+		expect(pureAural(new FakeWalkplay()).capabilities.canEnable).toBe(false);
+	});
+
+	test('reads past what earlier reports leave in the answer buffer', async () => {
+		const t = new FakeWalkplay();
+		const device = pureAural(t);
+		await device.push({ filters: [pk(200, 1, 1)], preamp: -3 });
+		await device.writeControl('micGain', -5);
+		expect(await device.firmware()).toBe('1.0.3');
+		const { leftGain, rightGain } = await device.readControls();
+		expect([leftGain, rightGain]).toEqual([0, -4]);
+	});
+
 	test('writes a control and reads it back; refuses what the profile does not list', async () => {
 		const t = new FakeWalkplay();
 		const device = pureAural(t);

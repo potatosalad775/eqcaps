@@ -24,12 +24,15 @@ const le16 = (db: number) => {
  * Every request is an output report 0x4B; every answer an input report 0x4B that repeats
  * [0x80, cmd]. Band answers carry the band at bytes 27–33, the pre-gain at 34 and the preset at 35,
  * as the app parses them. `stuck` ignores writes to that control.
+ *
+ * As the PureAural does, requests and answers share one buffer, and an answer overwrites only the
+ * bytes it fills: the firmware leaves byte 2 and ends without a NUL, a 0x16 answer leaves byte 4.
  */
 export class FakeWalkplay implements HidTransport {
 	readonly kind = 'hid' as const;
 	readonly vendorId = 0x3302;
 	readonly productId = 0x4322;
-	readonly productName = 'PureAural';
+	readonly productName = 'NICEHCK PureAural';
 	readonly collections = [];
 	/** [op, cmd] of every request: op 0x80 reads, 0x01 writes. */
 	readonly sent: [number, number][] = [];
@@ -45,6 +48,8 @@ export class FakeWalkplay implements HidTransport {
 		rightGain: -4
 	};
 	stuck?: string;
+	/** Drops the next report, as a PureAural idle for some minutes did. */
+	asleep = false;
 	/** Band index → [freq, q, gain, type code, preset]. */
 	readonly bands = new Map<number, [number, number, number, number, number]>([
 		[0, [100, 0.75, 3.5, 2, 1]],
@@ -52,10 +57,14 @@ export class FakeWalkplay implements HidTransport {
 	]);
 	private readonly listeners = new Set<(reportId: number, data: Uint8Array) => void>();
 
-	private reply(...data: number[]) {
-		const answer = new Uint8Array(63);
-		answer.set(data);
-		for (const l of [...this.listeners]) l(0x4b, Uint8Array.from(answer));
+	private readonly buffer = new Uint8Array(63);
+
+	/** An answer; an undefined byte is left as it was in the buffer. */
+	private reply(...data: (number | undefined)[]) {
+		data.forEach((b, i) => {
+			if (b !== undefined) this.buffer[i] = b;
+		});
+		for (const l of [...this.listeners]) l(0x4b, Uint8Array.from(this.buffer));
 	}
 
 	private band(i: number) {
@@ -79,12 +88,17 @@ export class FakeWalkplay implements HidTransport {
 	private handle(d: Uint8Array) {
 		const [op, cmd] = [d[0]!, d[1]!];
 		this.sent.push([op, cmd]);
+		if (this.asleep) {
+			this.asleep = false;
+			return;
+		}
+		this.buffer.set(d.subarray(0, this.buffer.length));
 		const control = BYTE_CONTROLS[cmd];
 		if (op === READ) {
 			if (control) return this.reply(READ, cmd, 1, this.values[control]!);
 			switch (cmd) {
 				case 0x0c:
-					return this.reply(READ, cmd, 0, ...Buffer.from(this.firmware), 0);
+					return this.reply(READ, cmd, undefined, ...Buffer.from(this.firmware));
 				case 0x09:
 					return this.reply(...this.band(d[4]!));
 				case 0x03:
@@ -93,7 +107,7 @@ export class FakeWalkplay implements HidTransport {
 					return this.reply(READ, cmd, 2, ...le16(this.values.micGain!));
 				case 0x16: {
 					const id = d[3] === 0 ? 'leftGain' : 'rightGain';
-					return this.reply(READ, cmd, 4, d[3]!, ...le16(this.values[id]!));
+					return this.reply(READ, cmd, 4, d[3]!, undefined, le16(this.values[id]!)[1]);
 				}
 			}
 			return;
@@ -105,6 +119,7 @@ export class FakeWalkplay implements HidTransport {
 		if (control) return set(control, d[3]!);
 		switch (cmd) {
 			case 0x09:
+				if (this.stuck === 'band') return;
 				this.bands.set(d[4]!, [d[27]! | (d[28]! << 8), s16(d, 29), s16(d, 31), d[33]!, d[35]!]);
 				return;
 			case 0x03:

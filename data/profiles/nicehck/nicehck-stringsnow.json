@@ -3,11 +3,21 @@
 	"extends": "nicehck-walkplay",
 	"id": "nicehck-stringsnow",
 	"device": { "brand": "NiceHCK", "model": "StringSnow", "aliases": ["弦雪"] },
-	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x1291" }] },
+	"match": {
+		"usb": [{ "vendorId": "0x3302", "productId": "0x1291", "productName": "StringSnow DSP" }]
+	},
 	"bandCount": 8,
 	"meta": {
-		"status": "draft",
-		"sources": [{ "kind": "vendor-app", "ref": "https://app.nicehck.cn/", "date": "2026-10-28" }],
-		"notes": "The app tags it \"YUANDAO DSP Device\". Its official presets: 1 Default, 2 Tears, 3 Balanced, 4 Rock, 5 Game (game mode), 6 Sleep (sleep mode), 8 bands each, pre-gain 0. The product name the device reports over USB is not known yet, so it matches by vendor and product id."
+		"status": "maintainer-verified",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "https://app.nicehck.cn/, read with a preset, sleep mode, a band and the pre-gain changed and the app's writes recorded: packages/device-bridge/test/recordings/2026-10-28-nicehck-stringsnow.json",
+				"firmware": "0.4",
+				"date": "2026-10-28",
+				"by": "potatosalad775"
+			}
+		],
+		"notes": "The app tags it \"YUANDAO DSP Device\" and files it under YUANDAO; it is sold as a NiceHCK product, so that is its brand here. Its official presets: 1 Default, 2 Tears, 3 Balanced, 4 Rock, 5 Game (game mode), 6 Sleep (sleep mode), 8 bands each, pre-gain 0. Sleep mode on writes preset 6 and off writes the preset that was on before; there is no mode command. Like the PureAural it leaves stale bytes in its answers, so the app shows its firmware (0.4) as \"0.\"."
 	}
 }

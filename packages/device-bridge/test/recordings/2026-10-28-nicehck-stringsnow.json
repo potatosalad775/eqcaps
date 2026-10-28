@@ -1,0 +1,4946 @@
+{
+	"recording": "eqcaps-webhid",
+	"version": 1,
+	"recordedAt": "2026-10-28T13:53:34.755Z",
+	"tool": {
+		"name": "eqcaps WebHID recorder",
+		"version": 2
+	},
+	"page": {
+		"origin": "https://app.nicehck.cn",
+		"path": "/device"
+	},
+	"userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+	"notes": "StringSnow, firmware 0.4. Recorder injected right after the page loaded, before the app connected. Connect; Read all; Balanced preset; snapshot; Sleep Mode on (writes preset 6) and off (rewrites preset 3); snapshot; editor: band 1 to 40 Hz and -2.5 dB, pre-gain box -6; snapshot; Read all. The device held a custom EQ in slot 101 before (pre-gain +1), restored afterwards with the handler.",
+	"devices": [
+		{
+			"vendorId": 13058,
+			"productId": 4753,
+			"productName": "StringSnow DSP",
+			"collections": [
+				{
+					"usagePage": 12,
+					"usage": 1,
+					"inputReports": [84, 75, 3],
+					"outputReports": [84, 75],
+					"featureReports": [],
+					"children": []
+				}
+			]
+		}
+	],
+	"snapshots": [
+		{
+			"t": 25364.9,
+			"label": "read all",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 4753,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 4753,
+					"name": "StringSnow",
+					"deviceName": "StringSnow",
+					"model": "YUANDAO DSP Device",
+					"tag": "YUANDAO DSP Device",
+					"customName": "StringSnow",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
+					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
+				},
+				"equalizerSetting": {
+					"id": 4753,
+					"deviceId": 4753,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 8,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 4753,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": false,
+					"specialMode": true,
+					"digitalFilter": false,
+					"channelBalance": false,
+					"microphoneGain": false,
+					"workMode": false,
+					"deviceVolume": false,
+					"gainLevel": false,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 101,
+				"deviceName": "",
+				"firmwareVersion": "0.",
+				"offset": 1,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 25,
+						"gain": -1,
+						"qValue": 0.5
+					},
+					{
+						"id": 1,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 180,
+						"gain": -3,
+						"qValue": 0.8
+					},
+					{
+						"id": 2,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 2300,
+						"gain": -4,
+						"qValue": 1
+					},
+					{
+						"id": 3,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 2800,
+						"gain": -2,
+						"qValue": 1
+					},
+					{
+						"id": 4,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 6200,
+						"gain": -2,
+						"qValue": 2
+					},
+					{
+						"id": 5,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 100,
+						"gain": 0,
+						"qValue": 1
+					},
+					{
+						"id": 6,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 100,
+						"gain": 0,
+						"qValue": 1
+					},
+					{
+						"id": 7,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 100,
+						"gain": 0,
+						"qValue": 1
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 4753,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1.1,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -5,
+								"qValue": 1.5
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 1.5,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8800,
+								"gain": 4.5,
+								"qValue": 3.8
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -4,
+								"qValue": 4.5
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 14500,
+								"gain": 2,
+								"qValue": 4
+							}
+						]
+					},
+					{
+						"id": "tears",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "tears",
+						"nameI18n": {
+							"ko": "후회의 눈물",
+							"zh": "悔恨之泪",
+							"ja": "悔恨の涙",
+							"en": "Tears"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 32,
+								"gain": 1.8,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 150,
+								"gain": -1.1,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.6,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 330,
+								"gain": 2.6,
+								"qValue": 0.5
+							},
+							{
+								"id": 4,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 460,
+								"gain": -1.4,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 2250,
+								"gain": -3.4,
+								"qValue": 2.4
+							},
+							{
+								"id": 6,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 5700,
+								"gain": 1.7,
+								"qValue": 2.5
+							},
+							{
+								"id": 7,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 3.6,
+								"qValue": 1
+							}
+						]
+					},
+					{
+						"id": "JM_1",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "JM_1",
+						"nameI18n": {
+							"ko": "균형 잡힌 뉴트럴",
+							"zh": "均衡中正",
+							"ja": "バランス良くニュートラル",
+							"en": "Balanced"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 62,
+								"gain": 2.9,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 340,
+								"gain": 0.4,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 460,
+								"gain": 3.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 1100,
+								"gain": -0.9,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -8.7,
+								"qValue": 1.1
+							},
+							{
+								"id": 5,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 6.7,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 1.7,
+								"qValue": 6.2
+							},
+							{
+								"id": 7,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.7,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "harman",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "harman",
+						"nameI18n": {
+							"ko": "일렉트로닉 록",
+							"zh": "欧美澎湃",
+							"ja": "欧米パワフル",
+							"en": "Rock"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 52,
+								"gain": 2.4,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.7,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 370,
+								"gain": 1.7,
+								"qValue": 2
+							},
+							{
+								"id": 3,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 760,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 1200,
+								"gain": -0.8,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 2200,
+								"gain": -7.1,
+								"qValue": 1.3
+							},
+							{
+								"id": 6,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 6100,
+								"gain": 7.9,
+								"qValue": 0.6
+							},
+							{
+								"id": 7,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -6.2,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "game",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "game",
+						"nameI18n": {
+							"ko": "게임 모드",
+							"zh": "游戏",
+							"ja": "ゲームモード",
+							"en": "Game"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameModeSwitch",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 20,
+								"gain": -2,
+								"qValue": 0.2
+							},
+							{
+								"id": 1,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 200,
+								"gain": -0.8,
+								"qValue": 1.35
+							},
+							{
+								"id": 2,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 330,
+								"gain": 0.6,
+								"qValue": 1.31
+							},
+							{
+								"id": 3,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 1500,
+								"gain": 0.1,
+								"qValue": 1.73
+							},
+							{
+								"id": 4,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -3.7,
+								"qValue": 1.96
+							},
+							{
+								"id": 5,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -1.2,
+								"qValue": 0.2
+							},
+							{
+								"id": 6,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 6000,
+								"gain": -1.2,
+								"qValue": 1.38
+							},
+							{
+								"id": 7,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 4.2,
+								"qValue": 4.2
+							}
+						]
+					},
+					{
+						"id": "sleep",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "sleep",
+						"nameI18n": {
+							"ko": "절전 모드",
+							"zh": "睡眠",
+							"ja": "スリープモード",
+							"en": "Sleep"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "SleepMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 400,
+								"gain": 1.5,
+								"qValue": 0.7
+							},
+							{
+								"id": 2,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 1000,
+								"gain": 0.5,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -10,
+								"qValue": 1.5
+							},
+							{
+								"id": 4,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 5,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 5,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 8800,
+								"gain": -6,
+								"qValue": 3.5
+							},
+							{
+								"id": 7,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -8,
+								"qValue": 4.5
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "custom",
+					"name": "custom",
+					"deviceId": 4753,
+					"description": "Custom",
+					"presetIndex": 101,
+					"offset": 1,
+					"isOfficial": false,
+					"isSpecialMode": false,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "device",
+							"type": 0,
+							"frequency": 25,
+							"gain": -1,
+							"qValue": 0.5
+						},
+						{
+							"id": 1,
+							"presetId": "device",
+							"type": 0,
+							"frequency": 180,
+							"gain": -3,
+							"qValue": 0.8
+						},
+						{
+							"id": 2,
+							"presetId": "device",
+							"type": 0,
+							"frequency": 2300,
+							"gain": -4,
+							"qValue": 1
+						},
+						{
+							"id": 3,
+							"presetId": "device",
+							"type": 0,
+							"frequency": 2800,
+							"gain": -2,
+							"qValue": 1
+						},
+						{
+							"id": 4,
+							"presetId": "device",
+							"type": 0,
+							"frequency": 6200,
+							"gain": -2,
+							"qValue": 2
+						},
+						{
+							"id": 5,
+							"presetId": "device",
+							"type": 0,
+							"frequency": 100,
+							"gain": 0,
+							"qValue": 1
+						},
+						{
+							"id": 6,
+							"presetId": "device",
+							"type": 0,
+							"frequency": 100,
+							"gain": 0,
+							"qValue": 1
+						},
+						{
+							"id": 7,
+							"presetId": "device",
+							"type": 0,
+							"frequency": 100,
+							"gain": 0,
+							"qValue": 1
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "UNKNOWN",
+					"value": 99
+				},
+				"workMode": null,
+				"gainLevel": null,
+				"deviceVolume": null,
+				"micGainDb": 0,
+				"channelBalance": 0
+			}
+		},
+		{
+			"t": 45160.7,
+			"label": "manual: Balanced",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 4753,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 4753,
+					"name": "StringSnow",
+					"deviceName": "StringSnow",
+					"model": "YUANDAO DSP Device",
+					"tag": "YUANDAO DSP Device",
+					"customName": "StringSnow",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
+					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
+				},
+				"equalizerSetting": {
+					"id": 4753,
+					"deviceId": 4753,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 8,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 4753,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": false,
+					"specialMode": true,
+					"digitalFilter": false,
+					"channelBalance": false,
+					"microphoneGain": false,
+					"workMode": false,
+					"deviceVolume": false,
+					"gainLevel": false,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 3,
+				"deviceName": "",
+				"firmwareVersion": "0.",
+				"offset": 0,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 62,
+						"gain": 2.9,
+						"qValue": 0.7
+					},
+					{
+						"id": 1,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 340,
+						"gain": 0.4,
+						"qValue": 2
+					},
+					{
+						"id": 2,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 460,
+						"gain": 3.2,
+						"qValue": 0.5
+					},
+					{
+						"id": 3,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 1100,
+						"gain": -0.9,
+						"qValue": 2
+					},
+					{
+						"id": 4,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 2300,
+						"gain": -8.7,
+						"qValue": 1.1
+					},
+					{
+						"id": 5,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 3000,
+						"gain": 6.7,
+						"qValue": 1.5
+					},
+					{
+						"id": 6,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 6000,
+						"gain": 1.7,
+						"qValue": 6.2
+					},
+					{
+						"id": 7,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 10000,
+						"gain": 0.7,
+						"qValue": 0.5
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 4753,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1.1,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -5,
+								"qValue": 1.5
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 1.5,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8800,
+								"gain": 4.5,
+								"qValue": 3.8
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -4,
+								"qValue": 4.5
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 14500,
+								"gain": 2,
+								"qValue": 4
+							}
+						]
+					},
+					{
+						"id": "tears",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "tears",
+						"nameI18n": {
+							"ko": "후회의 눈물",
+							"zh": "悔恨之泪",
+							"ja": "悔恨の涙",
+							"en": "Tears"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 32,
+								"gain": 1.8,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 150,
+								"gain": -1.1,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.6,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 330,
+								"gain": 2.6,
+								"qValue": 0.5
+							},
+							{
+								"id": 4,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 460,
+								"gain": -1.4,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 2250,
+								"gain": -3.4,
+								"qValue": 2.4
+							},
+							{
+								"id": 6,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 5700,
+								"gain": 1.7,
+								"qValue": 2.5
+							},
+							{
+								"id": 7,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 3.6,
+								"qValue": 1
+							}
+						]
+					},
+					{
+						"id": "JM_1",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "JM_1",
+						"nameI18n": {
+							"ko": "균형 잡힌 뉴트럴",
+							"zh": "均衡中正",
+							"ja": "バランス良くニュートラル",
+							"en": "Balanced"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 62,
+								"gain": 2.9,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 340,
+								"gain": 0.4,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 460,
+								"gain": 3.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 1100,
+								"gain": -0.9,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -8.7,
+								"qValue": 1.1
+							},
+							{
+								"id": 5,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 6.7,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 1.7,
+								"qValue": 6.2
+							},
+							{
+								"id": 7,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.7,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "harman",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "harman",
+						"nameI18n": {
+							"ko": "일렉트로닉 록",
+							"zh": "欧美澎湃",
+							"ja": "欧米パワフル",
+							"en": "Rock"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 52,
+								"gain": 2.4,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.7,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 370,
+								"gain": 1.7,
+								"qValue": 2
+							},
+							{
+								"id": 3,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 760,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 1200,
+								"gain": -0.8,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 2200,
+								"gain": -7.1,
+								"qValue": 1.3
+							},
+							{
+								"id": 6,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 6100,
+								"gain": 7.9,
+								"qValue": 0.6
+							},
+							{
+								"id": 7,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -6.2,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "game",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "game",
+						"nameI18n": {
+							"ko": "게임 모드",
+							"zh": "游戏",
+							"ja": "ゲームモード",
+							"en": "Game"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameModeSwitch",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 20,
+								"gain": -2,
+								"qValue": 0.2
+							},
+							{
+								"id": 1,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 200,
+								"gain": -0.8,
+								"qValue": 1.35
+							},
+							{
+								"id": 2,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 330,
+								"gain": 0.6,
+								"qValue": 1.31
+							},
+							{
+								"id": 3,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 1500,
+								"gain": 0.1,
+								"qValue": 1.73
+							},
+							{
+								"id": 4,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -3.7,
+								"qValue": 1.96
+							},
+							{
+								"id": 5,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -1.2,
+								"qValue": 0.2
+							},
+							{
+								"id": 6,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 6000,
+								"gain": -1.2,
+								"qValue": 1.38
+							},
+							{
+								"id": 7,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 4.2,
+								"qValue": 4.2
+							}
+						]
+					},
+					{
+						"id": "sleep",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "sleep",
+						"nameI18n": {
+							"ko": "절전 모드",
+							"zh": "睡眠",
+							"ja": "スリープモード",
+							"en": "Sleep"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "SleepMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 400,
+								"gain": 1.5,
+								"qValue": 0.7
+							},
+							{
+								"id": 2,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 1000,
+								"gain": 0.5,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -10,
+								"qValue": 1.5
+							},
+							{
+								"id": 4,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 5,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 5,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 8800,
+								"gain": -6,
+								"qValue": 3.5
+							},
+							{
+								"id": 7,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -8,
+								"qValue": 4.5
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "JM_1",
+					"deviceId": 4753,
+					"description": " ",
+					"descriptionI18n": {},
+					"presetKey": "JM_1",
+					"nameI18n": {
+						"ko": "균형 잡힌 뉴트럴",
+						"zh": "均衡中正",
+						"ja": "バランス良くニュートラル",
+						"en": "Balanced"
+					},
+					"presetIndex": 3,
+					"offset": 0,
+					"modeType": null,
+					"isSpecialMode": false,
+					"isOfficial": true,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 62,
+							"gain": 2.9,
+							"qValue": 0.7
+						},
+						{
+							"id": 1,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 340,
+							"gain": 0.4,
+							"qValue": 2
+						},
+						{
+							"id": 2,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 460,
+							"gain": 3.2,
+							"qValue": 0.5
+						},
+						{
+							"id": 3,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 1100,
+							"gain": -0.9,
+							"qValue": 2
+						},
+						{
+							"id": 4,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 2300,
+							"gain": -8.7,
+							"qValue": 1.1
+						},
+						{
+							"id": 5,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 3000,
+							"gain": 6.7,
+							"qValue": 1.5
+						},
+						{
+							"id": 6,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 6000,
+							"gain": 1.7,
+							"qValue": 6.2
+						},
+						{
+							"id": 7,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 10000,
+							"gain": 0.7,
+							"qValue": 0.5
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "UNKNOWN",
+					"value": 99
+				},
+				"workMode": null,
+				"gainLevel": null,
+				"deviceVolume": null,
+				"micGainDb": 0,
+				"channelBalance": 0
+			}
+		},
+		{
+			"t": 51312,
+			"label": "manual: sleep mode on, off",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 4753,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 4753,
+					"name": "StringSnow",
+					"deviceName": "StringSnow",
+					"model": "YUANDAO DSP Device",
+					"tag": "YUANDAO DSP Device",
+					"customName": "StringSnow",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
+					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
+				},
+				"equalizerSetting": {
+					"id": 4753,
+					"deviceId": 4753,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 8,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 4753,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": false,
+					"specialMode": true,
+					"digitalFilter": false,
+					"channelBalance": false,
+					"microphoneGain": false,
+					"workMode": false,
+					"deviceVolume": false,
+					"gainLevel": false,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 3,
+				"deviceName": "",
+				"firmwareVersion": "0.",
+				"offset": 0,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 62,
+						"gain": 2.9,
+						"qValue": 0.7
+					},
+					{
+						"id": 1,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 340,
+						"gain": 0.4,
+						"qValue": 2
+					},
+					{
+						"id": 2,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 460,
+						"gain": 3.2,
+						"qValue": 0.5
+					},
+					{
+						"id": 3,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 1100,
+						"gain": -0.9,
+						"qValue": 2
+					},
+					{
+						"id": 4,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 2300,
+						"gain": -8.7,
+						"qValue": 1.1
+					},
+					{
+						"id": 5,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 3000,
+						"gain": 6.7,
+						"qValue": 1.5
+					},
+					{
+						"id": 6,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 6000,
+						"gain": 1.7,
+						"qValue": 6.2
+					},
+					{
+						"id": 7,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 10000,
+						"gain": 0.7,
+						"qValue": 0.5
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 4753,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1.1,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -5,
+								"qValue": 1.5
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 1.5,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8800,
+								"gain": 4.5,
+								"qValue": 3.8
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -4,
+								"qValue": 4.5
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 14500,
+								"gain": 2,
+								"qValue": 4
+							}
+						]
+					},
+					{
+						"id": "tears",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "tears",
+						"nameI18n": {
+							"ko": "후회의 눈물",
+							"zh": "悔恨之泪",
+							"ja": "悔恨の涙",
+							"en": "Tears"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 32,
+								"gain": 1.8,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 150,
+								"gain": -1.1,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.6,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 330,
+								"gain": 2.6,
+								"qValue": 0.5
+							},
+							{
+								"id": 4,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 460,
+								"gain": -1.4,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 2250,
+								"gain": -3.4,
+								"qValue": 2.4
+							},
+							{
+								"id": 6,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 5700,
+								"gain": 1.7,
+								"qValue": 2.5
+							},
+							{
+								"id": 7,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 3.6,
+								"qValue": 1
+							}
+						]
+					},
+					{
+						"id": "JM_1",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "JM_1",
+						"nameI18n": {
+							"ko": "균형 잡힌 뉴트럴",
+							"zh": "均衡中正",
+							"ja": "バランス良くニュートラル",
+							"en": "Balanced"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 62,
+								"gain": 2.9,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 340,
+								"gain": 0.4,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 460,
+								"gain": 3.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 1100,
+								"gain": -0.9,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -8.7,
+								"qValue": 1.1
+							},
+							{
+								"id": 5,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 6.7,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 1.7,
+								"qValue": 6.2
+							},
+							{
+								"id": 7,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.7,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "harman",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "harman",
+						"nameI18n": {
+							"ko": "일렉트로닉 록",
+							"zh": "欧美澎湃",
+							"ja": "欧米パワフル",
+							"en": "Rock"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 52,
+								"gain": 2.4,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.7,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 370,
+								"gain": 1.7,
+								"qValue": 2
+							},
+							{
+								"id": 3,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 760,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 1200,
+								"gain": -0.8,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 2200,
+								"gain": -7.1,
+								"qValue": 1.3
+							},
+							{
+								"id": 6,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 6100,
+								"gain": 7.9,
+								"qValue": 0.6
+							},
+							{
+								"id": 7,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -6.2,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "game",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "game",
+						"nameI18n": {
+							"ko": "게임 모드",
+							"zh": "游戏",
+							"ja": "ゲームモード",
+							"en": "Game"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameModeSwitch",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 20,
+								"gain": -2,
+								"qValue": 0.2
+							},
+							{
+								"id": 1,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 200,
+								"gain": -0.8,
+								"qValue": 1.35
+							},
+							{
+								"id": 2,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 330,
+								"gain": 0.6,
+								"qValue": 1.31
+							},
+							{
+								"id": 3,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 1500,
+								"gain": 0.1,
+								"qValue": 1.73
+							},
+							{
+								"id": 4,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -3.7,
+								"qValue": 1.96
+							},
+							{
+								"id": 5,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -1.2,
+								"qValue": 0.2
+							},
+							{
+								"id": 6,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 6000,
+								"gain": -1.2,
+								"qValue": 1.38
+							},
+							{
+								"id": 7,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 4.2,
+								"qValue": 4.2
+							}
+						]
+					},
+					{
+						"id": "sleep",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "sleep",
+						"nameI18n": {
+							"ko": "절전 모드",
+							"zh": "睡眠",
+							"ja": "スリープモード",
+							"en": "Sleep"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "SleepMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 400,
+								"gain": 1.5,
+								"qValue": 0.7
+							},
+							{
+								"id": 2,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 1000,
+								"gain": 0.5,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -10,
+								"qValue": 1.5
+							},
+							{
+								"id": 4,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 5,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 5,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 8800,
+								"gain": -6,
+								"qValue": 3.5
+							},
+							{
+								"id": 7,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -8,
+								"qValue": 4.5
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "JM_1",
+					"deviceId": 4753,
+					"description": " ",
+					"descriptionI18n": {},
+					"presetKey": "JM_1",
+					"nameI18n": {
+						"ko": "균형 잡힌 뉴트럴",
+						"zh": "均衡中正",
+						"ja": "バランス良くニュートラル",
+						"en": "Balanced"
+					},
+					"presetIndex": 3,
+					"offset": 0,
+					"modeType": null,
+					"isSpecialMode": false,
+					"isOfficial": true,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 62,
+							"gain": 2.9,
+							"qValue": 0.7
+						},
+						{
+							"id": 1,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 340,
+							"gain": 0.4,
+							"qValue": 2
+						},
+						{
+							"id": 2,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 460,
+							"gain": 3.2,
+							"qValue": 0.5
+						},
+						{
+							"id": 3,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 1100,
+							"gain": -0.9,
+							"qValue": 2
+						},
+						{
+							"id": 4,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 2300,
+							"gain": -8.7,
+							"qValue": 1.1
+						},
+						{
+							"id": 5,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 3000,
+							"gain": 6.7,
+							"qValue": 1.5
+						},
+						{
+							"id": 6,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 6000,
+							"gain": 1.7,
+							"qValue": 6.2
+						},
+						{
+							"id": 7,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 10000,
+							"gain": 0.7,
+							"qValue": 0.5
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "UNKNOWN",
+					"value": 99
+				},
+				"workMode": null,
+				"gainLevel": null,
+				"deviceVolume": null,
+				"micGainDb": 0,
+				"channelBalance": 0
+			}
+		},
+		{
+			"t": 73772.6,
+			"label": "manual: band 1 40 Hz -2.5 dB, pre-gain -6",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 4753,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 4753,
+					"name": "StringSnow",
+					"deviceName": "StringSnow",
+					"model": "YUANDAO DSP Device",
+					"tag": "YUANDAO DSP Device",
+					"customName": "StringSnow",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
+					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
+				},
+				"equalizerSetting": {
+					"id": 4753,
+					"deviceId": 4753,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 8,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 4753,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": false,
+					"specialMode": true,
+					"digitalFilter": false,
+					"channelBalance": false,
+					"microphoneGain": false,
+					"workMode": false,
+					"deviceVolume": false,
+					"gainLevel": false,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 3,
+				"deviceName": "",
+				"firmwareVersion": "0.",
+				"offset": -6,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 40,
+						"gain": -2.5,
+						"qValue": 0.7
+					},
+					{
+						"id": 1,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 340,
+						"gain": 0.4,
+						"qValue": 2
+					},
+					{
+						"id": 2,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 460,
+						"gain": 3.2,
+						"qValue": 0.5
+					},
+					{
+						"id": 3,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 1100,
+						"gain": -0.9,
+						"qValue": 2
+					},
+					{
+						"id": 4,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 2300,
+						"gain": -8.7,
+						"qValue": 1.1
+					},
+					{
+						"id": 5,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 3000,
+						"gain": 6.7,
+						"qValue": 1.5
+					},
+					{
+						"id": 6,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 6000,
+						"gain": 1.7,
+						"qValue": 6.2
+					},
+					{
+						"id": 7,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 10000,
+						"gain": 0.7,
+						"qValue": 0.5
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 4753,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1.1,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -5,
+								"qValue": 1.5
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 1.5,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8800,
+								"gain": 4.5,
+								"qValue": 3.8
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -4,
+								"qValue": 4.5
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 14500,
+								"gain": 2,
+								"qValue": 4
+							}
+						]
+					},
+					{
+						"id": "tears",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "tears",
+						"nameI18n": {
+							"ko": "후회의 눈물",
+							"zh": "悔恨之泪",
+							"ja": "悔恨の涙",
+							"en": "Tears"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 32,
+								"gain": 1.8,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 150,
+								"gain": -1.1,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.6,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 330,
+								"gain": 2.6,
+								"qValue": 0.5
+							},
+							{
+								"id": 4,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 460,
+								"gain": -1.4,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 2250,
+								"gain": -3.4,
+								"qValue": 2.4
+							},
+							{
+								"id": 6,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 5700,
+								"gain": 1.7,
+								"qValue": 2.5
+							},
+							{
+								"id": 7,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 3.6,
+								"qValue": 1
+							}
+						]
+					},
+					{
+						"id": "JM_1",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "JM_1",
+						"nameI18n": {
+							"ko": "균형 잡힌 뉴트럴",
+							"zh": "均衡中正",
+							"ja": "バランス良くニュートラル",
+							"en": "Balanced"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 62,
+								"gain": 2.9,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 340,
+								"gain": 0.4,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 460,
+								"gain": 3.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 1100,
+								"gain": -0.9,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -8.7,
+								"qValue": 1.1
+							},
+							{
+								"id": 5,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 6.7,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 1.7,
+								"qValue": 6.2
+							},
+							{
+								"id": 7,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.7,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "harman",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "harman",
+						"nameI18n": {
+							"ko": "일렉트로닉 록",
+							"zh": "欧美澎湃",
+							"ja": "欧米パワフル",
+							"en": "Rock"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 52,
+								"gain": 2.4,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.7,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 370,
+								"gain": 1.7,
+								"qValue": 2
+							},
+							{
+								"id": 3,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 760,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 1200,
+								"gain": -0.8,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 2200,
+								"gain": -7.1,
+								"qValue": 1.3
+							},
+							{
+								"id": 6,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 6100,
+								"gain": 7.9,
+								"qValue": 0.6
+							},
+							{
+								"id": 7,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -6.2,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "game",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "game",
+						"nameI18n": {
+							"ko": "게임 모드",
+							"zh": "游戏",
+							"ja": "ゲームモード",
+							"en": "Game"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameModeSwitch",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 20,
+								"gain": -2,
+								"qValue": 0.2
+							},
+							{
+								"id": 1,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 200,
+								"gain": -0.8,
+								"qValue": 1.35
+							},
+							{
+								"id": 2,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 330,
+								"gain": 0.6,
+								"qValue": 1.31
+							},
+							{
+								"id": 3,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 1500,
+								"gain": 0.1,
+								"qValue": 1.73
+							},
+							{
+								"id": 4,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -3.7,
+								"qValue": 1.96
+							},
+							{
+								"id": 5,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -1.2,
+								"qValue": 0.2
+							},
+							{
+								"id": 6,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 6000,
+								"gain": -1.2,
+								"qValue": 1.38
+							},
+							{
+								"id": 7,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 4.2,
+								"qValue": 4.2
+							}
+						]
+					},
+					{
+						"id": "sleep",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "sleep",
+						"nameI18n": {
+							"ko": "절전 모드",
+							"zh": "睡眠",
+							"ja": "スリープモード",
+							"en": "Sleep"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "SleepMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 400,
+								"gain": 1.5,
+								"qValue": 0.7
+							},
+							{
+								"id": 2,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 1000,
+								"gain": 0.5,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -10,
+								"qValue": 1.5
+							},
+							{
+								"id": 4,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 5,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 5,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 8800,
+								"gain": -6,
+								"qValue": 3.5
+							},
+							{
+								"id": 7,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -8,
+								"qValue": 4.5
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "JM_1",
+					"deviceId": 4753,
+					"description": " ",
+					"descriptionI18n": {},
+					"presetKey": "JM_1",
+					"nameI18n": {
+						"ko": "균형 잡힌 뉴트럴",
+						"zh": "均衡中正",
+						"ja": "バランス良くニュートラル",
+						"en": "Balanced"
+					},
+					"presetIndex": 3,
+					"offset": 0,
+					"modeType": null,
+					"isSpecialMode": false,
+					"isOfficial": true,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 62,
+							"gain": 2.9,
+							"qValue": 0.7
+						},
+						{
+							"id": 1,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 340,
+							"gain": 0.4,
+							"qValue": 2
+						},
+						{
+							"id": 2,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 460,
+							"gain": 3.2,
+							"qValue": 0.5
+						},
+						{
+							"id": 3,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 1100,
+							"gain": -0.9,
+							"qValue": 2
+						},
+						{
+							"id": 4,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 2300,
+							"gain": -8.7,
+							"qValue": 1.1
+						},
+						{
+							"id": 5,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 3000,
+							"gain": 6.7,
+							"qValue": 1.5
+						},
+						{
+							"id": 6,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 6000,
+							"gain": 1.7,
+							"qValue": 6.2
+						},
+						{
+							"id": 7,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 10000,
+							"gain": 0.7,
+							"qValue": 0.5
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "UNKNOWN",
+					"value": 99
+				},
+				"workMode": null,
+				"gainLevel": null,
+				"deviceVolume": null,
+				"micGainDb": 0,
+				"channelBalance": 0
+			}
+		},
+		{
+			"t": 76996.9,
+			"label": "read all",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 4753,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 4753,
+					"name": "StringSnow",
+					"deviceName": "StringSnow",
+					"model": "YUANDAO DSP Device",
+					"tag": "YUANDAO DSP Device",
+					"customName": "StringSnow",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
+					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
+				},
+				"equalizerSetting": {
+					"id": 4753,
+					"deviceId": 4753,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 8,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 4753,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": false,
+					"specialMode": true,
+					"digitalFilter": false,
+					"channelBalance": false,
+					"microphoneGain": false,
+					"workMode": false,
+					"deviceVolume": false,
+					"gainLevel": false,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 3,
+				"deviceName": "",
+				"firmwareVersion": "0.",
+				"offset": -6,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 40,
+						"gain": -2.5,
+						"qValue": 0.7
+					},
+					{
+						"id": 1,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 340,
+						"gain": 0.4,
+						"qValue": 2
+					},
+					{
+						"id": 2,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 460,
+						"gain": 3.2,
+						"qValue": 0.5
+					},
+					{
+						"id": 3,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 1100,
+						"gain": -0.9,
+						"qValue": 2
+					},
+					{
+						"id": 4,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 2300,
+						"gain": -8.7,
+						"qValue": 1.1
+					},
+					{
+						"id": 5,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 3000,
+						"gain": 6.7,
+						"qValue": 1.5
+					},
+					{
+						"id": 6,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 6000,
+						"gain": 1.7,
+						"qValue": 6.2
+					},
+					{
+						"id": 7,
+						"presetId": "JM_1",
+						"type": 0,
+						"frequency": 10000,
+						"gain": 0.7,
+						"qValue": 0.5
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 4753,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1.1,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -5,
+								"qValue": 1.5
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 1.5,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8800,
+								"gain": 4.5,
+								"qValue": 3.8
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -4,
+								"qValue": 4.5
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 14500,
+								"gain": 2,
+								"qValue": 4
+							}
+						]
+					},
+					{
+						"id": "tears",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "tears",
+						"nameI18n": {
+							"ko": "후회의 눈물",
+							"zh": "悔恨之泪",
+							"ja": "悔恨の涙",
+							"en": "Tears"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 32,
+								"gain": 1.8,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 150,
+								"gain": -1.1,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.6,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 330,
+								"gain": 2.6,
+								"qValue": 0.5
+							},
+							{
+								"id": 4,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 460,
+								"gain": -1.4,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 2250,
+								"gain": -3.4,
+								"qValue": 2.4
+							},
+							{
+								"id": 6,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 5700,
+								"gain": 1.7,
+								"qValue": 2.5
+							},
+							{
+								"id": 7,
+								"presetId": "tears",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 3.6,
+								"qValue": 1
+							}
+						]
+					},
+					{
+						"id": "JM_1",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "JM_1",
+						"nameI18n": {
+							"ko": "균형 잡힌 뉴트럴",
+							"zh": "均衡中正",
+							"ja": "バランス良くニュートラル",
+							"en": "Balanced"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 62,
+								"gain": 2.9,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 340,
+								"gain": 0.4,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 460,
+								"gain": 3.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 1100,
+								"gain": -0.9,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -8.7,
+								"qValue": 1.1
+							},
+							{
+								"id": 5,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 6.7,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 1.7,
+								"qValue": 6.2
+							},
+							{
+								"id": 7,
+								"presetId": "JM_1",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.7,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "harman",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "harman",
+						"nameI18n": {
+							"ko": "일렉트로닉 록",
+							"zh": "欧美澎湃",
+							"ja": "欧米パワフル",
+							"en": "Rock"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 52,
+								"gain": 2.4,
+								"qValue": 0.7
+							},
+							{
+								"id": 1,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 160,
+								"gain": 0.7,
+								"qValue": 2
+							},
+							{
+								"id": 2,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 370,
+								"gain": 1.7,
+								"qValue": 2
+							},
+							{
+								"id": 3,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 760,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 4,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 1200,
+								"gain": -0.8,
+								"qValue": 2
+							},
+							{
+								"id": 5,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 2200,
+								"gain": -7.1,
+								"qValue": 1.3
+							},
+							{
+								"id": 6,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 6100,
+								"gain": 7.9,
+								"qValue": 0.6
+							},
+							{
+								"id": 7,
+								"presetId": "harman",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -6.2,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "game",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "game",
+						"nameI18n": {
+							"ko": "게임 모드",
+							"zh": "游戏",
+							"ja": "ゲームモード",
+							"en": "Game"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameModeSwitch",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 20,
+								"gain": -2,
+								"qValue": 0.2
+							},
+							{
+								"id": 1,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 200,
+								"gain": -0.8,
+								"qValue": 1.35
+							},
+							{
+								"id": 2,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 330,
+								"gain": 0.6,
+								"qValue": 1.31
+							},
+							{
+								"id": 3,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 1500,
+								"gain": 0.1,
+								"qValue": 1.73
+							},
+							{
+								"id": 4,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -3.7,
+								"qValue": 1.96
+							},
+							{
+								"id": 5,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -1.2,
+								"qValue": 0.2
+							},
+							{
+								"id": 6,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 6000,
+								"gain": -1.2,
+								"qValue": 1.38
+							},
+							{
+								"id": 7,
+								"presetId": "game",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 4.2,
+								"qValue": 4.2
+							}
+						]
+					},
+					{
+						"id": "sleep",
+						"deviceId": 4753,
+						"description": " ",
+						"descriptionI18n": {},
+						"presetKey": "sleep",
+						"nameI18n": {
+							"ko": "절전 모드",
+							"zh": "睡眠",
+							"ja": "スリープモード",
+							"en": "Sleep"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "SleepMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 20,
+								"gain": 1.5,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 400,
+								"gain": 1.5,
+								"qValue": 0.7
+							},
+							{
+								"id": 2,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 1000,
+								"gain": 0.5,
+								"qValue": 0.5
+							},
+							{
+								"id": 3,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 2300,
+								"gain": -10,
+								"qValue": 1.5
+							},
+							{
+								"id": 4,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -2.5,
+								"qValue": 2.7
+							},
+							{
+								"id": 5,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 5,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 8800,
+								"gain": -6,
+								"qValue": 3.5
+							},
+							{
+								"id": 7,
+								"presetId": "sleep",
+								"type": 0,
+								"frequency": 12500,
+								"gain": -8,
+								"qValue": 4.5
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "JM_1",
+					"deviceId": 4753,
+					"description": " ",
+					"descriptionI18n": {},
+					"presetKey": "JM_1",
+					"nameI18n": {
+						"ko": "균형 잡힌 뉴트럴",
+						"zh": "均衡中正",
+						"ja": "バランス良くニュートラル",
+						"en": "Balanced"
+					},
+					"presetIndex": 3,
+					"offset": 0,
+					"modeType": null,
+					"isSpecialMode": false,
+					"isOfficial": true,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 62,
+							"gain": 2.9,
+							"qValue": 0.7
+						},
+						{
+							"id": 1,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 340,
+							"gain": 0.4,
+							"qValue": 2
+						},
+						{
+							"id": 2,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 460,
+							"gain": 3.2,
+							"qValue": 0.5
+						},
+						{
+							"id": 3,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 1100,
+							"gain": -0.9,
+							"qValue": 2
+						},
+						{
+							"id": 4,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 2300,
+							"gain": -8.7,
+							"qValue": 1.1
+						},
+						{
+							"id": 5,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 3000,
+							"gain": 6.7,
+							"qValue": 1.5
+						},
+						{
+							"id": 6,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 6000,
+							"gain": 1.7,
+							"qValue": 6.2
+						},
+						{
+							"id": 7,
+							"presetId": "JM_1",
+							"type": 0,
+							"frequency": 10000,
+							"gain": 0.7,
+							"qValue": 0.5
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "UNKNOWN",
+					"value": 99
+				},
+				"workMode": null,
+				"gainLevel": null,
+				"deviceVolume": null,
+				"micGainDb": 0,
+				"channelBalance": 0
+			}
+		}
+	],
+	"events": [
+		{
+			"t": 5987.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "800c"
+		},
+		{
+			"t": 6003.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800c00302e34000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 6019.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000000"
+		},
+		{
+			"t": 6035.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80090000003400cfeafc3f2fbd38803863ca3fd142c77ff9b138c01900800000ff020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 6051.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000001"
+		},
+		{
+			"t": 6067.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000134007e7dd63fde831e81b83f0d3f227ce17eca421cc1b400cd0000fd020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 6083.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000002"
+		},
+		{
+			"t": 6099.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000234004076f63dbe0b5d8ca319ff3642f4a2731d700acbfc08000100fc020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 6115.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000003"
+		},
+		{
+			"t": 6132.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000334008772c73ebe24d18de637593542db2e729255dfcbf00a000100fe020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 6147.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000004"
+		},
+		{
+			"t": 6163.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000434002b13b03ec3621e96ab4f8d343d9de1692a9dc2cc3818000200fe020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 6179.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000005"
+		},
+		{
+			"t": 6195.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000534000000004001956b80151e953fff6a947febe16ac0640000010000020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 6211.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000006"
+		},
+		{
+			"t": 6227.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000634000000004001956b80151e953fff6a947febe16ac0640000010000020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 6243.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000007"
+		},
+		{
+			"t": 6259.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000734000000004001956b80151e953fff6a947febe16ac0640000010000020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 6275.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8003"
+		},
+		{
+			"t": 6309.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800302000100000000004001956b80151e953fff6a947febe16ac0640000010000020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24275.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "800c"
+		},
+		{
+			"t": 24292.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800c02302e34000000004001956b80151e953fff6a947febe16ac0640000010000020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24307.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000000"
+		},
+		{
+			"t": 24323.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80090000003400cfeafc3f2fbd38803863ca3fd142c77ff9b138c01900800000ff020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24340.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000001"
+		},
+		{
+			"t": 24355.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000134007e7dd63fde831e81b83f0d3f227ce17eca421cc1b400cd0000fd020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24371.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000002"
+		},
+		{
+			"t": 24388.6,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000234004076f63dbe0b5d8ca319ff3642f4a2731d700acbfc08000100fc020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24403.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000003"
+		},
+		{
+			"t": 24419.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000334008772c73ebe24d18de637593542db2e729255dfcbf00a000100fe020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24435.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000004"
+		},
+		{
+			"t": 24451.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000434002b13b03ec3621e96ab4f8d343d9de1692a9dc2cc3818000200fe020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24467.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000005"
+		},
+		{
+			"t": 24483.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000534000000004001956b80151e953fff6a947febe16ac0640000010000020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24499.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000006"
+		},
+		{
+			"t": 24515.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000634000000004001956b80151e953fff6a947febe16ac0640000010000020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24531.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000007"
+		},
+		{
+			"t": 24547.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000734000000004001956b80151e953fff6a947febe16ac0640000010000020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 24563.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8003"
+		},
+		{
+			"t": 24579.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800302000100000000004001956b80151e953fff6a947febe16ac0640000010000020065000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 42163.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000dce30f408d7250807cee9f3f738daf7fa82d50c03e00b300e602020003"
+		},
+		{
+			"t": 42195.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100010000c32c0440e23cb98009a84a3f1ec3467f342bb1c0540100026600020003"
+		},
+		{
+			"t": 42227.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000200003b44b240d7e42e839e532d3c291bd17c276820c3cc0180003303020003"
+		},
+		{
+			"t": 42260.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000300006206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff020003"
+		},
+		{
+			"t": 42291.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000b3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df7020003"
+		},
+		{
+			"t": 42323.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000a2b526437097c687fda96d379068397861a06bc5b80b8001b306020003"
+		},
+		{
+			"t": 42355.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100060000306c60408272f68c258b233c7e8d0973aa087cc370173306b301020003"
+		},
+		{
+			"t": 42387.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700001e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b300020003"
+		},
+		{
+			"t": 42419.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 42451.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 42483.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 42515.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 45235.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210000000043ed004081dc09806c3df53f7f23f67f51d509c0140000028001020006"
+		},
+		{
+			"t": 45267.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210001000097133440a5913382dd64a33d5b6ecc7d8c8728c29001b3008001020006"
+		},
+		{
+			"t": 45299.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100020000af013a401fdfe787b1162038e1201878a0e7a5c7e80380008000020006"
+		},
+		{
+			"t": 45331.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100030000be6c6d3c2a68c78be67c1f39d69738745c1673cafc08800100f6020006"
+		},
+		{
+			"t": 45363.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000400003b7e103f0fc1ab8c16437439f13e5473af3e7bc79411b30280fd020006"
+		},
+		{
+			"t": 45395.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000dc59d043cb86fd957ba662323579026aaaffccc9581b00020005020006"
+		},
+		{
+			"t": 45427.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100060000d2bfd63cecae479f208b7c361451b8600eb5accc6022800300fa020006"
+		},
+		{
+			"t": 45459.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700005be19c3b9b2f77b21e29cf3565d0884d88f593ced430800400f8020006"
+		},
+		{
+			"t": 45491.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 45523.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 45555.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 45587.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 48307.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000dce30f408d7250807cee9f3f738daf7fa82d50c03e00b300e602020003"
+		},
+		{
+			"t": 48339.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100010000c32c0440e23cb98009a84a3f1ec3467f342bb1c0540100026600020003"
+		},
+		{
+			"t": 48371.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000200003b44b240d7e42e839e532d3c291bd17c276820c3cc0180003303020003"
+		},
+		{
+			"t": 48403.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000300006206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff020003"
+		},
+		{
+			"t": 48435.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000b3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df7020003"
+		},
+		{
+			"t": 48467.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000a2b526437097c687fda96d379068397861a06bc5b80b8001b306020003"
+		},
+		{
+			"t": 48499.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100060000306c60408272f68c258b233c7e8d0973aa087cc370173306b301020003"
+		},
+		{
+			"t": 48531.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700001e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b300020003"
+		},
+		{
+			"t": 48563.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 48595.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 48627.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 48659.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 57287.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000000"
+		},
+		{
+			"t": 57287.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000000ffffdce30f408d7250807cee9f3f738daf7fa82d50c03e00b300e602020003000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 57315.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000001"
+		},
+		{
+			"t": 57331.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000001ffffc32c0440e23cb98009a84a3f1ec3467f342bb1c0540100026600020003000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 57347.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000002"
+		},
+		{
+			"t": 57363.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000002ffff3b44b240d7e42e839e532d3c291bd17c276820c3cc0180003303020003000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 57379.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000003"
+		},
+		{
+			"t": 57395.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000003ffff6206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff020003000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 57411.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000004"
+		},
+		{
+			"t": 57427.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000004ffffb3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df7020003000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 57443.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000005"
+		},
+		{
+			"t": 57459.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000005ffffa2b526437097c687fda96d379068397861a06bc5b80b8001b306020003000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 57475.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000006"
+		},
+		{
+			"t": 57491.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000006ffff306c60408272f68c258b233c7e8d0973aa087cc370173306b301020003000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 57507.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000007"
+		},
+		{
+			"t": 57523.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000007ffff1e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b300020003000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 69513.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000b6420a4097e2338067f7c13f691dcc7fe3c533c02800b300e602020003"
+		},
+		{
+			"t": 69539.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100010000c32c0440e23cb98009a84a3f1ec3467f342bb1c0540100026600020003"
+		},
+		{
+			"t": 69571.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000200003b44b240d7e42e839e532d3c291bd17c276820c3cc0180003303020003"
+		},
+		{
+			"t": 69603.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000300006206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff020003"
+		},
+		{
+			"t": 69636.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000b3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df7020003"
+		},
+		{
+			"t": 69667.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000a2b526437097c687fda96d379068397861a06bc5b80b8001b306020003"
+		},
+		{
+			"t": 69699.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100060000306c60408272f68c258b233c7e8d0973aa087cc370173306b301020003"
+		},
+		{
+			"t": 69731.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700001e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b300020003"
+		},
+		{
+			"t": 69763.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 69796.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 69827.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 69859.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 70649.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000b6420a4097e2338067f7c13f691dcc7fe3c533c02800b300e602020003"
+		},
+		{
+			"t": 70675.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100010000c32c0440e23cb98009a84a3f1ec3467f342bb1c0540100026600020003"
+		},
+		{
+			"t": 70707.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000200003b44b240d7e42e839e532d3c291bd17c276820c3cc0180003303020003"
+		},
+		{
+			"t": 70739.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000300006206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff020003"
+		},
+		{
+			"t": 70771.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000b3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df7020003"
+		},
+		{
+			"t": 70803.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000a2b526437097c687fda96d379068397861a06bc5b80b8001b306020003"
+		},
+		{
+			"t": 70835.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100060000306c60408272f68c258b233c7e8d0973aa087cc370173306b301020003"
+		},
+		{
+			"t": 70867.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700001e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b300020003"
+		},
+		{
+			"t": 70899.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 70931.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 70963.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 70995.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 71040,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000972bf73f4eb84680ca38c23fb247b97f9e9b46c02800b30080fd020003"
+		},
+		{
+			"t": 71075.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100010000c32c0440e23cb98009a84a3f1ec3467f342bb1c0540100026600020003"
+		},
+		{
+			"t": 71107.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000200003b44b240d7e42e839e532d3c291bd17c276820c3cc0180003303020003"
+		},
+		{
+			"t": 71139.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000300006206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff020003"
+		},
+		{
+			"t": 71171.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000b3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df7020003"
+		},
+		{
+			"t": 71203.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000a2b526437097c687fda96d379068397861a06bc5b80b8001b306020003"
+		},
+		{
+			"t": 71235.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100060000306c60408272f68c258b233c7e8d0973aa087cc370173306b301020003"
+		},
+		{
+			"t": 71268.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700001e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b300020003"
+		},
+		{
+			"t": 71299.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 71331.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 71363.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 71395.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 71762.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000972bf73f4eb84680ca38c23fb247b97f9e9b46c02800b30080fd020003"
+		},
+		{
+			"t": 71795.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100010000c32c0440e23cb98009a84a3f1ec3467f342bb1c0540100026600020003"
+		},
+		{
+			"t": 71827.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000200003b44b240d7e42e839e532d3c291bd17c276820c3cc0180003303020003"
+		},
+		{
+			"t": 71859.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000300006206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff020003"
+		},
+		{
+			"t": 71891.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000b3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df7020003"
+		},
+		{
+			"t": 71923.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000a2b526437097c687fda96d379068397861a06bc5b80b8001b306020003"
+		},
+		{
+			"t": 71955.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100060000306c60408272f68c258b233c7e8d0973aa087cc370173306b301020003"
+		},
+		{
+			"t": 71987.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700001e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b300020003"
+		},
+		{
+			"t": 72019.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 72051.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 72083.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 72115.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 72160.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000972bf73f4eb84680ca38c23fb247b97f9e9b46c02800b30080fd02fa03"
+		},
+		{
+			"t": 72195.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100010000c32c0440e23cb98009a84a3f1ec3467f342bb1c054010002660002fa03"
+		},
+		{
+			"t": 72227.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000200003b44b240d7e42e839e532d3c291bd17c276820c3cc018000330302fa03"
+		},
+		{
+			"t": 72259.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000300006206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff02fa03"
+		},
+		{
+			"t": 72291.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000b3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df702fa03"
+		},
+		{
+			"t": 72323.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000a2b526437097c687fda96d379068397861a06bc5b80b8001b30602fa03"
+		},
+		{
+			"t": 72355.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100060000306c60408272f68c258b233c7e8d0973aa087cc370173306b30102fa03"
+		},
+		{
+			"t": 72387.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700001e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b30002fa03"
+		},
+		{
+			"t": 72419.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 72451.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 72483.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01030200fa"
+		},
+		{
+			"t": 72515.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 73886.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000972bf73f4eb84680ca38c23fb247b97f9e9b46c02800b30080fd02fa03"
+		},
+		{
+			"t": 73923.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100010000c32c0440e23cb98009a84a3f1ec3467f342bb1c054010002660002fa03"
+		},
+		{
+			"t": 73955.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000200003b44b240d7e42e839e532d3c291bd17c276820c3cc018000330302fa03"
+		},
+		{
+			"t": 73987.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000300006206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff02fa03"
+		},
+		{
+			"t": 74019.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000b3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df702fa03"
+		},
+		{
+			"t": 74051.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000a2b526437097c687fda96d379068397861a06bc5b80b8001b30602fa03"
+		},
+		{
+			"t": 74083.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100060000306c60408272f68c258b233c7e8d0973aa087cc370173306b30102fa03"
+		},
+		{
+			"t": 74115.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700001e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b30002fa03"
+		},
+		{
+			"t": 74147.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 74179.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 74211.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01030200fa"
+		},
+		{
+			"t": 74243.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 75907.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "800c"
+		},
+		{
+			"t": 75923.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800c02302e34ff1e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b30002fa03000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 75939.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000000"
+		},
+		{
+			"t": 75955.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000034ff972bf73f4eb84680ca38c23fb247b97f9e9b46c02800b30080fd02fa03000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 75971.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000001"
+		},
+		{
+			"t": 75987.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000134ffc32c0440e23cb98009a84a3f1ec3467f342bb1c054010002660002fa03000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 76003.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000002"
+		},
+		{
+			"t": 76019.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000234ff3b44b240d7e42e839e532d3c291bd17c276820c3cc018000330302fa03000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 76035.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000003"
+		},
+		{
+			"t": 76051.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000334ff6206e23fee60b48288e7bc3d129f4b7d161261c24c0400021aff02fa03000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 76067.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000004"
+		},
+		{
+			"t": 76083.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000434ffb3e1e73b2e2c3e8ee90c2737d2d3c1716411f1ccfc081a014df702fa03000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 76099.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000005"
+		},
+		{
+			"t": 76115.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000534ffa2b526437097c687fda96d379068397861a06bc5b80b8001b30602fa03000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 76131.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000006"
+		},
+		{
+			"t": 76147.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000634ff306c60408272f68c258b233c7e8d0973aa087cc370173306b30102fa03000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 76163.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000007"
+		},
+		{
+			"t": 76179.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000734ff1e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b30002fa03000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 76195.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8003"
+		},
+		{
+			"t": 76211.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80030200faffff1e5cfb41e472ebbfda1fca0e1c8d144007843aef10278000b30002fa03000000000000000000000000000000000000000000000000000000"
+		}
+	]
+}

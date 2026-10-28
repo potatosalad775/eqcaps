@@ -43,25 +43,81 @@ and cited as a `vendor-app` source.
 
 ## Next
 
-1. **Record each device** with the recorder: open the device's page, **Read all**, then change a
-   band, the pre-gain and each control once in the app and press **Snapshot**. Save to
-   `test/recordings/`. Expected disagreements to settle:
-   - the product names: add `productName` to each match entry, which also makes room to give
-     `0x4322` back to the SchemeNo16 group for other vendors' devices;
-   - the commit (Walkplay's own app agrees with NICEHCK's; see [walkplay.md](walkplay.md)): the app ends a write with `[1,0x0A,4,0,0,FF,FF]`, `[1,0x01]`, the pre-gain,
-     `[1,0x04]`; the handler sends devicePEQ's `[1,5,0]`, `[1,0x17,0]`, `[1,0x0A,…]`, `[1,1,1,0]`.
-     The app calls `[1,0x01]` (padded `[1,1,0,0]`) "save to flash", and the handler's
-     `setEnabled(false)` sends the same bytes, so it may save rather than turn the EQ off. Check by
-     ear after a push from the handler (uniPEQ) whether the EQ applies and survives a replug, and
-     what `setEnabled(false)` does. If they differ, give `walkplay-hid` a `commit` option rather
-     than a new handler;
-   - whether shelves work (the app only writes peaking; devicePEQ wrote shelves to the Octave);
-   - the default slot: the handler writes 101, which the app shows as "custom". The app's own
-     custom presets start at 32.
+1. **Record each device.** PureAural done on 2026-10-28, firmware 0.3, on the owner's device
+   (`test/recordings/2026-10-28-nicehck-pureaural.json`); its profile is maintainer-verified.
+   The handler reads what the app read, the app's band, pre-gain and control writes are the
+   handler's bytes, and the data has the app's limits and controls. Found:
+   - USB product name `NICEHCK PureAural`, now in its match entry.
+   - The device keeps one report buffer and an answer overwrites only the bytes it fills; the rest
+     is what the last request or answer left. The firmware answer has no length (byte 2 is left
+     over) and no NUL, and a 0x16 answer sets only the whole dB (byte 5), not byte 4. The handler
+     now stops the version at the first non-printable byte and reads 0x16 from byte 5. The app
+     doesn't: after some reads it shows the firmware as "0." and a wrong balance (1 for 14).
+   - The pre-gain read (0x03) answered +1 before and after the app wrote 0 and -2. Whether the
+     write takes is the by-ear check below.
+   - After about 6 minutes idle, the device lost the first report sent (band 0 of a preset);
+     sent again, it took. See the read-back below.
+   - Six mic gain writes in quick succession (keyboard) left it at -4.5 dB; single writes are
+     exact. The handler sends one write per change.
+   - The app's pre-gain minus button sends the previous value (shows -1, sends 0).
+   - The recorder was injected after the app had connected, so it attaches its input listener to
+     devices already open. Restoring the settings afterwards (where the idle loss and the mic
+     run happened) is cut from the recording: those snapshots hold the device's -4.5 dB and the
+     app's stale balance.
+
+   10th Anniversary Edition done on 2026-10-28, firmware 0.3
+   (`test/recordings/2026-10-28-nicehck-10th-anniversary-edition.json`), maintainer-verified:
+   it agreed with no changes. USB product name `10th Anniversary Edition` (no brand). Its pre-gain
+   reads back what the app wrote. It held a custom EQ in slot 101, restored afterwards with the
+   handler's frames and read back byte for byte.
+
+   **By ear on the PureAural** (2026-10-28, the handler's frames sent from the page):
+   - The handler's commit (`[1,5,0]`, `[1,0x17,0]`, `[1,0x0A,…]`, `[1,1,1,0]`) applies the EQ, and
+     it survives a replug. No `commit` option is needed.
+   - The handler's pre-gain write (-12 dB) is heard and reads back as written; only the app's
+     writes read back +1, cause unknown.
+   - `setEnabled(false)` (`[1,1,0,0,0]`) changes nothing: the profile sets `enableCommand: false`,
+     so it reports `canEnable: false`.
+   - A low shelf is heard as a shelf and reads back as type 1: the device takes shelves, though
+     the app only offers peaking. The profiles still list `PK` only, as the app allows.
+   - The first push after a replug lost band 0 although the device had just answered reads, so
+     the wake-up read wasn't enough. A push now reads its bands back, sends a lost band again
+     with the commit, and fails with `rejected` if it still isn't taken.
+
+   Tears done on 2026-10-28, firmware 0.2 (`test/recordings/2026-10-28-nicehck-tears.json`),
+   maintainer-verified: it agreed with no changes. USB product name `Tears DSP`. Game mode on
+   writes preset 4 and off rewrites the preset before it (3), confirming there's no mode command.
+   A positive pre-gain (+3) reads back as written. Its flat EQ in slot 101 was restored with the
+   handler's frames.
+
+   StringSnow done on 2026-10-28, firmware 0.4 (`test/recordings/2026-10-28-nicehck-stringsnow.json`),
+   maintainer-verified: it agreed with no changes. USB product name `StringSnow DSP`. Sleep mode
+   writes preset 6 and off rewrites the preset before it (3). Its custom EQ in slot 101 was
+   restored with the handler's frames.
+
+   All four of the owner's devices are recorded. What was expected to settle:
+   - Product names: `NICEHCK PureAural`, `StringSnow DSP`, `Tears DSP`, `10th Anniversary
+     Edition`, in each match entry. The SchemeNo16 group could take `0x4322` back: the PureAural
+     would still win, by specificity (vid+pid+name) and as a non-group profile (SPEC §8). devicePEQ's
+     groups come from Walkplay's product catalog (its `walkplayPreprocessor/walkplay.json`, 367
+     products with real vendor/product pairs and a SchemeNo each); its generator keeps one vendor
+     list and per-scheme product lists, so our groups match every combination (SchemeNo16: 19
+     vendor ids × 79 product ids, of which 80 pairs are in the catalog). The catalog lists
+     `0x3302:0x4322` as SchemeNo16 with no name; StringSnow, Tears and the 10th Anniversary
+     Edition aren't in it. Whether to rebuild the groups from the real pairs is open.
+   - The commit: the handler's works (by ear, above); no `commit` option.
+   - `setEnabled(false)` doesn't turn the EQ off on the PureAural, and the app has no EQ off
+     switch: `enableCommand: false` in the `nicehck-walkplay` base, for every NICEHCK device.
+   - Shelves work on the PureAural; the profiles keep `PK`, as the app allows.
+   - The default slot: 101 works and the app shows it as "custom", as it does for its own
+     custom writes there. It stays.
+   - Special modes (Tears' game mode, StringSnow's sleep mode) are preset writes, as assumed.
 2. **Octave**: add its controls (`dacFilter`, `micGain`, `leftGain`, `rightGain`) and the app's
    limits, once someone with an Octave records it; its capture test pins its current shape.
 3. **Status.** Once a recording agrees with the data, the device's profile becomes
-   `community-verified`.
+   `community-verified`, or `maintainer-verified` on the owner's devices (PureAural done).
 4. **Ids.** `nicehck-10th-anniversary-edition` and the brand: the app files StringSnow, Tears and
    the 10th Anniversary Edition under YUANDAO. Ids are permanent once published (invariant 4), so
-   settle brand and ids before this branch merges.
+   settle brand and ids before this branch merges. Settled 2026-10-28: the brand stays NiceHCK
+   (they are sold as NICEHCK products) and the ids stay `nicehck-*`; each profile's notes say
+   the app files it under YUANDAO.

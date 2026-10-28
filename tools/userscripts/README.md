@@ -17,7 +17,7 @@ Pages it knows:
 | Page | Adapter | Devices |
 | --- | --- | --- |
 | Fosi Audio control center, `https://cc.fosiaudio.com` | `fosi-cc` | DS3 (checked); C1, C3, ZH1, ZH3 (recorded, not yet checked) |
-| NICEHCK web app, `https://app.nicehck.cn` | `nicehck-app` | PureAural, StringSnow, Tears, 10th Anniversary Edition, Octave (checked against a simulated device only) |
+| NICEHCK web app, `https://app.nicehck.cn` | `nicehck-app` | PureAural, StringSnow, Tears, 10th Anniversary Edition (checked); Octave (checked against a simulated device only) |
 | Walkplay web app, `https://peq.szwalkplay.com` | `walkplay-peq` | Walkplay-chipset devices (writes checked; snapshots recorded, not checked) |
 
 On NICEHCK's app, **Read all** runs the reads the app makes when it connects (firmware, every band,

@@ -282,8 +282,9 @@ class NicehckLikeApp {
 		const byte = v.getUint8(3);
 		switch (v.getUint8(1)) {
 			case 0x0c: {
+				// Byte 2 as the length, as the app takes it.
 				let text = '';
-				for (let i = 3; i < v.byteLength && v.getUint8(i) !== 0; i++) {
+				for (let i = 3; i < 3 + v.getUint8(2) && v.getUint8(i) !== 0; i++) {
 					text += String.fromCharCode(v.getUint8(i));
 				}
 				s.firmwareVersion = text.replace(/[^0-9.]/g, '');
@@ -359,7 +360,7 @@ class NicehckLikeApp {
 			version: 1,
 			recordedAt: '2026-10-28T00:00:00.000Z',
 			page: { origin: 'https://app.nicehck.cn', path: '/device' },
-			devices: [{ vendorId: 0x3302, productId: 0x4322, productName: 'PureAural' }],
+			devices: [{ vendorId: 0x3302, productId: 0x4322, productName: 'NICEHCK PureAural' }],
 			snapshots,
 			events: this.events
 		};
@@ -367,8 +368,11 @@ class NicehckLikeApp {
 }
 
 describe('the NICEHCK checks, on a synthetic recording', () => {
-	async function recorded(edit?: (app: NicehckLikeApp) => Promise<void>) {
-		const app = new NicehckLikeApp(new FakeWalkplay());
+	async function recorded(
+		edit?: (app: NicehckLikeApp) => Promise<void>,
+		device = new FakeWalkplay()
+	) {
+		const app = new NicehckLikeApp(device);
 		await edit?.(app);
 		const state = await app.readAll();
 		return app.recording([{ t: 1e9, label: 'read all', adapter: 'nicehck-app', state }]);
@@ -395,7 +399,10 @@ describe('the NICEHCK checks, on a synthetic recording', () => {
 	});
 
 	test('a read the handler decodes differently is reported', async () => {
-		const recording = await recorded();
+		// A mic gain of 0 leaves byte 4 of the 0x16 answers at 0, so the balance is compared.
+		const device = new FakeWalkplay();
+		device.values.micGain = 0;
+		const recording = await recorded(undefined, device);
 		const state = recording.snapshots[0]!.state as NicehckState;
 		state.deviceVolume = 61;
 		state.bands![1]!.gain = -1;

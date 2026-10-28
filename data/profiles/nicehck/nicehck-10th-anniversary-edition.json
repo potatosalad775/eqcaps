@@ -7,11 +7,23 @@
 		"model": "10th Anniversary Edition",
 		"aliases": ["原道十周年纪念版"]
 	},
-	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0xc200" }] },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x3302", "productId": "0xc200", "productName": "10th Anniversary Edition" }
+		]
+	},
 	"bandCount": 8,
 	"meta": {
-		"status": "draft",
-		"sources": [{ "kind": "vendor-app", "ref": "https://app.nicehck.cn/", "date": "2026-10-28" }],
-		"notes": "The app tags it \"YUANDAO DSP Device\". Its official presets: 1 Default (flat), 2 Tears, 3 Rock Live, 4 POP, 5 ACG, 6 Balance, 7 Tuned by DSP Master, 8 bands each, with pre-gains from -2 to +3 dB. The product name the device reports over USB is not known yet, so it matches by vendor and product id."
+		"status": "maintainer-verified",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "https://app.nicehck.cn/, read with a preset, a band and the pre-gain changed and the app's writes recorded: packages/device-bridge/test/recordings/2026-10-28-nicehck-10th-anniversary-edition.json",
+				"firmware": "0.3",
+				"date": "2026-10-28",
+				"by": "potatosalad775"
+			}
+		],
+		"notes": "The app tags it \"YUANDAO DSP Device\" and files it under YUANDAO; it is sold as a NiceHCK product, so that is its brand here. Its official presets: 1 Default (flat), 2 Tears, 3 Rock Live, 4 POP, 5 ACG, 6 Balance, 7 Tuned by DSP Master, 8 bands each, with pre-gains from -2 to +3 dB. Its USB product name has no brand: \"10th Anniversary Edition\". Like the PureAural it leaves stale bytes in its answers, so the app shows its firmware as \"0.\"."
 	}
 }

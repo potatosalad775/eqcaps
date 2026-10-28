@@ -1,0 +1,6874 @@
+{
+	"recording": "eqcaps-webhid",
+	"version": 1,
+	"recordedAt": "2026-10-28T11:55:15.063Z",
+	"tool": {
+		"name": "eqcaps WebHID recorder",
+		"version": 2
+	},
+	"page": {
+		"origin": "https://app.nicehck.cn",
+		"path": "/device"
+	},
+	"userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+	"notes": "PureAural, firmware 0.3. Recorder injected after the app connected (input listener attached to the open device). Read all; then DAC filter NON-OS, work mode CLASS-H, gain Medium, volume 79, mic gain -6 dB, balance left then right (ends at 14); snapshot; Rock preset; snapshot; editor: band 1 to 100 Hz and +3.5 dB, pre-gain minus button (shows -1, the app sends 0), pre-gain box -2; snapshot; Read all. Cut there; restoring the settings afterwards is described in docs/plans/nicehck.md.",
+	"devices": [
+		{
+			"vendorId": 13058,
+			"productId": 17186,
+			"productName": "NICEHCK PureAural",
+			"collections": [
+				{
+					"usagePage": 12,
+					"usage": 1,
+					"inputReports": [1, 75, 3],
+					"outputReports": [1, 75],
+					"featureReports": [],
+					"children": []
+				}
+			]
+		}
+	],
+	"snapshots": [
+		{
+			"t": 1385.1,
+			"label": "read all",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 17186,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 17186,
+					"name": "NICEHCK PureAural",
+					"deviceName": "PureAural",
+					"model": "NICEHCK DSP Device",
+					"tag": "NICEHCK DSP Device",
+					"customName": "PureAural",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"features": [
+						"usb.equalizer",
+						"usb.digital_filter",
+						"usb.gain_level",
+						"usb.work_mode",
+						"usb.microphone_gain",
+						"usb.channel_balance",
+						"usb.device_volume"
+					]
+				},
+				"equalizerSetting": {
+					"id": 17186,
+					"deviceId": 17186,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 10,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 17186,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": true,
+					"specialMode": false,
+					"digitalFilter": true,
+					"channelBalance": true,
+					"microphoneGain": true,
+					"workMode": true,
+					"deviceVolume": true,
+					"gainLevel": true,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 1,
+				"deviceName": "",
+				"firmwareVersion": "0.3",
+				"offset": 1,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 20,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 1,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 50,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 2,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 100,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 3,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 200,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 4,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 4500,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 5,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 7000,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 6,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 8000,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 7,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 12500,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 8,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 15000,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 9,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 18000,
+						"gain": 0,
+						"qValue": 0.75
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 50,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 100,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 18000,
+								"gain": 0,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "rock",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "rock",
+						"nameI18n": {
+							"ko": "록",
+							"zh": "摇滚",
+							"ja": "ロック",
+							"en": "Rock"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.5,
+								"qValue": 0.45
+							},
+							{
+								"id": 1,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.7,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 850,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 1800,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 2800,
+								"gain": 1.4,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 2.4,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -1.8,
+								"qValue": 1.4
+							},
+							{
+								"id": 8,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.6,
+								"qValue": 1.7
+							},
+							{
+								"id": 9,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0.8,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "vocal",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "vocal",
+						"nameI18n": {
+							"ko": "보컬",
+							"zh": "人声",
+							"ja": "ボーカル",
+							"en": "Vocal"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 250,
+								"gain": 0.8,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 500,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1000,
+								"gain": -0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 4,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1750,
+								"gain": -1,
+								"qValue": 1.2
+							},
+							{
+								"id": 5,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 2200,
+								"gain": 0.3,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 3650,
+								"gain": 3.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 5000,
+								"gain": 2,
+								"qValue": 0.8
+							},
+							{
+								"id": 8,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 6800,
+								"gain": -1.8,
+								"qValue": 1
+							},
+							{
+								"id": 9,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -2,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "instrumental",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "instrumental",
+						"nameI18n": {
+							"ko": "기악",
+							"zh": "器乐",
+							"ja": "インストゥルメンタル",
+							"en": "Instrumental"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 50,
+								"gain": 1.5,
+								"qValue": 0.6
+							},
+							{
+								"id": 1,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 550,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.3,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 2700,
+								"gain": 2,
+								"qValue": 1.6
+							},
+							{
+								"id": 5,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.6,
+								"qValue": 1.1
+							},
+							{
+								"id": 6,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3.2,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 0.7,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "fps_footsteps",
+						"deviceId": 17186,
+						"description": "强化脚步声表现，削弱高频刺耳感",
+						"descriptionI18n": {
+							"ko": "발소리 표현을 강화하고 고음역대 날카로운 느낌을 줄여줍니다",
+							"zh": "强化脚步声表现，削弱高频刺耳感",
+							"ja": "足音の表現を強化し、高域の耳障りな感覚を抑える",
+							"en": "Enhances footsteps while reducing harsh highs"
+						},
+						"presetKey": "fps_footsteps",
+						"nameI18n": {
+							"ko": "FPS 발소리",
+							"zh": "FPS 脚步",
+							"ja": "FPS 足音",
+							"en": "FPS Footsteps"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 60,
+								"gain": -2.5,
+								"qValue": 1
+							},
+							{
+								"id": 1,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 180,
+								"gain": 2,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 250,
+								"gain": 2.5,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 1700,
+								"gain": -2.8,
+								"qValue": 0.9
+							},
+							{
+								"id": 5,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2.8,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 1,
+								"qValue": 2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 1.2,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -3.5,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 13000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					},
+					{
+						"id": "fps_gunshot",
+						"deviceId": 17186,
+						"description": "提高枪声清晰度，增强空间方位感知",
+						"descriptionI18n": {
+							"ko": "총소리 선명도를 높이고 공간적 방향감 인지를 강화합니다",
+							"zh": "提高枪声清晰度，增强空间方位感知",
+							"ja": "銃声の明瞭度を向上させ、空間の方位感覚を強化する",
+							"en": "Improves gunshot clarity and positional awareness"
+						},
+						"presetKey": "fps_gunshot",
+						"nameI18n": {
+							"ko": "FPS 총소리",
+							"zh": "FPS 枪声",
+							"ja": "FPS銃声",
+							"en": "FPS Gunshots"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 50,
+								"gain": -2,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 100,
+								"gain": -4,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 250,
+								"gain": -3,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1300,
+								"gain": -1,
+								"qValue": 1.3
+							},
+							{
+								"id": 4,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 3.5,
+								"qValue": 1.2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3,
+								"qValue": 2.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 1,
+								"qValue": 2.5
+							},
+							{
+								"id": 9,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 3,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "vocal_boost",
+						"deviceId": 17186,
+						"description": "提升语音清晰度，减轻鼻音与喷麦感",
+						"descriptionI18n": {
+							"ko": "음성 선명도를 높이고, 비음과 마이크 잡음을 완화합니다",
+							"zh": "提升语音清晰度，减轻鼻音与喷麦感",
+							"ja": "音声の明瞭さを高め、鼻声とポップノイズを軽減",
+							"en": "Improves voice clarity and reduces nasal and popping sounds"
+						},
+						"presetKey": "vocal_boost",
+						"nameI18n": {
+							"ko": "음성 강화",
+							"zh": "语音增强",
+							"ja": "ボイスブースト",
+							"en": "Vocal Boost"
+						},
+						"presetIndex": 7,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 30,
+								"gain": -4,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 100,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 220,
+								"gain": -2,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 400,
+								"gain": -2,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1.5,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.5,
+								"qValue": 1
+							},
+							{
+								"id": 6,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 2000,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -4,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 9000,
+								"gain": 3,
+								"qValue": 0.55
+							},
+							{
+								"id": 9,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 11000,
+								"gain": 2,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "immersion_mode",
+						"deviceId": 17186,
+						"description": "增强低频量感与整体亮度，营造氛围感",
+						"descriptionI18n": {
+							"ko": "저음 양감과 전체 밝기를 강화하여 더욱 몰입감 있는 사운드를 구현합니다",
+							"zh": "增强低频量感与整体亮度，营造氛围感",
+							"ja": "低域の量感と全体の明るさを高め、雰囲気を作ります",
+							"en": "Boosts bass presence and overall brightness for an immersive feel"
+						},
+						"presetKey": "immersion_mode",
+						"nameI18n": {
+							"ko": "앰비언스 몰입",
+							"zh": "氛围沉浸",
+							"ja": "没入モード",
+							"en": "Immersion Mode"
+						},
+						"presetIndex": 8,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 50,
+								"gain": 4,
+								"qValue": 0.9
+							},
+							{
+								"id": 1,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 150,
+								"gain": 3,
+								"qValue": 0.9
+							},
+							{
+								"id": 2,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 450,
+								"gain": 0.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 4,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 900,
+								"gain": -1,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 7,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 3,
+								"qValue": 1.2
+							},
+							{
+								"id": 8,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -1,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "default",
+					"deviceId": 17186,
+					"description": "",
+					"descriptionI18n": {},
+					"presetKey": "default",
+					"nameI18n": {
+						"ko": "표준",
+						"zh": "默认",
+						"ja": "標準モード",
+						"en": "Default"
+					},
+					"presetIndex": 1,
+					"offset": 0,
+					"modeType": null,
+					"isSpecialMode": false,
+					"isOfficial": true,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 20,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 1,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 50,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 2,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 100,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 3,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 200,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 4,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 4500,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 5,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 7000,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 6,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 8000,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 7,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 12500,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 8,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 15000,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 9,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 18000,
+							"gain": 0,
+							"qValue": 0.75
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "FAST-LL",
+					"value": 1
+				},
+				"workMode": 1,
+				"gainLevel": 0,
+				"deviceVolume": 100,
+				"micGainDb": 0,
+				"channelBalance": 0
+			}
+		},
+		{
+			"t": 73349.9,
+			"label": "manual",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 17186,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 17186,
+					"name": "NICEHCK PureAural",
+					"deviceName": "PureAural",
+					"model": "NICEHCK DSP Device",
+					"tag": "NICEHCK DSP Device",
+					"customName": "PureAural",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"features": [
+						"usb.equalizer",
+						"usb.digital_filter",
+						"usb.gain_level",
+						"usb.work_mode",
+						"usb.microphone_gain",
+						"usb.channel_balance",
+						"usb.device_volume"
+					]
+				},
+				"equalizerSetting": {
+					"id": 17186,
+					"deviceId": 17186,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 10,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 17186,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": true,
+					"specialMode": false,
+					"digitalFilter": true,
+					"channelBalance": true,
+					"microphoneGain": true,
+					"workMode": true,
+					"deviceVolume": true,
+					"gainLevel": true,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 1,
+				"deviceName": "",
+				"firmwareVersion": "0.3",
+				"offset": 1,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 20,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 1,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 50,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 2,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 100,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 3,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 200,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 4,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 4500,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 5,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 7000,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 6,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 8000,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 7,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 12500,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 8,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 15000,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 9,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 18000,
+						"gain": 0,
+						"qValue": 0.75
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 50,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 100,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 18000,
+								"gain": 0,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "rock",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "rock",
+						"nameI18n": {
+							"ko": "록",
+							"zh": "摇滚",
+							"ja": "ロック",
+							"en": "Rock"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.5,
+								"qValue": 0.45
+							},
+							{
+								"id": 1,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.7,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 850,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 1800,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 2800,
+								"gain": 1.4,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 2.4,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -1.8,
+								"qValue": 1.4
+							},
+							{
+								"id": 8,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.6,
+								"qValue": 1.7
+							},
+							{
+								"id": 9,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0.8,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "vocal",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "vocal",
+						"nameI18n": {
+							"ko": "보컬",
+							"zh": "人声",
+							"ja": "ボーカル",
+							"en": "Vocal"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 250,
+								"gain": 0.8,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 500,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1000,
+								"gain": -0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 4,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1750,
+								"gain": -1,
+								"qValue": 1.2
+							},
+							{
+								"id": 5,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 2200,
+								"gain": 0.3,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 3650,
+								"gain": 3.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 5000,
+								"gain": 2,
+								"qValue": 0.8
+							},
+							{
+								"id": 8,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 6800,
+								"gain": -1.8,
+								"qValue": 1
+							},
+							{
+								"id": 9,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -2,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "instrumental",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "instrumental",
+						"nameI18n": {
+							"ko": "기악",
+							"zh": "器乐",
+							"ja": "インストゥルメンタル",
+							"en": "Instrumental"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 50,
+								"gain": 1.5,
+								"qValue": 0.6
+							},
+							{
+								"id": 1,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 550,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.3,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 2700,
+								"gain": 2,
+								"qValue": 1.6
+							},
+							{
+								"id": 5,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.6,
+								"qValue": 1.1
+							},
+							{
+								"id": 6,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3.2,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 0.7,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "fps_footsteps",
+						"deviceId": 17186,
+						"description": "强化脚步声表现，削弱高频刺耳感",
+						"descriptionI18n": {
+							"ko": "발소리 표현을 강화하고 고음역대 날카로운 느낌을 줄여줍니다",
+							"zh": "强化脚步声表现，削弱高频刺耳感",
+							"ja": "足音の表現を強化し、高域の耳障りな感覚を抑える",
+							"en": "Enhances footsteps while reducing harsh highs"
+						},
+						"presetKey": "fps_footsteps",
+						"nameI18n": {
+							"ko": "FPS 발소리",
+							"zh": "FPS 脚步",
+							"ja": "FPS 足音",
+							"en": "FPS Footsteps"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 60,
+								"gain": -2.5,
+								"qValue": 1
+							},
+							{
+								"id": 1,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 180,
+								"gain": 2,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 250,
+								"gain": 2.5,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 1700,
+								"gain": -2.8,
+								"qValue": 0.9
+							},
+							{
+								"id": 5,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2.8,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 1,
+								"qValue": 2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 1.2,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -3.5,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 13000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					},
+					{
+						"id": "fps_gunshot",
+						"deviceId": 17186,
+						"description": "提高枪声清晰度，增强空间方位感知",
+						"descriptionI18n": {
+							"ko": "총소리 선명도를 높이고 공간적 방향감 인지를 강화합니다",
+							"zh": "提高枪声清晰度，增强空间方位感知",
+							"ja": "銃声の明瞭度を向上させ、空間の方位感覚を強化する",
+							"en": "Improves gunshot clarity and positional awareness"
+						},
+						"presetKey": "fps_gunshot",
+						"nameI18n": {
+							"ko": "FPS 총소리",
+							"zh": "FPS 枪声",
+							"ja": "FPS銃声",
+							"en": "FPS Gunshots"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 50,
+								"gain": -2,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 100,
+								"gain": -4,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 250,
+								"gain": -3,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1300,
+								"gain": -1,
+								"qValue": 1.3
+							},
+							{
+								"id": 4,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 3.5,
+								"qValue": 1.2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3,
+								"qValue": 2.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 1,
+								"qValue": 2.5
+							},
+							{
+								"id": 9,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 3,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "vocal_boost",
+						"deviceId": 17186,
+						"description": "提升语音清晰度，减轻鼻音与喷麦感",
+						"descriptionI18n": {
+							"ko": "음성 선명도를 높이고, 비음과 마이크 잡음을 완화합니다",
+							"zh": "提升语音清晰度，减轻鼻音与喷麦感",
+							"ja": "音声の明瞭さを高め、鼻声とポップノイズを軽減",
+							"en": "Improves voice clarity and reduces nasal and popping sounds"
+						},
+						"presetKey": "vocal_boost",
+						"nameI18n": {
+							"ko": "음성 강화",
+							"zh": "语音增强",
+							"ja": "ボイスブースト",
+							"en": "Vocal Boost"
+						},
+						"presetIndex": 7,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 30,
+								"gain": -4,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 100,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 220,
+								"gain": -2,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 400,
+								"gain": -2,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1.5,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.5,
+								"qValue": 1
+							},
+							{
+								"id": 6,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 2000,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -4,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 9000,
+								"gain": 3,
+								"qValue": 0.55
+							},
+							{
+								"id": 9,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 11000,
+								"gain": 2,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "immersion_mode",
+						"deviceId": 17186,
+						"description": "增强低频量感与整体亮度，营造氛围感",
+						"descriptionI18n": {
+							"ko": "저음 양감과 전체 밝기를 강화하여 더욱 몰입감 있는 사운드를 구현합니다",
+							"zh": "增强低频量感与整体亮度，营造氛围感",
+							"ja": "低域の量感と全体の明るさを高め、雰囲気を作ります",
+							"en": "Boosts bass presence and overall brightness for an immersive feel"
+						},
+						"presetKey": "immersion_mode",
+						"nameI18n": {
+							"ko": "앰비언스 몰입",
+							"zh": "氛围沉浸",
+							"ja": "没入モード",
+							"en": "Immersion Mode"
+						},
+						"presetIndex": 8,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 50,
+								"gain": 4,
+								"qValue": 0.9
+							},
+							{
+								"id": 1,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 150,
+								"gain": 3,
+								"qValue": 0.9
+							},
+							{
+								"id": 2,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 450,
+								"gain": 0.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 4,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 900,
+								"gain": -1,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 7,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 3,
+								"qValue": 1.2
+							},
+							{
+								"id": 8,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -1,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "default",
+					"deviceId": 17186,
+					"description": "",
+					"descriptionI18n": {},
+					"presetKey": "default",
+					"nameI18n": {
+						"ko": "표준",
+						"zh": "默认",
+						"ja": "標準モード",
+						"en": "Default"
+					},
+					"presetIndex": 1,
+					"offset": 0,
+					"modeType": null,
+					"isSpecialMode": false,
+					"isOfficial": true,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 20,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 1,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 50,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 2,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 100,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 3,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 200,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 4,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 4500,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 5,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 7000,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 6,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 8000,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 7,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 12500,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 8,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 15000,
+							"gain": 0,
+							"qValue": 0.75
+						},
+						{
+							"id": 9,
+							"presetId": "default",
+							"type": 0,
+							"frequency": 18000,
+							"gain": 0,
+							"qValue": 0.75
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "NON-OS",
+					"value": 5
+				},
+				"workMode": 0,
+				"gainLevel": 1,
+				"deviceVolume": 79,
+				"micGainDb": -6,
+				"channelBalance": 14
+			}
+		},
+		{
+			"t": 86207.9,
+			"label": "manual: Rock",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 17186,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 17186,
+					"name": "NICEHCK PureAural",
+					"deviceName": "PureAural",
+					"model": "NICEHCK DSP Device",
+					"tag": "NICEHCK DSP Device",
+					"customName": "PureAural",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"features": [
+						"usb.equalizer",
+						"usb.digital_filter",
+						"usb.gain_level",
+						"usb.work_mode",
+						"usb.microphone_gain",
+						"usb.channel_balance",
+						"usb.device_volume"
+					]
+				},
+				"equalizerSetting": {
+					"id": 17186,
+					"deviceId": 17186,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 10,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 17186,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": true,
+					"specialMode": false,
+					"digitalFilter": true,
+					"channelBalance": true,
+					"microphoneGain": true,
+					"workMode": true,
+					"deviceVolume": true,
+					"gainLevel": true,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 2,
+				"deviceName": "",
+				"firmwareVersion": "0.3",
+				"offset": 0,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 80,
+						"gain": 2.5,
+						"qValue": 0.45
+					},
+					{
+						"id": 1,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 250,
+						"gain": 1.7,
+						"qValue": 0.5
+					},
+					{
+						"id": 2,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 550,
+						"gain": 1,
+						"qValue": 0.75
+					},
+					{
+						"id": 3,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 850,
+						"gain": -1.8,
+						"qValue": 0.75
+					},
+					{
+						"id": 4,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 1800,
+						"gain": -0.8,
+						"qValue": 0.75
+					},
+					{
+						"id": 5,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 2800,
+						"gain": 1.4,
+						"qValue": 1.5
+					},
+					{
+						"id": 6,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 3800,
+						"gain": 2.4,
+						"qValue": 0.75
+					},
+					{
+						"id": 7,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 8000,
+						"gain": -1.8,
+						"qValue": 1.4
+					},
+					{
+						"id": 8,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 10000,
+						"gain": 0.6,
+						"qValue": 1.7
+					},
+					{
+						"id": 9,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 15000,
+						"gain": 0.8,
+						"qValue": 0.75
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 50,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 100,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 18000,
+								"gain": 0,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "rock",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "rock",
+						"nameI18n": {
+							"ko": "록",
+							"zh": "摇滚",
+							"ja": "ロック",
+							"en": "Rock"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.5,
+								"qValue": 0.45
+							},
+							{
+								"id": 1,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.7,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 850,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 1800,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 2800,
+								"gain": 1.4,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 2.4,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -1.8,
+								"qValue": 1.4
+							},
+							{
+								"id": 8,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.6,
+								"qValue": 1.7
+							},
+							{
+								"id": 9,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0.8,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "vocal",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "vocal",
+						"nameI18n": {
+							"ko": "보컬",
+							"zh": "人声",
+							"ja": "ボーカル",
+							"en": "Vocal"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 250,
+								"gain": 0.8,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 500,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1000,
+								"gain": -0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 4,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1750,
+								"gain": -1,
+								"qValue": 1.2
+							},
+							{
+								"id": 5,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 2200,
+								"gain": 0.3,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 3650,
+								"gain": 3.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 5000,
+								"gain": 2,
+								"qValue": 0.8
+							},
+							{
+								"id": 8,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 6800,
+								"gain": -1.8,
+								"qValue": 1
+							},
+							{
+								"id": 9,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -2,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "instrumental",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "instrumental",
+						"nameI18n": {
+							"ko": "기악",
+							"zh": "器乐",
+							"ja": "インストゥルメンタル",
+							"en": "Instrumental"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 50,
+								"gain": 1.5,
+								"qValue": 0.6
+							},
+							{
+								"id": 1,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 550,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.3,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 2700,
+								"gain": 2,
+								"qValue": 1.6
+							},
+							{
+								"id": 5,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.6,
+								"qValue": 1.1
+							},
+							{
+								"id": 6,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3.2,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 0.7,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "fps_footsteps",
+						"deviceId": 17186,
+						"description": "强化脚步声表现，削弱高频刺耳感",
+						"descriptionI18n": {
+							"ko": "발소리 표현을 강화하고 고음역대 날카로운 느낌을 줄여줍니다",
+							"zh": "强化脚步声表现，削弱高频刺耳感",
+							"ja": "足音の表現を強化し、高域の耳障りな感覚を抑える",
+							"en": "Enhances footsteps while reducing harsh highs"
+						},
+						"presetKey": "fps_footsteps",
+						"nameI18n": {
+							"ko": "FPS 발소리",
+							"zh": "FPS 脚步",
+							"ja": "FPS 足音",
+							"en": "FPS Footsteps"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 60,
+								"gain": -2.5,
+								"qValue": 1
+							},
+							{
+								"id": 1,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 180,
+								"gain": 2,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 250,
+								"gain": 2.5,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 1700,
+								"gain": -2.8,
+								"qValue": 0.9
+							},
+							{
+								"id": 5,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2.8,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 1,
+								"qValue": 2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 1.2,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -3.5,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 13000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					},
+					{
+						"id": "fps_gunshot",
+						"deviceId": 17186,
+						"description": "提高枪声清晰度，增强空间方位感知",
+						"descriptionI18n": {
+							"ko": "총소리 선명도를 높이고 공간적 방향감 인지를 강화합니다",
+							"zh": "提高枪声清晰度，增强空间方位感知",
+							"ja": "銃声の明瞭度を向上させ、空間の方位感覚を強化する",
+							"en": "Improves gunshot clarity and positional awareness"
+						},
+						"presetKey": "fps_gunshot",
+						"nameI18n": {
+							"ko": "FPS 총소리",
+							"zh": "FPS 枪声",
+							"ja": "FPS銃声",
+							"en": "FPS Gunshots"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 50,
+								"gain": -2,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 100,
+								"gain": -4,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 250,
+								"gain": -3,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1300,
+								"gain": -1,
+								"qValue": 1.3
+							},
+							{
+								"id": 4,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 3.5,
+								"qValue": 1.2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3,
+								"qValue": 2.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 1,
+								"qValue": 2.5
+							},
+							{
+								"id": 9,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 3,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "vocal_boost",
+						"deviceId": 17186,
+						"description": "提升语音清晰度，减轻鼻音与喷麦感",
+						"descriptionI18n": {
+							"ko": "음성 선명도를 높이고, 비음과 마이크 잡음을 완화합니다",
+							"zh": "提升语音清晰度，减轻鼻音与喷麦感",
+							"ja": "音声の明瞭さを高め、鼻声とポップノイズを軽減",
+							"en": "Improves voice clarity and reduces nasal and popping sounds"
+						},
+						"presetKey": "vocal_boost",
+						"nameI18n": {
+							"ko": "음성 강화",
+							"zh": "语音增强",
+							"ja": "ボイスブースト",
+							"en": "Vocal Boost"
+						},
+						"presetIndex": 7,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 30,
+								"gain": -4,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 100,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 220,
+								"gain": -2,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 400,
+								"gain": -2,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1.5,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.5,
+								"qValue": 1
+							},
+							{
+								"id": 6,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 2000,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -4,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 9000,
+								"gain": 3,
+								"qValue": 0.55
+							},
+							{
+								"id": 9,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 11000,
+								"gain": 2,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "immersion_mode",
+						"deviceId": 17186,
+						"description": "增强低频量感与整体亮度，营造氛围感",
+						"descriptionI18n": {
+							"ko": "저음 양감과 전체 밝기를 강화하여 더욱 몰입감 있는 사운드를 구현합니다",
+							"zh": "增强低频量感与整体亮度，营造氛围感",
+							"ja": "低域の量感と全体の明るさを高め、雰囲気を作ります",
+							"en": "Boosts bass presence and overall brightness for an immersive feel"
+						},
+						"presetKey": "immersion_mode",
+						"nameI18n": {
+							"ko": "앰비언스 몰입",
+							"zh": "氛围沉浸",
+							"ja": "没入モード",
+							"en": "Immersion Mode"
+						},
+						"presetIndex": 8,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 50,
+								"gain": 4,
+								"qValue": 0.9
+							},
+							{
+								"id": 1,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 150,
+								"gain": 3,
+								"qValue": 0.9
+							},
+							{
+								"id": 2,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 450,
+								"gain": 0.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 4,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 900,
+								"gain": -1,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 7,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 3,
+								"qValue": 1.2
+							},
+							{
+								"id": 8,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -1,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "rock",
+					"deviceId": 17186,
+					"description": "",
+					"descriptionI18n": {},
+					"presetKey": "rock",
+					"nameI18n": {
+						"ko": "록",
+						"zh": "摇滚",
+						"ja": "ロック",
+						"en": "Rock"
+					},
+					"presetIndex": 2,
+					"offset": 0,
+					"modeType": null,
+					"isSpecialMode": false,
+					"isOfficial": true,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 80,
+							"gain": 2.5,
+							"qValue": 0.45
+						},
+						{
+							"id": 1,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 250,
+							"gain": 1.7,
+							"qValue": 0.5
+						},
+						{
+							"id": 2,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 550,
+							"gain": 1,
+							"qValue": 0.75
+						},
+						{
+							"id": 3,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 850,
+							"gain": -1.8,
+							"qValue": 0.75
+						},
+						{
+							"id": 4,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 1800,
+							"gain": -0.8,
+							"qValue": 0.75
+						},
+						{
+							"id": 5,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 2800,
+							"gain": 1.4,
+							"qValue": 1.5
+						},
+						{
+							"id": 6,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 3800,
+							"gain": 2.4,
+							"qValue": 0.75
+						},
+						{
+							"id": 7,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 8000,
+							"gain": -1.8,
+							"qValue": 1.4
+						},
+						{
+							"id": 8,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 10000,
+							"gain": 0.6,
+							"qValue": 1.7
+						},
+						{
+							"id": 9,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 15000,
+							"gain": 0.8,
+							"qValue": 0.75
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "NON-OS",
+					"value": 5
+				},
+				"workMode": 0,
+				"gainLevel": 1,
+				"deviceVolume": 79,
+				"micGainDb": -6,
+				"channelBalance": 14
+			}
+		},
+		{
+			"t": 142059.9,
+			"label": "manual: band 1 100 Hz +3.5 dB, pre-gain -1",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 17186,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 17186,
+					"name": "NICEHCK PureAural",
+					"deviceName": "PureAural",
+					"model": "NICEHCK DSP Device",
+					"tag": "NICEHCK DSP Device",
+					"customName": "PureAural",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"features": [
+						"usb.equalizer",
+						"usb.digital_filter",
+						"usb.gain_level",
+						"usb.work_mode",
+						"usb.microphone_gain",
+						"usb.channel_balance",
+						"usb.device_volume"
+					]
+				},
+				"equalizerSetting": {
+					"id": 17186,
+					"deviceId": 17186,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 10,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 17186,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": true,
+					"specialMode": false,
+					"digitalFilter": true,
+					"channelBalance": true,
+					"microphoneGain": true,
+					"workMode": true,
+					"deviceVolume": true,
+					"gainLevel": true,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 2,
+				"deviceName": "",
+				"firmwareVersion": "0.3",
+				"offset": 0,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 100,
+						"gain": 3.5,
+						"qValue": 0.45
+					},
+					{
+						"id": 1,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 250,
+						"gain": 1.7,
+						"qValue": 0.5
+					},
+					{
+						"id": 2,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 550,
+						"gain": 1,
+						"qValue": 0.75
+					},
+					{
+						"id": 3,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 850,
+						"gain": -1.8,
+						"qValue": 0.75
+					},
+					{
+						"id": 4,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 1800,
+						"gain": -0.8,
+						"qValue": 0.75
+					},
+					{
+						"id": 5,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 2800,
+						"gain": 1.4,
+						"qValue": 1.5
+					},
+					{
+						"id": 6,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 3800,
+						"gain": 2.4,
+						"qValue": 0.75
+					},
+					{
+						"id": 7,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 8000,
+						"gain": -1.8,
+						"qValue": 1.4
+					},
+					{
+						"id": 8,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 15000,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 9,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 15000,
+						"gain": 0.8,
+						"qValue": 0.75
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 50,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 100,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 18000,
+								"gain": 0,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "rock",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "rock",
+						"nameI18n": {
+							"ko": "록",
+							"zh": "摇滚",
+							"ja": "ロック",
+							"en": "Rock"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.5,
+								"qValue": 0.45
+							},
+							{
+								"id": 1,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.7,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 850,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 1800,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 2800,
+								"gain": 1.4,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 2.4,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -1.8,
+								"qValue": 1.4
+							},
+							{
+								"id": 8,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.6,
+								"qValue": 1.7
+							},
+							{
+								"id": 9,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0.8,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "vocal",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "vocal",
+						"nameI18n": {
+							"ko": "보컬",
+							"zh": "人声",
+							"ja": "ボーカル",
+							"en": "Vocal"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 250,
+								"gain": 0.8,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 500,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1000,
+								"gain": -0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 4,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1750,
+								"gain": -1,
+								"qValue": 1.2
+							},
+							{
+								"id": 5,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 2200,
+								"gain": 0.3,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 3650,
+								"gain": 3.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 5000,
+								"gain": 2,
+								"qValue": 0.8
+							},
+							{
+								"id": 8,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 6800,
+								"gain": -1.8,
+								"qValue": 1
+							},
+							{
+								"id": 9,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -2,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "instrumental",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "instrumental",
+						"nameI18n": {
+							"ko": "기악",
+							"zh": "器乐",
+							"ja": "インストゥルメンタル",
+							"en": "Instrumental"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 50,
+								"gain": 1.5,
+								"qValue": 0.6
+							},
+							{
+								"id": 1,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 550,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.3,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 2700,
+								"gain": 2,
+								"qValue": 1.6
+							},
+							{
+								"id": 5,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.6,
+								"qValue": 1.1
+							},
+							{
+								"id": 6,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3.2,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 0.7,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "fps_footsteps",
+						"deviceId": 17186,
+						"description": "强化脚步声表现，削弱高频刺耳感",
+						"descriptionI18n": {
+							"ko": "발소리 표현을 강화하고 고음역대 날카로운 느낌을 줄여줍니다",
+							"zh": "强化脚步声表现，削弱高频刺耳感",
+							"ja": "足音の表現を強化し、高域の耳障りな感覚を抑える",
+							"en": "Enhances footsteps while reducing harsh highs"
+						},
+						"presetKey": "fps_footsteps",
+						"nameI18n": {
+							"ko": "FPS 발소리",
+							"zh": "FPS 脚步",
+							"ja": "FPS 足音",
+							"en": "FPS Footsteps"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 60,
+								"gain": -2.5,
+								"qValue": 1
+							},
+							{
+								"id": 1,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 180,
+								"gain": 2,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 250,
+								"gain": 2.5,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 1700,
+								"gain": -2.8,
+								"qValue": 0.9
+							},
+							{
+								"id": 5,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2.8,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 1,
+								"qValue": 2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 1.2,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -3.5,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 13000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					},
+					{
+						"id": "fps_gunshot",
+						"deviceId": 17186,
+						"description": "提高枪声清晰度，增强空间方位感知",
+						"descriptionI18n": {
+							"ko": "총소리 선명도를 높이고 공간적 방향감 인지를 강화합니다",
+							"zh": "提高枪声清晰度，增强空间方位感知",
+							"ja": "銃声の明瞭度を向上させ、空間の方位感覚を強化する",
+							"en": "Improves gunshot clarity and positional awareness"
+						},
+						"presetKey": "fps_gunshot",
+						"nameI18n": {
+							"ko": "FPS 총소리",
+							"zh": "FPS 枪声",
+							"ja": "FPS銃声",
+							"en": "FPS Gunshots"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 50,
+								"gain": -2,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 100,
+								"gain": -4,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 250,
+								"gain": -3,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1300,
+								"gain": -1,
+								"qValue": 1.3
+							},
+							{
+								"id": 4,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 3.5,
+								"qValue": 1.2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3,
+								"qValue": 2.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 1,
+								"qValue": 2.5
+							},
+							{
+								"id": 9,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 3,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "vocal_boost",
+						"deviceId": 17186,
+						"description": "提升语音清晰度，减轻鼻音与喷麦感",
+						"descriptionI18n": {
+							"ko": "음성 선명도를 높이고, 비음과 마이크 잡음을 완화합니다",
+							"zh": "提升语音清晰度，减轻鼻音与喷麦感",
+							"ja": "音声の明瞭さを高め、鼻声とポップノイズを軽減",
+							"en": "Improves voice clarity and reduces nasal and popping sounds"
+						},
+						"presetKey": "vocal_boost",
+						"nameI18n": {
+							"ko": "음성 강화",
+							"zh": "语音增强",
+							"ja": "ボイスブースト",
+							"en": "Vocal Boost"
+						},
+						"presetIndex": 7,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 30,
+								"gain": -4,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 100,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 220,
+								"gain": -2,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 400,
+								"gain": -2,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1.5,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.5,
+								"qValue": 1
+							},
+							{
+								"id": 6,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 2000,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -4,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 9000,
+								"gain": 3,
+								"qValue": 0.55
+							},
+							{
+								"id": 9,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 11000,
+								"gain": 2,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "immersion_mode",
+						"deviceId": 17186,
+						"description": "增强低频量感与整体亮度，营造氛围感",
+						"descriptionI18n": {
+							"ko": "저음 양감과 전체 밝기를 강화하여 더욱 몰입감 있는 사운드를 구현합니다",
+							"zh": "增强低频量感与整体亮度，营造氛围感",
+							"ja": "低域の量感と全体の明るさを高め、雰囲気を作ります",
+							"en": "Boosts bass presence and overall brightness for an immersive feel"
+						},
+						"presetKey": "immersion_mode",
+						"nameI18n": {
+							"ko": "앰비언스 몰입",
+							"zh": "氛围沉浸",
+							"ja": "没入モード",
+							"en": "Immersion Mode"
+						},
+						"presetIndex": 8,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 50,
+								"gain": 4,
+								"qValue": 0.9
+							},
+							{
+								"id": 1,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 150,
+								"gain": 3,
+								"qValue": 0.9
+							},
+							{
+								"id": 2,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 450,
+								"gain": 0.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 4,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 900,
+								"gain": -1,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 7,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 3,
+								"qValue": 1.2
+							},
+							{
+								"id": 8,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -1,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "rock",
+					"deviceId": 17186,
+					"description": "",
+					"descriptionI18n": {},
+					"presetKey": "rock",
+					"nameI18n": {
+						"ko": "록",
+						"zh": "摇滚",
+						"ja": "ロック",
+						"en": "Rock"
+					},
+					"presetIndex": 2,
+					"offset": 0,
+					"modeType": null,
+					"isSpecialMode": false,
+					"isOfficial": true,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 80,
+							"gain": 2.5,
+							"qValue": 0.45
+						},
+						{
+							"id": 1,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 250,
+							"gain": 1.7,
+							"qValue": 0.5
+						},
+						{
+							"id": 2,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 550,
+							"gain": 1,
+							"qValue": 0.75
+						},
+						{
+							"id": 3,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 850,
+							"gain": -1.8,
+							"qValue": 0.75
+						},
+						{
+							"id": 4,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 1800,
+							"gain": -0.8,
+							"qValue": 0.75
+						},
+						{
+							"id": 5,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 2800,
+							"gain": 1.4,
+							"qValue": 1.5
+						},
+						{
+							"id": 6,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 3800,
+							"gain": 2.4,
+							"qValue": 0.75
+						},
+						{
+							"id": 7,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 8000,
+							"gain": -1.8,
+							"qValue": 1.4
+						},
+						{
+							"id": 8,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 10000,
+							"gain": 0.6,
+							"qValue": 1.7
+						},
+						{
+							"id": 9,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 15000,
+							"gain": 0.8,
+							"qValue": 0.75
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "NON-OS",
+					"value": 5
+				},
+				"workMode": 0,
+				"gainLevel": 1,
+				"deviceVolume": 79,
+				"micGainDb": -6,
+				"channelBalance": 14
+			}
+		},
+		{
+			"t": 180216.9,
+			"label": "read all",
+			"adapter": "nicehck-app",
+			"store": "device",
+			"state": {
+				"deviceInfo": {
+					"id": 17186,
+					"transport": "usb",
+					"vendorId": 13058,
+					"productId": 17186,
+					"name": "NICEHCK PureAural",
+					"deviceName": "PureAural",
+					"model": "NICEHCK DSP Device",
+					"tag": "NICEHCK DSP Device",
+					"customName": "PureAural",
+					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
+					"features": [
+						"usb.equalizer",
+						"usb.digital_filter",
+						"usb.gain_level",
+						"usb.work_mode",
+						"usb.microphone_gain",
+						"usb.channel_balance",
+						"usb.device_volume"
+					]
+				},
+				"equalizerSetting": {
+					"id": 17186,
+					"deviceId": 17186,
+					"minFrequency": 20,
+					"maxFrequency": 20000,
+					"frequencyNumber": 10,
+					"minGain": -12,
+					"maxGain": 12,
+					"minQValue": 0.2,
+					"maxQValue": 12,
+					"minOffset": -12,
+					"maxOffset": 8,
+					"sampleRate": 96000
+				},
+				"hidProductId": 17186,
+				"capabilities": {
+					"equalizer": true,
+					"equalizerModeSwitch": true,
+					"specialMode": false,
+					"digitalFilter": true,
+					"channelBalance": true,
+					"microphoneGain": true,
+					"workMode": true,
+					"deviceVolume": true,
+					"gainLevel": true,
+					"ota": false,
+					"channelBalanceRange": {
+						"min": -50,
+						"max": 50
+					},
+					"microphoneGainRange": {
+						"min": -12,
+						"max": 12
+					}
+				},
+				"eqIndex": 2,
+				"deviceName": "",
+				"firmwareVersion": "0.",
+				"offset": 1,
+				"bands": [
+					{
+						"id": 0,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 100,
+						"gain": 3.5,
+						"qValue": 0.45
+					},
+					{
+						"id": 1,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 250,
+						"gain": 1.7,
+						"qValue": 0.5
+					},
+					{
+						"id": 2,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 550,
+						"gain": 1,
+						"qValue": 0.75
+					},
+					{
+						"id": 3,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 850,
+						"gain": -1.8,
+						"qValue": 0.75
+					},
+					{
+						"id": 4,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 1800,
+						"gain": -0.8,
+						"qValue": 0.75
+					},
+					{
+						"id": 5,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 2800,
+						"gain": 1.4,
+						"qValue": 1.5
+					},
+					{
+						"id": 6,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 3800,
+						"gain": 2.4,
+						"qValue": 0.75
+					},
+					{
+						"id": 7,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 8000,
+						"gain": -1.8,
+						"qValue": 1.4
+					},
+					{
+						"id": 8,
+						"presetId": "device",
+						"type": 0,
+						"frequency": 15000,
+						"gain": 0,
+						"qValue": 0.75
+					},
+					{
+						"id": 9,
+						"presetId": "rock",
+						"type": 0,
+						"frequency": 15000,
+						"gain": 0.8,
+						"qValue": 0.75
+					}
+				],
+				"officialEqualizerPresets": [
+					{
+						"id": "default",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "default",
+						"nameI18n": {
+							"ko": "표준",
+							"zh": "默认",
+							"ja": "標準モード",
+							"en": "Default"
+						},
+						"presetIndex": 1,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 20,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 1,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 50,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 100,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 7000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 6,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 12500,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "default",
+								"type": 0,
+								"frequency": 18000,
+								"gain": 0,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "rock",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "rock",
+						"nameI18n": {
+							"ko": "록",
+							"zh": "摇滚",
+							"ja": "ロック",
+							"en": "Rock"
+						},
+						"presetIndex": 2,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.5,
+								"qValue": 0.45
+							},
+							{
+								"id": 1,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.7,
+								"qValue": 0.5
+							},
+							{
+								"id": 2,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 850,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 1800,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 5,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 2800,
+								"gain": 1.4,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 2.4,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -1.8,
+								"qValue": 1.4
+							},
+							{
+								"id": 8,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.6,
+								"qValue": 1.7
+							},
+							{
+								"id": 9,
+								"presetId": "rock",
+								"type": 0,
+								"frequency": 15000,
+								"gain": 0.8,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "vocal",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "vocal",
+						"nameI18n": {
+							"ko": "보컬",
+							"zh": "人声",
+							"ja": "ボーカル",
+							"en": "Vocal"
+						},
+						"presetIndex": 3,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 80,
+								"gain": 2.2,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 250,
+								"gain": 0.8,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 500,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1000,
+								"gain": -0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 4,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 1750,
+								"gain": -1,
+								"qValue": 1.2
+							},
+							{
+								"id": 5,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 2200,
+								"gain": 0.3,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 3650,
+								"gain": 3.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 5000,
+								"gain": 2,
+								"qValue": 0.8
+							},
+							{
+								"id": 8,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 6800,
+								"gain": -1.8,
+								"qValue": 1
+							},
+							{
+								"id": 9,
+								"presetId": "vocal",
+								"type": 0,
+								"frequency": 12000,
+								"gain": -2,
+								"qValue": 0.5
+							}
+						]
+					},
+					{
+						"id": "instrumental",
+						"deviceId": 17186,
+						"description": "",
+						"descriptionI18n": {},
+						"presetKey": "instrumental",
+						"nameI18n": {
+							"ko": "기악",
+							"zh": "器乐",
+							"ja": "インストゥルメンタル",
+							"en": "Instrumental"
+						},
+						"presetIndex": 4,
+						"offset": 0,
+						"modeType": null,
+						"isSpecialMode": false,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 50,
+								"gain": 1.5,
+								"qValue": 0.6
+							},
+							{
+								"id": 1,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 200,
+								"gain": 0.4,
+								"qValue": 0.6
+							},
+							{
+								"id": 2,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 550,
+								"gain": -0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.3,
+								"qValue": 0.75
+							},
+							{
+								"id": 4,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 2700,
+								"gain": 2,
+								"qValue": 1.6
+							},
+							{
+								"id": 5,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 4500,
+								"gain": 2.6,
+								"qValue": 1.1
+							},
+							{
+								"id": 6,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3.2,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 0.5,
+								"qValue": 0.75
+							},
+							{
+								"id": 8,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 0.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 9,
+								"presetId": "instrumental",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 0.7,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "fps_footsteps",
+						"deviceId": 17186,
+						"description": "强化脚步声表现，削弱高频刺耳感",
+						"descriptionI18n": {
+							"ko": "발소리 표현을 강화하고 고음역대 날카로운 느낌을 줄여줍니다",
+							"zh": "强化脚步声表现，削弱高频刺耳感",
+							"ja": "足音の表現を強化し、高域の耳障りな感覚を抑える",
+							"en": "Enhances footsteps while reducing harsh highs"
+						},
+						"presetKey": "fps_footsteps",
+						"nameI18n": {
+							"ko": "FPS 발소리",
+							"zh": "FPS 脚步",
+							"ja": "FPS 足音",
+							"en": "FPS Footsteps"
+						},
+						"presetIndex": 5,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 60,
+								"gain": -2.5,
+								"qValue": 1
+							},
+							{
+								"id": 1,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 180,
+								"gain": 2,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 250,
+								"gain": 2.5,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 500,
+								"gain": 1,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 1700,
+								"gain": -2.8,
+								"qValue": 0.9
+							},
+							{
+								"id": 5,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2.8,
+								"qValue": 2
+							},
+							{
+								"id": 6,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 1,
+								"qValue": 2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 1.2,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -3.5,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "fps_footsteps",
+								"type": 0,
+								"frequency": 13000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					},
+					{
+						"id": "fps_gunshot",
+						"deviceId": 17186,
+						"description": "提高枪声清晰度，增强空间方位感知",
+						"descriptionI18n": {
+							"ko": "총소리 선명도를 높이고 공간적 방향감 인지를 강화합니다",
+							"zh": "提高枪声清晰度，增强空间方位感知",
+							"ja": "銃声の明瞭度を向上させ、空間の方位感覚を強化する",
+							"en": "Improves gunshot clarity and positional awareness"
+						},
+						"presetKey": "fps_gunshot",
+						"nameI18n": {
+							"ko": "FPS 총소리",
+							"zh": "FPS 枪声",
+							"ja": "FPS銃声",
+							"en": "FPS Gunshots"
+						},
+						"presetIndex": 6,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 50,
+								"gain": -2,
+								"qValue": 2
+							},
+							{
+								"id": 1,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 100,
+								"gain": -4,
+								"qValue": 1
+							},
+							{
+								"id": 2,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 250,
+								"gain": -3,
+								"qValue": 1
+							},
+							{
+								"id": 3,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1300,
+								"gain": -1,
+								"qValue": 1.3
+							},
+							{
+								"id": 4,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 1800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 5,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 3000,
+								"gain": 2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 6000,
+								"gain": 3.5,
+								"qValue": 1.2
+							},
+							{
+								"id": 7,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 8000,
+								"gain": -3,
+								"qValue": 2.5
+							},
+							{
+								"id": 8,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 10000,
+								"gain": 1,
+								"qValue": 2.5
+							},
+							{
+								"id": 9,
+								"presetId": "fps_gunshot",
+								"type": 0,
+								"frequency": 12000,
+								"gain": 3,
+								"qValue": 2
+							}
+						]
+					},
+					{
+						"id": "vocal_boost",
+						"deviceId": 17186,
+						"description": "提升语音清晰度，减轻鼻音与喷麦感",
+						"descriptionI18n": {
+							"ko": "음성 선명도를 높이고, 비음과 마이크 잡음을 완화합니다",
+							"zh": "提升语音清晰度，减轻鼻音与喷麦感",
+							"ja": "音声の明瞭さを高め、鼻声とポップノイズを軽減",
+							"en": "Improves voice clarity and reduces nasal and popping sounds"
+						},
+						"presetKey": "vocal_boost",
+						"nameI18n": {
+							"ko": "음성 강화",
+							"zh": "语音增强",
+							"ja": "ボイスブースト",
+							"en": "Vocal Boost"
+						},
+						"presetIndex": 7,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 30,
+								"gain": -4,
+								"qValue": 0.5
+							},
+							{
+								"id": 1,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 100,
+								"gain": 1,
+								"qValue": 0.75
+							},
+							{
+								"id": 2,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 220,
+								"gain": -2,
+								"qValue": 0.75
+							},
+							{
+								"id": 3,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 400,
+								"gain": -2,
+								"qValue": 1
+							},
+							{
+								"id": 4,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 550,
+								"gain": 1.5,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 800,
+								"gain": -1.5,
+								"qValue": 1
+							},
+							{
+								"id": 6,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 2000,
+								"gain": -1.8,
+								"qValue": 0.75
+							},
+							{
+								"id": 7,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 4500,
+								"gain": -4,
+								"qValue": 1.5
+							},
+							{
+								"id": 8,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 9000,
+								"gain": 3,
+								"qValue": 0.55
+							},
+							{
+								"id": 9,
+								"presetId": "vocal_boost",
+								"type": 0,
+								"frequency": 11000,
+								"gain": 2,
+								"qValue": 0.75
+							}
+						]
+					},
+					{
+						"id": "immersion_mode",
+						"deviceId": 17186,
+						"description": "增强低频量感与整体亮度，营造氛围感",
+						"descriptionI18n": {
+							"ko": "저음 양감과 전체 밝기를 강화하여 더욱 몰입감 있는 사운드를 구현합니다",
+							"zh": "增强低频量感与整体亮度，营造氛围感",
+							"ja": "低域の量感と全体の明るさを高め、雰囲気を作ります",
+							"en": "Boosts bass presence and overall brightness for an immersive feel"
+						},
+						"presetKey": "immersion_mode",
+						"nameI18n": {
+							"ko": "앰비언스 몰입",
+							"zh": "氛围沉浸",
+							"ja": "没入モード",
+							"en": "Immersion Mode"
+						},
+						"presetIndex": 8,
+						"offset": 0,
+						"modeType": "GameMode",
+						"isSpecialMode": true,
+						"isOfficial": true,
+						"bands": [
+							{
+								"id": 0,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 50,
+								"gain": 4,
+								"qValue": 0.9
+							},
+							{
+								"id": 1,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 150,
+								"gain": 3,
+								"qValue": 0.9
+							},
+							{
+								"id": 2,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 250,
+								"gain": 1.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 3,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 450,
+								"gain": 0.5,
+								"qValue": 0.8
+							},
+							{
+								"id": 4,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 900,
+								"gain": -1,
+								"qValue": 1
+							},
+							{
+								"id": 5,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 2500,
+								"gain": -2,
+								"qValue": 1.5
+							},
+							{
+								"id": 6,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 3800,
+								"gain": 3,
+								"qValue": 1.5
+							},
+							{
+								"id": 7,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 8000,
+								"gain": 3,
+								"qValue": 1.2
+							},
+							{
+								"id": 8,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 11000,
+								"gain": -1,
+								"qValue": 0.9
+							},
+							{
+								"id": 9,
+								"presetId": "immersion_mode",
+								"type": 0,
+								"frequency": 16000,
+								"gain": 2,
+								"qValue": 0.9
+							}
+						]
+					}
+				],
+				"equalizerPreset": {
+					"id": "rock",
+					"deviceId": 17186,
+					"description": "",
+					"descriptionI18n": {},
+					"presetKey": "rock",
+					"nameI18n": {
+						"ko": "록",
+						"zh": "摇滚",
+						"ja": "ロック",
+						"en": "Rock"
+					},
+					"presetIndex": 2,
+					"offset": 0,
+					"modeType": null,
+					"isSpecialMode": false,
+					"isOfficial": true,
+					"bands": [
+						{
+							"id": 0,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 80,
+							"gain": 2.5,
+							"qValue": 0.45
+						},
+						{
+							"id": 1,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 250,
+							"gain": 1.7,
+							"qValue": 0.5
+						},
+						{
+							"id": 2,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 550,
+							"gain": 1,
+							"qValue": 0.75
+						},
+						{
+							"id": 3,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 850,
+							"gain": -1.8,
+							"qValue": 0.75
+						},
+						{
+							"id": 4,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 1800,
+							"gain": -0.8,
+							"qValue": 0.75
+						},
+						{
+							"id": 5,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 2800,
+							"gain": 1.4,
+							"qValue": 1.5
+						},
+						{
+							"id": 6,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 3800,
+							"gain": 2.4,
+							"qValue": 0.75
+						},
+						{
+							"id": 7,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 8000,
+							"gain": -1.8,
+							"qValue": 1.4
+						},
+						{
+							"id": 8,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 10000,
+							"gain": 0.6,
+							"qValue": 1.7
+						},
+						{
+							"id": 9,
+							"presetId": "rock",
+							"type": 0,
+							"frequency": 15000,
+							"gain": 0.8,
+							"qValue": 0.75
+						}
+					]
+				},
+				"tkFilterTypeIndex": {
+					"name": "NON-OS",
+					"value": 5
+				},
+				"workMode": 0,
+				"gainLevel": 1,
+				"deviceVolume": 79,
+				"micGainDb": -6,
+				"channelBalance": 1
+			}
+		}
+	],
+	"events": [
+		{
+			"t": 8.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "800c"
+		},
+		{
+			"t": 28.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800c04302e330000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 39.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000000"
+		},
+		{
+			"t": 58.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80090000003300000000403d991c80f16de33fc366e37f0f921cc01400c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 71.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000001"
+		},
+		{
+			"t": 90.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80090000013300000000400d824780c5aab83ff37db87f3b5547c03200c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 103.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000002"
+		},
+		{
+			"t": 122.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000002330000000040d30d8f8011a5713f2df2707fef5a8ec06400c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 135.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000003"
+		},
+		{
+			"t": 153.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000333000000004083411e81f186e43e7dbee17e0f791bc1c800c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 167.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000004"
+		},
+		{
+			"t": 186.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80090000043300000000405d585f99fdd93e2ba3a7a0660326c1d49411c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 199.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000005"
+		},
+		{
+			"t": 220.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000005330000000040bc8857a74f3ada224477a858b1c525dd581bc0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 231.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000006"
+		},
+		{
+			"t": 250.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000006330000000040478fdcac00000020b9702353000000e0401fc0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 263.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000007"
+		},
+		{
+			"t": 284.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000733000000004050d923c564991a16b026dc3a9c66e5e9d430c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 295.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000008"
+		},
+		{
+			"t": 313.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80090000083300000000407b7a3fd259fb59128585c02da704a6ed983ac0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 327.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000009"
+		},
+		{
+			"t": 346.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000009330000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 359.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8003"
+		},
+		{
+			"t": 375.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8003020001000000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 391.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8011"
+		},
+		{
+			"t": 410.6,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8011020101000000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 423.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8019"
+		},
+		{
+			"t": 443.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8019020001000000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 455.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "801d"
+		},
+		{
+			"t": 473.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "801d020101000000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 487.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8085"
+		},
+		{
+			"t": 506.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8085026400000000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 519.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8002"
+		},
+		{
+			"t": 537.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8002020000000000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 551.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "80160400"
+		},
+		{
+			"t": 568,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8016040000000000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 583.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "80160401"
+		},
+		{
+			"t": 600.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8016040100000000000040f1daafe14a3c360f0f25501eb6c3c9f05046c0000000020001000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 33324,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01110105"
+		},
+		{
+			"t": 43290.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "011d0100"
+		},
+		{
+			"t": 49324.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01190101"
+		},
+		{
+			"t": 62905.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0185014f"
+		},
+		{
+			"t": 63992.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01020200fa"
+		},
+		{
+			"t": 64024.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 65080,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "011604000000"
+		},
+		{
+			"t": 65111.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0116040100f6"
+		},
+		{
+			"t": 66172.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0116040000f2"
+		},
+		{
+			"t": 66199.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "011604010000"
+		},
+		{
+			"t": 83207.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210000000037641b40fcb3a480365a403f044c5b7f9241a4c0500073008002020002"
+		},
+		{
+			"t": 83239.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210001000040c83340f45fe3814c2aed3d0ca01c7e740ddfc1fa008000b301020002"
+		},
+		{
+			"t": 83271.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210002000098472c40618bea821ceffd3c9f74157d4cc9d5c22602c0000001020002"
+		},
+		{
+			"t": 83303.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100030000b1e4863f41c73e8562056b3bbf38c17aec150ec55203c00033fe020002"
+		},
+		{
+			"t": 83335.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000f3ae923f0caf868ad58ab836f450797538c6b4c90807c00033ff020002"
+		},
+		{
+			"t": 83367.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000191198404582d28854029d38bb7d2d7793eccac6f00a80016601020002"
+		},
+		{
+			"t": 83399.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000600009e118c422be97393832d722dd5168c6cdfc001d0d80ec0006602020002"
+		},
+		{
+			"t": 83431.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700009a06053ea59379a32db3d12c5b6c865c394629d5401f660133fe020002"
+		},
+		{
+			"t": 83463.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100080000e2caac402bec6ca9bf27732cd51393565f0de0d21027b3019a00020002"
+		},
+		{
+			"t": 83495.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000900001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd00020002"
+		},
+		{
+			"t": 83527.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 83559.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 83591.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 83623.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 86393.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000000"
+		},
+		{
+			"t": 86394.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000000ffff37641b40fcb3a480365a403f044c5b7f9241a4c0500073008002020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 86423.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000001"
+		},
+		{
+			"t": 86440.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000001ffff40c83340f45fe3814c2aed3d0ca01c7e740ddfc1fa008000b301020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 86455.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000002"
+		},
+		{
+			"t": 86472.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000002ffff98472c40618bea821ceffd3c9f74157d4cc9d5c22602c0000001020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 86487.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000003"
+		},
+		{
+			"t": 86504,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000003ffffb1e4863f41c73e8562056b3bbf38c17aec150ec55203c00033fe020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 86519.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000004"
+		},
+		{
+			"t": 86536.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000004fffff3ae923f0caf868ad58ab836f450797538c6b4c90807c00033ff020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 86551.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000005"
+		},
+		{
+			"t": 86568.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000005ffff191198404582d28854029d38bb7d2d7793eccac6f00a80016601020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 86583.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000006"
+		},
+		{
+			"t": 86600.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000006ffff9e118c422be97393832d722dd5168c6cdfc001d0d80ec0006602020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 86615.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000007"
+		},
+		{
+			"t": 86632.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000007ffff9a06053ea59379a32db3d12c5b6c865c394629d5401f660133fe020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 86647.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000008"
+		},
+		{
+			"t": 86695.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000008ffff000000407b7a3fd259fb59128585c02da704a6ed983ac0000000020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 86711.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000009"
+		},
+		{
+			"t": 86728.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8009000009ffff1e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd00020002000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 125138.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000000004732224097c2cd80aebd103f693d327f0b10cdc0640073008002020002"
+		},
+		{
+			"t": 125175.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210001000040c83340f45fe3814c2aed3d0ca01c7e740ddfc1fa008000b301020002"
+		},
+		{
+			"t": 125207.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210002000098472c40618bea821ceffd3c9f74157d4cc9d5c22602c0000001020002"
+		},
+		{
+			"t": 125239.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100030000b1e4863f41c73e8562056b3bbf38c17aec150ec55203c00033fe020002"
+		},
+		{
+			"t": 125272,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000f3ae923f0caf868ad58ab836f450797538c6b4c90807c00033ff020002"
+		},
+		{
+			"t": 125303.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000191198404582d28854029d38bb7d2d7793eccac6f00a80016601020002"
+		},
+		{
+			"t": 125335.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000600009e118c422be97393832d722dd5168c6cdfc001d0d80ec0006602020002"
+		},
+		{
+			"t": 125367.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700009a06053ea59379a32db3d12c5b6c865c394629d5401f660133fe020002"
+		},
+		{
+			"t": 125399.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100080000000000407b7a3fd259fb59128585c02da704a6ed983ac0000000020002"
+		},
+		{
+			"t": 125432.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000900001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd00020002"
+		},
+		{
+			"t": 125463.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 125495.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 125527.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 125559.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 126237.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000000004732224097c2cd80aebd103f693d327f0b10cdc0640073008002020002"
+		},
+		{
+			"t": 126279.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210001000040c83340f45fe3814c2aed3d0ca01c7e740ddfc1fa008000b301020002"
+		},
+		{
+			"t": 126311.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210002000098472c40618bea821ceffd3c9f74157d4cc9d5c22602c0000001020002"
+		},
+		{
+			"t": 126344,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100030000b1e4863f41c73e8562056b3bbf38c17aec150ec55203c00033fe020002"
+		},
+		{
+			"t": 126375.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000f3ae923f0caf868ad58ab836f450797538c6b4c90807c00033ff020002"
+		},
+		{
+			"t": 126407.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000191198404582d28854029d38bb7d2d7793eccac6f00a80016601020002"
+		},
+		{
+			"t": 126439.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000600009e118c422be97393832d722dd5168c6cdfc001d0d80ec0006602020002"
+		},
+		{
+			"t": 126471.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700009a06053ea59379a32db3d12c5b6c865c394629d5401f660133fe020002"
+		},
+		{
+			"t": 126503.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100080000000000407b7a3fd259fb59128585c02da704a6ed983ac0000000020002"
+		},
+		{
+			"t": 126536.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000900001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd00020002"
+		},
+		{
+			"t": 126567.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 126599.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 126631.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 126663.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 126706.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000e40c30406c5bc2804b4a0e3f94a43d7fd1a8c1c0640073008003020002"
+		},
+		{
+			"t": 126744,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210001000040c83340f45fe3814c2aed3d0ca01c7e740ddfc1fa008000b301020002"
+		},
+		{
+			"t": 126775.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210002000098472c40618bea821ceffd3c9f74157d4cc9d5c22602c0000001020002"
+		},
+		{
+			"t": 126807.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100030000b1e4863f41c73e8562056b3bbf38c17aec150ec55203c00033fe020002"
+		},
+		{
+			"t": 126839.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000f3ae923f0caf868ad58ab836f450797538c6b4c90807c00033ff020002"
+		},
+		{
+			"t": 126871.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000191198404582d28854029d38bb7d2d7793eccac6f00a80016601020002"
+		},
+		{
+			"t": 126903.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000600009e118c422be97393832d722dd5168c6cdfc001d0d80ec0006602020002"
+		},
+		{
+			"t": 126935.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700009a06053ea59379a32db3d12c5b6c865c394629d5401f660133fe020002"
+		},
+		{
+			"t": 126967.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100080000000000407b7a3fd259fb59128585c02da704a6ed983ac0000000020002"
+		},
+		{
+			"t": 126999.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000900001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd00020002"
+		},
+		{
+			"t": 127031.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 127064.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 127095.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 127127.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 133634.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000e40c30406c5bc2804b4a0e3f94a43d7fd1a8c1c0640073008003020002"
+		},
+		{
+			"t": 133671.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210001000040c83340f45fe3814c2aed3d0ca01c7e740ddfc1fa008000b301020002"
+		},
+		{
+			"t": 133703.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210002000098472c40618bea821ceffd3c9f74157d4cc9d5c22602c0000001020002"
+		},
+		{
+			"t": 133735.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100030000b1e4863f41c73e8562056b3bbf38c17aec150ec55203c00033fe020002"
+		},
+		{
+			"t": 133767.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000f3ae923f0caf868ad58ab836f450797538c6b4c90807c00033ff020002"
+		},
+		{
+			"t": 133799.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000191198404582d28854029d38bb7d2d7793eccac6f00a80016601020002"
+		},
+		{
+			"t": 133831.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000600009e118c422be97393832d722dd5168c6cdfc001d0d80ec0006602020002"
+		},
+		{
+			"t": 133863.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700009a06053ea59379a32db3d12c5b6c865c394629d5401f660133fe020002"
+		},
+		{
+			"t": 133895.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100080000000000407b7a3fd259fb59128585c02da704a6ed983ac0000000020002"
+		},
+		{
+			"t": 133927.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000900001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd00020002"
+		},
+		{
+			"t": 133959.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 133991.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 134023.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0103020000"
+		},
+		{
+			"t": 134055.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 162251.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000e40c30406c5bc2804b4a0e3f94a43d7fd1a8c1c064007300800302fe02"
+		},
+		{
+			"t": 162279.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210001000040c83340f45fe3814c2aed3d0ca01c7e740ddfc1fa008000b30102fe02"
+		},
+		{
+			"t": 162311.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210002000098472c40618bea821ceffd3c9f74157d4cc9d5c22602c000000102fe02"
+		},
+		{
+			"t": 162343.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100030000b1e4863f41c73e8562056b3bbf38c17aec150ec55203c00033fe02fe02"
+		},
+		{
+			"t": 162375.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000f3ae923f0caf868ad58ab836f450797538c6b4c90807c00033ff02fe02"
+		},
+		{
+			"t": 162407.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000191198404582d28854029d38bb7d2d7793eccac6f00a8001660102fe02"
+		},
+		{
+			"t": 162439.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000600009e118c422be97393832d722dd5168c6cdfc001d0d80ec000660202fe02"
+		},
+		{
+			"t": 162471.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700009a06053ea59379a32db3d12c5b6c865c394629d5401f660133fe02fe02"
+		},
+		{
+			"t": 162503.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100080000000000407b7a3fd259fb59128585c02da704a6ed983ac000000002fe02"
+		},
+		{
+			"t": 162535.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000900001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02"
+		},
+		{
+			"t": 162567.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 162599.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 162631.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01030200fe"
+		},
+		{
+			"t": 162663.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 172219.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100000000e40c30406c5bc2804b4a0e3f94a43d7fd1a8c1c064007300800302fe02"
+		},
+		{
+			"t": 172247.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210001000040c83340f45fe3814c2aed3d0ca01c7e740ddfc1fa008000b30102fe02"
+		},
+		{
+			"t": 172279.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0109210002000098472c40618bea821ceffd3c9f74157d4cc9d5c22602c000000102fe02"
+		},
+		{
+			"t": 172311.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100030000b1e4863f41c73e8562056b3bbf38c17aec150ec55203c00033fe02fe02"
+		},
+		{
+			"t": 172343.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100040000f3ae923f0caf868ad58ab836f450797538c6b4c90807c00033ff02fe02"
+		},
+		{
+			"t": 172375.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100050000191198404582d28854029d38bb7d2d7793eccac6f00a8001660102fe02"
+		},
+		{
+			"t": 172407.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000600009e118c422be97393832d722dd5168c6cdfc001d0d80ec000660202fe02"
+		},
+		{
+			"t": 172439.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000700009a06053ea59379a32db3d12c5b6c865c394629d5401f660133fe02fe02"
+		},
+		{
+			"t": 172471.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01092100080000000000407b7a3fd259fb59128585c02da704a6ed983ac000000002fe02"
+		},
+		{
+			"t": 172503.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010921000900001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02"
+		},
+		{
+			"t": 172535.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010a040000ffff"
+		},
+		{
+			"t": 172567.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0101"
+		},
+		{
+			"t": 172599.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01030200fe"
+		},
+		{
+			"t": 172631.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0104"
+		},
+		{
+			"t": 178839.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "800c"
+		},
+		{
+			"t": 178860.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800c02302e33ff1e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 178871.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000000"
+		},
+		{
+			"t": 178892,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000033ffe40c30406c5bc2804b4a0e3f94a43d7fd1a8c1c064007300800302fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 178903.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000001"
+		},
+		{
+			"t": 178922.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000133ff40c83340f45fe3814c2aed3d0ca01c7e740ddfc1fa008000b30102fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 178935.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000002"
+		},
+		{
+			"t": 178954.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000233ff98472c40618bea821ceffd3c9f74157d4cc9d5c22602c000000102fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 178967.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000003"
+		},
+		{
+			"t": 178986.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000333ffb1e4863f41c73e8562056b3bbf38c17aec150ec55203c00033fe02fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 178999.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000004"
+		},
+		{
+			"t": 179017.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000433fff3ae923f0caf868ad58ab836f450797538c6b4c90807c00033ff02fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179031.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000005"
+		},
+		{
+			"t": 179049.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000533ff191198404582d28854029d38bb7d2d7793eccac6f00a8001660102fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179063.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000006"
+		},
+		{
+			"t": 179082,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000633ff9e118c422be97393832d722dd5168c6cdfc001d0d80ec000660202fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179095.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000007"
+		},
+		{
+			"t": 179116.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000733ff9a06053ea59379a32db3d12c5b6c865c394629d5401f660133fe02fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179127.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000008"
+		},
+		{
+			"t": 179146.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000833ff000000407b7a3fd259fb59128585c02da704a6ed983ac000000002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179159.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8009000009"
+		},
+		{
+			"t": 179179.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900000933ff1e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179191.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8003"
+		},
+		{
+			"t": 179213.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800302000100001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179223.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8011"
+		},
+		{
+			"t": 179242.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "801102050100001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179255.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8019"
+		},
+		{
+			"t": 179276.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "801902010100001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179287.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "801d"
+		},
+		{
+			"t": 179307.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "801d02000100001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179319.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8085"
+		},
+		{
+			"t": 179339.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "8085024f0000001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179351.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "8002"
+		},
+		{
+			"t": 179371.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80020200faffff1e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179383.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "80160400"
+		},
+		{
+			"t": 179403.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80160400faf2001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 179415.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "80160401"
+		},
+		{
+			"t": 179436.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80160401fa00001e222342246a80d11ec18e11dc957f2ec41c4eec983ac000cd0002fe02000000000000000000000000000000000000000000000000000000"
+		}
+	]
+}

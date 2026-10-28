@@ -85,7 +85,7 @@ why a block can't be driven: an unknown handler (data newer than this bridge) or
 | Handler | Transports | Options |
 | --- | --- | --- |
 | `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`; `0x21` on newer models) |
-| `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101) |
+| `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101), `enableCommand` (default true; false where `[1,1,0,…]` doesn't turn the EQ off, as on the NICEHCK PureAural) |
 | `moondrop-usb-hid` | HID | – |
 | `moondrop-old-fashioned-hid` | HID | – |
 | `conexant-usb-hid` | HID | – |

@@ -4,7 +4,9 @@
 	"id": "nicehck-pureaural",
 	"schemaVersion": "1.2",
 	"device": { "brand": "NiceHCK", "model": "PureAural" },
-	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x4322" }] },
+	"match": {
+		"usb": [{ "vendorId": "0x3302", "productId": "0x4322", "productName": "NICEHCK PureAural" }]
+	},
 	"bandCount": 10,
 	"protocol": {
 		"controls": [
@@ -72,8 +74,16 @@
 		]
 	},
 	"meta": {
-		"status": "draft",
-		"sources": [{ "kind": "vendor-app", "ref": "https://app.nicehck.cn/", "date": "2026-10-28" }],
-		"notes": "devicePEQ lists its product id in its SchemeNo16 group (walkplay-schemeno16-devices), which no longer matches it. Its official presets: 1 Default (flat), 2 Rock, 3 Vocal, 4 Instrumental, and the game presets 5 FPS Footsteps, 6 FPS Gunshots, 7 Vocal Boost, 8 Immersion Mode, 10 bands each, pre-gain 0. The app shows the channel balance as one slider from -50 to 50 and writes it as a cut of one channel (n > 0 cuts the left by n dB, n < 0 the right); the device holds a gain per channel, which are the two controls here. The product name the device reports over USB is not known yet, so it matches by vendor and product id."
+		"status": "maintainer-verified",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "https://app.nicehck.cn/, read with every band, the pre-gain and every control changed and the app's writes recorded: packages/device-bridge/test/recordings/2026-10-28-nicehck-pureaural.json",
+				"firmware": "0.3",
+				"date": "2026-10-28",
+				"by": "potatosalad775"
+			}
+		],
+		"notes": "devicePEQ lists its product id in its SchemeNo16 group (walkplay-schemeno16-devices), which no longer matches it. Its official presets: 1 Default (flat), 2 Rock, 3 Vocal, 4 Instrumental, and the game presets 5 FPS Footsteps, 6 FPS Gunshots, 7 Vocal Boost, 8 Immersion Mode, 10 bands each, pre-gain 0. The app shows the channel balance as one slider from -50 to 50 and writes it as a cut of one channel (n > 0 cuts the left by n dB, n < 0 the right); the device holds a gain per channel, which are the two controls here. Warnings, seen on firmware 0.3: the first report after the device has been idle for some minutes is lost (a band write the app sent first after about 6 minutes didn't take; sent again, it did); a quick run of mic gain writes left it at -4.5 dB, which no write asked for; after the app's pre-gain writes the pre-gain read (0x03) answered +1 dB, though it reads back the handler's writes. setEnabled(false) doesn't turn its EQ off (see the base). It also takes shelves, which the app doesn't offer. The device fills only the bytes it answers with and leaves the rest of its report as the last one left it, so the app shows a cut-short firmware version (\"0.\") and a wrong balance after some reads; the handler reads past that."
 	}
 }
