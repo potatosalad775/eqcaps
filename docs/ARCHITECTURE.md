@@ -57,7 +57,7 @@ a submission backend, and non-EQ device features (DAC filters, mic gain…).
 
 ```
 eqcaps/
-├── docs/                         SPEC, ARCHITECTURE, DECISIONS, INSPECTOR, research/, history/
+├── docs/                         SPEC, ARCHITECTURE, DECISIONS, INSPECTOR, plans/, research/, history/
 ├── schema/v1/
 │   ├── profile.schema.json       published (flat) profiles; hand-written
 │   └── source.schema.json        authoring files (adds extends / abstract); generated
@@ -74,6 +74,7 @@ eqcaps/
 │   ├── build/                    Ajv validation, cross-profile checks, publishing, data CLI
 │   └── device-bridge/            transports, codecs and sessions; browser transports in ./browser
 ├── apps/inspector/               SvelteKit SPA (adapter-static)
+├── tools/userscripts/            WebHID recorder for vendor web apps (recordings for bridge tests)
 └── scripts/
     ├── codegen.ts                source.schema.json + TS types from profile.schema.json
     ├── conformance.ts            engine vectors in conformance/v1/
@@ -180,6 +181,8 @@ While editing, apps run `validateList` and flag problems without rewriting anyth
 | Public URLs move | ids are permanent; a custom domain goes in front before any move (D24) |
 
 ## 11. Roadmap
+
+Work in progress has a plan in [plans/](plans/).
 
 - **More verified profiles.** Two are `maintainer-verified` (CrinEar Protocol Micro, EarAcoustic
   OSHUN DECO), both from guided reads. The RME drafts' notes list what to check.

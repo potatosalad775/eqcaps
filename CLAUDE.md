@@ -8,7 +8,7 @@ profiles for any EQ app: modernGraphTool, an Android hardware PEQ app (Capacitor
 who adopts the format.
 
 **Status: in production.** Format v1 frozen 2026-10-03 (D36), published under `/v1/`; format 1.1
-adds `writable` presets (D48). `core`, `client` and `device-bridge` 0.2.x on npm. The first app
+adds `writable` presets (D48), format 1.2 device controls (D49). `core`, `client` and `device-bridge` 0.2.x on npm. The first app
 built on it, uniPEQ (unipeq.com, `potatosalad775/uniPEQ`), is public. Open work: ARCHITECTURE §11.
 Read `docs/ARCHITECTURE.md` first.
 
@@ -29,6 +29,7 @@ Never edit `schema/v1/source.schema.json`,
 | `docs/SPEC.md` | **the** format definition (v1, frozen) and engine semantics. Single source of truth. |
 | `docs/INSPECTOR.md` | inspector web app: capability tiers, guided reads, safety, privacy. Code cites its § numbers; keep them stable. |
 | `docs/DECISIONS.md` | the decisions in force, one short entry each, by stable D-number |
+| `docs/plans/` | work in progress, one plan per effort. Add new plans and progress here, not to the docs above. |
 | `docs/history/` | archived full decision log and build-out plan. Read for background; don't edit. |
 | `docs/research/prior-art.md` | evidence: existing constraint models + what real device handlers encode |
 
@@ -60,8 +61,8 @@ for v2. Don't define format details anywhere except SPEC.md.
    across languages; `assign` / `fit` / `complete` are normative only through their properties
    (SPEC §13).
 8. **Consumers must work without the CDN.** The database enhances an app and never blocks it.
-9. **The inspector never writes to a device** (D40): it calls the bridge's `pull`, never `push` or
-   `setEnabled`. Writing is for apps, through `fit` + `complete`.
+9. **The inspector never writes to a device** (D40): it calls the bridge's `pull`, never `push`,
+   `setEnabled` or `writeControl`. Writing is for apps, through `fit` + `complete`.
 
 ## Conventions
 
@@ -87,13 +88,14 @@ for v2. Don't define format details anywhere except SPEC.md.
   profile's `protocol` (D42), inherited from the base, so a device on a known protocol is a data
   file only; `src/protocols.ts` checks it against the handlers (`protocolOf`) and holds the
   vendor guesses for devices without a profile. Identities stay in profile `match` (the client
-  matches, the bridge doesn't). A new handler option goes in that file's `OPTIONS` and the README.
+  matches, the bridge doesn't). A new handler option goes in that file's `OPTIONS` and the
+  README; a new device control goes in the handler's `controls` and the README (D49).
   Protocols come from devicePEQ `0617f38`; test against device answers
   (`packages/device-bridge/test/captures/`) and codec round trips, not devicePEQ's bytes.
 - Inspector (D34): SvelteKit SPA with adapter-static and Tailwind, never server-rendered. Logic
   that can be tested lives in plain `.ts` modules under `src/lib/` (tested by the root Vitest run);
-  routes and components stay thin. Nothing in the inspector calls the bridge's `push` or
-  `setEnabled` (invariant 9).
+  routes and components stay thin. Nothing in the inspector calls the bridge's `push`,
+  `setEnabled` or `writeControl` (invariant 9).
   The editor (D35) edits authoring files, read from the repository (`/data/` in dev, GitHub
   `main` in production), and checks them with `packages/build`, as CI does.
 - Workspace packages import each other by package name. Node scripts that need sources run with
