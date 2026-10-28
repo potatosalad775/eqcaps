@@ -1,0 +1,29 @@
+{
+	"description": "A range control follows the §4 domain rules: its bounds lie on its grid.",
+	"spec": "§9.1",
+	"profile": {
+		"schemaVersion": "1.2",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{
+					"id": "volume",
+					"name": "Volume",
+					"kind": "range",
+					"role": "volume",
+					"range": {
+						"min": 0,
+						"max": 60.5,
+						"step": 1
+					}
+				}
+			]
+		}
+	},
+	"expect": [
+		{
+			"code": "domain-off-grid",
+			"path": "/protocol/controls/0/range/max"
+		}
+	]
+}

@@ -1,0 +1,80 @@
+{
+	"description": "`when` names another control in the list that has no `when` of its own, and only values that control takes.",
+	"spec": "§9.1",
+	"profile": {
+		"schemaVersion": "1.2",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{
+					"id": "uacMode",
+					"name": "USB mode",
+					"kind": "choice",
+					"role": "usb-mode",
+					"reconnect": true,
+					"values": [
+						{
+							"value": 0,
+							"name": "UAC 2.0"
+						},
+						{
+							"value": 1,
+							"name": "UAC 1.0"
+						}
+					]
+				},
+				{
+					"id": "filterMode",
+					"name": "Filter",
+					"kind": "choice",
+					"when": {
+						"control": "uacMode",
+						"values": [2]
+					},
+					"values": [
+						{
+							"value": 0,
+							"name": "Fast"
+						},
+						{
+							"value": 1,
+							"name": "Slow"
+						}
+					]
+				},
+				{
+					"id": "upsample",
+					"name": "Upsample",
+					"kind": "toggle",
+					"when": {
+						"control": "filterMode",
+						"values": [0]
+					}
+				},
+				{
+					"id": "light",
+					"name": "LED",
+					"kind": "toggle",
+					"when": {
+						"control": "lights",
+						"values": [1]
+					}
+				}
+			]
+		}
+	},
+	"expect": [
+		{
+			"code": "control-when-invalid",
+			"path": "/protocol/controls/1/when/values/0"
+		},
+		{
+			"code": "control-when-invalid",
+			"path": "/protocol/controls/2/when/control"
+		},
+		{
+			"code": "control-when-invalid",
+			"path": "/protocol/controls/3/when/control"
+		}
+	]
+}

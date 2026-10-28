@@ -14,7 +14,13 @@ export const ISSUE_CODES = {
 	'slot-incomplete': '§2, §5: after merging, a slot lacks types, freq, q or gain.',
 	'variant-self-reference': "§6: a variant's `when` references a field the variant defines.",
 	'dependency-cycle': '§6: variant dependencies form a cycle.',
-	'firmware-range-empty': '§3: match.firmware has min ≥ max, so no firmware matches.',
+	'firmware-range-empty':
+		"§3: match.firmware (or a control's firmware, §9.1) has min ≥ max, so no firmware matches.",
+	'control-duplicate': '§9.1: two controls share an id.',
+	'control-value-duplicate': '§9.1: a choice control lists a value twice.',
+	'control-when-invalid':
+		"§9.1: `when` names no other control, a control with a `when` of its own, or a value that control doesn't take.",
+	'control-value-invalid': "§9.1: `disablesEq` lists a value the control doesn't take.",
 	'status-needs-evidence': '§10: a verified status without a counting source.',
 	'status-needs-maintainer':
 		'§10: maintainer-verified without a counting source whose `by` names who checked it.',

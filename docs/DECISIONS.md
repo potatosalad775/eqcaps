@@ -129,6 +129,20 @@ holding what every device on that protocol shares; shape bases extend them.
 in a list is marked, the unmarked ones are built-in; with none marked the data doesn't say. The
 first additive minor.
 
+### D49. Device controls: format 1.2 (2026-10-28)
+`protocol.controls` lists a device's settings besides the EQ (volume, output gain, DAC filter,
+upsampling, USB mode, sound modes, lights, tone), because they change what the device plays and
+whether its EQ applies. Like presets, the data says which values the device takes and the handler
+knows how to send them: ids are each handler's vocabulary, values are the device's own numbers,
+and an optional closed `role` lets apps present them alike. A control can depend on another
+control (`when`, one level deep) and on firmware (unknown firmware: absent), mark values at which
+the EQ stops applying (`disablesEq`), and mark writes that reconnect the device. Opt-in:
+`pull`/`push` never touch controls, apps write one only when the user changes it, and never raise
+a volume on their own. The bridge refuses unlisted values and absent controls, reads each write
+back, and can read the device's firmware so apps can choose between firmware-split profiles. The
+inspector reads controls at most and never writes them (invariant 9). First data: the Fosi Audio
+DS3, from Fosi's web control center.
+
 ---
 
 ## Engine

@@ -1,0 +1,67 @@
+{
+	"description": "A protocol may list the device controls besides the EQ: toggles, choices and ranges, with conditions on firmware and on another control. Format 1.2.",
+	"spec": "§9.1",
+	"profile": {
+		"schemaVersion": "1.2",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{
+					"id": "uacMode",
+					"name": "USB mode",
+					"kind": "choice",
+					"role": "usb-mode",
+					"reconnect": true,
+					"values": [
+						{
+							"value": 0,
+							"name": "UAC 2.0"
+						},
+						{
+							"value": 1,
+							"name": "UAC 1.0"
+						}
+					]
+				},
+				{
+					"id": "upsample",
+					"name": "Upsample",
+					"kind": "toggle",
+					"role": "upsampling",
+					"when": {
+						"control": "uacMode",
+						"values": [0]
+					},
+					"firmware": {
+						"min": "1.4.9"
+					},
+					"disablesEq": [1]
+				},
+				{
+					"id": "volume",
+					"name": "Volume",
+					"kind": "range",
+					"role": "volume",
+					"range": {
+						"min": 0,
+						"max": 60,
+						"step": 1
+					}
+				},
+				{
+					"id": "bass",
+					"name": "Bass",
+					"kind": "range",
+					"role": "tone-bass",
+					"range": {
+						"min": -10,
+						"max": 10,
+						"step": 0.5
+					},
+					"unit": "dB"
+				}
+			]
+		}
+	},
+	"expect": []
+}

@@ -1,0 +1,27 @@
+{
+	"description": "A choice control lists its values; only a range control has a range.",
+	"spec": "§9.1",
+	"profile": {
+		"schemaVersion": "1.2",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{
+					"id": "gainMode",
+					"name": "Gain",
+					"kind": "choice",
+					"range": {
+						"min": 0,
+						"max": 1
+					}
+				}
+			]
+		}
+	},
+	"expect": [
+		{
+			"code": "schema",
+			"path": "/protocol/controls/0/values"
+		}
+	]
+}

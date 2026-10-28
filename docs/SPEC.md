@@ -1,8 +1,8 @@
 # EQ Constraint Profile Format: v1
 
 > **Status: frozen as v1 (format 1.0) on 2026-10-03** ([DECISIONS D36](DECISIONS.md)); **format
-> 1.1** (2026-10-10, D48) adds `writable` presets (§9). This file is the single place the format is
-> defined. From here on it changes only by minors that add (§15); anything else needs v2.
+> 1.1** (2026-10-10, D48) adds `writable` presets (§9); **format 1.2** (2026-10-28, D49) adds
+> device controls (§9.1). This file is the single place the format is defined. From here on it changes only by minors that add (§15); anything else needs v2.
 > Published under `/v1/`.
 > MUST / SHOULD / MAY are used as in RFC 2119. Rationale for each choice is in
 > [DECISIONS.md](DECISIONS.md), and the evidence is in [research/prior-art.md](research/prior-art.md).
@@ -319,6 +319,60 @@ wire grids are the handler's (D42).
   protocol it can drive (never guess one), and MUST NOT reject the profile for it (§15).
 - A hardware profile without `protocol` is one no handler drives (the RME ADI-2 series is
   controlled over MIDI SysEx).
+
+### 9.1 Device controls (`protocol.controls`, format 1.2)
+
+The device's settings besides the EQ that change what it plays or how the EQ applies: volume,
+output gain, the DAC's digital filter, upsampling, USB audio mode, sound modes, lights, tone
+controls. Each control is one value the device holds. Like `presets`, the data says which values
+the device accepts and the handler knows how to send them.
+
+```jsonc
+"controls": [
+  { "id": "uacMode", "name": "USB mode", "kind": "choice", "role": "usb-mode", "reconnect": true,
+    "values": [{ "value": 0, "name": "UAC 2.0" }, { "value": 1, "name": "UAC 1.0" }] },
+  { "id": "upsample", "name": "Upsample", "kind": "toggle", "role": "upsampling",
+    "when": { "control": "uacMode", "values": [0] }, "firmware": { "min": "1.4.9" },
+    "disablesEq": [1] },
+  { "id": "volume", "name": "Volume", "kind": "range", "role": "volume",
+    "range": { "min": 0, "max": 60, "step": 1 } },
+  { "id": "bass", "name": "Bass", "kind": "range", "role": "tone-bass",
+    "range": { "min": -10, "max": 10, "step": 1 }, "unit": "dB" }
+]
+```
+
+- `id` is the handler's name for the control, from the bridge's vocabulary like `options`, and
+  unique within the list. `name` is the device's or vendor app's label.
+- `kind` sets the values: `toggle` takes `0` (off) and `1` (on); `choice` takes the `value`s of
+  `values` (at least two, unique, each with a `name`); `range` takes the numbers in `range`, a
+  range or stepped range (§4), whose bounds MUST lie on its grid. Values are the device's own
+  numbers, as it is told them. They are in dB only when `unit` is `"dB"`; otherwise they are the
+  device's steps, with no stated unit.
+- `role` (optional) says what the control is, so an app can present the same setting alike across
+  devices: `volume`, `output-gain` (an amplifier gain or level switch), `dac-filter` (the DAC's
+  reconstruction filter), `upsampling`, `usb-mode` (the USB audio class or descriptor set the
+  device presents), `sound-mode` (game, surround and similar processing modes), `light`,
+  `tone-bass`, `tone-treble`.
+- `when` (optional): the control exists only while the control named in `when.control` holds one
+  of `when.values`. That control MUST be another one in the list, MUST NOT have a `when` of its
+  own, and MUST take every listed value.
+- `firmware` (optional): the control exists only on these firmware versions (§3 order). When the
+  device's firmware is unknown, a control with `firmware` counts as absent.
+- `disablesEq` (optional): values at which the device doesn't apply the parametric EQ. Each MUST
+  be a value the control takes. While a control holds one, an app SHOULD say the EQ is inactive.
+  Before turning the EQ on, an app SHOULD ask the user, then set the control to a value outside
+  `disablesEq`.
+- `reconnect: true`: writing the control can make the device drop the connection or come back as
+  a different USB device. An app confirms with the user before it writes one and reconnects
+  afterwards. The device's `match` SHOULD cover every identity it can come back with.
+
+Rules for consumers:
+
+- Controls are opt-in. Reading and writing EQ never touches them, and an app writes a control only
+  when the user changes it. In particular, an app MUST NOT raise a `volume` control unless the
+  user set that value.
+- A consumer that doesn't know a control's `id`, `kind` or `role` ignores that control (for an
+  unknown `role`, the role alone) and keeps the rest of the protocol.
 
 ## 10. Provenance (`meta`)
 
@@ -797,6 +851,7 @@ the host app: the database enhances an app and never blocks it. The reference cl
 | --- | --- | --- |
 | 1.0 | 2026-10-03 | the frozen v1 format (D36) |
 | 1.1 | 2026-10-10 | `protocol.presets[].writable` (§9, D48) |
+| 1.2 | 2026-10-28 | `protocol.controls` (§9.1, D49) |
 - Consumers run **lenient** structural checks at runtime, never the strict CI schema, so newer
   minors don't break older apps. Unknown keys are ignored. Unknown **rule** types and **filter**
   types are surfaced to the user (§7), never silently dropped.

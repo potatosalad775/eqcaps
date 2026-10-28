@@ -223,6 +223,8 @@ export interface Protocol {
 	baudRate?: number;
 	/** The protocol is unconfirmed for this device. */
 	experimental?: boolean;
+	/** The device's settings besides the EQ (volume, gain, DAC filter, USB mode…), by the handler's control ids. Format 1.2 (SPEC §9.1). */
+	controls?: Control[];
 }
 
 export interface Preset {
@@ -232,6 +234,51 @@ export interface Preset {
 	bypass?: boolean;
 	/** The user may write filters to this preset (a user memory). Once any preset in the list is marked, the unmarked ones are built-in curves (SPEC §9). Format 1.1. */
 	writable?: boolean;
+}
+
+/** One setting the device holds besides the EQ, in the device's own numbers (SPEC §9.1). Format 1.2. */
+export interface Control {
+	/** The handler's name for the control ("gainMode"), unique within the list. */
+	id: string;
+	/** The device's or vendor app's label. */
+	name: string;
+	/** toggle takes 0 and 1; choice takes the values listed in `values`; range takes the numbers in `range`. */
+	kind: 'toggle' | 'choice' | 'range';
+	/** What the control is, so apps can present it alike across devices. */
+	role?:
+		| 'volume'
+		| 'output-gain'
+		| 'dac-filter'
+		| 'upsampling'
+		| 'usb-mode'
+		| 'sound-mode'
+		| 'light'
+		| 'tone-bass'
+		| 'tone-treble';
+	/** choice only: the values the device takes, with their labels. */
+	values?: ControlValue[];
+	/** range only: a range or stepped range (SPEC §4). */
+	range?: RangeDomain | SteppedDomain;
+	/** range only: the values are in dB. Without it they are the device's steps. */
+	unit?: 'dB';
+	when?: ControlCondition;
+	/** The control exists only on these firmware versions; with the firmware unknown it counts as absent. */
+	firmware?: FirmwareRange;
+	/** Values at which the device doesn't apply the EQ. */
+	disablesEq?: number[];
+	/** Writing the control can drop the connection or change the device's USB identity. */
+	reconnect?: boolean;
+}
+
+export interface ControlValue {
+	value: number;
+	name: string;
+}
+
+/** The control exists only while another control holds one of these values (SPEC §9.1). */
+export interface ControlCondition {
+	control: string;
+	values: number[];
 }
 
 export type GithubHandle = string;
@@ -285,4 +332,6 @@ export interface AuthoringProtocol {
 	baudRate?: number;
 	/** The protocol is unconfirmed for this device. */
 	experimental?: boolean;
+	/** The device's settings besides the EQ (volume, gain, DAC filter, USB mode…), by the handler's control ids. Format 1.2 (SPEC §9.1). */
+	controls?: Control[];
 }

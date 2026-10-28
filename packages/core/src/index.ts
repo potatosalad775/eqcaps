@@ -1,12 +1,14 @@
 /** Format version this package implements (SPEC §15). */
-export const SCHEMA_VERSION = '1.1';
+export const SCHEMA_VERSION = '1.2';
 
 export type * from './types/schema.generated.ts';
 export { ISSUE_CODES } from './issues.ts';
 export type { Issue, IssueCode } from './issues.ts';
 export { EPSILON, near, onGrid, domainForm, domainBounds, isLockedDomain } from './domain.ts';
 export type { DomainForm } from './domain.ts';
-export { compareFirmware, firmwareRangesOverlap } from './firmware.ts';
+export { compareFirmware, firmwareInRange, firmwareRangesOverlap } from './firmware.ts';
+export { controlPresent, controlTakes, eqDisabledBy } from './controls.ts';
+export type { ControlValues } from './controls.ts';
 export { mergeSlotFields, overrideIndices, slotOverrides } from './slots.ts';
 export type { SlotOverride } from './slots.ts';
 export { COUNTING_SOURCE_KINDS, isCountingSource, validateProfile } from './validate-profile.ts';

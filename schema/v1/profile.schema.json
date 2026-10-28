@@ -446,6 +446,12 @@
 				"experimental": {
 					"description": "The protocol is unconfirmed for this device.",
 					"type": "boolean"
+				},
+				"controls": {
+					"description": "The device's settings besides the EQ (volume, gain, DAC filter, USB mode…), by the handler's control ids. Format 1.2 (SPEC §9.1).",
+					"type": "array",
+					"items": { "$ref": "#/$defs/control" },
+					"minItems": 1
 				}
 			},
 			"patternProperties": { "^x-": true },
@@ -474,6 +480,113 @@
 				"properties": { "bypass": { "const": true }, "writable": { "const": true } },
 				"required": ["bypass", "writable"]
 			}
+		},
+		"control": {
+			"description": "One setting the device holds besides the EQ, in the device's own numbers (SPEC §9.1). Format 1.2.",
+			"type": "object",
+			"properties": {
+				"id": {
+					"description": "The handler's name for the control (\"gainMode\"), unique within the list.",
+					"type": "string",
+					"pattern": "^[a-z][A-Za-z0-9]*$"
+				},
+				"name": {
+					"description": "The device's or vendor app's label.",
+					"type": "string",
+					"minLength": 1
+				},
+				"kind": {
+					"description": "toggle takes 0 and 1; choice takes the values listed in `values`; range takes the numbers in `range`.",
+					"enum": ["toggle", "choice", "range"]
+				},
+				"role": {
+					"description": "What the control is, so apps can present it alike across devices.",
+					"enum": [
+						"volume",
+						"output-gain",
+						"dac-filter",
+						"upsampling",
+						"usb-mode",
+						"sound-mode",
+						"light",
+						"tone-bass",
+						"tone-treble"
+					]
+				},
+				"values": {
+					"description": "choice only: the values the device takes, with their labels.",
+					"type": "array",
+					"items": { "$ref": "#/$defs/controlValue" },
+					"minItems": 2
+				},
+				"range": {
+					"description": "range only: a range or stepped range (SPEC §4).",
+					"oneOf": [{ "$ref": "#/$defs/rangeDomain" }, { "$ref": "#/$defs/steppedDomain" }]
+				},
+				"unit": {
+					"description": "range only: the values are in dB. Without it they are the device's steps.",
+					"const": "dB"
+				},
+				"when": { "$ref": "#/$defs/controlCondition" },
+				"firmware": {
+					"description": "The control exists only on these firmware versions; with the firmware unknown it counts as absent.",
+					"$ref": "#/$defs/firmwareRange"
+				},
+				"disablesEq": {
+					"description": "Values at which the device doesn't apply the EQ.",
+					"type": "array",
+					"items": { "type": "number" },
+					"minItems": 1,
+					"uniqueItems": true
+				},
+				"reconnect": {
+					"description": "Writing the control can drop the connection or change the device's USB identity.",
+					"type": "boolean"
+				}
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["id", "name", "kind"],
+			"allOf": [
+				{
+					"if": { "properties": { "kind": { "const": "choice" } }, "required": ["kind"] },
+					"then": { "required": ["values"], "properties": { "range": false, "unit": false } }
+				},
+				{
+					"if": { "properties": { "kind": { "const": "range" } }, "required": ["kind"] },
+					"then": { "required": ["range"], "properties": { "values": false } }
+				},
+				{
+					"if": { "properties": { "kind": { "const": "toggle" } }, "required": ["kind"] },
+					"then": { "properties": { "values": false, "range": false, "unit": false } }
+				}
+			]
+		},
+		"controlValue": {
+			"type": "object",
+			"properties": {
+				"value": { "type": "number" },
+				"name": { "type": "string", "minLength": 1 }
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["value", "name"]
+		},
+		"controlCondition": {
+			"description": "The control exists only while another control holds one of these values (SPEC §9.1).",
+			"type": "object",
+			"properties": {
+				"control": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },
+				"values": {
+					"type": "array",
+					"items": { "type": "number" },
+					"minItems": 1,
+					"uniqueItems": true
+				}
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["control", "values"]
 		},
 		"githubHandle": {
 			"type": "string",

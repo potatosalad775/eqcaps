@@ -13,6 +13,16 @@ export function compareFirmware(a: string, b: string): number {
 	return 0;
 }
 
+/** Whether `firmware` lies in `range` (min inclusive, max exclusive). Unknown firmware: false. */
+export function firmwareInRange(
+	range: { min?: string; max?: string },
+	firmware: string | undefined
+): boolean {
+	if (firmware === undefined) return false;
+	if (range.min !== undefined && compareFirmware(firmware, range.min) < 0) return false;
+	return range.max === undefined || compareFirmware(firmware, range.max) < 0;
+}
+
 /** Whether two firmware ranges (min inclusive, max exclusive, missing = unbounded) overlap. */
 export function firmwareRangesOverlap(
 	a: { min?: string; max?: string } | undefined,

@@ -1,0 +1,27 @@
+{
+	"description": "A control's firmware range matches something, like match.firmware.",
+	"spec": "§9.1",
+	"profile": {
+		"schemaVersion": "1.2",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{
+					"id": "upsample",
+					"name": "Upsample",
+					"kind": "toggle",
+					"firmware": {
+						"min": "1.5",
+						"max": "1.4.9"
+					}
+				}
+			]
+		}
+	},
+	"expect": [
+		{
+			"code": "firmware-range-empty",
+			"path": "/protocol/controls/0/firmware"
+		}
+	]
+}

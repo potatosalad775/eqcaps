@@ -1,0 +1,33 @@
+{
+	"description": "A choice lists each value once.",
+	"spec": "§9.1",
+	"profile": {
+		"schemaVersion": "1.2",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{
+					"id": "gainMode",
+					"name": "Gain",
+					"kind": "choice",
+					"values": [
+						{
+							"value": 0,
+							"name": "Low"
+						},
+						{
+							"value": 0,
+							"name": "High"
+						}
+					]
+				}
+			]
+		}
+	},
+	"expect": [
+		{
+			"code": "control-value-duplicate",
+			"path": "/protocol/controls/0/values/1"
+		}
+	]
+}

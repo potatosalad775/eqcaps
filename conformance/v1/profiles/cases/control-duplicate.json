@@ -1,0 +1,40 @@
+{
+	"description": "Control ids are unique within the list.",
+	"spec": "§9.1",
+	"profile": {
+		"schemaVersion": "1.2",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{
+					"id": "volume",
+					"name": "Volume",
+					"kind": "range",
+					"role": "volume",
+					"range": {
+						"min": 0,
+						"max": 60,
+						"step": 1
+					}
+				},
+				{
+					"id": "volume",
+					"name": "Volume again",
+					"kind": "range",
+					"role": "volume",
+					"range": {
+						"min": 0,
+						"max": 60,
+						"step": 1
+					}
+				}
+			]
+		}
+	},
+	"expect": [
+		{
+			"code": "control-duplicate",
+			"path": "/protocol/controls/1/id"
+		}
+	]
+}

@@ -6,10 +6,18 @@ import {
 	type Field
 } from './dependencies.ts';
 import { domainBounds, domainForm, near, onGrid } from './domain.ts';
+import { controlTakes } from './controls.ts';
 import { compareFirmware } from './firmware.ts';
 import { error, type Issue } from './issues.ts';
 import { mergeSlotFields, overrideIndices, slotOverrides } from './slots.ts';
-import type { Domain, Profile, SlotFields, Source } from './types/schema.generated.ts';
+import type {
+	Control,
+	Domain,
+	FirmwareRange,
+	Profile,
+	SlotFields,
+	Source
+} from './types/schema.generated.ts';
 
 /** Source kinds that count toward a verified status (SPEC §10). */
 export const COUNTING_SOURCE_KINDS: ReadonlySet<Source['kind']> = new Set([
@@ -37,6 +45,7 @@ export function validateProfile(profile: Profile): Issue[] {
 		...checkBands(profile),
 		...checkDependencies(profile),
 		...checkMatch(profile),
+		...checkControls(profile),
 		...checkMeta(profile),
 		...checkVersion(profile)
 	];
@@ -44,7 +53,11 @@ export function validateProfile(profile: Profile): Issue[] {
 
 // §4 ------------------------------------------------------------------------------------------
 
-function checkDomain(d: Domain, field: 'freq' | 'q' | 'gain' | 'preamp', path: string): Issue[] {
+function checkDomain(
+	d: Domain,
+	field: 'freq' | 'q' | 'gain' | 'preamp' | 'control',
+	path: string
+): Issue[] {
 	const issues: Issue[] = [];
 	const form = domainForm(d);
 	if ('min' in d && d.min > d.max) {
@@ -244,18 +257,81 @@ function checkDependencies(profile: Profile): Issue[] {
 
 // §3 ------------------------------------------------------------------------------------------
 
-function checkMatch(profile: Profile): Issue[] {
-	const fw = profile.match?.firmware;
+function checkFirmwareRange(fw: FirmwareRange | undefined, path: string): Issue[] {
 	if (fw?.min !== undefined && fw.max !== undefined && compareFirmware(fw.min, fw.max) >= 0) {
 		return [
 			error(
 				'firmware-range-empty',
-				'/match/firmware',
+				path,
 				`no firmware matches: min ${fw.min} is inclusive and max ${fw.max} exclusive`
 			)
 		];
 	}
 	return [];
+}
+
+function checkMatch(profile: Profile): Issue[] {
+	return checkFirmwareRange(profile.match?.firmware, '/match/firmware');
+}
+
+// §9.1 ----------------------------------------------------------------------------------------
+
+function checkControls(profile: Profile): Issue[] {
+	const controls = profile.protocol?.controls ?? [];
+	const issues: Issue[] = [];
+	const byId = new Map<string, Control>();
+	controls.forEach((c, i) => {
+		const path = `/protocol/controls/${i}`;
+		if (byId.has(c.id)) {
+			issues.push(error('control-duplicate', `${path}/id`, `control "${c.id}" is listed twice`));
+		} else byId.set(c.id, c);
+		if (c.kind === 'range' && c.range)
+			issues.push(...checkDomain(c.range, 'control', `${path}/range`));
+		(c.values ?? []).forEach((v, j) => {
+			if (c.values!.slice(0, j).some((w) => near(w.value, v.value))) {
+				issues.push(
+					error(
+						'control-value-duplicate',
+						`${path}/values/${j}`,
+						`value ${v.value} is listed twice`
+					)
+				);
+			}
+		});
+		issues.push(...checkFirmwareRange(c.firmware, `${path}/firmware`));
+		(c.disablesEq ?? []).forEach((v, j) => {
+			if (!controlTakes(c, v)) {
+				issues.push(
+					error('control-value-invalid', `${path}/disablesEq/${j}`, `"${c.id}" doesn't take ${v}`)
+				);
+			}
+		});
+	});
+	controls.forEach((c, i) => {
+		if (!c.when) return;
+		const path = `/protocol/controls/${i}/when`;
+		const target = byId.get(c.when.control);
+		const why =
+			c.when.control === c.id
+				? 'names the control itself'
+				: !target
+					? `names "${c.when.control}", which isn't in the list`
+					: target.when
+						? `names "${target.id}", which has a when of its own`
+						: undefined;
+		if (why) {
+			issues.push(error('control-when-invalid', `${path}/control`, `when ${why}`));
+			return;
+		}
+		c.when.values.forEach((v, j) => {
+			if (!controlTakes(target!, v)) {
+				issues.push(
+					error('control-when-invalid', `${path}/values/${j}`, `"${target!.id}" doesn't take ${v}`)
+				);
+			}
+		});
+	});
+	return issues;
 }
 
 // §10 -----------------------------------------------------------------------------------------
@@ -320,6 +396,9 @@ function checkVersion(profile: Profile): Issue[] {
 	const needs: { minor: number; field: string }[] = [];
 	if (profile.protocol?.presets?.some((p) => p.writable !== undefined)) {
 		needs.push({ minor: 1, field: 'protocol.presets[].writable' });
+	}
+	if (profile.protocol?.controls !== undefined) {
+		needs.push({ minor: 2, field: 'protocol.controls' });
 	}
 	return needs
 		.filter((n) => n.minor > declared)
