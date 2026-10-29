@@ -14,7 +14,8 @@
 	"preamp": { "mode": "none" },
 	"protocol": {
 		"handler": "ktmicro-usb-hid",
-		"options": { "slotRegister": false, "preampRegister": false, "frameDelay": 400 }
+		"options": { "slotRegister": false, "preampRegister": false, "frameDelay": 400 },
+		"disconnectOnSave": true
 	},
 	"meta": {
 		"status": "draft",
@@ -25,6 +26,6 @@
 				"date": "2026-10-28"
 			}
 		],
-		"notes": "What Tanchjim's Android app does with its KT Micro devices (the app's \"FeiFan\" protocol; it tells them apart by USB product name only): 5 bands of peaking, low and high shelf, low-pass and high-pass, 30 to 20000 Hz in whole Hz, Q 0.1 to 10 and gain ±12 dB, both to one decimal. The app has no pre-gain and no EQ switch: it never reads or writes the slot register 0x24 or the preamp register 0x66. It writes the ten band registers 400 ms apart, then the commit, then closes the USB connection; it sends the commit and closes again when it goes to the background. These are the app's editor limits, not verified firmware limits."
+		"notes": "What Tanchjim's Android app does with its KT Micro devices (the app's \"FeiFan\" protocol; it tells them apart by USB product name only): 5 bands of peaking, low and high shelf, low-pass and high-pass, 30 to 20000 Hz in whole Hz, Q 0.1 to 10 and gain ±12 dB, both to one decimal. The app has no pre-gain and no EQ switch: it never reads or writes the slot register 0x24 or the preamp register 0x66. It writes the ten band registers 400 ms apart, then the commit, then closes the USB connection; it sends the commit and closes again when it goes to the background. On the FOLA, a write after a commit hangs until the device is opened again, so the bridge reconnects after each push (disconnectOnSave), as the app does. These are the app's editor limits, not verified firmware limits."
 	}
 }

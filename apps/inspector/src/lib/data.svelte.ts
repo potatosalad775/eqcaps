@@ -48,8 +48,9 @@ class Catalog {
 		this.#client ??= createClient({
 			baseUrl: dataUrl(),
 			store: storage(),
-			// Contributors check their own changes here: revalidate often (an ETag request is cheap).
-			ttl: 5 * 60 * 1000,
+			// Contributors check their own changes here: revalidate often (an ETag request is cheap),
+			// and in dev on every load, so a `data:build` shows up on the next reload.
+			ttl: import.meta.env.DEV ? 0 : 5 * 60 * 1000,
 			onError: (error, context) => {
 				const message = error instanceof Error ? error.message : String(error);
 				this.errors = [...this.errors, `${context}: ${message}`];

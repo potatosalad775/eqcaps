@@ -95,13 +95,26 @@ found under another vendor id.
   the old base (Q ≤ 5) flagged and the app's range (Q ≤ 10) allows.
 - New profiles, `0x31b2` + the app's name: DSP S, Zero DSP and Tanya DSP (half frequency), Zero
   Ultima, EA Force, FOLA, Fission Rational HiFi Edition, Origin AT.
-- Not followed: the app closes the USB connection after the save. The bridge keeps it open; if
-  writes after a save don't take, that's the first thing to try.
+- At first not followed: the app closes the USB connection after the save. The FOLA showed why
+  (below); the base now has `disconnectOnSave`.
+
+## FOLA on the owner's Mac (2026-10-29)
+
+- USB `0x31b2:0x1123`, product name `TANCHJIM-FOLA`. One consumer-control collection: reports
+  0x4B (75) and 0x54 (84), 10 bytes in and out, and input report 1, 1 byte. The app uses only
+  0x4B; 0x54 is left alone. `productId` added to the profile's match.
+- Inspector pull: bands read in Hz, so the FOLA is not a half-frequency model.
+- uniPEQ push (dev, with tarballs from `release --pack` and the local build): the first write took, the next one hung. After the
+  commit the FOLA re-enumerates (it drops out of the audio device list for a moment), which is
+  what the app's close-after-save and Android's repeated permission dialog follow from.
+  `disconnectOnSave: true` on `tanchjim-ktmicro`: with it, every write took, and the Android app
+  read them back as written.
+- Reconnecting in Chrome after the drop sometimes needs the device chooser again, sometimes not.
+- Still to do before `maintainer-verified`: one band of each type by ear, and replug-and-read.
 
 ## Next
 
-1. **Identify the FOLA**: vid/pid, the exact product name and the HID report descriptor. Check that
-   it matches `tanchjim-fola`, then pull (inspector, read only, D40) and push (uniPEQ).
+1. **FOLA**: the by-ear pass and replug-and-read above, then `maintainer-verified`.
 2. **TTGK half**: read `StarGate2Command` and `Space2Command` against `walkplay-hid` the way
    walkplay.md read Walkplay's app, then a Tanchjim Walkplay base (the app offers all five types
    and ±10 dB, Q 0.1–5, 20–20000 Hz; the existing OLA II and Space Pro profiles are peaking only)
