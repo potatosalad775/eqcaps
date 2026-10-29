@@ -46,7 +46,13 @@ copied (D25), and cited as a `vendor-app` source.
    own traffic; the inspector would only record ours.
 3. **Status.** Done for the DS3 (maintainer-verified). Other devices recorded by contributors
    become `community-verified` once their recording agrees with the data (D28).
-4. **More Fosi devices.** The C1, C3, ZH1 and ZH3 send the same commands in the control center,
+4. **Active preset and EQ switch.** Found on 2026-10-29 on the DS3 (1.6.10, UAC 2.0, through the
+   control center's own calls): `0x8B 0xFF` answers the active preset in the `0x8B` layout (byte
+   2 the index); it followed every `0x8A` select, with the EQ on or off. The EQ switch (`0x9E`) is
+   separate state. So: Fosi `currentSlot()` from `0x8B 0xFF`, and `eqEnabled()` with a
+   `readsEnabled` capability, from `0x9E`. uniPEQ shows "Unknown" in Device EQ until then; its
+   plan is uniPEQ `docs/plans/device-controls.md`.
+5. **More Fosi devices.** The C1, C3, ZH1 and ZH3 send the same commands in the control center,
    so each can be a data file, plus a handler fix where a command differs. The C1 has the same
    8/32-band split at 1.4.15. The C3 has 10 bands, bass and treble controls, and an FPS mode and
    spatial audio that turn the EQ off (`disablesEq`). The Q8 and DA30 use other protocols and

@@ -77,8 +77,10 @@ device, and whether an old handle went or was reused, for telling these cases ap
 
 `device.capabilities` says what the protocol can do (`canRead`, `canWrite`, `readsPreamp`,
 `readsSlot`, `writesPreamp`, `writesSlot`, `needsBandCount`, the filter `types` it has wire codes for, the
-`wire` grid it can carry, preset `slots`, `disconnectOnSave`, `experimental`, `readsFirmware`, and
-the device `controls` it drives). A push with a
+`wire` grid it can carry, preset `slots`, `disconnectOnSave`, `experimental`, `readsFirmware`,
+`readsEnabled`, and the device `controls` it drives). Where the EQ switch is separate from the
+preset (`readsEnabled`), `eqEnabled()` reads it, and `currentSlot()` gives the preset whether the
+EQ is on or off. A push with a
 `preamp` or `slot` the protocol can't write is refused, not sent without it, and so is a pull of
 a `slot` the protocol can't read. Each handler's `codec`
 turns a push request into frames and back without a device, for checking what a value becomes on

@@ -49,6 +49,8 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	experimental: boolean;
 	/** `firmware()` asks the device. */
 	readsFirmware: boolean;
+	/** `eqEnabled()` asks the device: its EQ switch is separate from the preset it plays. */
+	readsEnabled: boolean;
 	/** The profile's device controls that this bridge drives (SPEC §9.1). */
 	controls: readonly Control[];
 }
@@ -66,8 +68,14 @@ export interface BridgeDevice {
 	readonly capabilities: DeviceCapabilities;
 	pull(request?: PullRequest): Promise<PullResult>;
 	push(request: PushRequest): Promise<PushResult>;
-	/** The active preset slot; null when EQ is off or the protocol can't say. */
+	/**
+	 * The active preset slot; null when the protocol can't say, or (on some bypass-preset
+	 * protocols) when the EQ is off. Where the EQ switch is separate state (`readsEnabled`), this is
+	 * the preset the device plays when its EQ is on, whether it is on or not.
+	 */
 	currentSlot(): Promise<number | null>;
+	/** Whether the EQ is on (`readsEnabled`); null when the protocol or device doesn't say. */
+	eqEnabled(): Promise<boolean | null>;
 	setEnabled(enabled: boolean, slot?: number): Promise<void>;
 	/** The device's firmware version, read once; null when the protocol or device doesn't say. */
 	firmware(): Promise<string | null>;
@@ -129,6 +137,7 @@ export function openDevice(
 		disconnectOnSave: protocol.disconnectOnSave ?? false,
 		experimental: protocol.experimental ?? false,
 		readsFirmware: handler.firmware !== undefined,
+		readsEnabled: handler.eqEnabled !== undefined,
 		controls: (protocol.controls ?? []).filter((c) => handler.controls?.[c.id])
 	};
 
@@ -212,6 +221,10 @@ export function openDevice(
 
 		currentSlot() {
 			return serial(async () => (handler.currentSlot ? handler.currentSlot(ctx) : null));
+		},
+
+		eqEnabled() {
+			return serial(async () => (handler.eqEnabled ? handler.eqEnabled(ctx) : null));
 		},
 
 		setEnabled(enabled, slot) {

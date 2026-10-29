@@ -17,6 +17,10 @@ export class FakeDs3 implements HidTransport {
 	firmware = [0x01, 0x05, 0x08];
 	values: Record<string, number> = { uacMode: 0, upsample: 0, volume: 20, gainMode: 0, led: 1 };
 	stuck?: string;
+	/** The active preset (0x8A, 0x92), which 0x8B 0xFF answers for. */
+	active = 0;
+	/** The EQ switch (0x9D, 0x9E), separate from the active preset. */
+	eqOn = true;
 	readonly presets = new Map([
 		[2, { gain: -3, name: 'ROCK' }],
 		[7, { gain: 0, name: 'MyCurve' }]
@@ -61,12 +65,17 @@ export class FakeDs3 implements HidTransport {
 				return this.reply(0x77, cmd, ...this.firmware);
 			case 0x91:
 				return this.reply(0x77, cmd, 10, 7);
+			case 0x8a:
+			case 0x92:
+				this.active = d[2]!;
+				return this.reply(0x77, cmd);
 			case 0x8b: {
-				const p = this.presets.get(d[2]!) ?? { gain: 0, name: '' };
+				const id = d[2] === 0xff ? this.active : d[2]!;
+				const p = this.presets.get(id) ?? { gain: 0, name: '' };
 				return this.reply(
 					0x77,
 					cmd,
-					d[2]!,
+					id,
 					...new Uint8Array(new Int32Array([p.gain]).buffer),
 					...name(p)
 				);
@@ -86,9 +95,10 @@ export class FakeDs3 implements HidTransport {
 				return this.reply(0x77, 0x8e, d[2]!, d[3]!, 2, 0, 0, 0x7a, 0x44, 0, 0, 0x80, 0x3f);
 			}
 			case 0x9d:
+				this.eqOn = d[2] === 1;
 				return this.reply(0x77, cmd, 0, d[2]!);
 			case 0x9e:
-				return this.reply(0x77, cmd, 1);
+				return this.reply(0x77, cmd, this.eqOn ? 1 : 0);
 			default:
 				return this.reply(0x77, cmd);
 		}

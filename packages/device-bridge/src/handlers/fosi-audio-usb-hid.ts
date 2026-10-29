@@ -9,10 +9,13 @@
 // with 0x91, which asks for the preset count, as devicePEQ does. A preset's pre-gain (whole dB,
 // int32 LE) and name (16 bytes UTF-8) are written together (0x8C) and read with 0x8B; the codec
 // leaves the name empty and the session fills in the one the device holds, so a write keeps it.
-// Built-in presets hold 8 bands; user presets hold 8, or 32 on firmware from 1.4.15.
+// 0x8B with preset 0xFF answers for the active preset, its id in byte 2, as the vendor app asks
+// when it connects. Built-in presets hold 8 bands; user presets hold 8, or 32 on firmware from
+// 1.4.15.
 //
-// EQ on/off (0x9D, answered on the feature report) is separate, persistent state that writing a
-// preset doesn't change, so a push also switches it on. A pull selects the preset it reads, as the
+// EQ on/off (0x9D, read with 0x9E, answered on the feature report) is separate, persistent state
+// that selecting or writing a preset doesn't change, and turning it off keeps the active preset;
+// so a push also switches it on. A pull selects the preset it reads, as the
 // vendor app does, so it changes the active preset. A band at 0 Hz and 0 dB reads back as empty,
 // so frequencies must be above 0 (upstream never sends 0 Hz either).
 
@@ -76,6 +79,8 @@ const SET_GAME_MODE = 0xa4;
 const GET_GAME_MODE = 0xa5;
 const GET_FIRMWARE_VERSION = 0xa6;
 const BYPASS = 0;
+/** The preset id 0x8B answers for the active preset. */
+const ACTIVE_PRESET = 0xff;
 /** Bands of a built-in preset, whatever the firmware. */
 const BUILT_IN_BANDS = 8;
 const NAME_AT = 7;
@@ -309,7 +314,7 @@ export const fosiAudioUsbHid: HidHandler<FosiAudioHidOptions> = {
 		writesPreamp: true,
 		writesSlot: true,
 		needsBandCount: true,
-		readsCurrentSlot: false,
+		readsCurrentSlot: true,
 		canEnable: true
 	}),
 
@@ -350,6 +355,16 @@ export const fosiAudioUsbHid: HidHandler<FosiAudioHidOptions> = {
 		}
 		await setEnabled(ctx, true, request.slot ?? ctx.options.defaultSlot ?? 7);
 		return { reconnect: false };
+	},
+
+	async currentSlot(ctx) {
+		const d = await ask(ctx, GET_EQ_MODE, ACTIVE_PRESET);
+		return d && d.length > 2 ? d[2]! : null;
+	},
+
+	async eqEnabled(ctx) {
+		const d = await ask(ctx, GET_EQ_ENABLE);
+		return d && d.length > 2 ? d[2] === 1 : null;
 	},
 
 	setEnabled,

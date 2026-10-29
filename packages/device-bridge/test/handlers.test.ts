@@ -567,6 +567,28 @@ describe('Bluetooth codecs', () => {
 describe('Fosi Audio DS3', () => {
 	const ds3 = (t: FakeDs3) => open(t, 'fosi-audio-ds3', 32);
 
+	test('reads the active preset, which stays when the EQ is off', async () => {
+		const t = new FakeDs3();
+		t.active = 3;
+		const device = ds3(t);
+		expect(device.capabilities).toMatchObject({ readsCurrentSlot: true, readsEnabled: true });
+		expect(await device.currentSlot()).toBe(3);
+		expect(await device.eqEnabled()).toBe(true);
+		await device.setEnabled(false);
+		expect(await device.eqEnabled()).toBe(false);
+		expect(await device.currentSlot()).toBe(3);
+		await device.setEnabled(true, 8);
+		expect([await device.currentSlot(), await device.eqEnabled()]).toEqual([8, true]);
+	});
+
+	test('a push leaves the device on the preset it wrote, with the EQ on', async () => {
+		const t = new FakeDs3();
+		t.eqOn = false;
+		const device = ds3(t);
+		await device.push({ filters: [pk(100, 3)], slot: 9 });
+		expect([await device.currentSlot(), await device.eqEnabled()]).toEqual([9, true]);
+	});
+
 	test('reads the firmware version once', async () => {
 		const t = new FakeDs3();
 		const device = ds3(t);

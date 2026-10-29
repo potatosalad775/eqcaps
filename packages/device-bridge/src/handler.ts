@@ -168,6 +168,11 @@ export interface Handler<T extends Transport, O, F> {
 	pull(ctx: HandlerContext<T, O>, request: { slot?: number; bands?: number }): Promise<PullResult>;
 	push(ctx: HandlerContext<T, O>, request: PushRequest): Promise<PushResult>;
 	currentSlot?(ctx: HandlerContext<T, O>): Promise<number | null>;
+	/**
+	 * Whether the EQ is on, for a protocol whose EQ switch is its own state rather than a bypass
+	 * preset; null when the device doesn't say.
+	 */
+	eqEnabled?(ctx: HandlerContext<T, O>): Promise<boolean | null>;
 	setEnabled?(ctx: HandlerContext<T, O>, enabled: boolean, slot?: number): Promise<void>;
 	/** The device's firmware version, dotted ("1.5.8"); null when the device doesn't say. */
 	firmware?(ctx: HandlerContext<T, O>): Promise<string | null>;
