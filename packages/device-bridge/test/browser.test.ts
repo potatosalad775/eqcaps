@@ -1,12 +1,13 @@
 // Browser transports, driven by fake WebHID / Web Serial / Web Bluetooth objects.
 
-import { describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { matchDevice } from '@potatosalad775/eqcaps-client';
 import {
 	grantedHidDevice,
 	requestBleDevice,
 	requestHidDevice,
 	requestSerialPort,
+	waitForGrantedHidDevice,
 	type BluetoothLike,
 	type HidDeviceLike,
 	type SerialPortLike
@@ -128,6 +129,130 @@ describe('WebHID', () => {
 		expect(transport!.productName).toBe('Protocol Micro');
 		expect(audio.opened).toBe(true);
 		expect(await grantedHidDevice({ ...identity, productId: 1 }, hid)).toBeNull();
+	});
+
+	describe('waiting for a granted device', () => {
+		const identity = { vendorId: 0x31b2, productId: 0x1123, productName: 'TANCHJIM-FOLA' };
+		type Listener = (e: { device: HidDeviceLike }) => void;
+
+		/** A `navigator.hid` whose granted list and connection events the test drives. */
+		function fakeNavigatorHid(granted: HidDeviceLike[]) {
+			const listeners = { connect: new Set<Listener>(), disconnect: new Set<Listener>() };
+			return {
+				granted,
+				listeners,
+				requestDevice: async (): Promise<HidDeviceLike[]> => {
+					throw new Error('no chooser');
+				},
+				getDevices: async () => [...granted],
+				addEventListener: (t: 'connect' | 'disconnect', l: Listener) => void listeners[t].add(l),
+				removeEventListener: (t: 'connect' | 'disconnect', l: Listener) =>
+					void listeners[t].delete(l),
+				fire(t: 'connect' | 'disconnect', device: HidDeviceLike) {
+					for (const l of listeners[t]) l({ device });
+				}
+			};
+		}
+
+		afterEach(() => void vi.useRealTimers());
+
+		test('takes a device already connected straight away', async () => {
+			const fola = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			const hid = fakeNavigatorHid([fola]);
+			const t = await waitForGrantedHidDevice(identity, { timeoutMs: 1000, hid });
+			expect(t?.productName).toBe('TANCHJIM-FOLA');
+			expect(fola.opened).toBe(true);
+			expect(hid.listeners.connect.size).toBe(0);
+		});
+
+		test('resolves on the connect event, skipping the handle from before a re-enumeration', async () => {
+			vi.useFakeTimers();
+			const before = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			const hid = fakeNavigatorHid([before]);
+			const events: string[] = [];
+			const wait = waitForGrantedHidDevice(identity, {
+				timeoutMs: 5000,
+				pollMs: 10_000,
+				ignoreCurrent: true,
+				hid,
+				onEvent: (e) => events.push(e)
+			});
+			await vi.advanceTimersByTimeAsync(100);
+			expect(before.opened).toBe(false);
+			hid.granted.length = 0;
+			hid.fire('disconnect', before);
+			const after = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			hid.granted.push(after);
+			hid.fire('connect', fakeHid('Keyboard', 1, 2));
+			hid.fire('connect', after);
+			expect(await wait).not.toBeNull();
+			expect(after.opened).toBe(true);
+			expect(before.opened).toBe(false);
+			expect(events).toEqual(['disconnect', 'connect', 'gone']);
+			expect(hid.listeners.connect.size + hid.listeners.disconnect.size).toBe(0);
+		});
+
+		test('finds the device by polling when no event comes, preferring the vendor interface', async () => {
+			vi.useFakeTimers();
+			const hid = fakeNavigatorHid([]);
+			const pollOnly = { requestDevice: hid.requestDevice, getDevices: hid.getDevices };
+			const wait = waitForGrantedHidDevice(identity, { timeoutMs: 5000, hid: pollOnly });
+			await vi.advanceTimersByTimeAsync(600);
+			const audio = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123, [{ usagePage: 0x0c }]);
+			const peq = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123, [{ usagePage: 0xff00 }]);
+			hid.granted.push(audio, peq);
+			await vi.advanceTimersByTimeAsync(250);
+			const t = await wait;
+			expect(t!.collections[0]!.usagePage).toBe(0xff00);
+		});
+
+		test('takes an old handle back once it has gone and returned', async () => {
+			vi.useFakeTimers();
+			const fola = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			const hid = fakeNavigatorHid([fola]);
+			const wait = waitForGrantedHidDevice(identity, { timeoutMs: 5000, ignoreCurrent: true, hid });
+			await vi.advanceTimersByTimeAsync(300);
+			expect(fola.opened).toBe(false);
+			hid.granted.length = 0;
+			await vi.advanceTimersByTimeAsync(250);
+			hid.granted.push(fola);
+			await vi.advanceTimersByTimeAsync(250);
+			expect(await wait).not.toBeNull();
+		});
+
+		test('takes back a handle that never went, after reuseAfterMs', async () => {
+			vi.useFakeTimers();
+			const fola = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			const hid = fakeNavigatorHid([fola]);
+			const events: string[] = [];
+			const wait = waitForGrantedHidDevice(identity, {
+				timeoutMs: 5000,
+				ignoreCurrent: true,
+				reuseAfterMs: 1500,
+				hid,
+				onEvent: (e) => events.push(e)
+			});
+			await vi.advanceTimersByTimeAsync(1400);
+			expect(fola.opened).toBe(false);
+			await vi.advanceTimersByTimeAsync(100);
+			expect(await wait).not.toBeNull();
+			expect(fola.opened).toBe(true);
+			expect(events).toEqual(['reused']);
+		});
+
+		test('gives null after the timeout, never asking for the chooser', async () => {
+			vi.useFakeTimers();
+			const hid = fakeNavigatorHid([]);
+			const wait = waitForGrantedHidDevice(identity, { timeoutMs: 5000, hid });
+			await vi.advanceTimersByTimeAsync(5000);
+			expect(await wait).toBeNull();
+			expect(hid.listeners.connect.size).toBe(0);
+			// A device turning up later is left alone.
+			const fola = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			hid.granted.push(fola);
+			await vi.advanceTimersByTimeAsync(1000);
+			expect(fola.opened).toBe(false);
+		});
 	});
 
 	test('a cancelled chooser gives null', async () => {

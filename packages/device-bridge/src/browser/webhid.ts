@@ -1,10 +1,12 @@
 import { BridgeError } from '../errors.ts';
 import { chooserFilters, type ChooserEntry } from '../chooser.ts';
+import { after } from '../platform.ts';
 import type { HidCollectionInfo, HidReportInfo, HidTransport } from '../transport.ts';
 import {
 	browserApis,
 	bytesOf,
 	type HidCollectionInfoLike,
+	type HidConnectionEventLike,
 	type HidDeviceLike,
 	type HidInputReportEventLike,
 	type HidLike,
@@ -109,17 +111,139 @@ export async function requestHidDevice(
  * exact product name, preferring the vendor-defined interface; null if it isn't connected.
  */
 export async function grantedHidDevice(
-	identity: { vendorId: number; productId: number; productName: string },
+	identity: HidIdentity,
 	hid: HidLike | undefined = browserApis().hid
 ): Promise<HidTransport | null> {
 	if (!hid) throw new BridgeError('unsupported', 'WebHID is not available in this browser');
 	const granted = await hid.getDevices().catch(transportError('getDevices'));
-	const same = granted.filter(
-		(d) =>
-			d.vendorId === identity.vendorId &&
-			d.productId === identity.productId &&
-			d.productName === identity.productName
+	const device = pickGranted(granted, identity);
+	return device ? hidTransport(device) : null;
+}
+
+/** What a granted device is found again by. */
+export interface HidIdentity {
+	vendorId: number;
+	productId: number;
+	productName: string;
+}
+
+const isSame = (d: HidDeviceLike, identity: HidIdentity) =>
+	d.vendorId === identity.vendorId &&
+	d.productId === identity.productId &&
+	d.productName === identity.productName;
+
+function pickGranted(granted: readonly HidDeviceLike[], identity: HidIdentity) {
+	const same = granted.filter((d) => isSame(d, identity));
+	return same.find(hasVendorCollection) ?? same[0];
+}
+
+export interface WaitForHidOptions {
+	/** How long to wait before giving up with null, ms. */
+	timeoutMs: number;
+	/** How often `getDevices()` is asked meanwhile, ms (default 250). */
+	pollMs?: number;
+	/**
+	 * Skip the matching devices granted at the call: for a device about to re-enumerate (one that
+	 * restarts to save), whose old handle stays listed for a moment and fails once it goes.
+	 */
+	ignoreCurrent?: boolean;
+	/**
+	 * With `ignoreCurrent`: a skipped handle still listed this long after the call, never having
+	 * gone, is taken after all. Some devices keep their HID interface through the restart and only
+	 * drop the audio one (the Tanchjim FOLA on macOS): their old handle is the device back.
+	 */
+	reuseAfterMs?: number;
+	/**
+	 * Called on `navigator.hid`'s connect and disconnect events for a matching device, with `gone`
+	 * when a poll first misses a skipped one, and with `reused` when a skipped handle that never went
+	 * is taken (`reuseAfterMs`). For diagnostics: whether the browser reports the device leaving and
+	 * coming back, and when.
+	 */
+	onEvent?: (event: 'connect' | 'disconnect' | 'gone' | 'reused') => void;
+	/** Default: `navigator.hid`. */
+	hid?: HidLike;
+}
+
+/**
+ * Waits for a device this site was granted to be connected, as `grantedHidDevice` finds it: on
+ * the browser's `connect` event or a `getDevices()` poll, whichever comes first. Null after
+ * `timeoutMs`, which is also what a device whose grant the browser dropped comes to: this never
+ * shows the chooser (that needs a click).
+ */
+export async function waitForGrantedHidDevice(
+	identity: HidIdentity,
+	options: WaitForHidOptions
+): Promise<HidTransport | null> {
+	const hid = options.hid ?? browserApis().hid;
+	if (!hid) throw new BridgeError('unsupported', 'WebHID is not available in this browser');
+	const stale = new Set(
+		options.ignoreCurrent
+			? (await hid.getDevices().catch(() => [])).filter((d) => isSame(d, identity))
+			: []
 	);
-	const device = same.find(hasVendorCollection) ?? same[0];
+	const device = await new Promise<HidDeviceLike | null>((resolve) => {
+		let settled = false;
+		let checking = false;
+		let gone = stale.size === 0;
+		let reuse = false;
+		let cancelPoll = () => {};
+		const finish = (d: HidDeviceLike | null) => {
+			if (settled) return;
+			settled = true;
+			cancelTimeout();
+			cancelReuse();
+			cancelPoll();
+			hid.removeEventListener?.('connect', onConnect);
+			hid.removeEventListener?.('disconnect', onDisconnect);
+			resolve(d);
+		};
+		const check = async () => {
+			if (settled || checking) return;
+			checking = true;
+			try {
+				const granted = await hid.getDevices().catch(() => []);
+				if (!gone && !granted.some((d) => stale.has(d))) {
+					gone = true;
+					options.onEvent?.('gone');
+				}
+				// Once the old handles have gone, one coming back is the device back.
+				const usable = gone || reuse ? granted : granted.filter((d) => !stale.has(d));
+				const found = pickGranted(usable, identity);
+				if (!found) return;
+				if (!gone && stale.has(found)) options.onEvent?.('reused');
+				finish(found);
+			} finally {
+				checking = false;
+			}
+		};
+		const onConnect = ({ device: d }: HidConnectionEventLike) => {
+			if (!isSame(d, identity)) return;
+			options.onEvent?.('connect');
+			if (stale.has(d)) gone = true;
+			// Through `getDevices()`, so a device with several interfaces still gets the vendor one.
+			void check();
+		};
+		const onDisconnect = ({ device: d }: HidConnectionEventLike) => {
+			if (isSame(d, identity)) options.onEvent?.('disconnect');
+		};
+		hid.addEventListener?.('connect', onConnect);
+		hid.addEventListener?.('disconnect', onDisconnect);
+		const cancelTimeout = after(options.timeoutMs, () => finish(null));
+		const cancelReuse =
+			options.reuseAfterMs !== undefined && stale.size > 0
+				? after(options.reuseAfterMs, () => {
+						reuse = true;
+						void check();
+					})
+				: () => {};
+		const poll = () => {
+			cancelPoll = after(options.pollMs ?? 250, () => {
+				void check();
+				poll();
+			});
+		};
+		poll();
+		void check();
+	});
 	return device ? hidTransport(device) : null;
 }

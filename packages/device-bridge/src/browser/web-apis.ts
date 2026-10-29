@@ -55,6 +55,19 @@ export interface HidLike {
 		filters: { vendorId?: number; productId?: number; usagePage?: number }[];
 	}): Promise<HidDeviceLike[]>;
 	getDevices(): Promise<HidDeviceLike[]>;
+	// Optional so a bare fake still works: without them a wait for a device only polls.
+	addEventListener?(
+		type: 'connect' | 'disconnect',
+		listener: (event: HidConnectionEventLike) => void
+	): void;
+	removeEventListener?(
+		type: 'connect' | 'disconnect',
+		listener: (event: HidConnectionEventLike) => void
+	): void;
+}
+
+export interface HidConnectionEventLike {
+	readonly device: HidDeviceLike;
 }
 
 export interface ReadableStreamReaderLike {

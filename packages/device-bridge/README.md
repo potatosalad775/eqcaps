@@ -64,6 +64,17 @@ Serial ports and BLE devices are chosen first and opened once the protocol is kn
 `open(protocol)`. A Bluetooth serial port shows only its service class, which several devices
 share: ask the user which device it is.
 
+A HID device this site was granted can be opened again without the chooser, by vendor id, product
+id and exact product name: `grantedHidDevice(identity)` if it is connected now, null if not.
+`waitForGrantedHidDevice(identity, { timeoutMs })` waits for it, on `navigator.hid`'s `connect`
+event or a `getDevices()` poll, and gives null after the timeout; it never shows the chooser,
+which needs a click. After a push that returns `reconnect: true` (a `disconnectOnSave` device
+restarting to save), pass `ignoreCurrent: true`: the old handle stays listed for a moment and
+fails once the device goes. Some devices keep their HID interface through the restart and only
+drop the audio one (the Tanchjim FOLA on macOS); `reuseAfterMs` takes the old handle back if it
+is still listed by then. `onEvent` reports the browser's connect and disconnect events for the
+device, and whether an old handle went or was reused, for telling these cases apart.
+
 `device.capabilities` says what the protocol can do (`canRead`, `canWrite`, `readsPreamp`,
 `readsSlot`, `writesPreamp`, `writesSlot`, `needsBandCount`, the filter `types` it has wire codes for, the
 `wire` grid it can carry, preset `slots`, `disconnectOnSave`, `experimental`, `readsFirmware`, and
