@@ -6,7 +6,7 @@ import {
 	type ControlValues,
 	type FilterType
 } from '@potatosalad775/eqcaps-core';
-import { BridgeError } from './errors.ts';
+import { BridgeError, isBridgeError } from './errors.ts';
 import type {
 	AnyHandler,
 	HandlerCapabilities,
@@ -265,7 +265,14 @@ export function openDevice(
 				if (!(await present(c))) {
 					throw new BridgeError('unsupported', `${handler.id}: the device has no "${id}" now`);
 				}
-				await driver(c).write(ctx, value);
+				try {
+					await driver(c).write(ctx, value);
+				} catch (e) {
+					// A device that restarts for this control can drop off the bus before the write
+					// returns (the DS3 on a USB mode switch): the transport failing is it restarting.
+					if (!c.reconnect || !isBridgeError(e, 'transport')) throw e;
+					ctx.log(`${handler.id}: "${id}" lost the device as it restarted (${e.message})`);
+				}
 				if (c.reconnect) return { reconnect: true };
 				const back = await driver(c).read(ctx);
 				if (!near(back, value)) {

@@ -641,6 +641,20 @@ describe('Fosi Audio DS3', () => {
 		expect(t.values.uacMode).toBe(1);
 	});
 
+	test('takes the device dropping during a write that restarts it as the restart', async () => {
+		const t = new FakeDs3();
+		const device = ds3(t);
+		await device.readControls();
+		const lost = () => {
+			throw new BridgeError('transport', 'WebHID: sendReport failed');
+		};
+		t.sendReport = t.sendFeatureReport = async (_id, data) => {
+			if (data[1] === 0x9b || data[1] === 0x93) lost();
+		};
+		expect(await device.writeControl('uacMode', 1)).toEqual({ reconnect: true });
+		await expect(device.writeControl('volume', 30)).rejects.toMatchObject({ code: 'transport' });
+	});
+
 	test('reads 8 bands of a built-in preset, all of a user preset, and the pre-gain', async () => {
 		const t = new FakeDs3();
 		const device = ds3(t);
