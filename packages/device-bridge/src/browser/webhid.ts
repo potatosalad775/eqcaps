@@ -108,10 +108,12 @@ export async function requestHidDevice(
 /**
  * A device this site was already granted, found again without the chooser: after it was unplugged
  * and plugged back in, say, or moved to a phone and back. Matches vendor id, product id and the
- * exact product name, preferring the vendor-defined interface; null if it isn't connected.
+ * exact product name, preferring the vendor-defined interface; null if it isn't connected. Several
+ * identities are for a device that can come back as any of them (the Fosi DS3 has one per USB
+ * mode); a device granted under one of them is found.
  */
 export async function grantedHidDevice(
-	identity: HidIdentity,
+	identity: HidIdentity | readonly HidIdentity[],
 	hid: HidLike | undefined = browserApis().hid
 ): Promise<HidTransport | null> {
 	if (!hid) throw new BridgeError('unsupported', 'WebHID is not available in this browser');
@@ -127,12 +129,16 @@ export interface HidIdentity {
 	productName: string;
 }
 
-const isSame = (d: HidDeviceLike, identity: HidIdentity) =>
-	d.vendorId === identity.vendorId &&
-	d.productId === identity.productId &&
-	d.productName === identity.productName;
+const isSame = (d: HidDeviceLike, identity: HidIdentity | readonly HidIdentity[]) =>
+	(Array.isArray(identity) ? identity : [identity]).some(
+		(i: HidIdentity) =>
+			d.vendorId === i.vendorId && d.productId === i.productId && d.productName === i.productName
+	);
 
-function pickGranted(granted: readonly HidDeviceLike[], identity: HidIdentity) {
+function pickGranted(
+	granted: readonly HidDeviceLike[],
+	identity: HidIdentity | readonly HidIdentity[]
+) {
 	const same = granted.filter((d) => isSame(d, identity));
 	return same.find(hasVendorCollection) ?? same[0];
 }
@@ -171,7 +177,7 @@ export interface WaitForHidOptions {
  * shows the chooser (that needs a click).
  */
 export async function waitForGrantedHidDevice(
-	identity: HidIdentity,
+	identity: HidIdentity | readonly HidIdentity[],
 	options: WaitForHidOptions
 ): Promise<HidTransport | null> {
 	const hid = options.hid ?? browserApis().hid;

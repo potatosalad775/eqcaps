@@ -240,6 +240,30 @@ describe('WebHID', () => {
 			expect(events).toEqual(['reused']);
 		});
 
+		test('finds a device that comes back as another of its identities', async () => {
+			vi.useFakeTimers();
+			const uac2 = { vendorId: 0x152a, productId: 0x889b, productName: 'Fosi Audio DS3' };
+			const uac1 = { vendorId: 0x20b1, productId: 0x80d5, productName: 'Fosi Audio DS3' };
+			const before = fakeHid('Fosi Audio DS3', 0x152a, 0x889b);
+			const hid = fakeNavigatorHid([before]);
+			const wait = waitForGrantedHidDevice([uac2, uac1], {
+				timeoutMs: 5000,
+				ignoreCurrent: true,
+				reuseAfterMs: 1500,
+				hid
+			});
+			await vi.advanceTimersByTimeAsync(300);
+			hid.granted.length = 0;
+			await vi.advanceTimersByTimeAsync(250);
+			const after = fakeHid('Fosi Audio DS3', 0x20b1, 0x80d5);
+			hid.granted.push(after);
+			hid.fire('connect', after);
+			const t = await wait;
+			expect(t!.productId).toBe(0x80d5);
+			expect(before.opened).toBe(false);
+			expect(await grantedHidDevice([uac2, uac1], hid)).not.toBeNull();
+		});
+
 		test('gives null after the timeout, never asking for the chooser', async () => {
 			vi.useFakeTimers();
 			const hid = fakeNavigatorHid([]);

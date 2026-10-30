@@ -65,7 +65,9 @@ Serial ports and BLE devices are chosen first and opened once the protocol is kn
 share: ask the user which device it is.
 
 A HID device this site was granted can be opened again without the chooser, by vendor id, product
-id and exact product name: `grantedHidDevice(identity)` if it is connected now, null if not.
+id and exact product name: `grantedHidDevice(identity)` if it is connected now, null if not. Pass
+several identities for a device that comes back as any of them (the Fosi DS3 changes its USB ids
+with its USB mode).
 `waitForGrantedHidDevice(identity, { timeoutMs })` waits for it, on `navigator.hid`'s `connect`
 event or a `getDevices()` poll, and gives null after the timeout; it never shows the chooser,
 which needs a click. After a push that returns `reconnect: true` (a `disconnectOnSave` device
