@@ -13,20 +13,19 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings"
 	},
 	"dependencies": {
-		"@potatosalad775/eqcaps-build": "0.0.0",
-		"@potatosalad775/eqcaps-client": "0.0.0",
-		"@potatosalad775/eqcaps-core": "0.0.0",
-		"@potatosalad775/eqcaps-device-bridge": "0.0.0",
-		"prettier": "^3.9.9"
+		"@potatosalad775/eqcaps-client": "0.3.0",
+		"@potatosalad775/eqcaps-core": "0.3.0",
+		"@potatosalad775/eqcaps-device-bridge": "0.3.0",
+		"prettier": "^3.9.10"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.70.3",
+		"@sveltejs/adapter-static": "^4.0.1",
+		"@sveltejs/kit": "^3.1.1",
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@tailwindcss/vite": "^4.3.3",
-		"svelte": "^5.57.1",
-		"svelte-check": "^4.7.6",
+		"svelte": "^5.57.3",
+		"svelte-check": "^4.7.7",
 		"tailwindcss": "^4.3.3",
-		"vite": "^8.3.2"
+		"vite": "^8.3.5"
 	}
 }

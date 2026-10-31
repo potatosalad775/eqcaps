@@ -48,10 +48,5 @@
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.71.0",
 		"vitest": "^4.1.11"
-	},
-	"overrides": {
-		"@sveltejs/kit": {
-			"cookie": "^0.7.2"
-		}
 	}
 }
