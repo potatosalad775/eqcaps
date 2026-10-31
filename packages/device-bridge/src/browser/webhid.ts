@@ -39,8 +39,14 @@ const transportError = (what: string) => (cause: unknown) => {
 	throw new BridgeError('transport', `WebHID: ${what} failed`, { cause });
 };
 
-/** Wraps a WebHID device (opened if it isn't) as a bridge transport. */
-export async function hidTransport(device: HidDeviceLike): Promise<HidTransport> {
+/**
+ * Wraps a WebHID device (opened if it isn't) as a bridge transport. `hid` reports it going: the
+ * browser fires `disconnect` there, with the same device object, not on the device.
+ */
+export async function hidTransport(
+	device: HidDeviceLike,
+	hid: HidLike | undefined = browserApis().hid
+): Promise<HidTransport> {
 	if (!device.opened) await device.open().catch(transportError('open'));
 	return {
 		kind: 'hid',
@@ -57,6 +63,16 @@ export async function hidTransport(device: HidDeviceLike): Promise<HidTransport>
 			const handler = (e: HidInputReportEventLike) => listener(e.reportId, bytesOf(e.data));
 			device.addEventListener('inputreport', handler);
 			return () => device.removeEventListener('inputreport', handler);
+		},
+		onDisconnect(listener) {
+			const handler = ({ device: d }: HidConnectionEventLike) => {
+				if (d !== device) return;
+				off();
+				listener();
+			};
+			const off = () => hid?.removeEventListener?.('disconnect', handler);
+			hid?.addEventListener?.('disconnect', handler);
+			return off;
 		},
 		close: () => device.close().catch(transportError('close'))
 	};
@@ -102,7 +118,7 @@ export async function requestHidDevice(
 		);
 		if (sibling) device = sibling;
 	}
-	return hidTransport(device);
+	return hidTransport(device, hid);
 }
 
 /**
@@ -119,7 +135,7 @@ export async function grantedHidDevice(
 	if (!hid) throw new BridgeError('unsupported', 'WebHID is not available in this browser');
 	const granted = await hid.getDevices().catch(transportError('getDevices'));
 	const device = pickGranted(granted, identity);
-	return device ? hidTransport(device) : null;
+	return device ? hidTransport(device, hid) : null;
 }
 
 /** What a granted device is found again by. */
@@ -251,5 +267,5 @@ export async function waitForGrantedHidDevice(
 		poll();
 		void check();
 	});
-	return device ? hidTransport(device) : null;
+	return device ? hidTransport(device, hid) : null;
 }

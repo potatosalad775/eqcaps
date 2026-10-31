@@ -43,6 +43,8 @@ export async function bleTransport(
 		if (value) queue.push(bytesOf(value));
 	});
 	const withResponse = !!tx.properties.write && !tx.properties.writeWithoutResponse;
+	// `close()` disconnects GATT itself, which fires `gattserverdisconnected` too.
+	let closing = false;
 	const transport: StreamTransport = {
 		kind: 'ble',
 		async write(data) {
@@ -53,7 +55,17 @@ export async function bleTransport(
 			}
 		},
 		read: (timeoutMs) => queue.read(timeoutMs),
+		onDisconnect(listener) {
+			const handler = () => {
+				off();
+				if (!closing) listener();
+			};
+			const off = () => device.removeEventListener?.('gattserverdisconnected', handler);
+			device.addEventListener?.('gattserverdisconnected', handler);
+			return off;
+		},
 		async close() {
+			closing = true;
 			queue.fail(new Error('closed'));
 			device.gatt?.disconnect();
 		}

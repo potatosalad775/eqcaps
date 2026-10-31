@@ -7,7 +7,8 @@
 // - an input listener sees every report that arrives after it subscribes, in order;
 // - `read()` returns the bytes that arrived since the last read, buffered, so nothing is lost
 //   between two reads;
-// - methods reject with a `BridgeError` of code `transport` when the device is gone.
+// - methods reject with a `BridgeError` of code `transport` when the device is gone;
+// - `onDisconnect`, where the platform reports it, fires when the device goes, not on `close()`.
 
 /** One report a HID collection declares, as the descriptor states it. */
 export interface HidReportInfo {
@@ -43,6 +44,12 @@ export interface HidTransport {
 	receiveFeatureReport(reportId: number): Promise<Uint8Array>;
 	/** Subscribes to input reports (`data` excludes the report id). Returns the unsubscribe. */
 	onInputReport(listener: (reportId: number, data: Uint8Array) => void): () => void;
+	/**
+	 * Calls `listener` once when the device goes away on its own (unplugged, out of range), never
+	 * for `close()`. Returns the unsubscribe. Optional: without it, a lost device only shows as an
+	 * operation failing with `transport`.
+	 */
+	onDisconnect?(listener: () => void): () => void;
 	close(): Promise<void>;
 }
 
@@ -67,6 +74,12 @@ export interface StreamTransport {
 	write(data: Uint8Array): Promise<void>;
 	/** The next received bytes, or null if nothing arrives within `timeoutMs`. */
 	read(timeoutMs: number): Promise<Uint8Array | null>;
+	/**
+	 * Calls `listener` once when the device goes away on its own (unplugged, out of range), never
+	 * for `close()`. Returns the unsubscribe. Optional: without it, a lost device only shows as an
+	 * operation failing with `transport`.
+	 */
+	onDisconnect?(listener: () => void): () => void;
 	close(): Promise<void>;
 }
 

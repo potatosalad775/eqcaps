@@ -279,6 +279,33 @@ describe('WebHID', () => {
 		});
 	});
 
+	test("reports the device's own disconnect once, and not another's", async () => {
+		type Listener = (e: { device: HidDeviceLike }) => void;
+		const listeners = new Set<Listener>();
+		const device = fakeHid('FIIO KA17', 0x2972, 0x0093);
+		const twin = fakeHid('FIIO KA17', 0x2972, 0x0093);
+		const transport = (await requestHidDevice({
+			hid: {
+				requestDevice: async () => [device],
+				getDevices: async () => [],
+				addEventListener: (_t, l) => void listeners.add(l),
+				removeEventListener: (_t, l) => void listeners.delete(l)
+			}
+		}))!;
+		const fire = (d: HidDeviceLike) => [...listeners].forEach((l) => l({ device: d }));
+		let lost = 0;
+		transport.onDisconnect!(() => lost++);
+		fire(twin);
+		expect(lost).toBe(0);
+		fire(device);
+		fire(device);
+		expect(lost).toBe(1);
+		expect(listeners.size).toBe(0);
+		transport.onDisconnect!(() => lost++)();
+		fire(device);
+		expect(lost).toBe(1);
+	});
+
 	test('a cancelled chooser gives null', async () => {
 		const t = await requestHidDevice({
 			hid: { requestDevice: async () => [], getDevices: async () => [] }
@@ -293,12 +320,17 @@ describe('Web Serial', () => {
 		let wake: (() => void) | undefined;
 		const written: number[][] = [];
 		let baud: number | undefined;
+		const gone = new Set<() => void>();
 		const port: SerialPortLike & {
 			feed(b: number[]): void;
+			unplug(): void;
 			written: number[][];
 			baud(): number | undefined;
 		} = {
 			getInfo: () => info,
+			addEventListener: (_t, l) => void gone.add(l),
+			removeEventListener: (_t, l) => void gone.delete(l),
+			unplug: () => [...gone].forEach((l) => l()),
 			async open(o) {
 				baud = o.baudRate;
 			},
@@ -373,6 +405,21 @@ describe('Web Serial', () => {
 		expect(await grantedHidDevice({ ...identity, productId: 1 }, hid)).toBeNull();
 	});
 
+	test('reports the port being unplugged, not being closed', async () => {
+		const port = fakePort({ usbVendorId: 6790, usbProductId: 21971 });
+		const choice = await requestSerialPort({ serial: { requestPort: async () => port } });
+		const transport = await choice!.open(protocolFor('fiio-audio-dsp'));
+		let lost = 0;
+		transport.onDisconnect!(() => lost++);
+		port.unplug();
+		port.unplug();
+		expect(lost).toBe(1);
+		transport.onDisconnect!(() => lost++);
+		await transport.close();
+		port.unplug();
+		expect(lost).toBe(1);
+	});
+
 	test('a cancelled chooser gives null', async () => {
 		const cancel = Object.assign(new Error('cancelled'), { name: 'NotFoundError' });
 		expect(
@@ -396,6 +443,8 @@ describe('Web Bluetooth', () => {
 			}
 		});
 		let request: unknown;
+		const gone = new Set<() => void>();
+		const dropped = () => [...gone].forEach((l) => l());
 		const bluetooth: BluetoothLike = {
 			requestDevice: async (o) => {
 				request = o;
@@ -408,8 +457,11 @@ describe('Web Bluetooth', () => {
 								getCharacteristic: async (u: string) => characteristic(u)
 							})
 						}),
-						disconnect() {}
-					}
+						// As the browser does: disconnecting fires `gattserverdisconnected`.
+						disconnect: dropped
+					},
+					addEventListener: (_t, l) => void gone.add(l),
+					removeEventListener: (_t, l) => void gone.delete(l)
 				};
 			}
 		};
@@ -426,6 +478,14 @@ describe('Web Bluetooth', () => {
 		notify!({ target: { value: new DataView(Uint8Array.from([5, 6]).buffer) } });
 		expect([...(await transport.read(100))!]).toEqual([5, 6]);
 		expect(transport.bleName).toBe('FIIO EH13');
+
+		let lost = 0;
+		transport.onDisconnect!(() => lost++);
+		dropped();
+		expect(lost).toBe(1);
+		transport.onDisconnect!(() => lost++);
+		await transport.close();
+		expect(lost).toBe(1);
 	});
 });
 

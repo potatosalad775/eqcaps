@@ -87,6 +87,9 @@ export interface SerialPortLike {
 	close(): Promise<void>;
 	readonly readable: { getReader(): ReadableStreamReaderLike } | null;
 	readonly writable: { getWriter(): WritableStreamWriterLike } | null;
+	// Optional so a bare fake still works: without them a lost port shows only as a failed read.
+	addEventListener?(type: 'disconnect', listener: () => void): void;
+	removeEventListener?(type: 'disconnect', listener: () => void): void;
 }
 
 export interface SerialLike {
@@ -120,6 +123,8 @@ export interface BluetoothDeviceLike {
 		}>;
 		disconnect(): void;
 	};
+	addEventListener?(type: 'gattserverdisconnected', listener: () => void): void;
+	removeEventListener?(type: 'gattserverdisconnected', listener: () => void): void;
 }
 
 export interface BluetoothLike {

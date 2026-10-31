@@ -61,6 +61,15 @@ export function serialTransport(port: SerialPortLike): StreamTransport {
 			}
 		},
 		read: (timeoutMs) => queue.read(timeoutMs),
+		onDisconnect(listener) {
+			const handler = () => {
+				off();
+				if (!closing) listener();
+			};
+			const off = () => port.removeEventListener?.('disconnect', handler);
+			port.addEventListener?.('disconnect', handler);
+			return off;
+		},
 		async close() {
 			closing = true;
 			await reader?.cancel().catch(() => {});
