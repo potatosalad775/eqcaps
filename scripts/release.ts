@@ -5,6 +5,9 @@
 // Usage: npm run release -- <version> [--dry-run] [--otp <code>]
 //        npm run release -- <version> --pack
 //
+// <version> is a semver (0.3.0, 0.3.0-rc.1) or major, minor or patch: the next such version after
+// the highest released v* tag on origin.
+//
 // --pack builds the packages and writes their tarballs to dist/pack/ instead of publishing, from
 // any working tree, to try them in another app before a release:
 // `npm install <eqcaps>/dist/pack/*.tgz` there.
@@ -95,6 +98,32 @@ function pack(version: string) {
 	console.log(`  npm install ${out}/*.tgz`);
 }
 
+const BUMPS = ['major', 'minor', 'patch'] as const;
+type Bump = (typeof BUMPS)[number];
+
+/** The version after the highest non-pre-release v* tag, bumped by `bump`. */
+function nextVersion(bump: Bump): string {
+	try {
+		git('fetch', '--quiet', '--tags', 'origin');
+	} catch {
+		console.warn('Could not fetch tags from origin; using the local tags.');
+	}
+	const latest = git('tag', '--list', 'v*', '--sort=-v:refname')
+		.split('\n')
+		.map((t) => /^v(\d+)\.(\d+)\.(\d+)$/.exec(t.trim()))
+		.find((m) => m !== null);
+	if (!latest) fail('No v<major>.<minor>.<patch> tag to bump from. Give the version.');
+	const [major, minor, patch] = [1, 2, 3].map((i) => Number(latest[i])) as [number, number, number];
+	const next =
+		bump === 'major'
+			? `${major + 1}.0.0`
+			: bump === 'minor'
+				? `${major}.${minor + 1}.0`
+				: `${major}.${minor}.${patch + 1}`;
+	console.log(`${latest[0]} + ${bump} = v${next}`);
+	return next;
+}
+
 function main() {
 	const { positionals, values } = parseArgs({
 		allowPositionals: true,
@@ -104,9 +133,12 @@ function main() {
 			pack: { type: 'boolean' }
 		}
 	});
-	const version = positionals[0]?.replace(/^v/, '');
+	const arg = positionals[0];
+	const version = BUMPS.includes(arg as Bump) ? nextVersion(arg as Bump) : arg?.replace(/^v/, '');
 	if (!version || !/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(version)) {
-		fail('usage: npm run release -- <version> [--dry-run] [--otp <code>] [--pack]');
+		fail(
+			'usage: npm run release -- <version | major | minor | patch> [--dry-run] [--otp <code>] [--pack]'
+		);
 	}
 	if (values.pack) {
 		pack(version);

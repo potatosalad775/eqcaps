@@ -97,6 +97,7 @@ npm run conformance    # after changing engine behaviour or scripts/conformance.
 npm run data:build     # publish /v1/ into dist/site/
 npm run inspector:dev  # the inspector, reading the local dist/site/v1/ and data/
 npm run release -- 0.3.0-rc.1 --pack  # package tarballs in dist/pack/, to try in another app
+npm run release -- minor --dry-run   # owner only: major/minor/patch bump the latest v* tag
 ```
 
 Never edit `schema/v1/source.schema.json`, `*.generated.ts` or the engine vectors in
