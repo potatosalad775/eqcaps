@@ -232,6 +232,11 @@ describe('protocolOf', () => {
 			protocolOf({ protocol: { handler: 'walkplay-hid', options: { 'x-note': 'hi' } } })
 		).toEqual({ handler: 'walkplay-hid' });
 	});
+
+	test("still accepts Walkplay's enableCommand, which no longer does anything", () => {
+		const raw = { handler: 'walkplay-hid', options: { enableCommand: false } };
+		expect(protocolOf({ protocol: raw })?.options).toEqual({ enableCommand: false });
+	});
 });
 
 test('protocolForMatches takes the first match with a protocol this bridge can drive', () => {

@@ -39,8 +39,8 @@ export interface WalkplayHidOptions {
 	/** Slot byte of a write that names no slot. Default 101 ("Custom"). */
 	defaultSlot?: number;
 	/**
-	 * Whether [1,1,0,…] turns the EQ off (`setEnabled`). Default true; false where it doesn't:
-	 * the NICEHCK PureAural keeps its EQ, and NICEHCK's app calls the frame "save to flash".
+	 * Ignored, and still accepted so profiles published with it load. It said whether [1,1,0,…]
+	 * turned the EQ off; no Walkplay device has an EQ switch (`canEnable` is false).
 	 */
 	enableCommand?: boolean;
 	/**
@@ -291,7 +291,7 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 	transport: 'hid',
 	codec: walkplayHidCodec,
 
-	capabilities: (_t, o) => ({
+	capabilities: () => ({
 		canRead: true,
 		canWrite: true,
 		readsPreamp: true,
@@ -300,7 +300,10 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 		writesSlot: true,
 		needsBandCount: true,
 		readsCurrentSlot: true,
-		canEnable: o.enableCommand ?? true
+		// Walkplay's app (peq.szwalkplay.com) and NICEHCK's have no EQ switch. devicePEQ's off,
+		// [1,1,0,…], is their Save, and left the EQ on on a NICEHCK PureAural and a CrinEar
+		// Protocol Micro.
+		canEnable: false
 	}),
 
 	async pull(ctx, { bands = 0 }) {
@@ -369,11 +372,6 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 		const slot = answer[35];
 		if (slot === undefined) throw new BridgeError('bad-response', 'Walkplay: short slot answer');
 		return slot;
-	},
-
-	async setEnabled(ctx, enabled, slot) {
-		const id = enabled ? (slot ?? ctx.options.defaultSlot ?? 101) : 0;
-		await send(ctx, [WRITE, 0x01, enabled ? 1 : 0, field(id, 1, U8, 'slot'), 0x00]);
 	},
 
 	async firmware(ctx) {

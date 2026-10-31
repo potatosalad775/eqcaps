@@ -92,6 +92,12 @@ string, without executing the bundle. The script isn't kept in the repository; t
   (`writeControl`). Not seen yet: whether an
   unsaved change survives a replug.
 
+- **No EQ switch** (2026-10-31): `canEnable` is false for every Walkplay device and `setEnabled`
+  is gone. Neither vendor app has a switch, and the handler's off (`[1,1,0,…]`, their Save) left
+  the EQ audibly on on the NICEHCK PureAural and the CrinEar Protocol Micro. The `enableCommand`
+  option is still accepted, and ignored, so profiles published with it load. Disagreement 2 is
+  settled.
+
 - Recorder: adapter `walkplay-peq` (snapshot only: Pinia stores `device`, `product` with the
   SchemeNo, `eq`, `filter`, `micphone`, `mf`). `recordings.test.ts` checks its writes with the
   NICEHCK write checks; its snapshots aren't checked yet.
@@ -103,7 +109,8 @@ string, without executing the bundle. The script isn't kept in the repository; t
 2. **Fix the commit** once recorded: send the app's apply-and-save instead of devicePEQ's tail.
    Retest the Octave capture's device by ear; `captures.test.ts` pins the old bytes, so it changes
    with it.
-3. **`setEnabled`**: drop it (`canEnable: false`) unless a recording shows a real switch.
+3. ~~**`setEnabled`**: drop it (`canEnable: false`) unless a recording shows a real switch.~~
+   Done 2026-10-31 (below).
 4. **Pre-gain in byte 34**: write the pre-gain there when given, and decide what a push without one
    sends (read it first, or refuse).
 5. **Controls**: add `noiseReduction` (toggle, 0x1B). The Save frame `[1,1,0]` is the one

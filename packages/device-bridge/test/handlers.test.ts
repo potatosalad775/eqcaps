@@ -726,8 +726,11 @@ describe('Walkplay controls and firmware (NICEHCK PureAural)', () => {
 		});
 	});
 
-	test('does not offer to turn the EQ off, which the PureAural ignores', () => {
+	test('has no EQ switch, which Walkplay devices lack', async () => {
 		expect(pureAural(new FakeWalkplay()).capabilities.canEnable).toBe(false);
+		const micro = open(new FakeWalkplay(), 'crinear-protocol-micro', 8);
+		expect(micro.capabilities.canEnable).toBe(false);
+		await expect(micro.setEnabled(false)).rejects.toMatchObject({ code: 'unsupported' });
 	});
 
 	test('reads past what earlier reports leave in the answer buffer', async () => {

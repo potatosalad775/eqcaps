@@ -108,6 +108,7 @@ and cited as a `vendor-app` source.
    - The commit: the handler's works (by ear, above); no `commit` option.
    - `setEnabled(false)` doesn't turn the EQ off on the PureAural, and the app has no EQ off
      switch: `enableCommand: false` in the `nicehck-walkplay` base, for every NICEHCK device.
+     Since 2026-10-31 no Walkplay device has the switch, and the option is ignored (walkplay.md).
    - Shelves work on the PureAural; the profiles keep `PK`, as the app allows.
    - The default slot: 101 works and the app shows it as "custom", as it does for its own
      custom writes there. It stays.
