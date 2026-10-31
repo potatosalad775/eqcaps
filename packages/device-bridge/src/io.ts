@@ -30,20 +30,36 @@ export function waitForInput(
 	});
 }
 
-/** Sends an output report and waits for the matching input report. */
+/**
+ * Sends an output report and waits for the matching input report. With `resendMs`, sends it again
+ * every `resendMs` until an answer matches or `timeoutMs` runs out: for a read, which changes
+ * nothing, on a device that drops requests while it's busy.
+ */
 export async function hidRequest(
 	transport: HidTransport,
 	reportId: number,
 	data: Uint8Array | number[],
 	match: (data: Uint8Array, reportId: number) => boolean,
 	timeoutMs: number,
-	what: string
+	what: string,
+	resendMs?: number
 ): Promise<Uint8Array> {
 	const answer = waitForInput(transport, match, timeoutMs, what);
 	// Keeps a send failure from leaving the wait's rejection unhandled.
 	answer.catch(() => {});
-	await transport.sendReport(reportId, Uint8Array.from(data));
-	return answer;
+	const frame = Uint8Array.from(data);
+	await transport.sendReport(reportId, frame);
+	if (resendMs === undefined) return answer;
+	let cancel = () => {};
+	const again = () => {
+		cancel = after(resendMs, () => {
+			// A failed resend is left to the timeout, as a missing answer.
+			transport.sendReport(reportId, frame).catch(() => {});
+			again();
+		});
+	};
+	again();
+	return answer.finally(() => cancel());
 }
 
 /**

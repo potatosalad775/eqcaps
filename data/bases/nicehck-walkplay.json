@@ -10,10 +10,10 @@
 		"gain": { "min": -12, "max": 12, "step": 0.00390625 }
 	},
 	"preamp": { "mode": "manual", "gain": { "min": -12, "max": 8, "step": 1 } },
-	"protocol": { "options": { "enableCommand": false } },
+	"protocol": { "options": { "enableCommand": false, "micGainDone": true } },
 	"meta": {
 		"status": "draft",
 		"sources": [{ "kind": "vendor-app", "ref": "https://app.nicehck.cn/", "date": "2026-10-28" }],
-		"notes": "What NICEHCK's web app (app.nicehck.cn, protocol variant \"ttgk_v1\") allows on every device it drives: peaking bands only, 20 to 20000 Hz, Q 0.2 to 12 (sent as 51/256, the grid point below 0.2), gain ±12 dB, pre-gain -12 to +8 dB in whole dB. The app writes the pre-gain into each band frame (byte 34) and in the 0x03 command as s16 ×256, and ends a write with [1,0x0A,4,0,0,FF,FF], [1,0x01], the pre-gain and [1,0x04], where the handler sends devicePEQ's commit; whether both persist the same is unconfirmed. The app tags each write with the index of the preset it came from: its official presets from 1, its own custom presets from 32. Game, sleep and diffuse modes are official presets written like any other, not a device command. The app has no EQ off switch, and the handler's [1,1,0,…] left the PureAural's EQ on, so enableCommand is false."
+		"notes": "What NICEHCK's web app (app.nicehck.cn, protocol variant \"ttgk_v1\") allows on every device it drives: peaking bands only, 20 to 20000 Hz, Q 0.2 to 12 (sent as 51/256, the grid point below 0.2), gain ±12 dB, pre-gain -12 to +8 dB in whole dB. The app writes the pre-gain into each band frame (byte 34) and in the 0x03 command as s16 ×256, and ends a write with [1,0x0A,4,0,0,FF,FF], [1,0x01], the pre-gain and [1,0x04], where the handler sends devicePEQ's commit; whether both persist the same is unconfirmed. The app tags each write with the index of the preset it came from: its official presets from 1, its own custom presets from 32. Game, sleep and diffuse modes are official presets written like any other, not a device command. The app has no EQ off switch, and the handler's [1,1,0,…] left the PureAural's EQ on, so enableCommand is false. It follows a mic gain write with [1,0x04], which Walkplay's own app doesn't send (micGainDone)."
 	}
 }

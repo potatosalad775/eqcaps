@@ -12,9 +12,13 @@
 // Firmware (0x0C) and the device controls come from NICEHCK's web app (app.nicehck.cn), which
 // drives its Walkplay devices with the same requests: the version is ASCII from byte 3; a control
 // is one byte at byte 3 of its answer, except the mic gain (0x02) and the per-channel gain (0x16,
-// channel at byte 3), which are written as s16 LE ×256 dB. The device only overwrites the bytes
-// it fills in an answer: a 0x16 answer carries the whole dB at byte 5 and leaves byte 4 as it was
-// (PureAural, test/recordings/2026-10-28-nicehck-pureaural.json).
+// channel at byte 3), which are written as s16 LE ×256 dB. The device holds the mic gain on a
+// grid of its own and rounds what it's sent onto it (the CrinEar Protocol Micro: 1.5 dB from -15
+// to +15). Walkplay's own app (peq.szwalkplay.com) sends its whole-dB slider value + 0.5 (low
+// byte 0x80); NICEHCK's sends a mic gain write with [1,0x04] after it (`micGainDone`), Walkplay's
+// sends nothing. The device only overwrites the bytes it fills in an answer: a 0x16 answer
+// carries the whole dB at byte 5 and leaves byte 4 as it was (PureAural,
+// test/recordings/2026-10-28-nicehck-pureaural.json).
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { biquadQ30, coefficientBytes } from '../biquad.ts';
@@ -28,7 +32,7 @@ import type {
 	HidHandler,
 	WriteState
 } from '../handler.ts';
-import { hidFrame, hidRequest, sendFrame, typeCodes, waitForInput } from '../io.ts';
+import { hidFrame, hidRequest, sendFrame, typeCodes } from '../io.ts';
 import type { HidTransport } from '../transport.ts';
 
 export interface WalkplayHidOptions {
@@ -39,6 +43,11 @@ export interface WalkplayHidOptions {
 	 * the NICEHCK PureAural keeps its EQ, and NICEHCK's app calls the frame "save to flash".
 	 */
 	enableCommand?: boolean;
+	/**
+	 * Whether a mic gain write is followed by [1,0x04], as NICEHCK's app does. Default false, as
+	 * Walkplay's app (peq.szwalkplay.com) sends nothing after it.
+	 */
+	micGainDone?: boolean;
 }
 
 const REPORT_ID = 0x4b;
@@ -49,6 +58,11 @@ const PREAMP = 0x03;
 const MIC_GAIN = 0x02;
 const DAC_DONE = 0x04;
 const FIRMWARE = 0x0c;
+/**
+ * Every read is sent again this often until it's answered: the PureAural drops requests while
+ * it's busy, for up to about 250 ms after a work mode switch and about 50 ms after [1,0x04].
+ */
+const RESEND_MS = 150;
 const CHANNEL_GAIN = 0x16;
 const COMMIT = [
 	[WRITE, 0x05, 0x00],
@@ -155,21 +169,22 @@ const ask = (ctx: Ctx, cmd: number, rest: number[] = [], also = (_d: Uint8Array)
 		[READ, cmd, ...rest],
 		(d) => d[0] === READ && d[1] === cmd && also(d),
 		1000,
-		`Walkplay 0x${cmd.toString(16)}`
+		`Walkplay 0x${cmd.toString(16)}`,
+		RESEND_MS
 	);
 
 /**
  * Each control's command, and how its value is carried: one byte, or s16 LE ×256 dB (`db`).
- * `channel` addresses one channel of 0x16; NICEHCK's app sends a mic gain write with 0x04 after it.
+ * `channel` addresses one channel of 0x16.
  */
 export const WALKPLAY_CONTROL_COMMANDS: Readonly<
-	Record<string, { cmd: number; db?: true; channel?: number; then?: number }>
+	Record<string, { cmd: number; db?: true; channel?: number }>
 > = {
 	dacFilter: { cmd: 0x11 },
 	gainLevel: { cmd: 0x19 },
 	workMode: { cmd: 0x1d },
 	volume: { cmd: 0x85 },
-	micGain: { cmd: MIC_GAIN, db: true, then: DAC_DONE },
+	micGain: { cmd: MIC_GAIN, db: true },
 	leftGain: { cmd: CHANNEL_GAIN, db: true, channel: 0 },
 	rightGain: { cmd: CHANNEL_GAIN, db: true, channel: 1 }
 };
@@ -207,9 +222,9 @@ function control(id: string): HandlerControl<HidTransport, WalkplayHidOptions> {
 		},
 		async write(ctx, value) {
 			await send(ctx, encodeWalkplayControl(id, value));
-			if (c.then !== undefined) {
+			if (c.cmd === MIC_GAIN && ctx.options.micGainDone) {
 				await ctx.sleep(20);
-				await send(ctx, [WRITE, c.then]);
+				await send(ctx, [WRITE, DAC_DONE]);
 			}
 			await ctx.sleep(30);
 		}
@@ -224,8 +239,9 @@ async function readBand(ctx: HandlerContext<HidTransport, WalkplayHidOptions>, i
 			REPORT_ID,
 			[READ, BAND, 0x00, 0x00, index, 0x00],
 			(d) => d[1] === BAND && d[4] === index && d.length >= 34,
-			300,
-			`Walkplay band ${index}`
+			600,
+			`Walkplay band ${index}`,
+			RESEND_MS
 		);
 		return decodeWalkplayBand(answer);
 	} catch (error) {
@@ -296,7 +312,8 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 				[READ, BAND, 0x00, 0x00, i, 0x00],
 				(d) => d[1] === BAND && d[4] === i && d.length >= 34,
 				2000,
-				`Walkplay band ${i}`
+				`Walkplay band ${i}`,
+				RESEND_MS
 			);
 			filters.push(decodeWalkplayBand(answer));
 		}
@@ -308,7 +325,8 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 				[READ, PREAMP, 0x00],
 				(d) => d[0] === READ && d[1] === PREAMP,
 				1000,
-				'Walkplay preamp'
+				'Walkplay preamp',
+				RESEND_MS
 			);
 			result.preamp = readI8(answer, 4);
 		} catch (error) {
@@ -338,11 +356,17 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 	},
 
 	async currentSlot(ctx) {
-		const answer = waitForInput(ctx.transport, (d) => d[1] === BAND, 2000, 'Walkplay slot');
-		answer.catch(() => {});
-		await send(ctx, [READ, BAND, 0x00]);
+		const answer = await hidRequest(
+			ctx.transport,
+			REPORT_ID,
+			[READ, BAND, 0x00],
+			(d) => d[1] === BAND,
+			2000,
+			'Walkplay slot',
+			RESEND_MS
+		);
 		// Byte 36 of the full report; the transport strips the report id.
-		const slot = (await answer)[35];
+		const slot = answer[35];
 		if (slot === undefined) throw new BridgeError('bad-response', 'Walkplay: short slot answer');
 		return slot;
 	},

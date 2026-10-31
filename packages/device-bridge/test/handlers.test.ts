@@ -17,6 +17,7 @@ import {
 	nothingFrame
 } from '../src/handlers/nothing-usb-serial.ts';
 import { ritaCodec } from '../src/handlers/tanchjim-rita-serial.ts';
+import { encodeWalkplayControl } from '../src/handlers/walkplay-hid.ts';
 import { typeCodes } from '../src/io.ts';
 import { utf8Decode, utf8Encode } from '../src/platform.ts';
 import {
@@ -733,7 +734,7 @@ describe('Walkplay controls and firmware (NICEHCK PureAural)', () => {
 		const t = new FakeWalkplay();
 		const device = pureAural(t);
 		await device.push({ filters: [pk(200, 1, 1)], preamp: -3 });
-		await device.writeControl('micGain', -5);
+		await device.writeControl('micGain', -4.5);
 		expect(await device.firmware()).toBe('1.0.3');
 		const { leftGain, rightGain } = await device.readControls();
 		expect([leftGain, rightGain]).toEqual([0, -4]);
@@ -742,8 +743,8 @@ describe('Walkplay controls and firmware (NICEHCK PureAural)', () => {
 	test('writes a control and reads it back; refuses what the profile does not list', async () => {
 		const t = new FakeWalkplay();
 		const device = pureAural(t);
-		expect(await device.writeControl('micGain', -5)).toEqual({ reconnect: false });
-		expect(t.values.micGain).toBe(-5);
+		expect(await device.writeControl('micGain', -4.5)).toEqual({ reconnect: false });
+		expect(t.values.micGain).toBe(-4.5);
 		// The app follows a mic gain write with 0x04.
 		expect(t.sent.slice(-3)).toEqual([
 			[0x01, 0x02],
@@ -760,6 +761,37 @@ describe('Walkplay controls and firmware (NICEHCK PureAural)', () => {
 		});
 		t.stuck = 'volume';
 		await expect(device.writeControl('volume', 10)).rejects.toMatchObject({ code: 'rejected' });
+	});
+
+	test("sends nothing after a mic gain write by default, as Walkplay's app", async () => {
+		const t = new FakeWalkplay();
+		const device = open(t, 'crinear-protocol-micro', 8);
+		expect(await device.writeControl('micGain', -4.5)).toEqual({ reconnect: false });
+		expect(t.values.micGain).toBe(-4.5);
+		expect(t.sent.slice(-2)).toEqual([
+			[0x01, 0x02],
+			[0x80, 0x02]
+		]);
+		expect(encodeWalkplayControl('micGain', -4.5)).toEqual([0x01, 0x02, 2, 0x80, 0xfb]);
+	});
+
+	test('reads again while the device is busy after a write', async () => {
+		const t = new FakeWalkplay();
+		t.busyAfter = { 0x1d: 2, 0x04: 1 };
+		const device = pureAural(t);
+		expect(await device.writeControl('workMode', 1)).toEqual({ reconnect: false });
+		expect(await device.writeControl('micGain', 1.5)).toEqual({ reconnect: false });
+		// Each dropped read was sent again.
+		expect(t.sent.filter(([op, cmd]) => op === 0x80 && cmd === 0x1d)).toHaveLength(3);
+		expect(t.sent.filter(([op, cmd]) => op === 0x80 && cmd === 0x02)).toHaveLength(2);
+	});
+
+	test('reads back once more before calling a write rejected', async () => {
+		const t = new FakeWalkplay();
+		t.lagging = true;
+		const device = pureAural(t);
+		expect(await device.writeControl('volume', 50)).toEqual({ reconnect: false });
+		expect(t.sent.filter(([op, cmd]) => op === 0x80 && cmd === 0x85)).toHaveLength(2);
 	});
 
 	test('pull and push never touch the controls', async () => {

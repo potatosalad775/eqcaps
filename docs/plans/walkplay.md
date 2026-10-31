@@ -45,9 +45,8 @@ backend answers are encrypted and were left alone.
    switch, so the handler's `canEnable` is most likely wrong: off may save rather than bypass.
 3. **Pre-gain in band frames.** The app writes the pre-gain into byte 34 of every band; the handler
    writes 0 there, so a push without `preamp` may reset the pre-gain to 0. Unconfirmed.
-4. **Mic gain.** NICEHCK's app writes s16 ×256 dB; Walkplay's writes `[0x80, dB]` in the same two
-   bytes (dB + 0.5 read as ×256) and reads byte 4 alone. Both agree for whole dB on the high byte;
-   the low byte differs.
+4. **Mic gain.** Settled 2026-10-31 (below): s16 ×256 dB, as NICEHCK's app writes it; Walkplay's
+   app adds 0.5 dB to its slider value.
 5. **Balance read length** is 2 in Walkplay's app and 4 in NICEHCK's. The handler sends 4, and
    matches the answer on the channel byte only.
 6. **Noise reduction** (0x1B) isn't a handler control yet.
@@ -79,6 +78,20 @@ string, without executing the bundle. The script isn't kept in the repository; t
 
 ## Done
 
+- **Mic gain, on a CrinEar Protocol Micro** (scheme 11, CB class, firmware 0.2;
+  `test/recordings/2026-10-31-crinear-protocol-micro*.json`, then every whole and half dB from −15
+  to +15 written and read back). The field is s16 ×256 dB, as the handler had it; the device
+  rounds it to the nearest 1.5 dB from −15 to +15 and answers that. Walkplay's app sends its
+  whole-dB slider value + 0.5 (`[1,2,2,0x80,dB]`) and nothing after it; NICEHCK's follows with
+  `[1,0x04]`, now the `micGainDone` option, set by the `nicehck-walkplay` base. The Micro's profile
+  has the control with a 1.5 dB step. The PureAural rounds the same way (1.5 dB from −12 to +12,
+  though NICEHCK's app offers whole dB), and ignores a request sent within about 50 ms of
+  `[1,0x04]`, and for up to about 250 ms after a work mode switch (0x1D); it varies. The handler
+  doesn't wait for it: every read is sent again each 150 ms until answered (`hidRequest`'s
+  `resendMs`), and a control's read-back is read once more before a mismatch counts as rejected
+  (`writeControl`). Not seen yet: whether an
+  unsaved change survives a replug.
+
 - Recorder: adapter `walkplay-peq` (snapshot only: Pinia stores `device`, `product` with the
   SchemeNo, `eq`, `filter`, `micphone`, `mf`). `recordings.test.ts` checks its writes with the
   NICEHCK write checks; its snapshots aren't checked yet.
@@ -93,6 +106,7 @@ string, without executing the bundle. The script isn't kept in the repository; t
 3. **`setEnabled`**: drop it (`canEnable: false`) unless a recording shows a real switch.
 4. **Pre-gain in byte 34**: write the pre-gain there when given, and decide what a push without one
    sends (read it first, or refuse).
-5. **Controls**: add `noiseReduction` (toggle, 0x1B); settle the mic gain encoding per scheme.
+5. **Controls**: add `noiseReduction` (toggle, 0x1B). The Save frame `[1,1,0]` is the one
+   `setEnabled(false)` sends (2): an app that changes a control may need to save it.
 6. **Data**: the high-shelf exclusion for schemes 11, 13 and 20 against the Walkplay bases.
 7. A snapshot checker for `walkplay-peq`, once a recording shows the store layout with a device.

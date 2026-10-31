@@ -56,7 +56,7 @@
 				"name": "Microphone Gain",
 				"kind": "range",
 				"role": "mic-gain",
-				"range": { "min": -12, "max": 12, "step": 1 },
+				"range": { "min": -12, "max": 12, "step": 1.5 },
 				"unit": "dB"
 			},
 			{
@@ -88,6 +88,6 @@
 				"by": "potatosalad775"
 			}
 		],
-		"notes": "devicePEQ lists its product id in its SchemeNo16 group (walkplay-schemeno16-devices), which no longer matches it. Its official presets: 1 Default (flat), 2 Rock, 3 Vocal, 4 Instrumental, and the game presets 5 FPS Footsteps, 6 FPS Gunshots, 7 Vocal Boost, 8 Immersion Mode, 10 bands each, pre-gain 0. The app shows the channel balance as one slider from -50 to 50 and writes it as a cut of one channel (n > 0 cuts the left by n dB, n < 0 the right); the device holds a gain per channel, which are the two controls here. Warnings, seen on firmware 0.3: the first report after the device has been idle for some minutes is lost (a band write the app sent first after about 6 minutes didn't take; sent again, it did); a quick run of mic gain writes left it at -4.5 dB, which no write asked for; after the app's pre-gain writes the pre-gain read (0x03) answered +1 dB, though it reads back the handler's writes. setEnabled(false) doesn't turn its EQ off (see the base). It also takes shelves, which the app doesn't offer. The device fills only the bytes it answers with and leaves the rest of its report as the last one left it, so the app shows a cut-short firmware version (\"0.\") and a wrong balance after some reads; the handler reads past that."
+		"notes": "devicePEQ lists its product id in its SchemeNo16 group (walkplay-schemeno16-devices), which no longer matches it. Its official presets: 1 Default (flat), 2 Rock, 3 Vocal, 4 Instrumental, and the game presets 5 FPS Footsteps, 6 FPS Gunshots, 7 Vocal Boost, 8 Immersion Mode, 10 bands each, pre-gain 0. The app shows the channel balance as one slider from -50 to 50 and writes it as a cut of one channel (n > 0 cuts the left by n dB, n < 0 the right); the device holds a gain per channel, which are the two controls here. Warnings, seen on firmware 0.3: the first report after the device has been idle for some minutes is lost (a band write the app sent first after about 6 minutes didn't take; sent again, it did); a quick run of mic gain writes left it at -4.5 dB, which no write asked for; after the app's pre-gain writes the pre-gain read (0x03) answered +1 dB, though it reads back the handler's writes. setEnabled(false) doesn't turn its EQ off (see the base). It also takes shelves, which the app doesn't offer. The device fills only the bytes it answers with and leaves the rest of its report as the last one left it, so the app shows a cut-short firmware version (\"0.\") and a wrong balance after some reads; the handler reads past that.\nMicrophone gain: NICEHCK's app offers whole dB, but the device rounds what it's sent to the nearest 1.5 dB and reads that back (every half dB from -12 to +12 written and read back on 2026-10-31), so the control's step is 1.5. The app follows a mic gain write with [1,0x04], and the device ignores a request sent within about 50 ms of it. Switching the work mode, the device ignores requests for up to about 250 ms (measured 2026-10-31); the DAC filter, gain level and volume answer at once."
 	}
 }

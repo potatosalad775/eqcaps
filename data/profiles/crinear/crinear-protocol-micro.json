@@ -2,12 +2,25 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "walkplay-peq-8-band-10db-ls-lowpass",
 	"id": "crinear-protocol-micro",
+	"schemaVersion": "1.2",
 	"device": { "brand": "CrinEar", "model": "Protocol Micro" },
 	"match": {
 		"usb": [{ "vendorId": "0x3302", "productId": "0xc20f", "productName": "Protocol Micro" }]
 	},
 	"bandCount": 8,
 	"band": { "gain": { "min": -15, "max": 15, "step": 0.00390625 } },
+	"protocol": {
+		"controls": [
+			{
+				"id": "micGain",
+				"name": "MIC Offset",
+				"kind": "range",
+				"role": "mic-gain",
+				"range": { "min": -15, "max": 15, "step": 1.5 },
+				"unit": "dB"
+			}
+		]
+	},
 	"meta": {
 		"status": "maintainer-verified",
 		"sources": [
@@ -22,8 +35,20 @@
 				"ref": "Crinacle EQ tool: gain slider from -15 to +15 dB",
 				"date": "2026-10-03",
 				"by": "potatosalad775"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "packages/device-bridge/test/recordings/2026-10-31-crinear-protocol-micro.json",
+				"date": "2026-10-31",
+				"by": "potatosalad775"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "packages/device-bridge/test/recordings/2026-10-31-crinear-protocol-micro-2.json",
+				"date": "2026-10-31",
+				"by": "potatosalad775"
 			}
 		],
-		"notes": "Guided read with the eqcaps inspector on 2026-10-03 in peq.szwalkplay.com: its buttons move gain and Q by 0.1, but typed values reach the device as they are, rounded onto the 1/256 wire grid, so the steps are 0.00390625 (the evidence file's own summary, 0.01, predates that reading; INSPECTOR §3.3). Bands 2–7 not checked: assumed to match band 1.\npeq.szwalkplay.com caps gain at ±10 dB; the Crinacle EQ tool allows ±15."
+		"notes": "Guided read with the eqcaps inspector on 2026-10-03 in peq.szwalkplay.com: its buttons move gain and Q by 0.1, but typed values reach the device as they are, rounded onto the 1/256 wire grid, so the steps are 0.00390625 (the evidence file's own summary, 0.01, predates that reading; INSPECTOR §3.3). Bands 2–7 not checked: assumed to match band 1.\npeq.szwalkplay.com caps gain at ±10 dB; the Crinacle EQ tool allows ±15.\nMIC Offset: written as s16 ×256 dB; the device rounds what it's sent to the nearest 1.5 dB from -15 to +15 and reads that back (every whole and half dB from -15 to +15 written and read back on 2026-10-31, firmware 0.2). peq.szwalkplay.com (scheme 11) shows a slider from -15 to +15 in whole steps and sends its value + 0.5 dB, so the device holds the grid point nearest to that; NICEHCK's app calls the same field dB. The app's Save sends [1,1,0]; the handler doesn't send it after a control write, and whether an unsaved change survives a replug is untested."
 	}
 }

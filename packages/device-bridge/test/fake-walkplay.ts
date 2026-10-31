@@ -50,6 +50,15 @@ export class FakeWalkplay implements HidTransport {
 	stuck?: string;
 	/** Drops the next report, as a PureAural idle for some minutes did. */
 	asleep = false;
+	/**
+	 * How many requests it drops after a write with this command, as the PureAural does while busy
+	 * (after a work mode switch, 0x1D, and after [1,0x04]).
+	 */
+	busyAfter: Record<number, number> = {};
+	private dropping = 0;
+	/** Answers the next read of a control written with its old value, once. */
+	lagging = false;
+	private stale: [id: string, value: number] | undefined;
 	/** Band index → [freq, q, gain, type code, preset]. */
 	readonly bands = new Map<number, [number, number, number, number, number]>([
 		[0, [100, 0.75, 3.5, 2, 1]],
@@ -92,8 +101,18 @@ export class FakeWalkplay implements HidTransport {
 			this.asleep = false;
 			return;
 		}
+		if (this.dropping > 0) {
+			this.dropping--;
+			return;
+		}
+		if (op === WRITE) this.dropping = this.busyAfter[cmd] ?? 0;
 		this.buffer.set(d.subarray(0, this.buffer.length));
 		const control = BYTE_CONTROLS[cmd];
+		if (op === READ && this.stale) {
+			const [id, value] = this.stale;
+			this.stale = undefined;
+			if (id === control) return this.reply(READ, cmd, 1, value);
+		}
 		if (op === READ) {
 			if (control) return this.reply(READ, cmd, 1, this.values[control]!);
 			switch (cmd) {
@@ -114,6 +133,7 @@ export class FakeWalkplay implements HidTransport {
 		}
 		if (op !== WRITE) return;
 		const set = (id: string, value: number) => {
+			if (this.lagging) this.stale = [id, this.values[id]!];
 			if (this.stuck !== id) this.values[id] = value;
 		};
 		if (control) return set(control, d[3]!);

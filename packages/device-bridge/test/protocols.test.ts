@@ -132,7 +132,17 @@ describe('protocolOf', () => {
 	test('index entries carry the protocol', () => {
 		expect(protocolOf(indexFields(profile('crinear-protocol-micro')))).toEqual({
 			handler: 'walkplay-hid',
-			presets: [{ id: 101, name: 'Custom' }]
+			presets: [{ id: 101, name: 'Custom' }],
+			controls: [
+				{
+					id: 'micGain',
+					name: 'MIC Offset',
+					kind: 'range',
+					role: 'mic-gain',
+					range: { min: -15, max: 15, step: 1.5 },
+					unit: 'dB'
+				}
+			]
 		});
 	});
 
@@ -321,7 +331,20 @@ test("protocolForMatches takes the client's matches over index entries", () => {
 	});
 	expect(protocolForMatches(matches)).toEqual({
 		profileId: 'crinear-protocol-micro',
-		protocol: { handler: 'walkplay-hid', presets: [{ id: 101, name: 'Custom' }] }
+		protocol: {
+			handler: 'walkplay-hid',
+			presets: [{ id: 101, name: 'Custom' }],
+			controls: [
+				{
+					id: 'micGain',
+					name: 'MIC Offset',
+					kind: 'range',
+					role: 'mic-gain',
+					range: { min: -15, max: 15, step: 1.5 },
+					unit: 'dB'
+				}
+			]
+		}
 	});
 });
 

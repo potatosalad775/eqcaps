@@ -1,0 +1,639 @@
+{
+	"recording": "eqcaps-webhid",
+	"version": 1,
+	"recordedAt": "2026-10-31T08:46:28.030Z",
+	"tool": {
+		"name": "eqcaps WebHID recorder",
+		"version": 2
+	},
+	"page": {
+		"origin": "https://peq.szwalkplay.com",
+		"path": "/"
+	},
+	"userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+	"notes": "Version 0.2, Changed Mic Gain from 0, -15, +15, and 0.",
+	"devices": [
+		{
+			"vendorId": 13058,
+			"productId": 49679,
+			"productName": "Protocol Micro",
+			"collections": [
+				{
+					"usagePage": 12,
+					"usage": 1,
+					"inputReports": [84, 75, 3],
+					"outputReports": [84, 75],
+					"featureReports": [],
+					"children": []
+				}
+			]
+		}
+	],
+	"snapshots": [
+		{
+			"t": 16128.9,
+			"label": "manual",
+			"adapter": "walkplay-peq",
+			"store": "pinia",
+			"state": {
+				"device": {
+					"deviceConnect": true,
+					"pid": "0xC20F",
+					"vid": "0x3302",
+					"version": "0.2",
+					"tagId": 1,
+					"tagADCId": 0,
+					"useTagId": 1,
+					"useTagADCId": 0,
+					"dacVolumeMax": 6,
+					"dacVolumeStep": 1,
+					"deviceName": "CB",
+					"deviceTypeNo": "CB",
+					"deviceFilterIndex": {
+						"LS": 1,
+						"PK": 2,
+						"HS": 3,
+						"LP": 4,
+						"HP": 5
+					}
+				},
+				"product": {
+					"BaseUrl": "https://walkplay-api.szwalkplay.com",
+					"CdnUrl": "https://walkplay-api.szwalkplay.com",
+					"ChannelNum": 8,
+					"CreateTime": "2026-03-21 14:58:52",
+					"Description": "",
+					"DescriptionEn": "",
+					"Id": 417,
+					"Images": [
+						"http://walkplay-oss.szwalkplay.com/profile/upload/product/20260709101908376-824131.jpg"
+					],
+					"ManufactureName": "科音",
+					"ManufactureNameEn": "CrinEar",
+					"ProductBrand": "科音",
+					"ProductBrandEn": "CrinEar",
+					"ProductId": "0xC20F",
+					"ProductModel": "Protocol Micro",
+					"ProductModelEn": "Protocol Micro",
+					"SchemeNo": "11",
+					"Status": 0,
+					"SyncTime": 1774076332000,
+					"Title": "Protocol Micro",
+					"TitleEn": "Protocol Micro",
+					"UpdateTime": "2026-03-21 14:58:52",
+					"Url": "https://walkplay-api.szwalkplay.com",
+					"VendorId": "0x3302"
+				},
+				"eq": {
+					"currentEQ": {
+						"adminId": 38,
+						"channelNum": 8,
+						"code": "90263e9b303ea015",
+						"createTime": "2026-03-21 14:58:52",
+						"deptId": 101,
+						"eqName": "纯净:PURE",
+						"eqNameCn": "纯净",
+						"eqNameEn": "PURE",
+						"filterTypes": [2, 2, 2, 2, 2, 2, 2, 2],
+						"freqs": [50, 200, 500, 1000, 2500, 5000, 10000, 15000],
+						"gains": [0, 0, 0, 0, 0, 0, 0, 0],
+						"id": 368819,
+						"offset": -1,
+						"params": {},
+						"pid": "0xC20F",
+						"qs": [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
+						"rowNum": 1000000,
+						"startNum": 0,
+						"tag": 1,
+						"type": "1",
+						"updateTime": "2026-03-21 15:00:41",
+						"vid": "0x3302"
+					},
+					"eqType": "pre",
+					"currentEqType": "pre"
+				},
+				"eqADC": {
+					"currentEQ": {
+						"eqType": "pre",
+						"tag": 0,
+						"id": 0,
+						"eqNameCn": "纯净",
+						"eqNameEn": "PURE",
+						"freqs": [50, 200, 500, 1000, 2500, 5000, 10000, 15000],
+						"qs": [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
+						"gains": [0, 0, 0, 0, 0, 0, 0, 0],
+						"filterTypes": [2, 2, 2, 2, 2, 2, 2, 2],
+						"offset": 0
+					},
+					"eqType": "pre",
+					"currentEqType": "pre"
+				},
+				"filter": {
+					"filterLoaded": false,
+					"currentFilter": {
+						"name": "FAST-LL",
+						"title": "FAST-LL:陡降-低延迟滤波器",
+						"intro": "声音厚实有力，温暖舒适，适配人声与慢节奏音乐。",
+						"img": "/static/image/filters/fast-ll.png",
+						"imaBig": "/static/image/filters/fast-ll-big.png"
+					},
+					"dacWorkMode": "-1",
+					"outputGainMode": "-1",
+					"channelBalance": [0, 0]
+				},
+				"micphone": {
+					"offset": 0,
+					"listenSwitch": false,
+					"noiseSwitch": "",
+					"adcEqPanelOpen": false
+				},
+				"mf": {
+					"moduleActive": false,
+					"reverberationSwitch": 0,
+					"reverberationValue": 0,
+					"modeSwitch": 0,
+					"modeValue": 0,
+					"modeGain": -2,
+					"soundSourceC": 0,
+					"soundSourceL": 315,
+					"soundSourceSL": 270,
+					"soundSourceBL": 225,
+					"soundSourceR": 45,
+					"soundSourceSR": 90,
+					"soundSourceBR": 135,
+					"soundSourceLEF": 0
+				}
+			}
+		},
+		{
+			"t": 23510.1,
+			"label": "manual",
+			"adapter": "walkplay-peq",
+			"store": "pinia",
+			"state": {
+				"device": {
+					"deviceConnect": true,
+					"pid": "0xC20F",
+					"vid": "0x3302",
+					"version": "0.2",
+					"tagId": 1,
+					"tagADCId": 0,
+					"useTagId": 1,
+					"useTagADCId": 0,
+					"dacVolumeMax": 6,
+					"dacVolumeStep": 1,
+					"deviceName": "CB",
+					"deviceTypeNo": "CB",
+					"deviceFilterIndex": {
+						"LS": 1,
+						"PK": 2,
+						"HS": 3,
+						"LP": 4,
+						"HP": 5
+					}
+				},
+				"product": {
+					"BaseUrl": "https://walkplay-api.szwalkplay.com",
+					"CdnUrl": "https://walkplay-api.szwalkplay.com",
+					"ChannelNum": 8,
+					"CreateTime": "2026-03-21 14:58:52",
+					"Description": "",
+					"DescriptionEn": "",
+					"Id": 417,
+					"Images": [
+						"http://walkplay-oss.szwalkplay.com/profile/upload/product/20260709101908376-824131.jpg"
+					],
+					"ManufactureName": "科音",
+					"ManufactureNameEn": "CrinEar",
+					"ProductBrand": "科音",
+					"ProductBrandEn": "CrinEar",
+					"ProductId": "0xC20F",
+					"ProductModel": "Protocol Micro",
+					"ProductModelEn": "Protocol Micro",
+					"SchemeNo": "11",
+					"Status": 0,
+					"SyncTime": 1774076332000,
+					"Title": "Protocol Micro",
+					"TitleEn": "Protocol Micro",
+					"UpdateTime": "2026-03-21 14:58:52",
+					"Url": "https://walkplay-api.szwalkplay.com",
+					"VendorId": "0x3302"
+				},
+				"eq": {
+					"currentEQ": {
+						"adminId": 38,
+						"channelNum": 8,
+						"code": "90263e9b303ea015",
+						"createTime": "2026-03-21 14:58:52",
+						"deptId": 101,
+						"eqName": "纯净:PURE",
+						"eqNameCn": "纯净",
+						"eqNameEn": "PURE",
+						"filterTypes": [2, 2, 2, 2, 2, 2, 2, 2],
+						"freqs": [50, 200, 500, 1000, 2500, 5000, 10000, 15000],
+						"gains": [0, 0, 0, 0, 0, 0, 0, 0],
+						"id": 368819,
+						"offset": -1,
+						"params": {},
+						"pid": "0xC20F",
+						"qs": [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
+						"rowNum": 1000000,
+						"startNum": 0,
+						"tag": 1,
+						"type": "1",
+						"updateTime": "2026-03-21 15:00:41",
+						"vid": "0x3302"
+					},
+					"eqType": "pre",
+					"currentEqType": "pre"
+				},
+				"eqADC": {
+					"currentEQ": {
+						"eqType": "pre",
+						"tag": 0,
+						"id": 0,
+						"eqNameCn": "纯净",
+						"eqNameEn": "PURE",
+						"freqs": [50, 200, 500, 1000, 2500, 5000, 10000, 15000],
+						"qs": [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
+						"gains": [0, 0, 0, 0, 0, 0, 0, 0],
+						"filterTypes": [2, 2, 2, 2, 2, 2, 2, 2],
+						"offset": 0
+					},
+					"eqType": "pre",
+					"currentEqType": "pre"
+				},
+				"filter": {
+					"filterLoaded": false,
+					"currentFilter": {
+						"name": "FAST-LL",
+						"title": "FAST-LL:陡降-低延迟滤波器",
+						"intro": "声音厚实有力，温暖舒适，适配人声与慢节奏音乐。",
+						"img": "/static/image/filters/fast-ll.png",
+						"imaBig": "/static/image/filters/fast-ll-big.png"
+					},
+					"dacWorkMode": "-1",
+					"outputGainMode": "-1",
+					"channelBalance": [0, 0]
+				},
+				"micphone": {
+					"offset": -15,
+					"listenSwitch": true,
+					"noiseSwitch": "",
+					"adcEqPanelOpen": false
+				},
+				"mf": {
+					"moduleActive": false,
+					"reverberationSwitch": 0,
+					"reverberationValue": 0,
+					"modeSwitch": 0,
+					"modeValue": 0,
+					"modeGain": -2,
+					"soundSourceC": 0,
+					"soundSourceL": 315,
+					"soundSourceSL": 270,
+					"soundSourceBL": 225,
+					"soundSourceR": 45,
+					"soundSourceSR": 90,
+					"soundSourceBR": 135,
+					"soundSourceLEF": 0
+				}
+			}
+		},
+		{
+			"t": 28100.6,
+			"label": "manual",
+			"adapter": "walkplay-peq",
+			"store": "pinia",
+			"state": {
+				"device": {
+					"deviceConnect": true,
+					"pid": "0xC20F",
+					"vid": "0x3302",
+					"version": "0.2",
+					"tagId": 1,
+					"tagADCId": 0,
+					"useTagId": 1,
+					"useTagADCId": 0,
+					"dacVolumeMax": 6,
+					"dacVolumeStep": 1,
+					"deviceName": "CB",
+					"deviceTypeNo": "CB",
+					"deviceFilterIndex": {
+						"LS": 1,
+						"PK": 2,
+						"HS": 3,
+						"LP": 4,
+						"HP": 5
+					}
+				},
+				"product": {
+					"BaseUrl": "https://walkplay-api.szwalkplay.com",
+					"CdnUrl": "https://walkplay-api.szwalkplay.com",
+					"ChannelNum": 8,
+					"CreateTime": "2026-03-21 14:58:52",
+					"Description": "",
+					"DescriptionEn": "",
+					"Id": 417,
+					"Images": [
+						"http://walkplay-oss.szwalkplay.com/profile/upload/product/20260709101908376-824131.jpg"
+					],
+					"ManufactureName": "科音",
+					"ManufactureNameEn": "CrinEar",
+					"ProductBrand": "科音",
+					"ProductBrandEn": "CrinEar",
+					"ProductId": "0xC20F",
+					"ProductModel": "Protocol Micro",
+					"ProductModelEn": "Protocol Micro",
+					"SchemeNo": "11",
+					"Status": 0,
+					"SyncTime": 1774076332000,
+					"Title": "Protocol Micro",
+					"TitleEn": "Protocol Micro",
+					"UpdateTime": "2026-03-21 14:58:52",
+					"Url": "https://walkplay-api.szwalkplay.com",
+					"VendorId": "0x3302"
+				},
+				"eq": {
+					"currentEQ": {
+						"adminId": 38,
+						"channelNum": 8,
+						"code": "90263e9b303ea015",
+						"createTime": "2026-03-21 14:58:52",
+						"deptId": 101,
+						"eqName": "纯净:PURE",
+						"eqNameCn": "纯净",
+						"eqNameEn": "PURE",
+						"filterTypes": [2, 2, 2, 2, 2, 2, 2, 2],
+						"freqs": [50, 200, 500, 1000, 2500, 5000, 10000, 15000],
+						"gains": [0, 0, 0, 0, 0, 0, 0, 0],
+						"id": 368819,
+						"offset": -1,
+						"params": {},
+						"pid": "0xC20F",
+						"qs": [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
+						"rowNum": 1000000,
+						"startNum": 0,
+						"tag": 1,
+						"type": "1",
+						"updateTime": "2026-03-21 15:00:41",
+						"vid": "0x3302"
+					},
+					"eqType": "pre",
+					"currentEqType": "pre"
+				},
+				"eqADC": {
+					"currentEQ": {
+						"eqType": "pre",
+						"tag": 0,
+						"id": 0,
+						"eqNameCn": "纯净",
+						"eqNameEn": "PURE",
+						"freqs": [50, 200, 500, 1000, 2500, 5000, 10000, 15000],
+						"qs": [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
+						"gains": [0, 0, 0, 0, 0, 0, 0, 0],
+						"filterTypes": [2, 2, 2, 2, 2, 2, 2, 2],
+						"offset": 0
+					},
+					"eqType": "pre",
+					"currentEqType": "pre"
+				},
+				"filter": {
+					"filterLoaded": false,
+					"currentFilter": {
+						"name": "FAST-LL",
+						"title": "FAST-LL:陡降-低延迟滤波器",
+						"intro": "声音厚实有力，温暖舒适，适配人声与慢节奏音乐。",
+						"img": "/static/image/filters/fast-ll.png",
+						"imaBig": "/static/image/filters/fast-ll-big.png"
+					},
+					"dacWorkMode": "-1",
+					"outputGainMode": "-1",
+					"channelBalance": [0, 0]
+				},
+				"micphone": {
+					"offset": 15,
+					"listenSwitch": true,
+					"noiseSwitch": "",
+					"adcEqPanelOpen": false
+				},
+				"mf": {
+					"moduleActive": false,
+					"reverberationSwitch": 0,
+					"reverberationValue": 0,
+					"modeSwitch": 0,
+					"modeValue": 0,
+					"modeGain": -2,
+					"soundSourceC": 0,
+					"soundSourceL": 315,
+					"soundSourceSL": 270,
+					"soundSourceBL": 225,
+					"soundSourceR": 45,
+					"soundSourceSR": 90,
+					"soundSourceBR": 135,
+					"soundSourceLEF": 0
+				}
+			}
+		},
+		{
+			"t": 32656,
+			"label": "manual",
+			"adapter": "walkplay-peq",
+			"store": "pinia",
+			"state": {
+				"device": {
+					"deviceConnect": true,
+					"pid": "0xC20F",
+					"vid": "0x3302",
+					"version": "0.2",
+					"tagId": 1,
+					"tagADCId": 0,
+					"useTagId": 1,
+					"useTagADCId": 0,
+					"dacVolumeMax": 6,
+					"dacVolumeStep": 1,
+					"deviceName": "CB",
+					"deviceTypeNo": "CB",
+					"deviceFilterIndex": {
+						"LS": 1,
+						"PK": 2,
+						"HS": 3,
+						"LP": 4,
+						"HP": 5
+					}
+				},
+				"product": {
+					"BaseUrl": "https://walkplay-api.szwalkplay.com",
+					"CdnUrl": "https://walkplay-api.szwalkplay.com",
+					"ChannelNum": 8,
+					"CreateTime": "2026-03-21 14:58:52",
+					"Description": "",
+					"DescriptionEn": "",
+					"Id": 417,
+					"Images": [
+						"http://walkplay-oss.szwalkplay.com/profile/upload/product/20260709101908376-824131.jpg"
+					],
+					"ManufactureName": "科音",
+					"ManufactureNameEn": "CrinEar",
+					"ProductBrand": "科音",
+					"ProductBrandEn": "CrinEar",
+					"ProductId": "0xC20F",
+					"ProductModel": "Protocol Micro",
+					"ProductModelEn": "Protocol Micro",
+					"SchemeNo": "11",
+					"Status": 0,
+					"SyncTime": 1774076332000,
+					"Title": "Protocol Micro",
+					"TitleEn": "Protocol Micro",
+					"UpdateTime": "2026-03-21 14:58:52",
+					"Url": "https://walkplay-api.szwalkplay.com",
+					"VendorId": "0x3302"
+				},
+				"eq": {
+					"currentEQ": {
+						"adminId": 38,
+						"channelNum": 8,
+						"code": "90263e9b303ea015",
+						"createTime": "2026-03-21 14:58:52",
+						"deptId": 101,
+						"eqName": "纯净:PURE",
+						"eqNameCn": "纯净",
+						"eqNameEn": "PURE",
+						"filterTypes": [2, 2, 2, 2, 2, 2, 2, 2],
+						"freqs": [50, 200, 500, 1000, 2500, 5000, 10000, 15000],
+						"gains": [0, 0, 0, 0, 0, 0, 0, 0],
+						"id": 368819,
+						"offset": -1,
+						"params": {},
+						"pid": "0xC20F",
+						"qs": [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
+						"rowNum": 1000000,
+						"startNum": 0,
+						"tag": 1,
+						"type": "1",
+						"updateTime": "2026-03-21 15:00:41",
+						"vid": "0x3302"
+					},
+					"eqType": "pre",
+					"currentEqType": "pre"
+				},
+				"eqADC": {
+					"currentEQ": {
+						"eqType": "pre",
+						"tag": 0,
+						"id": 0,
+						"eqNameCn": "纯净",
+						"eqNameEn": "PURE",
+						"freqs": [50, 200, 500, 1000, 2500, 5000, 10000, 15000],
+						"qs": [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
+						"gains": [0, 0, 0, 0, 0, 0, 0, 0],
+						"filterTypes": [2, 2, 2, 2, 2, 2, 2, 2],
+						"offset": 0
+					},
+					"eqType": "pre",
+					"currentEqType": "pre"
+				},
+				"filter": {
+					"filterLoaded": false,
+					"currentFilter": {
+						"name": "FAST-LL",
+						"title": "FAST-LL:陡降-低延迟滤波器",
+						"intro": "声音厚实有力，温暖舒适，适配人声与慢节奏音乐。",
+						"img": "/static/image/filters/fast-ll.png",
+						"imaBig": "/static/image/filters/fast-ll-big.png"
+					},
+					"dacWorkMode": "-1",
+					"outputGainMode": "-1",
+					"channelBalance": [0, 0]
+				},
+				"micphone": {
+					"offset": 0,
+					"listenSwitch": true,
+					"noiseSwitch": "",
+					"adcEqPanelOpen": false
+				},
+				"mf": {
+					"moduleActive": false,
+					"reverberationSwitch": 0,
+					"reverberationValue": 0,
+					"modeSwitch": 0,
+					"modeValue": 0,
+					"modeGain": -2,
+					"soundSourceC": 0,
+					"soundSourceL": 315,
+					"soundSourceSL": 270,
+					"soundSourceBL": 225,
+					"soundSourceR": 45,
+					"soundSourceSR": 90,
+					"soundSourceBR": 135,
+					"soundSourceLEF": 0
+				}
+			}
+		}
+	],
+	"events": [
+		{
+			"t": 1121.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "800c"
+		},
+		{
+			"t": 1128.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800c02302e32ff000000407b7a3fd259fb59128585c02da704a6ed983ac000000002ff01000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1304.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "800900"
+		},
+		{
+			"t": 1320.6,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "800900302e32ff000000407b7a3fd259fb59128585c02da704a6ed983ac000000002ff01000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1512.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "800200"
+		},
+		{
+			"t": 1528.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "80020200000000000000407b7a3fd259fb59128585c02da704a6ed983ac000000002ff01000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 21564.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "01020280f1"
+		},
+		{
+			"t": 27033.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "010202800f"
+		},
+		{
+			"t": 31704.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "0102028000"
+		}
+	]
+}

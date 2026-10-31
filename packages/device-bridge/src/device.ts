@@ -274,7 +274,13 @@ export function openDevice(
 					ctx.log(`${handler.id}: "${id}" lost the device as it restarted (${e.message})`);
 				}
 				if (c.reconnect) return { reconnect: true };
-				const back = await driver(c).read(ctx);
+				let back = await driver(c).read(ctx);
+				// Once more before calling it rejected: a device may apply a value a moment late,
+				// or a late answer to an earlier read may have come first.
+				if (!near(back, value)) {
+					await ctx.sleep(100);
+					back = await driver(c).read(ctx);
+				}
 				if (!near(back, value)) {
 					throw new BridgeError(
 						'rejected',
