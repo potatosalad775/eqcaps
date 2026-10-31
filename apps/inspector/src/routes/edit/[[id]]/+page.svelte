@@ -14,10 +14,10 @@
 		type FilterType
 	} from '@potatosalad775/eqcaps-core';
 	import type { DataFile } from '@potatosalad775/eqcaps-build';
-	import { authoringPath, baseIds, httpReader, loadChain } from '$lib/authoring';
-	import { sourcesUrl } from '$lib/channel';
-	import { identityText, readFindings } from '$lib/connect';
-	import { catalog } from '$lib/data.svelte';
+	import { authoringPath, baseIds, httpReader, loadChain } from '#lib/authoring.ts';
+	import { sourcesUrl } from '#lib/channel.ts';
+	import { identityText, readFindings } from '#lib/connect.ts';
+	import { catalog } from '#lib/data.svelte.ts';
 	import {
 		blankProfile,
 		checkEdited,
@@ -27,15 +27,15 @@
 		profileIssueUrl,
 		pullRequestUrl,
 		withSchemaRef
-	} from '$lib/editor';
-	import { edited, listOf, setOptional } from '$lib/editor-form';
-	import { today } from '$lib/evidence';
-	import { citeEvidence, loadHandoff, profileForDevice, type Handoff } from '$lib/handoff';
-	import { REPO_URL } from '$lib/repo';
-	import { schemaValidator } from '$lib/schemas';
-	import { violationText } from '$lib/violations';
-	import DomainInput from '$lib/components/DomainInput.svelte';
-	import SlotChart from '$lib/components/SlotChart.svelte';
+	} from '#lib/editor.ts';
+	import { edited, listOf, setOptional } from '#lib/editor-form.ts';
+	import { today } from '#lib/evidence.ts';
+	import { citeEvidence, loadHandoff, profileForDevice, type Handoff } from '#lib/handoff.ts';
+	import { REPO_URL } from '#lib/repo.ts';
+	import { schemaValidator } from '#lib/schemas.ts';
+	import { violationText } from '#lib/violations.ts';
+	import DomainInput from '#lib/components/DomainInput.svelte';
+	import SlotChart from '#lib/components/SlotChart.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();

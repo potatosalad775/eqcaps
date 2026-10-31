@@ -2,7 +2,7 @@
 	// One domain (SPEC §4) as form inputs: a range, a stepped range, listed values or one fixed
 	// value. Calls onchange with the new domain once the inputs describe one.
 	import type { Domain } from '@potatosalad775/eqcaps-core';
-	import { domainToForm, formToDomain, type DomainForm } from '$lib/editor-form';
+	import { domainToForm, formToDomain, type DomainForm } from '#lib/editor-form.ts';
 
 	let {
 		label,

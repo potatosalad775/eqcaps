@@ -11,8 +11,8 @@
 		evidenceText,
 		stringFields,
 		type EvidenceReport
-	} from '$lib/evidence';
-	import { saveHandoff, type Handoff } from '$lib/handoff';
+	} from '#lib/evidence.ts';
+	import { saveHandoff, type Handoff } from '#lib/handoff.ts';
 
 	let {
 		report,
@@ -75,7 +75,6 @@
 			action === 'fix' && handoff.profileId
 				? resolve('/edit/[[id]]', { id: handoff.profileId })
 				: resolve('/edit/[[id]]', {});
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- resolved, plus a query
 		await goto(`${target}?device=1`);
 	}
 </script>

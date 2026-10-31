@@ -1,5 +1,8 @@
-import { base } from '$app/paths';
+import { resolve } from '$app/paths';
 import { REPO_URL } from './repo.ts';
+
+// The app's root, base path included (`/eqcaps/` on Pages, `/` in dev).
+const root = () => resolve('/');
 
 /**
  * The data channel the app reads: /v1/ on the app's own origin (Pages, or the local build in
@@ -7,7 +10,7 @@ import { REPO_URL } from './repo.ts';
  */
 export function dataUrl(): string {
 	const configured = import.meta.env.VITE_EQCAPS_DATA as string | undefined;
-	return configured || new URL(`${base}/v1/`, location.href).href;
+	return configured || new URL(`${root()}v1/`, location.href).href;
 }
 
 /**
@@ -17,7 +20,7 @@ export function dataUrl(): string {
 export function sourcesUrl(): string {
 	const configured = import.meta.env.VITE_EQCAPS_SOURCES as string | undefined;
 	if (configured) return configured;
-	if (import.meta.env.DEV) return new URL(`${base}/data/`, location.href).href;
+	if (import.meta.env.DEV) return new URL(`${root()}data/`, location.href).href;
 	return `${REPO_URL.replace('https://github.com/', 'https://raw.githubusercontent.com/')}/main/data/`;
 }
 

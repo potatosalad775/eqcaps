@@ -1,3 +1,4 @@
+import adapter from '@sveltejs/adapter-static';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { execFileSync } from 'node:child_process';
@@ -11,6 +12,9 @@ import {
 	type Connect,
 	type Plugin
 } from 'vite';
+
+// Pages serves the site under /eqcaps/ (DECISIONS D24). Unset for local dev and preview.
+const BASE_PATH = (process.env.BASE_PATH || '') as '' | `/${string}`;
 
 const siteDir = fileURLToPath(new URL('../../dist/site/', import.meta.url));
 const repoDir = fileURLToPath(new URL('../../', import.meta.url));
@@ -58,7 +62,23 @@ process.env.VITE_EQCAPS_COMMIT ??= (() => {
 })();
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit(), localData()],
+	plugins: [
+		tailwindcss(),
+		sveltekit({
+			adapter: adapter({
+				pages: 'dist',
+				assets: 'dist',
+				// A static SPA: pages with a parameter (/p/<id>) are not prerendered. GitHub Pages
+				// answers every unknown path with 404.html, which boots the app on the right route.
+				fallback: '404.html',
+				precompress: false
+			}),
+			paths: { base: BASE_PATH },
+			dynamicCompileOptions: ({ filename }) =>
+				filename.includes('node_modules') ? undefined : { runes: true }
+		}),
+		localData()
+	],
 	// Workspace packages resolve to their TypeScript sources, so nothing needs building first.
 	resolve: { conditions: ['eqcaps:source', ...defaultClientConditions] },
 	ssr: { resolve: { conditions: ['eqcaps:source', ...defaultServerConditions] } }

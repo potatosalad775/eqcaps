@@ -34,19 +34,19 @@
 		readFindings,
 		wireRows,
 		wrongConstraintIssueUrl
-	} from '$lib/connect';
-	import { catalog } from '$lib/data.svelte';
-	import { openReadOnly, type ReadOnlyDevice } from '$lib/device';
-	import { APP_COMMIT } from '$lib/channel';
-	import { readEvidence, today } from '$lib/evidence';
-	import { memberBase } from '$lib/handoff';
-	import EvidenceReview from '$lib/components/EvidenceReview.svelte';
-	import GuidedRead from '$lib/components/GuidedRead.svelte';
-	import { formatApo } from '$lib/filters-text';
-	import { formatField } from '$lib/format';
-	import { violationText } from '$lib/violations';
-	import GroupBadge from '$lib/components/GroupBadge.svelte';
-	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	} from '#lib/connect.ts';
+	import { catalog } from '#lib/data.svelte.ts';
+	import { openReadOnly, type ReadOnlyDevice } from '#lib/device.ts';
+	import { APP_COMMIT } from '#lib/channel.ts';
+	import { readEvidence, today } from '#lib/evidence.ts';
+	import { memberBase } from '#lib/handoff.ts';
+	import EvidenceReview from '#lib/components/EvidenceReview.svelte';
+	import GuidedRead from '#lib/components/GuidedRead.svelte';
+	import { formatApo } from '#lib/filters-text.ts';
+	import { formatField } from '#lib/format.ts';
+	import { violationText } from '#lib/violations.ts';
+	import GroupBadge from '#lib/components/GroupBadge.svelte';
+	import StatusBadge from '#lib/components/StatusBadge.svelte';
 
 	const apis = (() => {
 		try {
@@ -284,7 +284,6 @@
 		} catch {
 			// The playground then shows its sample.
 		}
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- resolved, plus a query
 		await goto(`${resolve('/playground')}?profile=${encodeURIComponent(profileId)}`);
 	}
 </script>

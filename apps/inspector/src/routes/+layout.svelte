@@ -2,8 +2,8 @@
 	import './layout.css';
 	import { page } from '$app/state';
 	import { asset, resolve } from '$app/paths';
-	import { dataUrl } from '$lib/channel';
-	import { catalog } from '$lib/data.svelte';
+	import { dataUrl } from '#lib/channel.ts';
+	import { catalog } from '#lib/data.svelte.ts';
 
 	let { children } = $props();
 
@@ -42,7 +42,7 @@
 				href={resolve('/')}
 				class="flex items-center gap-2 font-semibold text-inherit no-underline"
 			>
-				<img src={asset('/favicon.svg')} alt="" class="size-6" />
+				<img src={asset('favicon.svg')} alt="" class="size-6" />
 				eqcaps <span class="font-normal text-zinc-500">inspector</span>
 			</a>
 			<nav class="flex gap-4 text-sm">

@@ -3,7 +3,7 @@
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { Meta, Profile } from '@potatosalad775/eqcaps-core';
-	import { catalog } from '$lib/data.svelte';
+	import { catalog } from '#lib/data.svelte.ts';
 	import {
 		CONNECTIONS,
 		connectionsOf,
@@ -11,10 +11,10 @@
 		searchEntries,
 		type Connection,
 		type Feature
-	} from '$lib/search';
-	import { identitySummary } from '$lib/identity';
-	import GroupBadge from '$lib/components/GroupBadge.svelte';
-	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	} from '#lib/search.ts';
+	import { identitySummary } from '#lib/identity.ts';
+	import GroupBadge from '#lib/components/GroupBadge.svelte';
+	import StatusBadge from '#lib/components/StatusBadge.svelte';
 
 	const params = page.url.searchParams;
 	let query = $state(params.get('q') ?? '');
@@ -47,7 +47,7 @@
 	// Keep the search in the URL, so a search can be shared and survives a reload.
 	$effect(() => {
 		if (!routerReady) return;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		const set = (k: string, v: string) =>
 			v ? url.searchParams.set(k, v) : url.searchParams.delete(k);
 		set('q', query.trim());
@@ -56,8 +56,6 @@
 		set('connection', connection);
 		set('features', features.join(','));
 		set('deprecated', showDeprecated ? '1' : '');
-		// Same page, new query: there is no route to resolve.
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		if (url.search !== page.url.search) replaceState(url, {});
 	});
 

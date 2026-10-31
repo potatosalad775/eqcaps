@@ -2,8 +2,8 @@
 	// Consumer guide (INSPECTOR §7): where the data is, and how an app uses it. The packages'
 	// READMEs and the SPEC have the details; this page is the map.
 	import { resolve } from '$app/paths';
-	import { dataUrl } from '$lib/channel';
-	import { REPO_URL } from '$lib/repo';
+	import { dataUrl } from '#lib/channel.ts';
+	import { REPO_URL } from '#lib/repo.ts';
 
 	const pkg = (name: string) => `https://www.npmjs.com/package/@potatosalad775/${name}`;
 	const readme = (name: string) => `${REPO_URL}/tree/main/packages/${name}#readme`;

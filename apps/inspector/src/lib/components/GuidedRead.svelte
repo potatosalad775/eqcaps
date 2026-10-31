@@ -1,20 +1,20 @@
 <script lang="ts">
 	// Guided read (T3, INSPECTOR §3): the user changes the EQ in the vendor's own app, one step at
 	// a time, and this component reads the device back after each step. It only ever calls the
-	// bridge's pull (invariant 9, D40); the planning and inference live in $lib/guided.
+	// bridge's pull (invariant 9, D40); the planning and inference live in #lib/guided.
 	import type { Profile } from '@potatosalad775/eqcaps-core';
 	import { type PullResult, type WireGrid } from '@potatosalad775/eqcaps-device-bridge';
 	import { grantedHidDevice } from '@potatosalad775/eqcaps-device-bridge/browser';
-	import { openReadOnly, type ReadOnlyDevice } from '$lib/device';
-	import type { EvidenceReport } from '$lib/evidence';
-	import type { Handoff } from '$lib/handoff';
-	import { changeText } from '$lib/guided/changes';
-	import { deriveConstraints } from '$lib/guided/constraints';
-	import { guidedEvidence } from '$lib/guided/evidence';
-	import { conclude, effective, infer } from '$lib/guided/infer';
-	import { instruction, nextStep, plannedSteps, stepLabel, stepState } from '$lib/guided/plan';
-	import { readEntry } from '$lib/guided/session';
-	import type { Entry, GuidedContext, Step } from '$lib/guided/types';
+	import { openReadOnly, type ReadOnlyDevice } from '#lib/device.ts';
+	import type { EvidenceReport } from '#lib/evidence.ts';
+	import type { Handoff } from '#lib/handoff.ts';
+	import { changeText } from '#lib/guided/changes.ts';
+	import { deriveConstraints } from '#lib/guided/constraints.ts';
+	import { guidedEvidence } from '#lib/guided/evidence.ts';
+	import { conclude, effective, infer } from '#lib/guided/infer.ts';
+	import { instruction, nextStep, plannedSteps, stepLabel, stepState } from '#lib/guided/plan.ts';
+	import { readEntry } from '#lib/guided/session.ts';
+	import type { Entry, GuidedContext, Step } from '#lib/guided/types.ts';
 	import EvidenceReview from './EvidenceReview.svelte';
 
 	let {

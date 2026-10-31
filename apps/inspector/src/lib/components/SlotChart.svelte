@@ -3,8 +3,8 @@
 	// coarse enough to see, listed values as dots, and each variant's window as an alternative
 	// (INSPECTOR §2 T0). Hover a row for its full domains.
 	import { describeDomain, type Domain, type Profile } from '@potatosalad775/eqcaps-core';
-	import { formatHz, formatTick } from '$lib/format';
-	import { freqAxis, gridPoints, slotRows, span, whenLabel, type SlotRow } from '$lib/slots';
+	import { formatHz, formatTick } from '#lib/format.ts';
+	import { freqAxis, gridPoints, slotRows, span, whenLabel, type SlotRow } from '#lib/slots.ts';
 
 	let { profile }: { profile: Profile } = $props();
 

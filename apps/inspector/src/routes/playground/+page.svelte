@@ -14,11 +14,11 @@
 		type Filter,
 		type Profile
 	} from '@potatosalad775/eqcaps-core';
-	import { catalog } from '$lib/data.svelte';
-	import { formatApo, parseFilters } from '$lib/filters-text';
-	import { formatField } from '$lib/format';
-	import { violationText } from '$lib/violations';
-	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import { catalog } from '#lib/data.svelte.ts';
+	import { formatApo, parseFilters } from '#lib/filters-text.ts';
+	import { formatField } from '#lib/format.ts';
+	import { violationText } from '#lib/violations.ts';
+	import StatusBadge from '#lib/components/StatusBadge.svelte';
 
 	const SAMPLE = `# AutoEQ ParametricEQ.txt and Equalizer APO text work, and so does JSON.
 Preamp: -6.4 dB
@@ -62,10 +62,8 @@ Filter 11: ON PK Fc 19000 Hz Gain 0.8 dB Q 0.70`;
 
 	$effect(() => {
 		if (!routerReady) return;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		url.searchParams.set('profile', profileId);
-		// Same page, new query: there is no route to resolve.
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		if (url.search !== page.url.search) replaceState(url, {});
 	});
 

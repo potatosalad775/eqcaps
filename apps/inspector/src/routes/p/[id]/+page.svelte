@@ -6,13 +6,13 @@
 		unsupported,
 		type Profile
 	} from '@potatosalad775/eqcaps-core';
-	import { catalog } from '$lib/data.svelte';
-	import { dataUrl } from '$lib/channel';
-	import { profileSourceUrl, sourceHref } from '$lib/repo';
-	import { bluetoothEntryText, usbEntryText } from '$lib/identity';
-	import SlotChart from '$lib/components/SlotChart.svelte';
-	import GroupBadge from '$lib/components/GroupBadge.svelte';
-	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import { catalog } from '#lib/data.svelte.ts';
+	import { dataUrl } from '#lib/channel.ts';
+	import { profileSourceUrl, sourceHref } from '#lib/repo.ts';
+	import { bluetoothEntryText, usbEntryText } from '#lib/identity.ts';
+	import SlotChart from '#lib/components/SlotChart.svelte';
+	import GroupBadge from '#lib/components/GroupBadge.svelte';
+	import StatusBadge from '#lib/components/StatusBadge.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
