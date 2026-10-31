@@ -254,7 +254,11 @@ export interface Control {
 		| 'sound-mode'
 		| 'light'
 		| 'tone-bass'
-		| 'tone-treble';
+		| 'tone-treble'
+		| 'amp-mode'
+		| 'mic-gain'
+		| 'balance-left'
+		| 'balance-right';
 	/** choice only: the values the device takes, with their labels. */
 	values?: ControlValue[];
 	/** range only: a range or stepped range (SPEC §4). */

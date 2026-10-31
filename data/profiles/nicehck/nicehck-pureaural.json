@@ -27,6 +27,7 @@
 				"id": "workMode",
 				"name": "Work Mode",
 				"kind": "choice",
+				"role": "amp-mode",
 				"values": [
 					{ "value": 0, "name": "CLASS-H" },
 					{ "value": 1, "name": "CLASS-AB" }
@@ -54,6 +55,7 @@
 				"id": "micGain",
 				"name": "Microphone Gain",
 				"kind": "range",
+				"role": "mic-gain",
 				"range": { "min": -12, "max": 12, "step": 1 },
 				"unit": "dB"
 			},
@@ -61,6 +63,7 @@
 				"id": "leftGain",
 				"name": "Channel Balance (left)",
 				"kind": "range",
+				"role": "balance-left",
 				"range": { "min": -50, "max": 0, "step": 1 },
 				"unit": "dB"
 			},
@@ -68,6 +71,7 @@
 				"id": "rightGain",
 				"name": "Channel Balance (right)",
 				"kind": "range",
+				"role": "balance-right",
 				"range": { "min": -50, "max": 0, "step": 1 },
 				"unit": "dB"
 			}

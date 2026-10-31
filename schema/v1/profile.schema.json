@@ -510,7 +510,11 @@
 						"sound-mode",
 						"light",
 						"tone-bass",
-						"tone-treble"
+						"tone-treble",
+						"amp-mode",
+						"mic-gain",
+						"balance-left",
+						"balance-right"
 					]
 				},
 				"values": {

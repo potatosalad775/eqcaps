@@ -121,7 +121,11 @@ const ROLES: ReadonlySet<string> = new Set([
 	'sound-mode',
 	'light',
 	'tone-bass',
-	'tone-treble'
+	'tone-treble',
+	'amp-mode',
+	'mic-gain',
+	'balance-left',
+	'balance-right'
 ]);
 
 const numbers = (v: unknown, what: string): number[] =>

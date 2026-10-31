@@ -354,7 +354,10 @@ the device accepts and the handler knows how to send them.
   devices: `volume`, `output-gain` (an amplifier gain or level switch), `dac-filter` (the DAC's
   reconstruction filter), `upsampling`, `usb-mode` (the USB audio class or descriptor set the
   device presents), `sound-mode` (game, surround and similar processing modes), `light`,
-  `tone-bass`, `tone-treble`.
+  `tone-bass`, `tone-treble`, `amp-mode` (the amplifier's operating class, such as class AB or
+  class H), `mic-gain` (the gain of a built-in microphone input), `balance-left`, `balance-right`
+  (the gain of one output channel). A device with both balance roles holds a gain per channel; an
+  app MAY show the pair as one balance control.
 - `when` (optional): the control exists only while the control named in `when.control` holds one
   of `when.values`. That control MUST be another one in the list, MUST NOT have a `when` of its
   own, and MUST take every listed value.
