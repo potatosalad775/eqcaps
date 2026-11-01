@@ -2,11 +2,12 @@
 // and -device-bridge to npm, a git tag, and a GitHub Release with the current bundle.json. Run it
 // from a clean, pushed main; npm asks for your 2FA code as it publishes.
 //
-// Usage: npm run release -- <version> [--dry-run] [--otp <code>]
-//        npm run release -- <version> --pack
+// Usage: npm run release -- <version> [--dry-run] [--otp <code>] [--yes]
+//        npm run release -- <version> --pack [--yes]
 //
 // <version> is a semver (0.3.0, 0.3.0-rc.1) or major, minor or patch: the next such version after
-// the highest released v* tag on origin.
+// the highest released v* tag on origin. The script asks you to confirm it before doing anything;
+// --yes skips the question.
 //
 // --pack builds the packages and writes their tarballs to dist/pack/ instead of publishing, from
 // any working tree, to try them in another app before a release:
@@ -18,6 +19,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
@@ -124,29 +126,51 @@ function nextVersion(bump: Bump): string {
 	return next;
 }
 
-function main() {
+/** Asks `question`; anything but y or yes, or no terminal to answer from, stops. */
+async function confirm(question: string) {
+	const rl = createInterface({ input: process.stdin, output: process.stdout });
+	// Input that ends before an answer (no terminal) would otherwise leave the question pending.
+	rl.once('close', () => fail('Stopped. Nothing was done.'));
+	try {
+		const answer = await rl.question(`\n${question} [y/N] `);
+		if (!/^y(es)?$/i.test(answer.trim())) fail('Stopped. Nothing was done.');
+	} finally {
+		rl.removeAllListeners('close');
+		rl.close();
+	}
+}
+
+async function main() {
 	const { positionals, values } = parseArgs({
 		allowPositionals: true,
 		options: {
 			'dry-run': { type: 'boolean' },
 			otp: { type: 'string' },
-			pack: { type: 'boolean' }
+			pack: { type: 'boolean' },
+			yes: { type: 'boolean', short: 'y' }
 		}
 	});
 	const arg = positionals[0];
 	const version = BUMPS.includes(arg as Bump) ? nextVersion(arg as Bump) : arg?.replace(/^v/, '');
 	if (!version || !/^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/.test(version)) {
 		fail(
-			'usage: npm run release -- <version | major | minor | patch> [--dry-run] [--otp <code>] [--pack]'
+			'usage: npm run release -- <version | major | minor | patch> [--dry-run] [--otp <code>] [--pack] [--yes]'
 		);
+	}
+	const dryRun = values['dry-run'] ?? false;
+	const tag = `v${version}`;
+	const prerelease = version.includes('-');
+	if (!values.yes) {
+		const target = values.pack
+			? `Pack ${version}`
+			: `${dryRun ? 'Dry-run release' : 'Release'} ${tag} under npm dist-tag ` +
+				(prerelease ? 'next, as a GitHub pre-release' : 'latest');
+		await confirm(`${target}?`);
 	}
 	if (values.pack) {
 		pack(version);
 		return;
 	}
-	const dryRun = values['dry-run'] ?? false;
-	const tag = `v${version}`;
-	const prerelease = version.includes('-');
 
 	// Release only what is on origin/main, so the tag points at a commit everyone can see.
 	if (git('status', '--porcelain'))
@@ -220,4 +244,4 @@ function main() {
 	console.log(`\nReleased ${tag}.`);
 }
 
-main();
+await main();
