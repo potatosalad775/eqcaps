@@ -5,7 +5,7 @@ import type { Profile, Source } from '@potatosalad775/eqcaps-core';
 
 export const REPO_URL = 'https://github.com/potatosalad775/eqcaps';
 
-/** data/profiles/<brand>/<id>.json, the authoring file (CLAUDE.md conventions). */
+/** data/profiles/<brand>/<id>.json, the authoring file (AGENTS.md). */
 export function profilePath(p: Pick<Profile, 'id' | 'device'>): string {
 	return `data/profiles/${brandSlug(p.device.brand)}/${p.id}.json`;
 }

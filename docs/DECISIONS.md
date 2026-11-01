@@ -6,7 +6,8 @@ and the decisions since superseded or removed (D23, D29, D31, D38), is archived 
 [history/decisions.md](history/decisions.md).
 
 To change a decision, edit its entry here with a dated note, and update [SPEC.md](SPEC.md) in the
-same change if the format is affected. A new decision takes the next free number (D49).
+same change if the format is affected. A new decision takes the next free number (D51). The rules
+agents follow are in [AGENTS.md](../AGENTS.md); this file is the record of why.
 
 ---
 
@@ -138,10 +139,11 @@ first additive minor.
 
 ### D49. Device controls: format 1.2 (2026-10-28)
 `protocol.controls` lists a device's settings besides the EQ (volume, output gain, DAC filter,
-upsampling, USB mode, sound modes, lights, tone, amplifier class, mic gain, channel balance), because they change what the device plays and
-whether its EQ applies. Like presets, the data says which values the device takes and the handler
-knows how to send them: ids are each handler's vocabulary, values are the device's own numbers,
-and an optional closed `role` lets apps present them alike. A control can depend on another
+upsampling, USB mode, sound modes, lights, tone, amplifier class, mic gain, channel balance),
+because they change what the device plays and whether its EQ applies. Like presets, the data
+says which values the device takes and the handler knows how to send them: ids are each
+handler's vocabulary, values are the device's own numbers, and an optional closed `role` lets
+apps present them alike. A control can depend on another
 control (`when`, one level deep) and on firmware (unknown firmware: absent), mark values at which
 the EQ stops applying (`disablesEq`), and mark writes that reconnect the device. Opt-in:
 `pull`/`push` never touch controls, apps write one only when the user changes it, and never raise
@@ -204,7 +206,8 @@ backend: it would need a bot token, moderation and abuse handling.
 
 ### D20. The device bridge lives here
 Taken from devicePEQ (0BSD) at commit `0617f38`, refactored into codec + session behind portable
-transports. Nothing in `schema/`, `data/`, `core` or `client` depends on it.
+transports. Nothing in `schema/`, `data/`, `core` or `client` depends on it. Since then, the
+handlers follow the vendors' own apps where one is known (D50).
 
 ### D21. Tech stack
 npm workspaces, TypeScript strict, Vitest + fast-check, Ajv, Svelte 5, Prettier + ESLint, the same
@@ -244,6 +247,19 @@ they're given, rounded onto the wire grid; anything the wire can't carry is a `B
 anything is sent. Push takes written values (apps run `fit` + `complete` first); pull returns
 them. Tests decode recorded device answers and round-trip every codec, rather than reproducing
 devicePEQ's bytes. Where the bridge deliberately differs from devicePEQ is listed in the archive.
+
+### D50. The vendor's own app is the reference (2026-11-01)
+What a handler sends (frames, order, commits, saves, delays) and what the data says (ranges,
+types, presets, controls) follow the vendor's own app, read for facts only (D25). Where the bridge
+or a profile disagrees with it, they change to match, without waiting for a recording. devicePEQ
+`0617f38` is the fallback where no vendor app is known, and its differences go in the notes. A
+deviation from the app is made only where the app is plainly broken, and the notes say so.
+Behaviour only one vendor's app has is a handler option, so other brands on the handler keep
+theirs. **Why:** the app is how the firmware is meant to be driven. devicePEQ's guesses, kept
+"until a recording confirms", were wrong more than once: its Walkplay commit carried two of the
+chip's factory-reset commands, which reset a Tanchjim Space II's DAC settings on every write, and
+neither Walkplay's, NICEHCK's nor Tanchjim's app sends them. D39's 2026-10-28 note is the same
+rule for unit conversions.
 
 ### D34. Inspector: a static SvelteKit SPA on the same origin as the data
 adapter-static, never server-rendered; `404.html` is the SPA fallback, so profile links are real

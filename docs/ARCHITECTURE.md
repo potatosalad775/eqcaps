@@ -23,14 +23,16 @@ is four things:
    [inspector](INSPECTOR.md) web app for browsing, checking devices and contributing.
 
 Out of scope: per-channel (L/R) EQ, how filters actually sound (D39), coefficient quantization,
-a submission backend, and non-EQ device features (DAC filters, mic gain…).
+a submission backend, and devices with no EQ. A device's other settings (volume, DAC filter, mic
+gain…) are in scope as device controls (D49), because they change what it plays and whether its
+EQ applies.
 
 ## 2. Consumers
 
 | Consumer | Uses |
 | --- | --- |
 | [uniPEQ](https://unipeq.com) ([source](https://github.com/potatosalad775/uniPEQ)): SvelteKit + Capacitor hardware PEQ app, web and Android | `core`, `client` and `device-bridge` from npm, an embedded `bundle.json`, its own native USB transport on Android (D27) |
-| The inspector (this repo) | everything, `pull` only (D40) |
+| The inspector (this repo) | everything, reads only (D40) |
 | Any other app | the `/v1/` JSON and schema (CC0), or the npm packages |
 
 ## 3. System overview
@@ -57,7 +59,10 @@ a submission backend, and non-EQ device features (DAC filters, mic gain…).
 
 ```
 eqcaps/
-├── docs/                         SPEC, ARCHITECTURE, DECISIONS, INSPECTOR, plans/, research/, history/
+├── AGENTS.md                     rules for coding agents (CLAUDE.md imports it)
+├── .claude/skills/               agent procedures, such as reading a vendor app
+├── docs/                         SPEC, ARCHITECTURE, DECISIONS, INSPECTOR;
+│                                 plans/, research/, history/
 ├── schema/v1/
 │   ├── profile.schema.json       published (flat) profiles; hand-written
 │   └── source.schema.json        authoring files (adds extends / abstract); generated
@@ -72,7 +77,8 @@ eqcaps/
 │   ├── core/                     types, semantic validator, engine (zero deps, sync)
 │   ├── client/                   fetch and cache index/profiles/bundle; matchDevice()
 │   ├── build/                    Ajv validation, cross-profile checks, publishing, data CLI
-│   └── device-bridge/            transports, codecs and sessions; browser transports in ./browser
+│   └── device-bridge/            transports, codecs and sessions; browser transports in ./browser;
+│                                 test/captures/ and test/recordings/ hold device answers
 ├── apps/inspector/               SvelteKit SPA (adapter-static)
 ├── tools/userscripts/            WebHID recorder for vendor web apps (recordings for bridge tests)
 └── scripts/
@@ -120,7 +126,8 @@ Changing one of these needs a DECISIONS entry.
 7. **`project`, `resolveSlot` and `validate` are exact** across languages; `assign`, `fit` and
    `complete` are normative through their properties (D15).
 8. **Apps must work without the CDN.** The database enhances an app and never blocks it.
-9. **The inspector never writes to a device** (D40).
+9. **The inspector never writes to a device** (D40): it calls `pull`, never `push`, `setEnabled`
+   or `writeControl`.
 
 ## 7. Data flow
 
@@ -155,19 +162,29 @@ filters ──fit──▶ slots ──complete(hints: what the device holds)─
 
 While editing, apps run `validateList` and flag problems without rewriting anything.
 
+Device controls (D49) are separate and opt-in: `pull` and `push` never touch them, and an app calls
+`writeControl` only when the user changes one. The bridge refuses a value the profile doesn't
+list and reads each write back.
+
 ## 9. Device bridge
 
 - **Transports.** Handlers see only `HidTransport` and `StreamTransport` (`src/transport.ts`).
   WebHID, Web Serial and Web Bluetooth implementations are in `./browser`, typed structurally; a
   native app supplies its own.
 - **Handlers** are a pure codec (`encode`, `decode`, `wire`) plus a session that does the I/O. 16
-  protocols, from devicePEQ `0617f38`.
+  protocols, ported from devicePEQ `0617f38` and since changed to do what the vendors' own apps
+  do, where one is known (D50): Walkplay's, NICEHCK's, Tanchjim's and Fosi Audio's so far.
 - **Protocols are data.** A profile names its handler, options and presets (D42), inherited from
   its base, so a new device on a known protocol needs no bridge release. `src/protocols.ts`
   checks the block against the handlers and holds per-vendor guesses for devices without a
   profile, marked experimental.
+- **Controls and firmware.** A handler can read the firmware and read and write the device
+  controls the profile lists (`firmware`, `readControls`, `writeControl`).
 - **Tests** decode recorded device answers (`test/captures/`), round-trip every codec on its wire
-  grid, and run the write recipe for every profile.
+  grid, and run the write recipe for every profile. Recordings of a vendor's web app driving a
+  device (`test/recordings/`, made with the WebHID recorder in `tools/userscripts/`) check that
+  the handler reads the same answers the same way, sends the app's writes as the same bytes, and
+  that the profile offers what the app read.
 
 ## 10. Risks
 
@@ -182,17 +199,24 @@ While editing, apps run `validateList` and flag problems without rewriting anyth
 
 ## 11. Roadmap
 
-Work in progress has a plan in [plans/](plans/).
+Work in progress has a plan in [plans/](plans/), with its status in the plans README.
 
-- **More verified profiles.** Two are `maintainer-verified` (CrinEar Protocol Micro, EarAcoustic
-  OSHUN DECO), both from guided reads. The RME drafts' notes list what to check.
+- **More verified profiles.** Eight are `maintainer-verified`, from guided reads and recordings:
+  CrinEar Protocol Micro, EarAcoustic OSHUN DECO, both Fosi Audio DS3 firmwares and NICEHCK's
+  PureAural, StringSnow, Tears and 10th Anniversary Edition. The Tanchjim FOLA is next. The RME
+  drafts' notes list what to check.
+- **Vendor apps against the handlers** (D50). Walkplay: the pre-gain in band frames and noise
+  reduction. Tanchjim's TTGK devices: whether the firmware filters by the coefficients or the
+  band's metadata, which needs a measurement; a Space II retest. More Fosi Audio devices (C1,
+  C3, ZH1, ZH3) as data files.
+- **Controls and firmware in the inspector.** A read shows the firmware and the device controls
+  and records them in the evidence file; when matches differ only by firmware, it reads the
+  firmware and matches again (plans/fosi-audio.md).
 - **Guided reads with a phone or desktop vendor app.** The inspector reconnects a granted device
   for each step; this path hasn't run on hardware yet (INSPECTOR §3.4).
-- **NiceHCK PureAural.** Its own profile (not a Walkplay variant), and the write differences its
-  and the OSHUN DECO's vendor apps showed as protocol options, with the captures as tests. Whether
-  the OSHUN DECO's bands 11–16 do anything needs a measurement.
 - **Qudelix 5K reads.** The USB handler can only write, and devicePEQ's writes are reported
   unstable. A capture of the vendor app's USB traffic would settle both.
 - **Smaller group profiles.** As devices are identified, give them device profiles with their
-  real ids and drop the pairs from the groups, most of which don't exist.
+  real ids and drop the pairs from the groups, most of which don't exist. Walkplay's product
+  catalog lists the real vendor/product pairs per scheme (plans/nicehck.md).
 - **modernGraphTool** adopting `core` and `client` in place of its own constraint model.

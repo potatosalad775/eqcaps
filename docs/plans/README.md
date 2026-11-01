@@ -8,8 +8,8 @@ decisions are recorded in [../DECISIONS.md](../DECISIONS.md), and what the proje
 
 | Plan | Status |
 | --- | --- |
-| [fosi-audio.md](fosi-audio.md) | Device controls (format 1.2), the DS3 and the WebHID recorder done on `feat/device-controls`; recording a real DS3 and inspector support next |
-| [nicehck.md](nicehck.md) | Walkplay firmware and controls, four NICEHCK profiles and the recorder adapter done on `feat/device-controls`; recording each device next |
+| [fosi-audio.md](fosi-audio.md) | Device controls (format 1.2), the DS3 (recorded, maintainer-verified) and the WebHID recorder done; inspector support and more Fosi devices next |
+| [nicehck.md](nicehck.md) | Walkplay firmware and controls, four NICEHCK profiles (recorded, maintainer-verified) and the recorder adapter done; the Octave waits for an owner |
 | [walkplay.md](walkplay.md) | Walkplay's own app read against walkplay-hid; the commit now follows the vendor apps (2026-11-01); recorder adapter done |
 | [tanchjim.md](tanchjim.md) | Tanchjim's KT Micro devices follow the vendor app (handler options, two bases, 8 new profiles); FOLA identified; the app's Walkplay-chip (TTGK) devices profiled and written as the app does; Space II retest next; Luna has no EQ |
-| [agent-docs.md](agent-docs.md) | Replace CLAUDE.md with one short AGENTS.md of rules and a vendor-app skill; not started |
+| [agent-docs.md](agent-docs.md) | AGENTS.md, the `read-vendor-app` skill and D50 done (2026-11-01); a fresh-session check next |

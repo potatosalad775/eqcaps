@@ -2,8 +2,8 @@
 
 > **Status: frozen as v1 (format 1.0) on 2026-10-03** ([DECISIONS D36](DECISIONS.md)); **format
 > 1.1** (2026-10-10, D48) adds `writable` presets (§9); **format 1.2** (2026-10-28, D49) adds
-> device controls (§9.1). This file is the single place the format is defined. From here on it changes only by minors that add (§15); anything else needs v2.
-> Published under `/v1/`.
+> device controls (§9.1). This file is the single place the format is defined. From here on it
+> changes only by minors that add (§15); anything else needs v2. Published under `/v1/`.
 > MUST / SHOULD / MAY are used as in RFC 2119. Rationale for each choice is in
 > [DECISIONS.md](DECISIONS.md), and the evidence is in [research/prior-art.md](research/prior-art.md).
 
@@ -180,7 +180,8 @@ This is what makes non-decimal steps like `1/14` (written `0.07142857142857142`)
 ]
 ```
 
-- `index` is an integer or an array of integers, each `< bandCount`. Each slot is overridden at most once.
+- `index` is an integer or an array of integers, each `< bandCount`. Each slot is overridden at
+  most once.
 - **Merge is per key, replace.** An override's `freq` replaces the template's `freq` as a whole:
   there is no deep merge of `min`/`max`/`step`. `variants` also replace as a whole.
 - When `bandCount` is `null`, `bands` MUST be empty (all slots are the template).
@@ -213,8 +214,8 @@ bridge.
 
 ### 5.4 Graphic EQs need no mode
 
-A slot is **freq-locked** if its `freq` is `{ value }` or a single-element `{ values }`. A profile is
-a graphic EQ iff every slot is freq-locked, and consumers derive `isGraphic` from that. Hybrids,
+A slot is **freq-locked** if its `freq` is `{ value }` or a single-element `{ values }`. A profile
+is a graphic EQ iff every slot is freq-locked, and consumers derive `isGraphic` from that. Hybrids,
 such as fixed centers with adjustable Q, need nothing special.
 
 ## 6. Variants (conditional domains)
@@ -436,7 +437,8 @@ both `*-verified` values as verified.
 
 Source files under `data/` MAY use:
 
-- `"abstract": true`. The file is a base only. It is never published and needs no `match` or `device`.
+- `"abstract": true`. The file is a base only. It is never published and needs no `match` or
+  `device`.
 - `"extends": "<id>"`. Start from that profile and apply this file's keys on top: top-level keys
   replace; `band` and `protocol` merge per key (§5.2 rule), so a base can name the handler and a
   device add its presets; `bands` merge by index: for each slot this file overrides, its keys
@@ -553,7 +555,7 @@ handler does by hand today.
   "meta": { "status": "draft", "sources": [{ "kind": "handler-code", "ref": "…", "date": "2026-10-02" }] } }
 ```
 
-(Vendor ids and model strings in F are placeholders until the importer fills real ones.)
+(The ids, vendor ids and model strings in F are placeholders.)
 
 ### G. Software target, unbounded
 
@@ -586,8 +588,7 @@ Common to every operation:
   is kept and checked.
 - **Evaluation order.** A slot's fields are evaluated `type` first, then `freq`, `q` and `gain` in
   topological order of the slot's dependency graph: the variant edges of §6, taken per slot after
-  merging. Fields with no path between them keep the order `freq`, `q`,
-  `gain`.
+  merging. Fields with no path between them keep the order `freq`, `q`, `gain`.
 - **Tolerance.** Every comparison uses `near` (§4): `a < b` means `a < b` and not `near(a, b)`, and
   `a ≤ b` means `a < b` or `near(a, b)`.
 
@@ -795,8 +796,8 @@ for the fillers that remain. A write keeps the engine's own layout this way, as 
 0 dB, or allows only gainless types), and `no-room` when no frequency satisfies
 `ascendingFrequency` (the filler then takes its default frequency).
 
-**Properties:** fillers, hints included, are in their domains, neutral unless a warning says otherwise, and if
-`validate(slots)` reports no `ascendingFrequency` violation, neither does
+**Properties:** fillers, hints included, are in their domains, neutral unless a warning says
+otherwise, and if `validate(slots)` reports no `ascendingFrequency` violation, neither does
 `validate(complete(slots).filters)`.
 
 ### 13.8 Conformance
@@ -845,18 +846,21 @@ is the hex SHA-256 of the profile file's bytes, so profiles are cacheable by it.
 
 A client treats every artifact leniently (§15): it ignores a document whose major version it
 doesn't know, ignores entries and profiles it can't read, and never lets a failure to load reach
-the host app: the database enhances an app and never blocks it. The reference client is `packages/client`.
+the host app: the database enhances an app and never blocks it. The reference client is
+`packages/client`.
 
 ## 15. Versioning and compatibility
 
 - **Major** (`v1` → `v2`): new URL prefix. The old prefix stays frozen and served for ≥ 12 months.
-- **Minor** (`1.0` → `1.1`): additive only (new optional fields, rule types, filter types). Each profile's `schemaVersion` states the minimum it needs; a profile that uses a later minor's field than it declares is an error (`version-too-low`).
+- **Minor** (`1.0` → `1.1`): additive only (new optional fields, rule types, filter types). Each
+  profile's `schemaVersion` states the minimum it needs; a profile that uses a later minor's field
+  than it declares is an error (`version-too-low`).
+- Consumers run **lenient** structural checks at runtime, never the strict CI schema, so newer
+  minors don't break older apps. Unknown keys are ignored. Unknown **rule** types and **filter**
+  types are surfaced to the user (§7), never silently dropped.
 
 | Minor | Date | Adds |
 | --- | --- | --- |
 | 1.0 | 2026-10-03 | the frozen v1 format (D36) |
 | 1.1 | 2026-10-10 | `protocol.presets[].writable` (§9, D48) |
 | 1.2 | 2026-10-28 | `protocol.controls` (§9.1, D49) |
-- Consumers run **lenient** structural checks at runtime, never the strict CI schema, so newer
-  minors don't break older apps. Unknown keys are ignored. Unknown **rule** types and **filter**
-  types are surfaced to the user (§7), never silently dropped.

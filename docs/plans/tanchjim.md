@@ -160,7 +160,7 @@ A Space II owner tried the published profile in uniPEQ 1.3.0 (firmware 1.3):
   `[1,0x17,0]`, two of Walkplay's factory reset commands, sent with every (auto-)write. Tanchjim's
   app never sends them.
 
-So `walkplay-hid` now writes as the vendor apps do (CLAUDE.md: the vendor app is the reference):
+So `walkplay-hid` now writes as the vendor apps do (D50: the vendor app is the reference):
 bands, `[1,0x0A,4,0,0,FF,FF]`, `[1,1,0]`, then the pre-gain and `[1,4]`, NICEHCK's recorded
 sequence. Tanchjim's order and pacing are options on `tanchjim-walkplay`: `preampWithBands`
 (pre-gain right after the bands, nothing after it), `frameDelay: 400`, and `afterControl`

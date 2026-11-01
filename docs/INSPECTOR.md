@@ -19,11 +19,13 @@ sections (`INSPECTOR §3.3`), so their numbers stay put.
 
 ## 2. Capability tiers
 
-Each tier works without the ones above it. The inspector **never writes to a device** (DECISIONS D40).
+Each tier works without the ones above it. The inspector **never writes to a device** (DECISIONS
+D40).
 
 ### T0: Browse (no device)
 
-- Search by brand, model, alias, USB id. Filter by status, kind and feature (has steps, partitioned, conditional…).
+- Search by brand, model, alias, USB id. Filter by status, kind and feature (has steps,
+  partitioned, conditional…).
 - **Profile view:** a per-slot chart (one row per slot on a log-frequency axis showing its freq
   window, variants drawn as alternative windows), plus gain/Q domains, type badges, rules,
   preamp, provenance with links to evidence, and raw JSON.
@@ -159,7 +161,7 @@ may touch other controls (a preamp moved during the first check on hardware).
 
 ### 3.5 Safety
 
-- The inspector never writes. No push, no `setEnabled`, nothing but reads.
+- The inspector never writes. No `push`, no `setEnabled`, no `writeControl`, nothing but reads.
 - The hearing notice stays: the steps ask for extreme values, which the user sets.
 - The last step asks the user to put their EQ back in the vendor app, and a final read confirms
   it matches the first read.
@@ -185,13 +187,13 @@ The inspector drives devices through `packages/device-bridge` (DECISIONS D33), a
 | Descriptor dump | HID collections, usages and report sizes from the transport |
 | Capability flags | whether a protocol reads, how many bands it needs told, whether it reports the preamp and the current preset |
 
-The bridge also has `push` and `setEnabled` for apps. The inspector imports neither, and a test
-(`no-writes.test.ts`) checks that.
+The bridge also has `push`, `setEnabled` and `writeControl` for apps. The inspector calls none of
+them, and a test (`no-writes.test.ts`) checks that.
 
 ## 5. Architecture
 
 ```
-apps/inspector (Svelte 5 + Vite, static SPA)
+apps/inspector (SvelteKit + Svelte 5, adapter-static SPA)
   ├── uses packages/client       fetch index/profiles, cache, match identity → profiles
   ├── uses packages/core         resolveSlot / validate / fit / assign / complete
   ├── uses packages/device-bridge  connectors + handlers (+ codecs), pull only

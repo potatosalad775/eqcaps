@@ -35,8 +35,8 @@ The format is defined in [docs/SPEC.md](docs/SPEC.md). In short:
    - `community-verified`: you supplied counting evidence (vendor docs, what the vendor's app lets
      you set, or a measurement);
    - `maintainer-verified`: a maintainer checked it on their own hardware or against vendor docs.
-5. Put evidence files (measurements, read-backs) in `data/evidence/<id>/`. Remove anything personal first:
-   Bluetooth names people gave their devices, serial numbers, MAC addresses.
+5. Put evidence files (measurements, read-backs) in `data/evidence/<id>/`. Remove anything
+   personal first: Bluetooth names people gave their devices, serial numbers, MAC addresses.
 
 Devices that share a chip can share a base in `data/bases/` through `extends` (SPEC §11). A
 protocol family's base (`walkplay-hid`, `fiio-usb-hid`) holds what every device on that protocol
@@ -68,6 +68,11 @@ device up with the data. The tests check that the protocol is one the bridge can
 the profile only allows what it can write. A recorded exchange with the device in
 `packages/device-bridge/test/captures/` makes it a regression test. New protocols need a handler,
 a codec and a session: see the existing ones and [DECISIONS D33](docs/DECISIONS.md).
+
+The vendor's own app is the reference for what a handler sends and what a profile allows
+([DECISIONS D50](docs/DECISIONS.md)): its ranges, its write sequence, its device settings. For a
+vendor web app, the [WebHID recorder](tools/userscripts/README.md) records what the app sends and
+the device answers; the bridge's tests then check the handler and the profile against it.
 
 ## Checking your change
 

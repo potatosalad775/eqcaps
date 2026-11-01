@@ -2,8 +2,9 @@
 
 Reads and writes parametric EQ on audio hardware: FiiO, Walkplay-chipset dongles, Moondrop,
 KT Micro, Fosi Audio, Qudelix, JDS Labs, Nothing, Tanchjim, Edifier, Audeze and others, every
-hardware device in the [eqcaps](https://github.com/potatosalad775/eqcaps) database. Protocols from
-[devicePEQ](https://github.com/jeromeof/devicePEQ).
+hardware device in the [eqcaps](https://github.com/potatosalad775/eqcaps) database. Protocols
+ported from [devicePEQ](https://github.com/jeromeof/devicePEQ), and changed to do what each
+vendor's own app does where one is known.
 
 - **No platform types.** Handlers talk to two small transport interfaces (`HidTransport`,
   `StreamTransport`). Browser transports for WebHID, Web Serial and Web Bluetooth are in
@@ -100,7 +101,7 @@ why a block can't be driven: an unknown handler (data newer than this bridge) or
 | Handler | Transports | Options |
 | --- | --- | --- |
 | `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`; `0x21` on newer models) |
-| `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101), `enableCommand` (default true; false where `[1,1,0,…]` doesn't turn the EQ off, as on the NICEHCK PureAural), `micGainDone` (default false; true follows a mic gain write with `[1,0x04]`, as NICEHCK's app does), `afterControl` (what follows a control write, by control id: `"done"` is `[1,0x04]`, `"save"` the apply and save of an EQ write; Tanchjim's app sends `done` after volume and `save` after mic gain), `preampWithBands` (default false; true sends the pre-gain right after the bands, before the apply and save, with no `[1,0x04]`, as Tanchjim's app does), `frameDelay` (ms between push frames; default 20 after a band, 50 after the rest) |
+| `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101), `enableCommand` (ignored; no Walkplay device has an EQ switch, and profiles published with it still load), `micGainDone` (default false; true follows a mic gain write with `[1,0x04]`, as NICEHCK's app does), `afterControl` (what follows a control write, by control id: `"done"` is `[1,0x04]`, `"save"` the apply and save of an EQ write; Tanchjim's app sends `done` after volume and `save` after mic gain), `preampWithBands` (default false; true sends the pre-gain right after the bands, before the apply and save, with no `[1,0x04]`, as Tanchjim's app does), `frameDelay` (ms between push frames; default 20 after a band, 50 after the rest) |
 | `moondrop-usb-hid` | HID | – |
 | `moondrop-old-fashioned-hid` | HID | – |
 | `conexant-usb-hid` | HID | – |
