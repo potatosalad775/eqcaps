@@ -148,6 +148,31 @@ OLA II DSP moved onto them (devicePEQ had them peaking only; Stargate II gains `
 Space II, Space Pro AT, DSP M, Rita DSP, Rita AT DSP, Pinto DSP, Bunny for Gaming; ids from the
 flash table where known, otherwise name under 0x3302. The handler is unchanged.
 
+## Space II in uniPEQ, and following the app (2026-11-01)
+
+A Space II owner tried the published profile in uniPEQ 1.3.0 (firmware 1.3):
+
+- **Volume** failed with "reads back 60, not 63". The app's slider is 0–100 but it sends
+  `ceil(slider × 0.6)`: the register is **0–60**, and the device clamps above it. The profile had
+  the slider's range.
+- **DAC filter, gain and DAC mode reset themselves** to 1/1/1 (the values at first connect): they
+  survived replugs, then reverted. Most likely the handler's devicePEQ commit, `[1,5,0]` and
+  `[1,0x17,0]`, two of Walkplay's factory reset commands, sent with every (auto-)write. Tanchjim's
+  app never sends them.
+
+So `walkplay-hid` now writes as the vendor apps do (CLAUDE.md: the vendor app is the reference):
+bands, `[1,0x0A,4,0,0,FF,FF]`, `[1,1,0]`, then the pre-gain and `[1,4]`, NICEHCK's recorded
+sequence. Tanchjim's order and pacing are options on `tanchjim-walkplay`: `preampWithBands`
+(pre-gain right after the bands, nothing after it), `frameDelay: 400`, and `afterControl`
+(`[1,4]` after volume; the apply and save after mic gain, from `saveDigitalAdc`). New control `dre`
+(0x32, held as 0 on; the handler turns it round). Data: Space volume 0–60, `dre` on the Space base,
+and `micGain` on a new `tanchjim-walkplay-mic` base for every TTGK device the app shows it for
+(all but the DSP M). The one deliberate difference from the app: the handler sends each filter
+type's own coefficients (Next 2).
+
+Needs a bridge release and uniPEQ update before this data is published: a bridge that doesn't know
+an option rejects the profile.
+
 ## Next
 
 1. **FOLA**: the by-ear pass and replug-and-read above, then `maintainer-verified`.
@@ -159,10 +184,11 @@ flash table where known, otherwise name under 0x3302. The handler is unchanged.
    +6 dB at 3 kHz, and the output is measured (loopback into an interface, a sweep in REW; a read
    back only returns the metadata). A bump at 3 kHz: coefficients, the handler's shelves are right
    and the app's are peaks. At 100 Hz: metadata, so then push a real low shelf and measure whether
-   it is one. Per model (Stargate II, Space), modest gains. Then the commit (walkplay.md Next 2). A `dre` toggle control needs an inverted byte (0 on); add it to
-   `walkplay-hid` once a Space device can confirm it.
-3. **Record the vendor app writing**: the Windows app over USBPcap/Wireshark (hidapi, so plain HID
+   it is one. Per model (Stargate II, Space), modest gains.
+3. **Space II retest** after the release: the volume across 0–60, DRE, and that the DAC filter,
+   gain and mode survive an EQ write and a replug.
+4. **Record the vendor app writing**: the Windows app over USBPcap/Wireshark (hidapi, so plain HID
    reports), or the Android app. Cover a write with each filter type, the save, and
    replug-and-read. Keep it under `packages/device-bridge/test/captures/`.
-4. **Luna**: out of eqcaps' scope while it has no EQ (a profile is an EQ constraint profile). Its
+5. **Luna**: out of eqcaps' scope while it has no EQ (a profile is an EQ constraint profile). Its
    controls could become a WebUSB handler later if a no-EQ device profile is ever wanted; park it.

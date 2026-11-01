@@ -6,8 +6,13 @@
 // freq u16 LE, q u16 LE ×256, gain s16 LE ×256, type, 0, slot. Reads answer in the same layout.
 // Both forms carry the frequency as given, in Hz. Some firmware is reported to place a band off
 // that frequency (SchemeNo11 about 2.25% low); the codec doesn't correct for it (D39).
-// Preamp: cmd 0x03, s8 dB. A write ends with a commit: [1,5,0], [1,0x17,0], [1,0x0A,4,0,0,FF,FF,0],
-// [1,1,1,0] (persist, PEQ on). A push then reads its bands back and sends a lost one again.
+// Preamp: cmd 0x03, s8 dB. A write is what the vendor apps send: the bands, then
+// [1,0x0A,4,0,0,FF,FF] (apply) and [1,0x01,0] (save to flash), then the pre-gain and [1,0x04]
+// (NICEHCK's app, recorded; Walkplay's and Tanchjim's send the same apply and save). Tanchjim's
+// app sends the pre-gain right after the bands instead, with nothing after it (`preampWithBands`),
+// and waits 400 ms between commands (`frameDelay`). devicePEQ's commit, [1,5,0] and [1,0x17,0]
+// before the apply, came from Walkplay's factory reset and reset a Tanchjim Space II's DAC
+// settings. A push then reads its bands back and sends a lost one again.
 //
 // Firmware (0x0C) and the device controls come from NICEHCK's web app (app.nicehck.cn), which
 // drives its Walkplay devices with the same requests: the version is ASCII from byte 3; a control
@@ -48,6 +53,20 @@ export interface WalkplayHidOptions {
 	 * Walkplay's app (peq.szwalkplay.com) sends nothing after it.
 	 */
 	micGainDone?: boolean;
+	/**
+	 * What follows a control write, by control id: `done` is [1,0x04], `save` the apply and save
+	 * of an EQ write. Tanchjim's app follows a volume write with [1,0x04] and a mic gain write
+	 * with the apply and save. A control not listed is followed by nothing, as in Walkplay's app.
+	 */
+	afterControl?: Readonly<Record<string, 'done' | 'save'>>;
+	/**
+	 * Whether a push sends the pre-gain right after the bands, before the apply and save, and
+	 * without [1,0x04], as Tanchjim's app does. Default false: after the save, then [1,0x04], as
+	 * NICEHCK's app does.
+	 */
+	preampWithBands?: boolean;
+	/** Milliseconds between the frames of a push. Default 20 after a band, 50 after the rest. */
+	frameDelay?: number;
 }
 
 const REPORT_ID = 0x4b;
@@ -64,12 +83,13 @@ const FIRMWARE = 0x0c;
  */
 const RESEND_MS = 150;
 const CHANNEL_GAIN = 0x16;
-const COMMIT = [
-	[WRITE, 0x05, 0x00],
-	[WRITE, 0x17, 0x00],
-	[WRITE, 0x0a, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00],
-	[WRITE, 0x01, 0x01, 0x00]
-];
+const APPLY = [WRITE, 0x0a, 0x04, 0x00, 0x00, 0xff, 0xff];
+const SAVE = [WRITE, 0x01, 0x00];
+/** What `afterControl` sends after a control write. */
+const AFTER_CONTROL: Record<'done' | 'save', number[][]> = {
+	done: [[WRITE, DAC_DONE]],
+	save: [APPLY, SAVE]
+};
 
 export const WALKPLAY_TYPES = typeCodes('walkplay', { PK: 2, LSC: 1, HSC: 3, LPQ: 4, HPQ: 5 });
 
@@ -138,10 +158,14 @@ export const walkplayHidCodec: Codec<WalkplayHidOptions, HidFrame> = {
 	encode({ filters, preamp, slot }, o) {
 		const slotByte = field(slot ?? o.defaultSlot ?? 101, 1, U8, 'slot');
 		const frames = filters.map((f, i) => encodeWalkplayBand(i, f, slotByte));
-		if (preamp !== undefined) {
-			frames.push([WRITE, PREAMP, 0x02, 0x00, field(preamp, 1, I8, 'preamp') & 0xff]);
-		}
-		return [...frames, ...COMMIT].map((d) => hidFrame(REPORT_ID, d));
+		const pre =
+			preamp === undefined
+				? []
+				: [[WRITE, PREAMP, 0x02, 0x00, field(preamp, 1, I8, 'preamp') & 0xff]];
+		const ordered = o.preampWithBands
+			? [...frames, ...pre, APPLY, SAVE]
+			: [...frames, APPLY, SAVE, ...pre, ...(pre.length ? [[WRITE, DAC_DONE]] : [])];
+		return ordered.map((d) => hidFrame(REPORT_ID, d));
 	},
 	decode(frames) {
 		const state: WriteState = { filters: [] };
@@ -175,15 +199,17 @@ const ask = (ctx: Ctx, cmd: number, rest: number[] = [], also = (_d: Uint8Array)
 
 /**
  * Each control's command, and how its value is carried: one byte, or s16 LE ×256 dB (`db`).
- * `channel` addresses one channel of 0x16.
+ * `channel` addresses one channel of 0x16. `inverted` is a toggle the device holds as 0 on, 1 off.
  */
 export const WALKPLAY_CONTROL_COMMANDS: Readonly<
-	Record<string, { cmd: number; db?: true; channel?: number }>
+	Record<string, { cmd: number; db?: true; channel?: number; inverted?: true }>
 > = {
 	dacFilter: { cmd: 0x11 },
 	gainLevel: { cmd: 0x19 },
 	workMode: { cmd: 0x1d },
 	volume: { cmd: 0x85 },
+	// Tanchjim's app (Space II, Space Pro, Space Pro AT).
+	dre: { cmd: 0x32, inverted: true },
 	micGain: { cmd: MIC_GAIN, db: true },
 	leftGain: { cmd: CHANNEL_GAIN, db: true, channel: 0 },
 	rightGain: { cmd: CHANNEL_GAIN, db: true, channel: 1 }
@@ -196,7 +222,7 @@ export function encodeWalkplayControl(id: string, value: number): number[] {
 	const lead = c.channel === undefined ? [] : [c.channel];
 	const data = c.db
 		? le16(field(value, 256, I16, id) & 0xffff)
-		: [field(value, 1, U8, 'control value')];
+		: [field(c.inverted ? 1 - value : value, 1, U8, 'control value')];
 	// 0x16 always says 4, as in its read; the others say how many bytes follow.
 	const length = c.channel === undefined ? data.length : 4;
 	return [WRITE, c.cmd, length, ...lead, ...data];
@@ -218,13 +244,18 @@ function control(id: string): HandlerControl<HidTransport, WalkplayHidOptions> {
 			}
 			// A 0x16 answer sets only the whole dB (byte 5); byte 4 is left from an earlier answer.
 			if (channel !== undefined) return readI8(d, at + 1);
+			if (c.inverted) return d[at] === 0 ? 1 : 0;
 			return c.db ? readI16le(d, at) / 256 : d[at]!;
 		},
 		async write(ctx, value) {
 			await send(ctx, encodeWalkplayControl(id, value));
-			if (c.cmd === MIC_GAIN && ctx.options.micGainDone) {
-				await ctx.sleep(20);
-				await send(ctx, [WRITE, DAC_DONE]);
+			const after =
+				ctx.options.afterControl?.[id] ??
+				(c.cmd === MIC_GAIN && ctx.options.micGainDone ? 'done' : undefined);
+			const frames = after ? AFTER_CONTROL[after] : [];
+			for (const frame of frames) {
+				await ctx.sleep(ctx.options.frameDelay ?? 20);
+				await send(ctx, frame);
 			}
 			await ctx.sleep(30);
 		}
@@ -282,7 +313,7 @@ async function sendFrames(
 ) {
 	for (const frame of frames) {
 		await sendFrame(ctx.transport, frame);
-		await ctx.sleep(frame.data[1] === BAND ? 20 : 50);
+		await ctx.sleep(ctx.options.frameDelay ?? (frame.data[1] === BAND ? 20 : 50));
 	}
 }
 

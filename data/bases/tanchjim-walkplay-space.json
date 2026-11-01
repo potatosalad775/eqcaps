@@ -45,7 +45,7 @@
 				"name": "Volume",
 				"kind": "range",
 				"role": "volume",
-				"range": { "min": 0, "max": 100, "step": 1 }
+				"range": { "min": 0, "max": 60, "step": 1 }
 			},
 			{
 				"id": "micGain",
@@ -70,7 +70,8 @@
 				"role": "balance-right",
 				"range": { "min": -127, "max": 0, "step": 1 },
 				"unit": "dB"
-			}
+			},
+			{ "id": "dre", "name": "DRE", "kind": "toggle" }
 		]
 	},
 	"meta": {
@@ -82,6 +83,6 @@
 				"date": "2026-11-01"
 			}
 		],
-		"notes": "Space II, Space Pro and Space Pro AT: the app gives them 10 bands and the same DAC screen, driven with the handler's control commands: DAC filter (0x11), gain (0x19), DAC mode (0x1D; 0 is class AB here, where NICEHCK's PureAural has 0 as class H), volume 0 to 100 (0x85), microphone gain -15 to +15 dB in whole dB (0x02, s16 ×256 with the whole dB in the high byte) and balance (0x16, one channel cut by up to 127 dB, the other at 0). The app follows a volume write with [1,0x04]; the handler doesn't. Whether the firmware rounds the microphone gain onto a coarser grid, as the CrinEar Protocol Micro does (1.5 dB), is unknown. Not a control yet: DRE (0x32, one byte, 0 on and 1 off), which the app shows on these three models."
+		"notes": "Space II, Space Pro and Space Pro AT: the app gives them 10 bands and the same DAC screen, driven with the handler's control commands: DAC filter (0x11), gain (0x19), DAC mode (0x1D; 0 is class AB here, where NICEHCK's PureAural has 0 as class H), volume 0 to 60 (0x85, followed by [1,0x04]; the app's slider runs 0 to 100 and sends ceil(slider × 0.6), and the Space II clamps a larger value to 60, seen 2026-11-01 in uniPEQ), microphone gain as on the other models (tanchjim-walkplay-mic), balance (0x16, one channel cut by up to 127 dB, the other at 0) and DRE (0x32, which the device holds as 0 on and 1 off; the handler turns it round). The app writes these controls with nothing after them but volume and mic gain. An EQ write used to reset the DAC filter, gain and DAC mode of a Space II: devicePEQ's commit sends two of Walkplay's factory reset commands, which the handler no longer sends."
 	}
 }

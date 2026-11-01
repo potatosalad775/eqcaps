@@ -11,15 +11,22 @@
 		"gain": { "min": -10, "max": 10, "step": 0.00390625 }
 	},
 	"preamp": { "mode": "manual", "gain": { "min": -8, "max": 4, "step": 1 } },
+	"protocol": {
+		"options": {
+			"preampWithBands": true,
+			"frameDelay": 400,
+			"afterControl": { "volume": "done", "micGain": "save" }
+		}
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): StarGate2Command, DeviceInfoHelper, FilterTypeMapping, CustomizeEffectsActivity",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): StarGate2Command, CommandProcessingCenter, DeviceInfoHelper, FilterTypeMapping, CustomizeEffectsActivity",
 				"date": "2026-11-01"
 			}
 		],
-		"notes": "What Tanchjim's Android app does with its Walkplay devices (the app's \"TTGK\" protocol; it tells them apart by USB product name): 8 bands (10 on the Space family) of peaking, low and high shelf, low-pass and high-pass, 20 to 20000 Hz in whole Hz, gain ±10 dB, Q 0.1 to 5 (sent as 26/256, the grid point nearest 0.1), and a pre-gain of -8 to +4 dB in whole dB. These are the app's editor limits, not verified firmware limits. The band frames are the handler's layout with the filter type codes the handler uses, but the app computes peaking coefficients for every band whatever its type, so whether this firmware filters by the coefficients or by the type byte is unknown: the handler sends the type's own coefficients. The app writes the pre-gain only with the 0x03 command, followed by [1,0x04], and leaves byte 34 of the band frames 0. It ends a write with [1,0x0A,4,0,0,FF,FF], 400 ms, then [1,0x01,0], as Walkplay's and NICEHCK's apps do, where the handler sends devicePEQ's commit (docs/plans/walkplay.md). It waits 400 ms between commands and tags each band with the index of the preset it came from. It has no EQ switch."
+		"notes": "What Tanchjim's Android app does with its Walkplay devices (the app's \"TTGK\" protocol; it tells them apart by USB product name): 8 bands (10 on the Space family) of peaking, low and high shelf, low-pass and high-pass, 20 to 20000 Hz in whole Hz, gain ±10 dB, Q 0.1 to 5 (sent as 26/256, the grid point nearest 0.1), and a pre-gain of -8 to +4 dB in whole dB. These are the app's editor limits, not verified firmware limits. The handler writes as the app does: the band frames, the pre-gain (0x03) right after them with byte 34 of each band left 0, then [1,0x0A,4,0,0,FF,FF] and [1,0x01,0], 400 ms between commands (preampWithBands, frameDelay); a volume write is followed by [1,0x04] and a mic gain write by the apply and save (afterControl). One deliberate difference: the app computes peaking coefficients for every band whatever its type, and the handler sends the type's own coefficients. Whether the firmware filters by the coefficients or by the type byte is unknown (docs/plans/tanchjim.md). The app tags each band with the index of the preset it came from, and has no EQ switch."
 	}
 }

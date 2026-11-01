@@ -80,13 +80,26 @@ const registers: Read = (v) =>
 			})
 		: fail('not a list of register pairs');
 
+/** Walkplay: what follows a control write, by control id. */
+const afterControl: Read = (v) =>
+	isObject(v) && Object.values(v).every((x) => x === 'done' || x === 'save')
+		? { ...v }
+		: fail(`${JSON.stringify(v)} is not a map of control ids to "done" or "save"`);
+
 /**
  * The options a profile may set, per handler. Options a handler derives itself (Qudelix's report
  * from the descriptor, Airoha's layout from the transport) aren't data and are left out.
  */
 const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOptions<K>]?: Read } } = {
 	'fiio-usb-hid': { reportId: byte, saveCommand: byte },
-	'walkplay-hid': { defaultSlot: byte, enableCommand: flag, micGainDone: flag },
+	'walkplay-hid': {
+		defaultSlot: byte,
+		enableCommand: flag,
+		micGainDone: flag,
+		afterControl: afterControl,
+		preampWithBands: flag,
+		frameDelay: nonNegative
+	},
 	'moondrop-usb-hid': {},
 	'moondrop-old-fashioned-hid': {},
 	'conexant-usb-hid': {},

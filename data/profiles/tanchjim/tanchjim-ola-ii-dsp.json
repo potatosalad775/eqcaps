@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "tanchjim-walkplay",
+	"extends": "tanchjim-walkplay-mic",
 	"id": "tanchjim-ola-ii-dsp",
 	"device": { "brand": "Tanchjim", "model": "OLA II DSP" },
 	"match": {

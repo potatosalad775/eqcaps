@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "tanchjim-walkplay",
+	"extends": "tanchjim-walkplay-mic",
 	"id": "tanchjim-stargate-ii",
 	"device": { "brand": "Tanchjim", "model": "Stargate II" },
 	"match": {

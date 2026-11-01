@@ -11,7 +11,8 @@ const BYTE_CONTROLS: Record<number, string> = {
 	0x11: 'dacFilter',
 	0x19: 'gainLevel',
 	0x1d: 'workMode',
-	0x85: 'volume'
+	0x85: 'volume',
+	0x32: 'dre'
 };
 
 const s16 = (d: ArrayLike<number>, i: number) => (((d[i]! | (d[i + 1]! << 8)) << 16) >> 16) / 256;
@@ -45,7 +46,9 @@ export class FakeWalkplay implements HidTransport {
 		volume: 60,
 		micGain: 3,
 		leftGain: 0,
-		rightGain: -4
+		rightGain: -4,
+		/** As the device holds it: 0 on, 1 off. */
+		dre: 0
 	};
 	stuck?: string;
 	/** Drops the next report, as a PureAural idle for some minutes did. */

@@ -17,7 +17,7 @@ import {
 	nothingFrame
 } from '../src/handlers/nothing-usb-serial.ts';
 import { ritaCodec } from '../src/handlers/tanchjim-rita-serial.ts';
-import { encodeWalkplayControl } from '../src/handlers/walkplay-hid.ts';
+import { encodeWalkplayControl, walkplayHidCodec } from '../src/handlers/walkplay-hid.ts';
 import { typeCodes } from '../src/io.ts';
 import { utf8Decode, utf8Encode } from '../src/platform.ts';
 import {
@@ -807,5 +807,55 @@ describe('Walkplay controls and firmware (NICEHCK PureAural)', () => {
 		expect(t.preamp).toBe(-3);
 		const controlCommands = [0x11, 0x19, 0x1d, 0x85, 0x02, 0x16];
 		expect(t.sent.filter(([, c]) => controlCommands.includes(c))).toEqual([]);
+	});
+});
+
+describe("Walkplay writes as the vendors' apps send them", () => {
+	const hex = (d: ArrayLike<number>) => Buffer.from(Array.from(d)).toString('hex');
+	const tail = (options: Parameters<typeof walkplayHidCodec.encode>[1]) =>
+		walkplayHidCodec
+			.encode({ filters: [pk(100, 1)], preamp: -2 }, options)
+			.slice(1)
+			.map((f) => hex(f.data));
+
+	test("ends as NICEHCK's app does: apply, save, pre-gain, [1,0x04]", () => {
+		// test/recordings/2026-10-28-nicehck-pureaural.json, after the band frames.
+		expect(tail({})).toEqual(['010a040000ffff', '010100', '01030200fe', '0104']);
+	});
+
+	test("sends the pre-gain with the bands, as Tanchjim's app does", () => {
+		expect(tail({ preampWithBands: true })).toEqual(['01030200fe', '010a040000ffff', '010100']);
+	});
+
+	test("never sends devicePEQ's [1,5,…] or [1,0x17,…], Walkplay's factory reset", async () => {
+		const t = new FakeWalkplay();
+		await open(t, 'tanchjim-space-ii').push({ filters: [pk(200, 1)], preamp: -3 });
+		expect(t.sent.filter(([op, c]) => op === 0x01 && (c === 0x05 || c === 0x17))).toEqual([]);
+		expect(t.bands.get(0)).toEqual([200, 1, 1, 2, 101]);
+		expect(t.preamp).toBe(-3);
+	});
+
+	test("follows a Space II volume write with [1,0x04], as Tanchjim's app does", async () => {
+		const t = new FakeWalkplay();
+		const device = open(t, 'tanchjim-space-ii');
+		expect(await device.writeControl('volume', 40)).toEqual({ reconnect: false });
+		expect(t.values.volume).toBe(40);
+		expect(t.sent.slice(-3)).toEqual([
+			[0x01, 0x85],
+			[0x01, 0x04],
+			[0x80, 0x85]
+		]);
+		await expect(device.writeControl('volume', 61)).rejects.toMatchObject({
+			code: 'invalid-request'
+		});
+	});
+
+	test('reads and writes DRE, which the device holds as 0 on', async () => {
+		const t = new FakeWalkplay();
+		const device = open(t, 'tanchjim-space-ii');
+		expect((await device.readControls()).dre).toBe(1);
+		await device.writeControl('dre', 0);
+		expect(t.values.dre).toBe(1);
+		expect(encodeWalkplayControl('dre', 1)).toEqual([0x01, 0x32, 1, 0]);
 	});
 });

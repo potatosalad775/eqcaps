@@ -91,8 +91,12 @@ for v2. Don't define format details anywhere except SPEC.md.
   vendor guesses for devices without a profile. Identities stay in profile `match` (the client
   matches, the bridge doesn't). A new handler option goes in that file's `OPTIONS` and the
   README; a new device control goes in the handler's `controls` and the README (D49).
-  Protocols come from devicePEQ `0617f38`; test against device answers
-  (`packages/device-bridge/test/captures/`) and codec round trips, not devicePEQ's bytes.
+  **The vendor's own app is the reference** for what a handler sends (frames, order, commits,
+  saves, delays) and for the data (ranges, controls): follow it, and change the handler when it
+  disagrees, without waiting for a recording. devicePEQ `0617f38` is only a fallback where no
+  vendor app is known; note where it differs. Deviate from an app only where it is plainly broken,
+  and say so in the notes. Test against device answers (`packages/device-bridge/test/captures/`,
+  `test/recordings/`) and codec round trips, not devicePEQ's bytes.
 - Inspector (D34): SvelteKit SPA with adapter-static and Tailwind, never server-rendered. Logic
   that can be tested lives in plain `.ts` modules under `src/lib/` (tested by the root Vitest run);
   routes and components stay thin. Nothing in the inspector calls the bridge's `push`,

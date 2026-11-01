@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "tanchjim-walkplay",
+	"extends": "tanchjim-walkplay-mic",
 	"id": "tanchjim-pinto-dsp",
 	"device": { "brand": "Tanchjim", "model": "Pinto DSP" },
 	"match": { "usb": [{ "vendorId": "0x3302", "productName": "TANCHJIM-PINTO DSP" }] },

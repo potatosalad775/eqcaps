@@ -106,9 +106,10 @@ string, without executing the bundle. The script isn't kept in the repository; t
 
 1. **Record** a Walkplay-scheme device in this app: connect, change a band and save, change each
    control, snapshot. That shows the commit and the controls on the wire, and the SchemeNo.
-2. **Fix the commit** once recorded: send the app's apply-and-save instead of devicePEQ's tail.
-   Retest the Octave capture's device by ear; `captures.test.ts` pins the old bytes, so it changes
-   with it.
+2. ~~**Fix the commit** once recorded.~~ Done 2026-11-01 without waiting: the vendor app is the
+   reference (CLAUDE.md). A push sends the apply and save, then the pre-gain and `[1,0x04]`, as
+   NICEHCK's app was recorded doing; devicePEQ's `[1,5,0]`, `[1,0x17,0]` reset a Tanchjim Space
+   II's DAC settings (tanchjim.md). Disagreement 1 is settled.
 3. ~~**`setEnabled`**: drop it (`canEnable: false`) unless a recording shows a real switch.~~
    Done 2026-10-31 (below).
 4. **Pre-gain in byte 34**: write the pre-gain there when given, and decide what a push without one

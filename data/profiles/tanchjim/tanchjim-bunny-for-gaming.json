@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "tanchjim-walkplay",
+	"extends": "tanchjim-walkplay-mic",
 	"id": "tanchjim-bunny-for-gaming",
 	"device": { "brand": "Tanchjim", "model": "Bunny for Gaming" },
 	"match": { "usb": [{ "vendorId": "0x3302", "productName": "BUNNY FOR GAMING" }] },

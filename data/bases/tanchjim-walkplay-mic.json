@@ -1,0 +1,30 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "tanchjim-walkplay",
+	"abstract": true,
+	"id": "tanchjim-walkplay-mic",
+	"schemaVersion": "1.2",
+	"protocol": {
+		"controls": [
+			{
+				"id": "micGain",
+				"name": "Microphone gain",
+				"kind": "range",
+				"role": "mic-gain",
+				"range": { "min": -15, "max": 15, "step": 1 },
+				"unit": "dB"
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): WireRodFragment, MicrophoneGainSetActivity, CommandProcessingCenter.saveDigitalAdc",
+				"date": "2026-11-01"
+			}
+		],
+		"notes": "The app's microphone gain setting, shown for every Tanchjim Walkplay device but the DSP M: -15 to +15 dB in whole dB (0x02, s16 ×256 with the whole dB in the high byte), followed by the apply and save. Whether the firmware rounds it onto a coarser grid, as the CrinEar Protocol Micro does (1.5 dB), is unknown."
+	}
+}

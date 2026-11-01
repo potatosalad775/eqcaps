@@ -100,7 +100,7 @@ why a block can't be driven: an unknown handler (data newer than this bridge) or
 | Handler | Transports | Options |
 | --- | --- | --- |
 | `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`; `0x21` on newer models) |
-| `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101), `enableCommand` (default true; false where `[1,1,0,…]` doesn't turn the EQ off, as on the NICEHCK PureAural), `micGainDone` (default false; true follows a mic gain write with `[1,0x04]`, as NICEHCK's app does) |
+| `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101), `enableCommand` (default true; false where `[1,1,0,…]` doesn't turn the EQ off, as on the NICEHCK PureAural), `micGainDone` (default false; true follows a mic gain write with `[1,0x04]`, as NICEHCK's app does), `afterControl` (what follows a control write, by control id: `"done"` is `[1,0x04]`, `"save"` the apply and save of an EQ write; Tanchjim's app sends `done` after volume and `save` after mic gain), `preampWithBands` (default false; true sends the pre-gain right after the bands, before the apply and save, with no `[1,0x04]`, as Tanchjim's app does), `frameDelay` (ms between push frames; default 20 after a band, 50 after the rest) |
 | `moondrop-usb-hid` | HID | – |
 | `moondrop-old-fashioned-hid` | HID | – |
 | `conexant-usb-hid` | HID | – |
@@ -155,7 +155,7 @@ its role), so data newer than the bridge still drives the rest.
 | Handler | Controls |
 | --- | --- |
 | `fosi-audio-usb-hid` | `volume`, `gainMode`, `filterMode`, `gameMode`, `upsample`, `uacMode`, `led` (one byte each, the device's own values) |
-| `walkplay-hid` | `dacFilter`, `gainLevel`, `workMode`, `volume` (one byte each); `micGain`, `leftGain`, `rightGain` (dB, on a 1/256 grid). From NICEHCK's and Walkplay's web apps; `firmware()` too |
+| `walkplay-hid` | `dacFilter`, `gainLevel`, `workMode`, `volume` (one byte each); `dre` (toggle, held as 0 on, 1 off; Tanchjim's app); `micGain`, `leftGain`, `rightGain` (dB, on a 1/256 grid). From NICEHCK's and Walkplay's web apps; `firmware()` too |
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,
 `timeout`, `bad-response`, `rejected`, `transport` or `invalid-request`.
