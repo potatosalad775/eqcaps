@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "walkplay-peq-10-band-10db-pk-only",
+	"extends": "tanchjim-walkplay-space",
 	"id": "tanchjim-space-pro",
 	"device": { "brand": "Tanchjim", "model": "Space Pro" },
 	"match": {
@@ -44,8 +44,13 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/walkplay_schemeno16_tanchjim_space_pro.json",
 				"date": "2026-10-02"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper, StarGate2Command.getDeviceByVidPid",
+				"date": "2026-11-01"
 			}
 		],
-		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo16\" group, whose settings apply under the device's own."
+		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo16\" group, whose settings apply under the device's own. devicePEQ has it as 10 bands of peaking only; Tanchjim's app offers all five types. The app reads the USB id a device keeps in flash (0x0D at a chip-specific address) only to recover one that comes up as 0x0666:0x0888 after a failed update; its table gives 0x3302:0x4367, as recorded."
 	}
 }

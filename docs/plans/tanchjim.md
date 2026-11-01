@@ -112,14 +112,55 @@ found under another vendor id.
 - Reconnecting in Chrome after the drop sometimes needs the device chooser again, sometimes not.
 - Still to do before `maintainer-verified`: one band of each type by ear, and replug-and-read.
 
+## TTGK half (2026-11-01)
+
+Same app build (2.5.7.4), now read for `StarGate2Command` (EQ) and `Space2Command` (the Space
+family's DAC screen) against `walkplay-hid`.
+
+- **Band frame**: the handler's layout byte for byte (report 0x4B, `[1,9,0x18,0,idx,0,0]`, Q2.30
+  coefficients at 96 kHz, freq u16, Q and gain ×256, type, 0, preset tag). Types are Walkplay's
+  (LS 1, PK 2, HS 3, LP 4, HP 5). The band read sends `[0x80,9,0x1F,0,idx]`; the handler sends 0
+  where the app sends 0x1F.
+- **But the app computes peaking coefficients for every band**, whatever its type byte says. Either
+  the firmware filters by the metadata (and the coefficients don't matter), or the app's shelves
+  and passes are peaks. The handler sends each type's own coefficients. Only a recording settles it.
+- **Write**: the bands, then `[1,0x0A,4,0,0,FF,FF]`, 400 ms, `[1,1,0]`: the same apply-and-save
+  as Walkplay's and NICEHCK's apps, so the third vendor app against the handler's devicePEQ commit
+  (walkplay.md, disagreement 1). Pre-gain only as `[1,3,2,0,dB]` + `[1,4]` (byte 34 stays 0),
+  −8…+4 whole dB.
+- **Editor**: all five types, 20–20000 Hz, ±10 dB, Q 0.10–5.00. 10 bands on Space II, Space Pro and
+  Space Pro AT; 8 on Stargate II, DSP M, OLA II DSP, Rita DSP, Pinto DSP, Bunny for Gaming, Rita
+  AT DSP.
+- **Identity**: by USB product name, as for FeiFan; the USB names `TANCHJIM-RITA` and
+  `TANCHJIM-RITA AT` map to the DSP cables. A device that comes up as 0x0666:0x0888 (a failed
+  update) is identified by the USB id it keeps in flash (read `0x0D`), which gives Space II
+  `0x3302:0x4381`, Space Pro `0x4367`, Stargate II `0x43d4` and `0xf3d4`, DSP M `0x129d`, and any
+  other 0x3302 id as Space Pro AT. The two already in profiles match what devicePEQ recorded.
+- **Space family controls** (`Space2Command`): the handler's own commands. DAC filter 0x11 (1–5),
+  gain 0x19 (0 low 2 Vrms, 1 high 4 Vrms), DAC mode 0x1D (**0 class AB, 1 class H**, the reverse of
+  the PureAural), volume 0x85 (0–100, followed by `[1,4]`), mic gain 0x02 (−15…+15 whole dB, s16
+  ×256), balance 0x16 (one channel cut, up to 127 dB). Not in the handler: **DRE** 0x32, one byte,
+  **0 on, 1 off**.
+
+Done: bases `tanchjim-walkplay` (8 bands, the app's types and ranges, pre-gain −8…+4) and
+`tanchjim-walkplay-space` (10 bands, the controls above, format 1.2). Stargate II, Space Pro and
+OLA II DSP moved onto them (devicePEQ had them peaking only; Stargate II gains `0xf3d4`). New:
+Space II, Space Pro AT, DSP M, Rita DSP, Rita AT DSP, Pinto DSP, Bunny for Gaming; ids from the
+flash table where known, otherwise name under 0x3302. The handler is unchanged.
+
 ## Next
 
 1. **FOLA**: the by-ear pass and replug-and-read above, then `maintainer-verified`.
-2. **TTGK half**: read `StarGate2Command` and `Space2Command` against `walkplay-hid` the way
-   walkplay.md read Walkplay's app, then a Tanchjim Walkplay base (the app offers all five types
-   and ±10 dB, Q 0.1–5, 20–20000 Hz; the existing OLA II and Space Pro profiles are peaking only)
-   and profiles for DSP M, Rita DSP, Pinto DSP, Bunny for Gaming, Rita AT DSP (8 bands), Space II
-   and Space Pro AT (10 bands).
+2. **TTGK on the wire**: does the firmware filter by the coefficients or by the metadata? A shelf
+   pushed from the handler can't tell: its coefficients and type agree, so it sounds right either
+   way, unless the firmware rebuilds from the metadata and doesn't handle the type (devicePEQ's
+   Stargate II exclusion of shelves hints at that). Instead, a one-off script (the codec can't
+   build it) writes one band whose metadata says PK +6 dB at 100 Hz and whose coefficients are PK
+   +6 dB at 3 kHz, and the output is measured (loopback into an interface, a sweep in REW; a read
+   back only returns the metadata). A bump at 3 kHz: coefficients, the handler's shelves are right
+   and the app's are peaks. At 100 Hz: metadata, so then push a real low shelf and measure whether
+   it is one. Per model (Stargate II, Space), modest gains. Then the commit (walkplay.md Next 2). A `dre` toggle control needs an inverted byte (0 on); add it to
+   `walkplay-hid` once a Space device can confirm it.
 3. **Record the vendor app writing**: the Windows app over USBPcap/Wireshark (hidapi, so plain HID
    reports), or the Android app. Cover a write with each filter type, the save, and
    replug-and-read. Keep it under `packages/device-bridge/test/captures/`.

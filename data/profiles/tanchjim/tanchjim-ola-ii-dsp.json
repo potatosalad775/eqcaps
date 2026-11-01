@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "walkplay-peq-8-band-10db-pk-only",
+	"extends": "tanchjim-walkplay",
 	"id": "tanchjim-ola-ii-dsp",
 	"device": { "brand": "Tanchjim", "model": "OLA II DSP" },
 	"match": {
@@ -31,7 +31,6 @@
 			}
 		]
 	},
-	"band": { "q": { "min": 0.1015625, "max": 5, "step": 0.00390625 } },
 	"meta": {
 		"status": "draft",
 		"sources": [
@@ -39,8 +38,13 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper, StarGate2Command.getDeviceByVidPid",
+				"date": "2026-11-01"
 			}
 		],
-		"notes": "devicePEQ overrides its shared constraints with {\"maxQ\":5}."
+		"notes": "devicePEQ has it as 8 bands of peaking only with Q up to 5; Tanchjim's app offers all five types."
 	}
 }

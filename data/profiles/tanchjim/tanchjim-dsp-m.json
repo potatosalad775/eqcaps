@@ -1,0 +1,20 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "tanchjim-walkplay",
+	"id": "tanchjim-dsp-m",
+	"device": { "brand": "Tanchjim", "model": "DSP M" },
+	"match": {
+		"usb": [{ "vendorId": "0x3302", "productId": "0x129d", "productName": "TANCHJIM-DSP M" }]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper, StarGate2Command.getDeviceByVidPid",
+				"date": "2026-11-01"
+			}
+		],
+		"notes": "The app reads the USB id a device keeps in flash (0x0D at a chip-specific address) only to recover one that comes up as 0x0666:0x0888 after a failed update; its table gives 0x3302:0x129d for the DSP M. The app saves its EQ like the other TTGK devices and shows no microphone setting for it."
+	}
+}

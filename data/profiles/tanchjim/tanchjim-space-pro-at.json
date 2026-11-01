@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "tanchjim-walkplay-space",
+	"id": "tanchjim-space-pro-at",
+	"device": { "brand": "Tanchjim", "model": "Space Pro AT" },
+	"match": { "usb": [{ "vendorId": "0x3302", "productName": "TANCHJIM-SPACE PRO AT" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper, StarGate2Command.getDeviceByVidPid",
+				"date": "2026-11-01"
+			}
+		],
+		"notes": "The app reads the USB id a device keeps in flash (0x0D at a chip-specific address) only to recover one that comes up as 0x0666:0x0888 after a failed update; its table gives no product id of its own for the Space Pro AT (any other 0x3302 id), so it is matched by name under Walkplay's vendor id."
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "tanchjim-walkplay",
+	"id": "tanchjim-bunny-for-gaming",
+	"device": { "brand": "Tanchjim", "model": "Bunny for Gaming" },
+	"match": { "usb": [{ "vendorId": "0x3302", "productName": "BUNNY FOR GAMING" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper, StarGate2Command.getDeviceByVidPid",
+				"date": "2026-11-01"
+			}
+		],
+		"notes": "Not the KT Micro Bunny DSP (tanchjim-bunny-dsp). Matched by the app's USB product name under Walkplay's vendor id; its product id is not known."
+	}
+}

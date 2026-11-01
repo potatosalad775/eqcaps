@@ -1,0 +1,20 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "tanchjim-walkplay",
+	"id": "tanchjim-rita-dsp",
+	"device": { "brand": "Tanchjim", "model": "Rita DSP" },
+	"match": {
+		"usb": [{ "vendorId": "0x3302", "productName": ["TANCHJIM-RITA DSP", "TANCHJIM-RITA"] }]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper, StarGate2Command.getDeviceByVidPid",
+				"date": "2026-11-01"
+			}
+		],
+		"notes": "The Rita's USB DSP cable; the app takes the USB name TANCHJIM-RITA for it too (the headphone itself is tanchjim-rita, over Bluetooth). Matched by the app's USB product name under Walkplay's vendor id; its product id is not known."
+	}
+}

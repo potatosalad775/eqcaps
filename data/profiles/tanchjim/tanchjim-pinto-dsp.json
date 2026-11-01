@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "tanchjim-walkplay",
+	"id": "tanchjim-pinto-dsp",
+	"device": { "brand": "Tanchjim", "model": "Pinto DSP" },
+	"match": { "usb": [{ "vendorId": "0x3302", "productName": "TANCHJIM-PINTO DSP" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper, StarGate2Command.getDeviceByVidPid",
+				"date": "2026-11-01"
+			}
+		],
+		"notes": "Matched by the app's USB product name under Walkplay's vendor id; its product id is not known."
+	}
+}
