@@ -118,7 +118,7 @@ describe('controls (SPEC §9.1)', () => {
 
 describe('protocolOf', () => {
 	test('reads hex strings as numbers', () => {
-		expect(protocolOf(profile('fiio-btr17'))?.options).toEqual({ saveCommand: 0x21 });
+		expect(protocolOf(profile('fiio-k17'))?.options).toEqual({ saveCommand: 0x21 });
 		expect(
 			protocolOf({
 				protocol: {

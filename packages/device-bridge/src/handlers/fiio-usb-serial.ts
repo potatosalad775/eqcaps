@@ -124,6 +124,15 @@ export const fiioUsbSerial: StreamHandler<FiioUsbSerialOptions> = {
 		return { reconnect: false };
 	},
 
+	async bandCount(ctx) {
+		const answer = await command(
+			ctx,
+			new StreamReader(ctx.transport),
+			fiioSerialFrame(true, COUNT)
+		);
+		return answer[6] || null;
+	},
+
 	async currentSlot(ctx) {
 		const answer = await command(
 			ctx,

@@ -1,0 +1,27 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-10-band-12db-shelves",
+	"id": "fiio-fx25",
+	"schemaVersion": "1.1",
+	"device": { "brand": "FiiO", "model": "FX25" },
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO FX25" }] },
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 160, "name": "USER1", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
+	}
+}

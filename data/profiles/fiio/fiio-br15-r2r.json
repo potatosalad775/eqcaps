@@ -9,7 +9,7 @@
 	"band": {
 		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "AP"],
 		"freq": { "min": 20, "max": 20000, "step": 1 },
-		"q": { "min": 0.1, "max": 10, "step": 0.01 },
+		"q": { "min": 0.25, "max": 8, "step": 0.01 },
 		"gain": { "min": -24, "max": 12, "step": 0.1 }
 	},
 	"preamp": { "mode": "manual", "gain": { "min": -24, "max": 12, "step": 0.1 } },
@@ -46,7 +46,8 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
-			}
+			},
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
 		],
 		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
 	}

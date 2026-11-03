@@ -13,3 +13,4 @@ decisions are recorded in [../DECISIONS.md](../DECISIONS.md), and what the proje
 | [walkplay.md](walkplay.md) | Walkplay's own app read against walkplay-hid; the commit now follows the vendor apps (2026-11-01); recorder adapter done |
 | [tanchjim.md](tanchjim.md) | Tanchjim's KT Micro devices follow the vendor app (handler options, two bases, 8 new profiles); FOLA identified; the app's Walkplay-chip (TTGK) devices profiled and written as the app does; Space II retest next; Luna has no EQ |
 | [agent-docs.md](agent-docs.md) | AGENTS.md, the `read-vendor-app` skill and D50 done (2026-11-01); a fresh-session check next |
+| [fiio.md](fiio.md) | FiiO, Snowsky and JadeAudio aligned with FiiO Control (limits, types, presets, `bandCount()`, 12 new profiles); K17 family, K15 and recording next |

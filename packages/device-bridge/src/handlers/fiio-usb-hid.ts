@@ -1,11 +1,13 @@
 // FiiO USB HID protocol, also used by JadeAudio and Snowsky devices (devicePEQ
-// fiioUsbHidHandler.js, 0BSD, at 0617f38).
+// fiioUsbHidHandler.js, 0BSD, at 0617f38; aligned with FiiO Control, fiiocontrol.fiio.com, which
+// never writes the band count).
 //
 // Frames on the model's report id (7 by default):
 //   set: AA 0A 00 00 <cmd> <len> <data…> 00 EE
 //   get: BB 0B 00 00 <cmd> <len> <data…> 00 EE, answered by a BB 0B … input report
-// Commands: 0x15 band, 0x16 preset, 0x17 preamp (s16 BE ×10), 0x18 band count, 0x19 save
-// (0x21 on newer models). Band: <index> <gain s16 BE ×10> <freq u16 BE> <q u16 BE ×100> <type>.
+// Commands: 0x15 band, 0x16 preset (one byte, two BE above 255), 0x17 preamp (s16 BE ×10), 0x18
+// band count (read only), 0x19 save. Band: <index> <gain s16 BE ×10> <freq u16 BE> <q u16 BE ×100>
+// <type>.
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { be16, field, grid, I16, readI16be, readU16be, U16, U8 } from '../bytes.ts';
@@ -17,7 +19,7 @@ import type { HidTransport } from '../transport.ts';
 export interface FiioUsbHidOptions {
 	/** Report id. Default 7. */
 	reportId?: number;
-	/** Command that saves to a preset. Default 0x19; 0x21 on newer models. */
+	/** Command that saves to a preset. Default 0x19. FiiO Control's 0x21 is factory reset. */
 	saveCommand?: number;
 }
 
@@ -28,7 +30,15 @@ const COUNT = 0x18;
 const SAVE = 0x19;
 const END = 0xee;
 
-export const FIIO_TYPES = typeCodes('fiio', { PK: 0, LSC: 1, HSC: 2 });
+export const FIIO_TYPES = typeCodes('fiio', {
+	PK: 0,
+	LSC: 1,
+	HSC: 2,
+	BP: 3,
+	LPQ: 4,
+	HPQ: 5,
+	AP: 6
+});
 
 /** 0 Hz is left out: with 0 dB and Q 0 it reads back as an unused band. */
 const FREQ = [1, 0xffff] as const;
@@ -81,7 +91,6 @@ export const fiioUsbHidCodec: Codec<FiioUsbHidOptions, HidFrame> = {
 		const frames: number[][] = [];
 		if (preamp !== undefined)
 			frames.push(set(PREAMP, be16(field(preamp, 10, I16, 'preamp') & 0xffff)));
-		frames.push(set(COUNT, [field(filters.length, 1, U8, 'band count')]));
 		filters.forEach((f, i) => frames.push(set(BAND, [i, ...encodeFiioBand(f)])));
 		if (slot !== undefined) frames.push(set(o.saveCommand ?? SAVE, [field(slot, 1, U8, 'slot')]));
 		return frames.map((d) => hidFrame(reportId(o), d));
@@ -111,8 +120,15 @@ function ask(ctx: Ctx, cmd: number, data: number[] = []) {
 	);
 }
 
+/** A preset id as it goes on the wire: game and cinema presets are above 255. */
+const presetBytes = (id: number) =>
+	id > U8[1] ? be16(field(id, 1, U16, 'slot')) : [field(id, 1, U8, 'slot')];
+
 /** The current preset; reading the bypass preset ("EQ off") reports none. */
-const presetOf = (ctx: Ctx, d: Uint8Array) => (d[6] === ctx.bypass ? undefined : d[6]);
+function presetOf(ctx: Ctx, d: Uint8Array) {
+	const id = d[5]! > 1 ? readU16be(d, 6) : d[6];
+	return id === ctx.bypass ? undefined : id;
+}
 
 export const fiioUsbHid: HidHandler<FiioUsbHidOptions> = {
 	id: 'fiio-usb-hid',
@@ -145,12 +161,15 @@ export const fiioUsbHid: HidHandler<FiioUsbHidOptions> = {
 		const frames = fiioUsbHidCodec.encode(request, ctx.options);
 		const save = ctx.options.saveCommand ?? SAVE;
 		for (const frame of frames) {
-			// The device needs a moment after the band count and before the save.
+			// The device needs a moment before the save.
 			if (frame.data[4] === save) await ctx.sleep(100);
 			await sendFrame(ctx.transport, frame);
-			if (frame.data[4] === COUNT) await ctx.sleep(100);
 		}
 		return { reconnect: false };
+	},
+
+	async bandCount(ctx) {
+		return (await ask(ctx, COUNT))[6] || null;
 	},
 
 	async currentSlot(ctx) {
@@ -167,9 +186,6 @@ export const fiioUsbHid: HidHandler<FiioUsbHidOptions> = {
 					: 'FiiO: this model has no "EQ off" preset'
 			);
 		}
-		await sendFrame(
-			ctx.transport,
-			hidFrame(reportId(ctx.options), set(PRESET, [field(id, 1, U8, 'slot')]))
-		);
+		await sendFrame(ctx.transport, hidFrame(reportId(ctx.options), set(PRESET, presetBytes(id))));
 	}
 };

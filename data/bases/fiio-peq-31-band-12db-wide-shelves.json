@@ -5,7 +5,11 @@
 	"id": "fiio-peq-31-band-12db-wide-shelves",
 	"schemaVersion": "1.1",
 	"bandCount": 31,
-	"band": { "types": ["PK", "LSC", "HSC"], "gain": { "min": -24, "max": 12, "step": 0.1 } },
+	"band": {
+		"types": ["PK", "LSC", "HSC"],
+		"gain": { "min": -24, "max": 12, "step": 0.1 },
+		"q": { "min": 0.4, "max": 128, "step": 0.01 }
+	},
 	"preamp": { "mode": "manual", "gain": { "min": -24, "max": 12, "step": 0.1 } },
 	"protocol": {
 		"options": { "saveCommand": "0x21" },
@@ -37,7 +41,8 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/peqConstraintsConfig.json",
 				"date": "2026-10-02"
-			}
+			},
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
 		],
 		"notes": "devicePEQ's shared constraints \"peq31Band12dBWideShelves\". Seeded by scripts/import/seed.ts; ranges are what the handler encodes, not verified firmware limits."
 	}

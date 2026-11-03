@@ -1,0 +1,32 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-10-band-12db-no-all-pass",
+	"id": "fiio-kg13",
+	"schemaVersion": "1.1",
+	"device": { "brand": "FiiO", "model": "KG13" },
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO KG13" }] },
+	"protocol": {
+		"presets": [
+			{ "id": 240, "name": "Close EQ", "bypass": true },
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 257, "name": "FPS" },
+			{ "id": 258, "name": "ACT" },
+			{ "id": 259, "name": "MOBA" },
+			{ "id": 260, "name": "MUG" },
+			{ "id": 513, "name": "Cinema" },
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
+	}
+}

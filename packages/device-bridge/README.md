@@ -100,7 +100,7 @@ why a block can't be driven: an unknown handler (data newer than this bridge) or
 
 | Handler | Transports | Options |
 | --- | --- | --- |
-| `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`; `0x21` on newer models) |
+| `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`, the save FiiO Control sends; only the K17 and K19 keep devicePEQ's `0x21`, which the app uses for factory reset) |
 | `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101), `enableCommand` (ignored; no Walkplay device has an EQ switch, and profiles published with it still load), `micGainDone` (default false; true follows a mic gain write with `[1,0x04]`, as NICEHCK's app does), `afterControl` (what follows a control write, by control id: `"done"` is `[1,0x04]`, `"save"` the apply and save of an EQ write; Tanchjim's app sends `done` after volume and `save` after mic gain), `preampWithBands` (default false; true sends the pre-gain right after the bands, before the apply and save, with no `[1,0x04]`, as Tanchjim's app does), `frameDelay` (ms between push frames; default 20 after a band, 50 after the rest) |
 | `moondrop-usb-hid` | HID | – |
 | `moondrop-old-fashioned-hid` | HID | – |
@@ -134,6 +134,7 @@ volume, gain, DAC filter, upsampling, USB mode, sound modes, lights. They are op
 
 ```ts
 const firmware = await device.firmware(); // "1.5.8", or null; read once
+const bands = await device.bandCount(); // what the device reports (`readsBandCount`), or null
 const values = await device.readControls(); // { uacMode: 0, upsample: 0, gameMode: null, … }
 const off = eqDisabledBy(device.capabilities.controls, values); // from eqcaps-core
 await device.writeControl('volume', 24); // only when the user changed it

@@ -51,6 +51,8 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	readsFirmware: boolean;
 	/** `eqEnabled()` asks the device: its EQ switch is separate from the preset it plays. */
 	readsEnabled: boolean;
+	/** `bandCount()` asks the device. */
+	readsBandCount: boolean;
 	/** The profile's device controls that this bridge drives (SPEC §9.1). */
 	controls: readonly Control[];
 }
@@ -79,6 +81,11 @@ export interface BridgeDevice {
 	setEnabled(enabled: boolean, slot?: number): Promise<void>;
 	/** The device's firmware version, read once; null when the protocol or device doesn't say. */
 	firmware(): Promise<string | null>;
+	/**
+	 * The band count the device reports, asked each time; null when the protocol or device doesn't
+	 * say. It can differ from the profile's `bandCount`: the bridge doesn't reconcile them.
+	 */
+	bandCount(): Promise<number | null>;
 	/**
 	 * The current value of every control in `capabilities.controls`; null for one the device
 	 * doesn't have now (SPEC §9.1: its firmware range or `when` doesn't hold). Opt-in: pull and
@@ -138,6 +145,7 @@ export function openDevice(
 		experimental: protocol.experimental ?? false,
 		readsFirmware: handler.firmware !== undefined,
 		readsEnabled: handler.eqEnabled !== undefined,
+		readsBandCount: handler.bandCount !== undefined,
 		controls: (protocol.controls ?? []).filter((c) => handler.controls?.[c.id])
 	};
 
@@ -238,6 +246,17 @@ export function openDevice(
 
 		firmware() {
 			return serial(readFirmware);
+		},
+
+		bandCount() {
+			return serial(async () => {
+				try {
+					return (await handler.bandCount?.(ctx)) ?? null;
+				} catch (e) {
+					ctx.log(`${handler.id}: no band count (${(e as Error).message})`);
+					return null;
+				}
+			});
 		},
 
 		readControls() {

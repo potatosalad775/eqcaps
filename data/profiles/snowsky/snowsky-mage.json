@@ -1,0 +1,43 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-usb-hid",
+	"id": "snowsky-mage",
+	"schemaVersion": "1.1",
+	"device": { "brand": "Snowsky", "model": "Mage" },
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "SNOWSKY MAGE" }] },
+	"bandCount": 10,
+	"band": {
+		"types": ["PK", "LSC", "BP", "LPQ", "HPQ", "AP"],
+		"gain": { "min": -24, "max": 12, "step": 0.1 }
+	},
+	"preamp": { "mode": "manual", "gain": { "min": -24, "max": 12, "step": 0.1 } },
+	"protocol": {
+		"presets": [
+			{ "id": 257, "name": "FPS" },
+			{ "id": 258, "name": "ACT" },
+			{ "id": 259, "name": "MOBA" },
+			{ "id": 260, "name": "MUG" },
+			{ "id": 416, "name": "GAME-USER1" },
+			{ "id": 417, "name": "GAME-USER2" },
+			{ "id": 418, "name": "GAME-USER3" },
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true },
+			{ "id": 240, "name": "Close EQ", "bypass": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
+	}
+}

@@ -176,6 +176,8 @@ export interface Handler<T extends Transport, O, F> {
 	setEnabled?(ctx: HandlerContext<T, O>, enabled: boolean, slot?: number): Promise<void>;
 	/** The device's firmware version, dotted ("1.5.8"); null when the device doesn't say. */
 	firmware?(ctx: HandlerContext<T, O>): Promise<string | null>;
+	/** The band count the device itself reports; null when it reports none. */
+	bandCount?(ctx: HandlerContext<T, O>): Promise<number | null>;
 	/**
 	 * The device controls this handler drives, by id: the vocabulary of a profile's
 	 * `protocol.controls` (SPEC §9.1).

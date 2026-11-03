@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "fiio-peq-10-band-12db-wide-all-filters",
+	"extends": "fiio-peq-10-band-12db-no-band-pass",
 	"id": "fiio-air-link",
 	"schemaVersion": "1.1",
 	"device": { "brand": "FiiO", "model": "Air Link" },
@@ -11,13 +11,12 @@
 			{ "id": 1, "name": "Pop" },
 			{ "id": 2, "name": "Rock" },
 			{ "id": 3, "name": "Dance" },
-			{ "id": 5, "name": "R&B" },
-			{ "id": 6, "name": "Classic" },
-			{ "id": 7, "name": "Hip-hop" },
-			{ "id": 4, "name": "USER1", "writable": true },
-			{ "id": 8, "name": "USER2", "writable": true },
-			{ "id": 9, "name": "USER3", "writable": true },
-			{ "id": 11, "name": "Close EQ", "bypass": true }
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true }
 		]
 	},
 	"meta": {
@@ -27,8 +26,8 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
-			}
-		],
-		"notes": "devicePEQ gives only the id of the preset that turns the EQ off; its name, \"Close EQ\", is assumed from other FiiO models."
+			},
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		]
 	}
 }

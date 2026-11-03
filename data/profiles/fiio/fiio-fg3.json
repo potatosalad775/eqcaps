@@ -1,43 +1,21 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-10-band-12db-no-all-pass",
 	"id": "fiio-fg3",
 	"schemaVersion": "1.1",
-	"kind": "hardware",
 	"device": { "brand": "FiiO", "model": "FG3" },
 	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO FG3" }] },
-	"bandCount": 10,
-	"band": {
-		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP"],
-		"freq": { "min": 20, "max": 20000, "step": 1 },
-		"q": { "min": 0.1, "max": 10, "step": 0.01 },
-		"gain": { "min": -12, "max": 12, "step": 0.1 }
-	},
-	"preamp": { "mode": "manual", "gain": { "min": -12, "max": 12, "step": 0.1 } },
 	"protocol": {
-		"handler": "fiio-usb-hid",
 		"presets": [
-			{ "id": 0, "name": "Jazz" },
-			{ "id": 1, "name": "Pop" },
-			{ "id": 2, "name": "Rock" },
-			{ "id": 3, "name": "Dance" },
-			{ "id": 4, "name": "R&B" },
-			{ "id": 5, "name": "Classic" },
-			{ "id": 6, "name": "Hip-hop" },
-			{ "id": 12, "name": "Cinema" },
-			{ "id": 13, "name": "FPS" },
-			{ "id": 14, "name": "MOBA" },
-			{ "id": 15, "name": "ACT" },
-			{ "id": 16, "name": "MUG" },
+			{ "id": 13, "name": "HiFi" },
+			{ "id": 257, "name": "FPS" },
+			{ "id": 258, "name": "ACT" },
+			{ "id": 259, "name": "MOBA" },
+			{ "id": 260, "name": "MUG" },
+			{ "id": 513, "name": "Cinema" },
 			{ "id": 160, "name": "USER1", "writable": true },
 			{ "id": 161, "name": "USER2", "writable": true },
-			{ "id": 162, "name": "USER3", "writable": true },
-			{ "id": 163, "name": "USER4", "writable": true },
-			{ "id": 164, "name": "USER5", "writable": true },
-			{ "id": 165, "name": "USER6", "writable": true },
-			{ "id": 166, "name": "USER7", "writable": true },
-			{ "id": 167, "name": "USER8", "writable": true },
-			{ "id": 168, "name": "USER9", "writable": true },
-			{ "id": 169, "name": "USER10", "writable": true }
+			{ "id": 162, "name": "USER3", "writable": true }
 		]
 	},
 	"meta": {
@@ -47,7 +25,8 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
-			}
+			},
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
 		],
 		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
 	}

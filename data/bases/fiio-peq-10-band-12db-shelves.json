@@ -1,0 +1,15 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "fiio-usb-hid",
+	"abstract": true,
+	"id": "fiio-peq-10-band-12db-shelves",
+	"bandCount": 10,
+	"band": { "types": ["PK", "LSC", "HSC"] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "FiiO Control: peaking and shelves, ±12 dB."
+	}
+}

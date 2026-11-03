@@ -1,0 +1,31 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "fiio-usb-hid",
+	"abstract": true,
+	"id": "fiio-peq-10-band-12db-all-filters-3-users",
+	"schemaVersion": "1.1",
+	"bandCount": 10,
+	"band": { "types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "AP"] },
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true },
+			{ "id": 240, "name": "Close EQ", "bypass": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "FiiO Control: every filter, ±12 dB, music presets, three user presets and Close EQ."
+	}
+}

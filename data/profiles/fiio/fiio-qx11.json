@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "fiio-peq-10-band-12db-all-filters-7",
+	"extends": "fiio-peq-10-band-12db-wide-all-filters",
 	"id": "fiio-qx11",
 	"schemaVersion": "1.1",
 	"device": { "brand": "FiiO", "model": "QX11" },
@@ -36,7 +36,9 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
-			}
-		]
+			},
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "FiiO Control lists game and cinema presets instead of the music ones when the QX11 is in game mode (product id 0x4014); these are its HiFi mode (0x0130) presets."
 	}
 }

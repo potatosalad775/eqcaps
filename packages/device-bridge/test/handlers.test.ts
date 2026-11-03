@@ -162,8 +162,87 @@ describe('device session', () => {
 		expect(device.capabilities.disconnectOnSave).toBe(true);
 		const result = await device.push({ filters: [pk(100, 1)], slot: 3 });
 		expect(result.reconnect).toBe(true);
-		// Count, band, save: no preamp write when none was given.
-		expect(sent.map((d) => d[4])).toEqual([0x18, 0x15, 0x19]);
+		// Band, save: no preamp write when none was given, and FiiO Control never writes the count.
+		expect(sent.map((d) => d[4])).toEqual([0x15, 0x19]);
+	});
+
+	test('FiiO filter types, as FiiO Control codes them', async () => {
+		const sent: number[][] = [];
+		const t: HidTransport = {
+			...silentHid(),
+			vendorId: 0x2972,
+			productName: 'FIIO KA15',
+			sendReport: async (_id, d) => void sent.push([...d])
+		};
+		const types = ['PK', 'LSC', 'HSC', 'BP', 'LPQ', 'HPQ', 'AP'] as const;
+		await open(t, 'fiio-ka15').push({
+			filters: types.map((type) => ({ type, freq: 100, q: 1, gain: 0 }))
+		});
+		expect(sent.map((d) => d[13])).toEqual([0, 1, 2, 3, 4, 5, 6]);
+	});
+
+	/** A FiiO HID device that answers command `cmd` with `data()`. */
+	const fiioAnswering = (
+		cmd: number,
+		data: () => number[],
+		sent: number[][] = []
+	): HidTransport => {
+		const listeners = new Set<(id: number, d: Uint8Array) => void>();
+		return {
+			...silentHid(),
+			vendorId: 0x2972,
+			sendReport: async (_id, d) => {
+				sent.push([...d]);
+				if (d[0] !== 0xbb || d[4] !== cmd) return;
+				const answer = [0xbb, 0x0b, 0, 0, cmd, data().length, ...data(), 0, 0xee];
+				for (const l of listeners) l(7, Uint8Array.from(answer));
+			},
+			onInputReport: (listener) => {
+				listeners.add(listener);
+				return () => listeners.delete(listener);
+			}
+		};
+	};
+
+	test('FiiO presets above 255 go on the wire as two bytes', async () => {
+		const sent: number[][] = [];
+		const device = open(
+			fiioAnswering(0x16, () => [0x01, 0x01], sent),
+			'fiio-kg13'
+		);
+		await device.setEnabled(true, 513);
+		expect(sent.at(-1)?.slice(4, 8)).toEqual([0x16, 2, 0x02, 0x01]);
+		expect(await device.currentSlot()).toBe(257);
+	});
+
+	test('FiiO devices report their own band count', async () => {
+		let count = 10;
+		const device = open(
+			fiioAnswering(0x18, () => [count]),
+			'snowsky-tiny-a'
+		);
+		expect(device.capabilities.readsBandCount).toBe(true);
+		expect(await device.bandCount()).toBe(10);
+		count = 0;
+		expect(await device.bandCount()).toBeNull();
+
+		const serial = new ScriptedStream(() => [[...fiioSerialFrame(true, 0x18, [10])]]);
+		expect(await open(serial, 'fiio-audio-dsp').bandCount()).toBe(10);
+	});
+
+	test('the band count is unknown where the protocol has none, or the read fails', async () => {
+		const other = open({ ...silentHid(), vendorId: 0x35d8 }, 'moondrop-echo-b');
+		expect(other.capabilities.readsBandCount).toBe(false);
+		expect(await other.bandCount()).toBeNull();
+
+		const unplugged: HidTransport = {
+			...silentHid(),
+			vendorId: 0x2972,
+			sendReport: async () => {
+				throw new Error('unplugged');
+			}
+		};
+		expect(await open(unplugged, 'snowsky-tiny-a').bandCount()).toBeNull();
 	});
 
 	test('a value the wire cannot carry fails before anything is sent', async () => {
@@ -179,7 +258,7 @@ describe('device session', () => {
 			code: 'unrepresentable'
 		});
 		await expect(
-			device.push({ filters: [{ type: 'LPQ', freq: 100, q: 0.7, gain: 0 }] })
+			device.push({ filters: [{ type: 'NO', freq: 100, q: 0.7, gain: 0 }] })
 		).rejects.toMatchObject({ code: 'unsupported-type' });
 		expect(sent).toEqual([]);
 	});
@@ -246,7 +325,7 @@ describe('device session', () => {
 			productName: 'FIIO KA17',
 			sendReport: async (_id, d) => {
 				log.push(`send ${d[4]}`);
-				if (d[4] === 0x18 && log.length === 1) await gate;
+				if (log.length === 1) await gate;
 			}
 		};
 		const device = open(t, 'fiio-ka17');
@@ -255,7 +334,7 @@ describe('device session', () => {
 		await Promise.resolve();
 		release();
 		await Promise.all([first, second]);
-		expect(log).toEqual(['send 24', 'send 21', 'send 24', 'send 21']);
+		expect(log).toEqual(['send 21', 'send 21']);
 	});
 });
 
