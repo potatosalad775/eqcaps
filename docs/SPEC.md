@@ -295,7 +295,7 @@ wire grids are the handler's (D42).
 ```jsonc
 "protocol": {
   "handler": "fiio-usb-hid",                     // required: a bridge handler id
-  "options": { "reportId": 1, "saveCommand": "0x21" }, // the handler's settings for this device
+  "options": { "reportId": 1, "saveCommand": "0x19" }, // the handler's settings for this device
   "presets": [{ "id": 0, "name": "Jazz" },                        // EQ memories
               { "id": 160, "name": "USER1", "writable": true },  // format 1.1
               { "id": 240, "name": "BYPASS", "bypass": true }],

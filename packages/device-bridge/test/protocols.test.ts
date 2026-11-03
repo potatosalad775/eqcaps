@@ -118,7 +118,10 @@ describe('controls (SPEC §9.1)', () => {
 
 describe('protocolOf', () => {
 	test('reads hex strings as numbers', () => {
-		expect(protocolOf(profile('fiio-k17'))?.options).toEqual({ saveCommand: 0x21 });
+		expect(
+			protocolOf({ protocol: { handler: 'fiio-usb-hid', options: { saveCommand: '0x19' } } })
+				?.options
+		).toEqual({ saveCommand: 0x19 });
 		expect(
 			protocolOf({
 				protocol: {

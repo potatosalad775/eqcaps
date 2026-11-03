@@ -58,9 +58,10 @@ on what a HID profile means for a device the app drives over serial.
    and HSC, as it already did for the types. uniPEQ follows the device's count through
    `bandCount()` once it has the release.
 2. **K17, K19, K17 R2R**: the app drives them over serial with its own protocol and a heartbeat, and
-   they have no global gain, while the profiles say HID with `saveCommand` 0x21 and a preamp. Don't
-   test a save on a K17 or K19 until this is settled; 0x21 is factory reset on the rest of the
-   family. No K17 R2R profile until then.
+   they have no global gain, while the profiles say HID with a preamp. devicePEQ's `saveCommand` 0x21
+   is gone (2026-11-03), since it is factory reset on the rest of the family, so these save with
+   0x19, which the app doesn't send them either: saving is unconfirmed, and the profiles say so.
+   A serial handler is the real fix. No K17 R2R profile until then.
 3. **K15**: the app uses USER 160–169 and `0xFF` for EQ off, and moved to serial in 4.3.3; the
    profile says USER 7–16 and bypass 240 over HID.
 4. **Record with the recorder** (needs an adapter for this Vue app):

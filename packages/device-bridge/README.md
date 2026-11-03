@@ -95,12 +95,12 @@ sent, not what it accepts. `handlerCodeUrl(handler, commit)` is the source `ref`
 ## Handlers and their options
 
 A profile's `protocol` (eqcaps SPEC §9) names one of these handlers, with the options its device
-needs. Byte options may be written as hex strings (`"0x21"`). `protocolProblem(protocol)` says
+needs. Byte options may be written as hex strings (`"0x19"`). `protocolProblem(protocol)` says
 why a block can't be driven: an unknown handler (data newer than this bridge) or option.
 
 | Handler | Transports | Options |
 | --- | --- | --- |
-| `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`, the save FiiO Control sends; only the K17 and K19 keep devicePEQ's `0x21`, which the app uses for factory reset) |
+| `fiio-usb-hid` | HID | `reportId` (default 7), `saveCommand` (default `0x19`, the save FiiO Control sends; its `0x21` is factory reset, so no profile sets this) |
 | `walkplay-hid` | HID | `defaultSlot` (slot of a write that names none, default 101), `enableCommand` (ignored; no Walkplay device has an EQ switch, and profiles published with it still load), `micGainDone` (default false; true follows a mic gain write with `[1,0x04]`, as NICEHCK's app does), `afterControl` (what follows a control write, by control id: `"done"` is `[1,0x04]`, `"save"` the apply and save of an EQ write; Tanchjim's app sends `done` after volume and `save` after mic gain), `preampWithBands` (default false; true sends the pre-gain right after the bands, before the apply and save, with no `[1,0x04]`, as Tanchjim's app does), `frameDelay` (ms between push frames; default 20 after a band, 50 after the rest) |
 | `moondrop-usb-hid` | HID | – |
 | `moondrop-old-fashioned-hid` | HID | – |

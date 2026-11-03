@@ -11,7 +11,9 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
-			}
-		]
+			},
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "Saving is unconfirmed: FiiO Control drives this model over serial with its own protocol, and this profile drives it over HID. It saves with the family's 0x19, not devicePEQ's 0x21, which FiiO Control uses as factory reset elsewhere in the family."
 	}
 }

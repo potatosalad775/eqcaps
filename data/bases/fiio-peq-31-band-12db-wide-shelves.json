@@ -12,7 +12,6 @@
 	},
 	"preamp": { "mode": "manual", "gain": { "min": -24, "max": 12, "step": 0.1 } },
 	"protocol": {
-		"options": { "saveCommand": "0x21" },
 		"presets": [
 			{ "id": 0, "name": "Jazz" },
 			{ "id": 1, "name": "Rock" },
