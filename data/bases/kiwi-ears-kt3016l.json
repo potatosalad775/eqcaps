@@ -1,0 +1,32 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt1132l",
+	"abstract": true,
+	"id": "kiwi-ears-kt3016l",
+	"protocol": {
+		"options": {
+			"enableRegister": "0x34",
+			"writeAck": "0x4f",
+			"preampRegister": false,
+			"bandDelay": 50,
+			"bandRegisters": [
+				{ "freq": "0x37", "q": "0x38" },
+				{ "freq": "0x3b", "q": "0x3c" },
+				{ "freq": "0x3d", "q": "0x3f" },
+				{ "freq": "0x39", "q": "0x3a" },
+				{ "freq": "0x35", "q": "0x36" }
+			]
+		}
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: KT_3016L register map",
+				"date": "2026-11-09"
+			}
+		],
+		"notes": "As the KT1132L, with the bands stored out of register order."
+	}
+}

@@ -1,30 +1,22 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
+	"extends": "kiwi-ears-kt3016l",
 	"id": "kiwi-ears-s-link",
 	"device": { "brand": "Kiwi Ears", "model": "S-Link" },
 	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x3016" }] },
-	"protocol": {
-		"options": {
-			"bandRegisters": [
-				{ "freq": "0x37", "q": "0x38" },
-				{ "freq": "0x3b", "q": "0x3c" },
-				{ "freq": "0x3d", "q": "0x3f" },
-				{ "freq": "0x39", "q": "0x3a" },
-				{ "freq": "0x35", "q": "0x36" }
-			]
-		},
-		"disconnectOnSave": true
-	},
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x3016 \"KT-3016L S-link\"",
+				"date": "2026-11-09"
+			},
 			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
 			}
-		],
-		"notes": "Every product id devicePEQ assigns to its \"Kiwi Ears KT_3016L\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified.\nProtocol: the bands are stored out of register order."
+		]
 	}
 }

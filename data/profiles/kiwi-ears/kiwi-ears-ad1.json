@@ -1,0 +1,17 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt0211l",
+	"id": "kiwi-ears-ad1",
+	"device": { "brand": "Kiwi Ears", "model": "AD1" },
+	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x20e3" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x3302:0x20E3 \"KT-0211L AD1\"",
+				"date": "2026-11-09"
+			}
+		]
+	}
+}

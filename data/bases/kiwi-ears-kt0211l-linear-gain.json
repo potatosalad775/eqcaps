@@ -1,0 +1,29 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt0211l",
+	"abstract": true,
+	"id": "kiwi-ears-kt0211l-linear-gain",
+	"protocol": {
+		"controls": [
+			{
+				"id": "globalGainDb",
+				"name": "Global Gain",
+				"kind": "range",
+				"role": "output-gain",
+				"range": { "min": -12, "max": 12, "step": 0.1 },
+				"unit": "dB"
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: the linear global gain config (dac_vol)",
+				"date": "2026-11-09"
+			}
+		],
+		"notes": "On these models Kiwi Ears' app treats register 0x3b as linear (dac_vol): minus ten times the dB, ±12 dB in 0.1 dB steps."
+	}
+}

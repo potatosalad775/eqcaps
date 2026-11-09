@@ -6,7 +6,8 @@
 	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x0113" }] },
 	"protocol": { "disconnectOnSave": true },
 	"meta": {
-		"status": "draft",
+		"status": "deprecated",
+		"replacedBy": "kiwi-ears-ad1-pro",
 		"sources": [
 			{
 				"kind": "handler-code",
@@ -14,6 +15,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Every product id devicePEQ assigns to its \"Kiwi Ears KT_0211L\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified. devicePEQ matches this product id only as a variant of the Allegro family."
+		"notes": "Replaced by the device it turned out to be: Kiwi Ears' app gives 0x31B2:0x0113 to the AD1 Pro. Every product id devicePEQ assigns to its \"Kiwi Ears KT_0211L\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified. devicePEQ matches this product id only as a variant of the Allegro family."
 	}
 }

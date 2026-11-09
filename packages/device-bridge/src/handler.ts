@@ -129,6 +129,8 @@ export interface HandlerCapabilities {
 	readsCurrentSlot: boolean;
 	/** `setEnabled()` sends a command. */
 	canEnable: boolean;
+	/** `eqEnabled()` asks the device, where that depends on the options. Default: it has the method. */
+	readsEnabled?: boolean;
 }
 
 export interface HandlerContext<T extends Transport, O> {

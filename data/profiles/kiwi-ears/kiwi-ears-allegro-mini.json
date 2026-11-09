@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
+	"extends": "kiwi-ears-kt0211l",
 	"id": "kiwi-ears-allegro-mini",
 	"device": { "brand": "Kiwi Ears", "model": "Allegro Mini" },
 	"match": {
@@ -9,10 +9,20 @@
 			{ "vendorId": "0x31b2", "productName": ["Kiwi Ears-Allegro Mini", "Kiwi Ears Allegro Mini"] }
 		]
 	},
-	"protocol": { "disconnectOnSave": true },
 	"meta": {
-		"status": "draft",
+		"status": "maintainer-verified",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "https://equalizer.kiwiears.com, connected on the owner's device with a band, the global gain, the EQ switch and a save exercised and the traffic recorded: packages/device-bridge/test/recordings/2026-11-09-kiwi-ears-allegro-mini.json",
+				"date": "2026-11-09",
+				"by": "potatosalad775"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x0111 \"KT-0211L Allegro Mini\"",
+				"date": "2026-11-09"
+			},
 			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
@@ -23,6 +33,7 @@
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/ktmicro_kiwi_ears_allegro_mini.json",
 				"date": "2026-10-02"
 			}
-		]
+		],
+		"notes": "As found, register 0x24 held 3, which the app shows as EQ off (it counts only 1 as on) and cannot write back; that value survives a save. By the owner's ear, 3 sounds like neither 0 nor 1, so it isn't another way of saying on. The bridge writes only 1 and 0, as the app does; devicePEQ's and older bridges' \"custom slot\" writes 3, which may be how a device comes to hold it. A save answers with flag 3, drops USB about 40 ms later and returns 850 ms after that. Register 0x24, the band, global gain and all persist across it. Confirmed from uniPEQ on Android (debug build on this bridge, 2026-11-09): identified, read, wrote and saved a curve, reconnected after the save, the EQ switch and global gain, and the values survived a replug."
 	}
 }

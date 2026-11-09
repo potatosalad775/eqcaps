@@ -1,0 +1,17 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt0211l",
+	"id": "kiwi-ears-allegro-nano",
+	"device": { "brand": "Kiwi Ears", "model": "Allegro Nano" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x0117" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x0117 \"KT-0211L Allegro Nano\"",
+				"date": "2026-11-09"
+			}
+		]
+	}
+}

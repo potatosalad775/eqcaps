@@ -17,15 +17,17 @@ import {
 import { FakeWalkplay } from './fake-walkplay.ts';
 import * as fosi from './recording-fosi.ts';
 import { checkReads, checkWrites, type FosiState } from './recording-fosi.ts';
+import * as kiwi from './recording-kiwi.ts';
 import * as nicehck from './recording-nicehck.ts';
 import type { NicehckState } from './recording-nicehck.ts';
 
 const all = [...profiles.values()];
 
 /** Each vendor app's checks, by the userscript adapter that recorded it. */
-const CHECKS: Record<string, typeof fosi | typeof nicehck> = {
+const CHECKS: Record<string, typeof fosi | typeof nicehck | typeof kiwi> = {
 	'fosi-cc': fosi,
-	'nicehck-app': nicehck
+	'nicehck-app': nicehck,
+	'kiwi-ears-eq': kiwi
 };
 
 /**
