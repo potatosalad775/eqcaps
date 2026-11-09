@@ -1,0 +1,23 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt1132l",
+	"id": "kiwi-ears-belle",
+	"device": { "brand": "Kiwi Ears", "model": "Belle" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x3006" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x3006 \"KT-1132L USB DAC\"; supported device list \"Kiwi Ears Belle(Type-C Version)\"",
+				"date": "2026-11-09"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "That 0x3006 is the Belle is by elimination: it is the only device in the app's list without a named table entry, and the only unnamed KT1132L id in its table. devicePEQ groups 0x3006 with the Chorus."
+	}
+}

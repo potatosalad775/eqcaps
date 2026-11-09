@@ -1,30 +1,22 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
+	"extends": "kiwi-ears-kt1132l",
 	"id": "kiwi-ears-chorus",
 	"device": { "brand": "Kiwi Ears", "model": "Chorus" },
-	"match": { "usb": [{ "vendorId": "0x31b2", "productId": ["0x1132", "0x3006"] }] },
-	"protocol": {
-		"options": {
-			"bandRegisters": [
-				{ "freq": "0x35", "q": "0x36" },
-				{ "freq": "0x37", "q": "0x38" },
-				{ "freq": "0x39", "q": "0x3a" },
-				{ "freq": "0x3b", "q": "0x3c" },
-				{ "freq": "0x3d", "q": "0x3f" }
-			]
-		},
-		"disconnectOnSave": true
-	},
+	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x1132" }] },
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x1132 \"KT-1132L B-Media Chorus\"",
+				"date": "2026-11-09"
+			},
 			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
 			}
-		],
-		"notes": "Every product id devicePEQ assigns to its \"Kiwi Ears KT_1132L\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified. Product id 0x1132 is the Chorus; 0x3006 is a sibling devicePEQ groups with it.\nProtocol: the fifth band's Q register is 0x3f (0x3e is a phantom register)."
+		]
 	}
 }

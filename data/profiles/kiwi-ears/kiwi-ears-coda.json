@@ -1,0 +1,17 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt0211l",
+	"id": "kiwi-ears-coda",
+	"device": { "brand": "Kiwi Ears", "model": "Coda" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x011b" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x011B \"KT-0211L Kiwi Ears Coda\"",
+				"date": "2026-11-09"
+			}
+		]
+	}
+}

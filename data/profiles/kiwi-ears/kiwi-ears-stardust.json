@@ -1,0 +1,17 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt1132l",
+	"id": "kiwi-ears-stardust",
+	"device": { "brand": "Kiwi Ears", "model": "Stardust" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x3030" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x3030 \"KT-1132L Kiwi Ears Stardust\"",
+				"date": "2026-11-09"
+			}
+		]
+	}
+}

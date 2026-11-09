@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt0211l-linear-gain",
+	"id": "kiwi-ears-kt0211l-usb-dac",
+	"device": { "brand": "Kiwi Ears", "model": "KT-0211L USB DAC" },
+	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x2017" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x3302:0x2017 \"KT-0211L USB DAC\"",
+				"date": "2026-11-09"
+			}
+		],
+		"notes": "In the app's device table but not in its list of supported devices; which product this is isn't known."
+	}
+}

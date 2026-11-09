@@ -469,8 +469,56 @@ exports[`ktmicro_kiwi_ears_allegro_mini.json > pull decodes the recorded answers
       "type": "PK",
     },
   ],
-  "findings": [],
-  "preamp": 0,
+  "findings": [
+    {
+      "allowed": [
+        "PK",
+      ],
+      "code": "type-not-allowed",
+      "field": "type",
+      "slot": 1,
+    },
+    {
+      "allowed": {
+        "max": 10,
+        "min": 0.1,
+        "step": 0.1,
+      },
+      "code": "off-grid",
+      "field": "q",
+      "slot": 1,
+    },
+    {
+      "allowed": {
+        "max": 10,
+        "min": 0.1,
+        "step": 0.1,
+      },
+      "code": "off-grid",
+      "field": "q",
+      "slot": 2,
+    },
+    {
+      "allowed": {
+        "max": 10,
+        "min": 0.1,
+        "step": 0.1,
+      },
+      "code": "off-grid",
+      "field": "q",
+      "slot": 3,
+    },
+    {
+      "allowed": {
+        "max": 10,
+        "min": 0.1,
+        "step": 0.1,
+      },
+      "code": "off-grid",
+      "field": "q",
+      "slot": 4,
+    },
+  ],
   "protocol": "ktmicro-usb-hid",
 }
 `;
@@ -521,7 +569,6 @@ exports[`ktmicro_kiwi_ears_allegro_pro.json > pull decodes the recorded answers 
       "slot": 0,
     },
   ],
-  "preamp": 0,
   "protocol": "ktmicro-usb-hid",
 }
 `;
@@ -561,7 +608,6 @@ exports[`ktmicro_kiwi_ears_chorus.json > pull decodes the recorded answers 1`] =
     },
   ],
   "findings": [],
-  "preamp": 0,
   "protocol": "ktmicro-usb-hid",
 }
 `;
@@ -601,7 +647,6 @@ exports[`ktmicro_kiwi_ears_slink.json > pull decodes the recorded answers 1`] = 
     },
   ],
   "findings": [],
-  "preamp": 0,
   "protocol": "ktmicro-usb-hid",
 }
 `;

@@ -7,9 +7,26 @@
 // (s8 dB). Not every model acknowledges register writes; the commit makes them take effect.
 // Tanchjim's app never touches 0x24 or 0x66, paces its writes 400 ms apart, and stores half the
 // frequency on its Zero, One and Tanya (D39): the options below say so per device.
+//
+// Kiwi Ears' web app (equalizer.kiwiears.com) has no slots: its register 0x24 (0x34 on KT1132L and
+// KT3016L, where 0x24 answers with a date) switches the EQ, 1 on and 0 off. Every write answers with
+// a success flag in byte 6, which it waits for. Register 0x3b is the KT0211L's DAC gain.
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
-import { field, grid, I16, I8, le16, readI16le, readI8, readU16le, U16, U8 } from '../bytes.ts';
+import {
+	field,
+	grid,
+	I16,
+	I8,
+	le16,
+	le32,
+	readI16le,
+	readI32le,
+	readI8,
+	readU16le,
+	U16,
+	U8
+} from '../bytes.ts';
 import { BridgeError } from '../errors.ts';
 import type { Codec, HandlerContext, HidFrame, HidHandler, WriteState } from '../handler.ts';
 import { hidFrame, hidRequest, refuseUncarried, sendFrame, typeCodes } from '../io.ts';
@@ -30,6 +47,15 @@ export interface KtmicroHidOptions {
 	preampRegister?: boolean;
 	/** Milliseconds between the frames of a push. Default 0. */
 	frameDelay?: number;
+	/**
+	 * Register of an EQ switch (1 on, 0 off), on firmware without slots. A push turns it on first,
+	 * and the slot register is left alone.
+	 */
+	enableRegister?: number;
+	/** Byte 6 of the answer to a good write: each write then waits for its answer. Default: none. */
+	writeAck?: number;
+	/** Milliseconds after each band's two frames. Default 0. */
+	bandDelay?: number;
 }
 
 const REPORT_ID = 0x4b;
@@ -38,6 +64,8 @@ const WRITE = 0x57;
 const COMMIT = 0x53;
 const SLOT = 0x24;
 const PREAMP = 0x66;
+const DAC_GAIN = 0x3b;
+const WRITE_TIMEOUT = 5000;
 
 export const KTMICRO_TYPES = typeCodes('ktmicro', { PK: 0, LPQ: 1, HPQ: 2, LSC: 3, HSC: 4 });
 
@@ -63,7 +91,8 @@ const packet = (register: number, cmd: number, data: number[] = []) => {
 };
 
 const hasPreamp = (o: KtmicroHidOptions) => o.preampRegister !== false;
-const hasSlots = (o: KtmicroHidOptions) => o.slotRegister !== false;
+const hasSlots = (o: KtmicroHidOptions) =>
+	o.slotRegister !== false && o.enableRegister === undefined;
 const freqUnit = (o: KtmicroHidOptions) => o.freqUnit ?? 1;
 
 /** One band from its two register answers or writes. */
@@ -122,16 +151,32 @@ export const ktmicroCodec: Codec<KtmicroHidOptions, HidFrame> = {
 
 type Ctx = HandlerContext<HidTransport, KtmicroHidOptions>;
 
-function request(ctx: Ctx, bytes: number[], what: string) {
+function request(ctx: Ctx, bytes: number[], what: string, timeout = 1000) {
 	return hidRequest(
 		ctx.transport,
 		REPORT_ID,
 		bytes,
 		(d) => d[0] === bytes[0] && d[4] === bytes[4],
-		1000,
+		timeout,
 		what
 	);
 }
+
+/** Sends a write, and with `writeAck` waits for the device to say it took. */
+async function send(ctx: Ctx, frame: HidFrame) {
+	const ack = ctx.options.writeAck;
+	if (ack === undefined) return sendFrame(ctx.transport, frame);
+	const what = `KT Micro write to register ${frame.data[0]}`;
+	const answer = await request(ctx, [...frame.data], what, WRITE_TIMEOUT);
+	if (answer[6] !== ack) {
+		throw new BridgeError('rejected', `${what}: flag ${answer[6]}, expected ${ack}`);
+	}
+}
+
+const writeRegister = (ctx: Ctx, register: number, value: number) =>
+	send(ctx, hidFrame(REPORT_ID, packet(register, WRITE, le32(value))));
+const readRegister = async (ctx: Ctx, register: number, what: string) =>
+	readI32le(await request(ctx, packet(register, READ), what), 6);
 
 const readSlot = async (ctx: Ctx) =>
 	(await request(ctx, packet(SLOT, READ, [0x03]), 'KT Micro slot'))[6]!;
@@ -151,10 +196,11 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 		readsSlot: false,
 		writesPreamp: hasPreamp(o),
 		writesSlot: false,
+		readsEnabled: o.enableRegister !== undefined,
 		...(o.bandRegisters ? { bands: o.bandRegisters.length } : {}),
 		needsBandCount: !o.bandRegisters,
 		readsCurrentSlot: hasSlots(o),
-		canEnable: hasSlots(o)
+		canEnable: hasSlots(o) || o.enableRegister !== undefined
 	}),
 
 	async pull(ctx, { bands }) {
@@ -172,15 +218,19 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 	},
 
 	async push(ctx, request) {
+		const { enableRegister, frameDelay = 0, bandDelay = 0 } = ctx.options;
 		const frames = ktmicroCodec.encode(request, ctx.options);
-		// Writes don't take while EQ is off: switch the custom slot on first.
-		if (hasSlots(ctx.options) && (await readSlot(ctx)) === (ctx.bypass ?? 2)) {
+		if (enableRegister !== undefined) {
+			await writeRegister(ctx, enableRegister, 1);
+		} else if (hasSlots(ctx.options) && (await readSlot(ctx)) === (ctx.bypass ?? 2)) {
+			// Writes don't take while EQ is off: switch the custom slot on first.
 			await selectSlot(ctx, ctx.options.customSlot ?? 3);
 		}
-		const delay = ctx.options.frameDelay ?? 0;
 		for (const [i, frame] of frames.entries()) {
-			if (i > 0 && delay > 0) await ctx.sleep(delay);
-			await sendFrame(ctx.transport, frame);
+			if (i > 0 && frameDelay > 0) await ctx.sleep(frameDelay);
+			await send(ctx, frame);
+			const endsBand = i % 2 === 1 && i < request.filters.length * 2;
+			if (endsBand && bandDelay > 0) await ctx.sleep(bandDelay);
 		}
 		await ctx.sleep(1000);
 		return { reconnect: false };
@@ -192,10 +242,31 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 		return slot === (ctx.bypass ?? 2) ? null : slot;
 	},
 
+	async eqEnabled(ctx) {
+		const register = ctx.options.enableRegister;
+		if (register === undefined) return null;
+		return (await readRegister(ctx, register, 'KT Micro EQ switch')) === 1;
+	},
+
 	async setEnabled(ctx, enabled, slot) {
+		const register = ctx.options.enableRegister;
+		if (register !== undefined) return writeRegister(ctx, register, enabled ? 1 : 0);
 		if (!hasSlots(ctx.options)) {
 			throw new BridgeError('unsupported', 'ktmicro-usb-hid: this device has no EQ switch');
 		}
 		await selectSlot(ctx, enabled ? (slot ?? ctx.options.customSlot ?? 3) : (ctx.bypass ?? 2));
+	},
+
+	controls: {
+		// The KT0211L's DAC gain, as a step (1.5 dB each, 0 mutes) or, on some models, in dB: the
+		// register holds minus ten times the dB.
+		globalGain: {
+			read: async (ctx) => (await readRegister(ctx, DAC_GAIN, 'KT Micro DAC gain')) & 0x0f,
+			write: (ctx, value) => writeRegister(ctx, DAC_GAIN, value)
+		},
+		globalGainDb: {
+			read: async (ctx) => 0 - (await readRegister(ctx, DAC_GAIN, 'KT Micro DAC gain')) / 10,
+			write: (ctx, value) => writeRegister(ctx, DAC_GAIN, Math.round(-value * 10))
+		}
 	}
 };

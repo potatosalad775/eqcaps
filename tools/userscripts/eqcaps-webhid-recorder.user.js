@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         eqcaps WebHID recorder
 // @namespace    https://github.com/potatosalad775/eqcaps
-// @version      2
+// @version      3
 // @description  Records a vendor web app's WebHID traffic, and what the app made of it, for eqcaps' protocol tests. It sends nothing to the device itself.
 // @match        https://cc.fosiaudio.com/*
 // @match        https://app.nicehck.cn/*
 // @match        https://peq.szwalkplay.com/*
+// @match        https://equalizer.kiwiears.com/*
 // @run-at       document-start
 // @grant        none
 // @license      MIT
@@ -20,7 +21,7 @@
 (() => {
 	'use strict';
 
-	const RECORDER_VERSION = 2;
+	const RECORDER_VERSION = 3;
 	const start = performance.now();
 	const devices = [];
 	const events = [];
@@ -65,6 +66,7 @@
 		if (error !== undefined) event.error = String(error?.message ?? error);
 		events.push(event);
 		panel.update();
+		return event;
 	}
 
 	// --- WebHID --------------------------------------------------------------------------------
@@ -79,12 +81,12 @@
 	};
 	const sending = (op) =>
 		async function (original, reportId, data) {
+			// Logged before it is sent: a fast answer can arrive before the send resolves.
+			const event = log(this, op, reportId, data);
 			try {
-				const result = await original.call(this, reportId, data);
-				log(this, op, reportId, data);
-				return result;
+				return await original.call(this, reportId, data);
 			} catch (e) {
-				log(this, op, reportId, data, e);
+				event.error = String(e?.message ?? e);
 				throw e;
 			}
 		};
@@ -259,7 +261,32 @@
 		}
 	};
 
-	const adapter = [fosi, nicehck, walkplay].find((a) => a.matches());
+	/**
+	 * Kiwi Ears' web EQ (equalizer.kiwiears.com): Vue with a Pinia store. It reads the device when it
+	 * connects, so there is no Read all: record, connect, use the app, snapshot.
+	 */
+	const kiwiEars = {
+		id: 'kiwi-ears-eq',
+		matches: () => location.hostname === 'equalizer.kiwiears.com',
+		snapshot() {
+			const s = fosi.pinia()?._s?.get('equalizerKt');
+			if (!s?.selectedDevice) throw new Error('no device: connect it in the app first');
+			return {
+				store: 'pinia',
+				state: JSON.parse(
+					JSON.stringify({
+						filters: s.filters,
+						dacEqEnabled: s.dacEqEnabled,
+						globalGainDb: s.globalGainDb,
+						globalGainIndex: s.globalGainIndex,
+						globalGainConfig: s.globalGainConfig
+					})
+				)
+			};
+		}
+	};
+
+	const adapter = [fosi, nicehck, walkplay, kiwiEars].find((a) => a.matches());
 
 	function takeSnapshot(label) {
 		if (!adapter) throw new Error('no adapter for this page');

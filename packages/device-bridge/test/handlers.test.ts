@@ -429,6 +429,129 @@ describe('KT Micro as Tanchjim drives it', () => {
 	});
 });
 
+describe('KT Micro as Kiwi Ears drives it', () => {
+	/** Registers that answer a read with what was last written, and a write with a flag. */
+	function kiwi(flag: number, seed: Record<number, number[]> = {}) {
+		const sent: number[][] = [];
+		const registers = new Map(Object.entries(seed).map(([r, v]) => [Number(r), v]));
+		const listeners = new Set<(id: number, d: Uint8Array) => void>();
+		const t: HidTransport = {
+			kind: 'hid',
+			vendorId: 0x31b2,
+			productId: 0x0111,
+			productName: 'Kiwi Ears',
+			collections: [],
+			sendReport: async (_id, d) => {
+				sent.push([...d]);
+				const answer = [...d];
+				if (d[4] === 0x57) registers.set(d[0]!, [...d].slice(6));
+				if (d[4] === 0x52) answer.splice(6, 4, ...(registers.get(d[0]!) ?? [0, 0, 0, 0]));
+				else answer[6] = flag;
+				for (const l of listeners) l(0x4b, Uint8Array.from(answer));
+			},
+			sendFeatureReport: async () => {},
+			receiveFeatureReport: async () => new Uint8Array(64),
+			onInputReport: (listener) => {
+				listeners.add(listener);
+				return () => listeners.delete(listener);
+			},
+			close: async () => {}
+		};
+		return { t, sent, registers };
+	}
+
+	test('a push turns the EQ on, writes the bands 50 ms apart, then saves', async () => {
+		const { t, sent } = kiwi(3);
+		const sleeps: number[] = [];
+		const device = openDevice(t, protocol('kiwi-ears-allegro-mini'), {
+			sleep: async (ms) => void sleeps.push(ms)
+		});
+		expect(device.capabilities).toMatchObject({
+			readsPreamp: false,
+			writesPreamp: false,
+			readsCurrentSlot: false,
+			readsEnabled: true,
+			canEnable: true
+		});
+		await device.push({ filters: [pk(100, -3), pk(1000, 2)] });
+		expect(sent.map((d) => d[0])).toEqual([0x24, 0x26, 0x27, 0x28, 0x29, 0]);
+		expect(sent[0]).toEqual([0x24, 0, 0, 0, 0x57, 0, 1, 0, 0, 0]);
+		expect(sent.at(-1)![4]).toBe(0x53);
+		expect(sleeps).toEqual([50, 50, 1000]);
+	});
+
+	test('a write the device answers with another flag is rejected', async () => {
+		const { t } = kiwi(0);
+		const device = openDevice(t, protocol('kiwi-ears-allegro-mini'), { sleep: noSleep });
+		await expect(device.push({ filters: [pk(100, 1)] })).rejects.toMatchObject({
+			code: 'rejected'
+		});
+	});
+
+	test('the EQ switch is its own register, 0x34 past the KT0211L', async () => {
+		const { t, sent } = kiwi(0x4f);
+		const device = openDevice(t, protocol('kiwi-ears-chorus'), { sleep: noSleep });
+		await device.setEnabled(true);
+		expect(await device.eqEnabled()).toBe(true);
+		await device.setEnabled(false);
+		expect(await device.eqEnabled()).toBe(false);
+		expect(new Set(sent.map((d) => d[0]))).toEqual(new Set([0x34]));
+		expect(await device.currentSlot()).toBeNull();
+	});
+
+	test('the EQ switch only ever gets 1 or 0, whatever slot is asked for', async () => {
+		const { t, sent } = kiwi(3);
+		const device = openDevice(t, protocol('kiwi-ears-allegro-mini'), { sleep: noSleep });
+		expect(device.capabilities.slots).toEqual([]);
+		await device.setEnabled(true, 3);
+		expect(sent).toEqual([[0x24, 0, 0, 0, 0x57, 0, 1, 0, 0, 0]]);
+	});
+
+	test('a device holding 3 reads as off, and a push moves it to 1', async () => {
+		const { t, registers } = kiwi(3, { 0x24: [3, 0, 0, 0] });
+		const device = openDevice(t, protocol('kiwi-ears-allegro-mini'), { sleep: noSleep });
+		expect(await device.eqEnabled()).toBe(false);
+		await device.push({ filters: [pk(100, 1)] });
+		expect(registers.get(0x24)).toEqual([1, 0, 0, 0]);
+	});
+
+	test('the S-Link is written through its reordered registers', async () => {
+		const { t, sent } = kiwi(0x4f);
+		const device = openDevice(t, protocol('kiwi-ears-s-link'), { sleep: noSleep });
+		await device.push({ filters: [pk(100, 1), pk(200, 1), pk(400, 1), pk(800, 1), pk(1600, 1)] });
+		expect(sent.map((d) => d[0])).toEqual([
+			0x34, 0x37, 0x38, 0x3b, 0x3c, 0x3d, 0x3f, 0x39, 0x3a, 0x35, 0x36, 0
+		]);
+	});
+
+	test('global gain in steps reads and writes register 0x3b', async () => {
+		const { t, sent } = kiwi(3, { 0x3b: [13, 0, 0, 0] });
+		const device = openDevice(t, protocol('kiwi-ears-allegro-mini'), { sleep: noSleep });
+		expect(await device.readControls()).toEqual({ globalGain: 13 });
+		await device.writeControl('globalGain', 15);
+		expect(sent.find((d) => d[4] === 0x57)).toEqual([0x3b, 0, 0, 0, 0x57, 0, 15, 0, 0, 0]);
+		expect(await device.readControls()).toEqual({ globalGain: 15 });
+	});
+
+	test('linear global gain holds minus ten times the dB', async () => {
+		const { t, sent } = kiwi(3);
+		const device = openDevice(t, protocol('kiwi-ears-usb-d1'), { sleep: noSleep });
+		expect(await device.readControls()).toEqual({ globalGainDb: 0 });
+		await device.writeControl('globalGainDb', 1.5);
+		expect(sent.find((d) => d[4] === 0x57)).toEqual([
+			0x3b, 0, 0, 0, 0x57, 0, 0xf1, 0xff, 0xff, 0xff
+		]);
+		await device.writeControl('globalGainDb', -12);
+		expect(await device.readControls()).toEqual({ globalGainDb: -12 });
+	});
+
+	test('other KT Micro brands keep their slots and report no EQ switch', () => {
+		const { t } = kiwi(3);
+		const device = openDevice(t, protocol('moondrop-chu-2-dsp'), { sleep: noSleep });
+		expect(device.capabilities).toMatchObject({ readsEnabled: false, canEnable: true });
+	});
+});
+
 describe('JDS Labs', () => {
 	const describeAnswer = {
 		Configuration: {

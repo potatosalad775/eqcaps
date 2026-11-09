@@ -105,7 +105,7 @@ why a block can't be driven: an unknown handler (data newer than this bridge) or
 | `moondrop-usb-hid` | HID | – |
 | `moondrop-old-fashioned-hid` | HID | – |
 | `conexant-usb-hid` | HID | – |
-| `ktmicro-usb-hid` | HID | `baseRegister` (default `0x26`), `bandRegisters` (`[{ "freq", "q" }]` per band, for models that skip or reorder registers), `customSlot` (default 3), `freqUnit` (Hz per unit of the frequency field, default 1; 2 where the firmware stores half the frequency), `slotRegister` and `preampRegister` (default true; false leaves the slot register 0x24, which also switches the EQ, or the preamp register 0x66 alone), `frameDelay` (ms between the frames of a push, default 0) |
+| `ktmicro-usb-hid` | HID | `baseRegister` (default `0x26`), `bandRegisters` (`[{ "freq", "q" }]` per band, for models that skip or reorder registers), `customSlot` (default 3), `freqUnit` (Hz per unit of the frequency field, default 1; 2 where the firmware stores half the frequency), `slotRegister` and `preampRegister` (default true; false leaves the slot register 0x24, which also switches the EQ, or the preamp register 0x66 alone), `frameDelay` (ms between the frames of a push, default 0), `enableRegister` (the register of an EQ switch, 1 on and 0 off, on firmware without slots: a push turns it on first, and the slot register is left alone), `writeAck` (byte 6 of the answer to a good write; each write then waits for its answer, and another flag is `rejected`), `bandDelay` (ms after each band's two frames, default 0) |
 | `fosi-audio-usb-hid` | HID | `reportId` (default 1), `bandwidth` (default 0), `defaultSlot` (default 7) |
 | `qudelix-usb-hid` | HID | – (the report comes from the descriptor) |
 | `jds-labs-usb-serial` | serial | – |
@@ -121,8 +121,8 @@ The rest of the block is the same for every handler: `presets` (`[{ "id", "name"
 device's EQ memories), `disconnectOnSave`, `baudRate` (serial; default 115200 over USB, 9600 over
 Bluetooth) and `experimental`. A preset marked `"bypass": true` is the one that turns the EQ off:
 `setEnabled(false)` selects it, and reading it back reports no current slot. Only `fiio-usb-hid`
-and `ktmicro-usb-hid` turn the EQ off with a preset (KT Micro's default is slot 2); the others
-refuse a `bypass` preset. Presets marked `"writable": true` (format 1.1) are the user memories a
+and `ktmicro-usb-hid` turn the EQ off with a preset (KT Micro's default is slot 2, unless its
+`enableRegister` is set); the others refuse a `bypass` preset. Presets marked `"writable": true` (format 1.1) are the user memories a
 write may target; once any preset is marked, the unmarked ones are built-in curves (SPEC §9). The
 bridge passes the mark on in `capabilities.slots` and doesn't enforce it. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
 
@@ -158,6 +158,7 @@ its role), so data newer than the bridge still drives the rest.
 | --- | --- |
 | `fosi-audio-usb-hid` | `volume`, `gainMode`, `filterMode`, `gameMode`, `upsample`, `uacMode`, `led` (one byte each, the device's own values) |
 | `walkplay-hid` | `dacFilter`, `gainLevel`, `workMode`, `volume` (one byte each); `dre` (toggle, held as 0 on, 1 off; Tanchjim's app); `micGain`, `leftGain`, `rightGain` (dB, on a 1/256 grid). From NICEHCK's and Walkplay's web apps; `firmware()` too |
+| `ktmicro-usb-hid` | `globalGain` (the KT0211L's DAC gain register 0x3b as a step), `globalGainDb` (the same register in dB on models that hold it so, minus ten times the dB). From Kiwi Ears' web app |
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,
 `timeout`, `bad-response`, `rejected`, `transport` or `invalid-request`.

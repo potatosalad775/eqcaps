@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt0211l",
+	"id": "kiwi-ears-allegro-bal",
+	"device": { "brand": "Kiwi Ears", "model": "Allegro BAL" },
+	"match": { "usb": [{ "vendorId": "0x0bda", "productId": "0x0023" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x0BDA:0x0023 \"Allegro BAL\"",
+				"date": "2026-11-09"
+			}
+		],
+		"notes": "Under Realtek's vendor id, with the KT0211L's registers in the app."
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt0211l",
+	"id": "kiwi-ears-ad1-pro",
+	"device": { "brand": "Kiwi Ears", "model": "AD1 Pro" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x0113" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x0113 \"KT-0113L AD1 Pro\"",
+				"date": "2026-11-09"
+			}
+		],
+		"notes": "The app gives this id the KT0211L's registers. Moondrop's Chu 2 DSP shares it and is told apart by its product name."
+	}
+}

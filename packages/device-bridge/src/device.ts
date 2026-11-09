@@ -136,15 +136,16 @@ export function openDevice(
 		sleep: options.sleep ?? realSleep,
 		log: options.log ?? (() => {})
 	};
+	const own = handler.capabilities(transport, handlerOptions);
 	const capabilities: DeviceCapabilities = {
-		...handler.capabilities(transport, handlerOptions),
+		...own,
 		types: handler.codec.types,
 		wire: handler.codec.wire(handlerOptions),
 		slots: protocol.presets ?? [],
 		disconnectOnSave: protocol.disconnectOnSave ?? false,
 		experimental: protocol.experimental ?? false,
 		readsFirmware: handler.firmware !== undefined,
-		readsEnabled: handler.eqEnabled !== undefined,
+		readsEnabled: handler.eqEnabled !== undefined && own.readsEnabled !== false,
 		readsBandCount: handler.bandCount !== undefined,
 		controls: (protocol.controls ?? []).filter((c) => handler.controls?.[c.id])
 	};

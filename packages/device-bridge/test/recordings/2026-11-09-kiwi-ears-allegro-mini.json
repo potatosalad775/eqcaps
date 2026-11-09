@@ -1,0 +1,3200 @@
+{
+	"recording": "eqcaps-webhid",
+	"version": 1,
+	"recordedAt": "2026-11-09T00:20:24.543Z",
+	"tool": {
+		"name": "eqcaps WebHID recorder (the same wrapper, injected into the page)",
+		"version": 2
+	},
+	"page": {
+		"origin": "https://equalizer.kiwiears.com",
+		"path": "/"
+	},
+	"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+	"notes": "Allegro Mini on the owner's Windows PC, in Edge. Connect; the app's own read-only __kt.scanRegisters(0x20, 0x70); EQ on; band 1 gain -0.1 dB; global gain to step 12; EQ off; EQ on; Save to flash, which drops USB about 40 ms after its answer and returns 850 ms later (HID disconnect at 92182.7 ms, connect at 93028.3 ms). Then back as found: band flat, step 13, the app's __kt.rawWriteRegister(0x24, 3) at 113603.9 ms, which the app's UI can't send, and a save (disconnect 113900.8 ms, connect 114753.2 ms). Eight events around 15460 ms are put back in request-then-answer order: the wrapper logged a send when it resolved, after a fast answer.",
+	"devices": [
+		{
+			"vendorId": 12722,
+			"productId": 273,
+			"productName": "Kiwi Ears-Allegro Mini",
+			"collections": [
+				{
+					"usagePage": 12,
+					"usage": 1,
+					"inputReports": [1, 75, 84],
+					"outputReports": [75, 84],
+					"featureReports": [],
+					"children": []
+				}
+			]
+		},
+		{
+			"vendorId": 12722,
+			"productId": 273,
+			"productName": "Kiwi Ears-Allegro Mini",
+			"collections": [
+				{
+					"usagePage": 12,
+					"usage": 1,
+					"inputReports": [1, 75, 84],
+					"outputReports": [75, 84],
+					"featureReports": [],
+					"children": []
+				}
+			]
+		},
+		{
+			"vendorId": 12722,
+			"productId": 273,
+			"productName": "Kiwi Ears-Allegro Mini",
+			"collections": [
+				{
+					"usagePage": 12,
+					"usage": 1,
+					"inputReports": [1, 75, 84],
+					"outputReports": [75, 84],
+					"featureReports": [],
+					"children": []
+				}
+			]
+		}
+	],
+	"snapshots": [
+		{
+			"t": 34354.1,
+			"label": "connected",
+			"adapter": "kiwi-ears-eq",
+			"store": "pinia",
+			"state": {
+				"filters": [
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 100,
+						"gain": 0,
+						"Q": 1.13,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 500,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					}
+				],
+				"dacEqEnabled": false,
+				"globalGainDb": 0,
+				"globalGainIndex": 13,
+				"globalGainConfig": {
+					"type": "steps",
+					"address": 59,
+					"name": "DacAnaGain_ALL",
+					"label": "Global Gain",
+					"defaultIndex": 13,
+					"steps": [
+						{
+							"index": 0,
+							"db": null
+						},
+						{
+							"index": 1,
+							"db": -18
+						},
+						{
+							"index": 2,
+							"db": -16.5
+						},
+						{
+							"index": 3,
+							"db": -15
+						},
+						{
+							"index": 4,
+							"db": -13.5
+						},
+						{
+							"index": 5,
+							"db": -12
+						},
+						{
+							"index": 6,
+							"db": -10.5
+						},
+						{
+							"index": 7,
+							"db": -9
+						},
+						{
+							"index": 8,
+							"db": -7.5
+						},
+						{
+							"index": 9,
+							"db": -6
+						},
+						{
+							"index": 10,
+							"db": -4.5
+						},
+						{
+							"index": 11,
+							"db": -3
+						},
+						{
+							"index": 12,
+							"db": -1.5
+						},
+						{
+							"index": 13,
+							"db": 0
+						},
+						{
+							"index": 14,
+							"db": 1.5
+						},
+						{
+							"index": 15,
+							"db": 3
+						}
+					]
+				}
+			}
+		},
+		{
+			"t": 71190.8,
+			"label": "band 1 gain -0.1",
+			"adapter": "kiwi-ears-eq",
+			"store": "pinia",
+			"state": {
+				"filters": [
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": -0.1,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 100,
+						"gain": 0,
+						"Q": 1.13,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 500,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					}
+				],
+				"dacEqEnabled": true,
+				"globalGainDb": 0,
+				"globalGainIndex": 13,
+				"globalGainConfig": {
+					"type": "steps",
+					"address": 59,
+					"name": "DacAnaGain_ALL",
+					"label": "Global Gain",
+					"defaultIndex": 13,
+					"steps": [
+						{
+							"index": 0,
+							"db": null
+						},
+						{
+							"index": 1,
+							"db": -18
+						},
+						{
+							"index": 2,
+							"db": -16.5
+						},
+						{
+							"index": 3,
+							"db": -15
+						},
+						{
+							"index": 4,
+							"db": -13.5
+						},
+						{
+							"index": 5,
+							"db": -12
+						},
+						{
+							"index": 6,
+							"db": -10.5
+						},
+						{
+							"index": 7,
+							"db": -9
+						},
+						{
+							"index": 8,
+							"db": -7.5
+						},
+						{
+							"index": 9,
+							"db": -6
+						},
+						{
+							"index": 10,
+							"db": -4.5
+						},
+						{
+							"index": 11,
+							"db": -3
+						},
+						{
+							"index": 12,
+							"db": -1.5
+						},
+						{
+							"index": 13,
+							"db": 0
+						},
+						{
+							"index": 14,
+							"db": 1.5
+						},
+						{
+							"index": 15,
+							"db": 3
+						}
+					]
+				}
+			}
+		},
+		{
+			"t": 71707.1,
+			"label": "global gain step 12",
+			"adapter": "kiwi-ears-eq",
+			"store": "pinia",
+			"state": {
+				"filters": [
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": -0.1,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 100,
+						"gain": 0,
+						"Q": 1.13,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 500,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					}
+				],
+				"dacEqEnabled": true,
+				"globalGainDb": -1.5,
+				"globalGainIndex": 12,
+				"globalGainConfig": {
+					"type": "steps",
+					"address": 59,
+					"name": "DacAnaGain_ALL",
+					"label": "Global Gain",
+					"defaultIndex": 13,
+					"steps": [
+						{
+							"index": 0,
+							"db": null
+						},
+						{
+							"index": 1,
+							"db": -18
+						},
+						{
+							"index": 2,
+							"db": -16.5
+						},
+						{
+							"index": 3,
+							"db": -15
+						},
+						{
+							"index": 4,
+							"db": -13.5
+						},
+						{
+							"index": 5,
+							"db": -12
+						},
+						{
+							"index": 6,
+							"db": -10.5
+						},
+						{
+							"index": 7,
+							"db": -9
+						},
+						{
+							"index": 8,
+							"db": -7.5
+						},
+						{
+							"index": 9,
+							"db": -6
+						},
+						{
+							"index": 10,
+							"db": -4.5
+						},
+						{
+							"index": 11,
+							"db": -3
+						},
+						{
+							"index": 12,
+							"db": -1.5
+						},
+						{
+							"index": 13,
+							"db": 0
+						},
+						{
+							"index": 14,
+							"db": 1.5
+						},
+						{
+							"index": 15,
+							"db": 3
+						}
+					]
+				}
+			}
+		},
+		{
+			"t": 73121.6,
+			"label": "eq off",
+			"adapter": "kiwi-ears-eq",
+			"store": "pinia",
+			"state": {
+				"filters": [
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": -0.1,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 100,
+						"gain": 0,
+						"Q": 1.13,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 500,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					}
+				],
+				"dacEqEnabled": false,
+				"globalGainDb": -1.5,
+				"globalGainIndex": 12,
+				"globalGainConfig": {
+					"type": "steps",
+					"address": 59,
+					"name": "DacAnaGain_ALL",
+					"label": "Global Gain",
+					"defaultIndex": 13,
+					"steps": [
+						{
+							"index": 0,
+							"db": null
+						},
+						{
+							"index": 1,
+							"db": -18
+						},
+						{
+							"index": 2,
+							"db": -16.5
+						},
+						{
+							"index": 3,
+							"db": -15
+						},
+						{
+							"index": 4,
+							"db": -13.5
+						},
+						{
+							"index": 5,
+							"db": -12
+						},
+						{
+							"index": 6,
+							"db": -10.5
+						},
+						{
+							"index": 7,
+							"db": -9
+						},
+						{
+							"index": 8,
+							"db": -7.5
+						},
+						{
+							"index": 9,
+							"db": -6
+						},
+						{
+							"index": 10,
+							"db": -4.5
+						},
+						{
+							"index": 11,
+							"db": -3
+						},
+						{
+							"index": 12,
+							"db": -1.5
+						},
+						{
+							"index": 13,
+							"db": 0
+						},
+						{
+							"index": 14,
+							"db": 1.5
+						},
+						{
+							"index": 15,
+							"db": 3
+						}
+					]
+				}
+			}
+		},
+		{
+			"t": 112754.2,
+			"label": "after save and reconnect",
+			"adapter": "kiwi-ears-eq",
+			"store": "pinia",
+			"state": {
+				"filters": [
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": -0.1,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 100,
+						"gain": 0,
+						"Q": 1.13,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 500,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					}
+				],
+				"dacEqEnabled": true,
+				"globalGainDb": -1.5,
+				"globalGainIndex": 12,
+				"globalGainConfig": {
+					"type": "steps",
+					"address": 59,
+					"name": "DacAnaGain_ALL",
+					"label": "Global Gain",
+					"defaultIndex": 13,
+					"steps": [
+						{
+							"index": 0,
+							"db": null
+						},
+						{
+							"index": 1,
+							"db": -18
+						},
+						{
+							"index": 2,
+							"db": -16.5
+						},
+						{
+							"index": 3,
+							"db": -15
+						},
+						{
+							"index": 4,
+							"db": -13.5
+						},
+						{
+							"index": 5,
+							"db": -12
+						},
+						{
+							"index": 6,
+							"db": -10.5
+						},
+						{
+							"index": 7,
+							"db": -9
+						},
+						{
+							"index": 8,
+							"db": -7.5
+						},
+						{
+							"index": 9,
+							"db": -6
+						},
+						{
+							"index": 10,
+							"db": -4.5
+						},
+						{
+							"index": 11,
+							"db": -3
+						},
+						{
+							"index": 12,
+							"db": -1.5
+						},
+						{
+							"index": 13,
+							"db": 0
+						},
+						{
+							"index": 14,
+							"db": 1.5
+						},
+						{
+							"index": 15,
+							"db": 3
+						}
+					]
+				}
+			}
+		},
+		{
+			"t": 118480.8,
+			"label": "restored",
+			"adapter": "kiwi-ears-eq",
+			"store": "pinia",
+			"state": {
+				"filters": [
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 50,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 100,
+						"gain": 0,
+						"Q": 1.13,
+						"bypass": false
+					},
+					{
+						"type": "peaking12",
+						"frequency": 500,
+						"gain": 0,
+						"Q": 1,
+						"bypass": false
+					}
+				],
+				"dacEqEnabled": false,
+				"globalGainDb": 0,
+				"globalGainIndex": 13,
+				"globalGainConfig": {
+					"type": "steps",
+					"address": 59,
+					"name": "DacAnaGain_ALL",
+					"label": "Global Gain",
+					"defaultIndex": 13,
+					"steps": [
+						{
+							"index": 0,
+							"db": null
+						},
+						{
+							"index": 1,
+							"db": -18
+						},
+						{
+							"index": 2,
+							"db": -16.5
+						},
+						{
+							"index": 3,
+							"db": -15
+						},
+						{
+							"index": 4,
+							"db": -13.5
+						},
+						{
+							"index": 5,
+							"db": -12
+						},
+						{
+							"index": 6,
+							"db": -10.5
+						},
+						{
+							"index": 7,
+							"db": -9
+						},
+						{
+							"index": 8,
+							"db": -7.5
+						},
+						{
+							"index": 9,
+							"db": -6
+						},
+						{
+							"index": 10,
+							"db": -4.5
+						},
+						{
+							"index": 11,
+							"db": -3
+						},
+						{
+							"index": 12,
+							"db": -1.5
+						},
+						{
+							"index": 13,
+							"db": 0
+						},
+						{
+							"index": 14,
+							"db": 1.5
+						},
+						{
+							"index": 15,
+							"db": 3
+						}
+					]
+				}
+			}
+		}
+	],
+	"events": [
+		{
+			"t": 15410.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "26000000520000000000"
+		},
+		{
+			"t": 15411.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "26000000520000003200"
+		},
+		{
+			"t": 15412.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "28000000520000000000"
+		},
+		{
+			"t": 15413.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "28000000520000003200"
+		},
+		{
+			"t": 15414.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2a000000520000000000"
+		},
+		{
+			"t": 15415.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2a000000520000003200"
+		},
+		{
+			"t": 15416.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2c000000520000000000"
+		},
+		{
+			"t": 15417.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2c000000520000006400"
+		},
+		{
+			"t": 15418.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2e000000520000000000"
+		},
+		{
+			"t": 15420,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2e00000052000000f401"
+		},
+		{
+			"t": 15420.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "27000000520000000000"
+		},
+		{
+			"t": 15421.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "270000005200e8030000"
+		},
+		{
+			"t": 15425,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "29000000520000000000"
+		},
+		{
+			"t": 15425.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "290000005200e8030000"
+		},
+		{
+			"t": 15426.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2b000000520000000000"
+		},
+		{
+			"t": 15427.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2b0000005200e8030000"
+		},
+		{
+			"t": 15428.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2d000000520000000000"
+		},
+		{
+			"t": 15429.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2d00000052006a040000"
+		},
+		{
+			"t": 15430.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2f000000520000000000"
+		},
+		{
+			"t": 15432.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2f0000005200e8030000"
+		},
+		{
+			"t": 15433.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 15434.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 15453.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 15453.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 15460.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "26000000520000000000"
+		},
+		{
+			"t": 15459.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "26000000520000003200"
+		},
+		{
+			"t": 15460.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 15460.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 15463.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "3b000000520000000000"
+		},
+		{
+			"t": 15460.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3b00000052000d000000"
+		},
+		{
+			"t": 15463.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "28000000520000000000"
+		},
+		{
+			"t": 15463.6,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "28000000520000003200"
+		},
+		{
+			"t": 15464.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2a000000520000000000"
+		},
+		{
+			"t": 15465.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2a000000520000003200"
+		},
+		{
+			"t": 15466.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2c000000520000000000"
+		},
+		{
+			"t": 15467.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2c000000520000006400"
+		},
+		{
+			"t": 15468.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2e000000520000000000"
+		},
+		{
+			"t": 15469.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2e00000052000000f401"
+		},
+		{
+			"t": 15470.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "27000000520000000000"
+		},
+		{
+			"t": 15471.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "270000005200e8030000"
+		},
+		{
+			"t": 15473,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "29000000520000000000"
+		},
+		{
+			"t": 15473.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "290000005200e8030000"
+		},
+		{
+			"t": 15474.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2b000000520000000000"
+		},
+		{
+			"t": 15475.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2b0000005200e8030000"
+		},
+		{
+			"t": 15476.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2d000000520000000000"
+		},
+		{
+			"t": 15477.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2d00000052006a040000"
+		},
+		{
+			"t": 15479.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2f000000520000000000"
+		},
+		{
+			"t": 15480.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2f0000005200e8030000"
+		},
+		{
+			"t": 15481.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 15482.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 34355.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "20000000520000000000"
+		},
+		{
+			"t": 34357,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2000000052000000401f"
+		},
+		{
+			"t": 34402.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "21000000520000000000"
+		},
+		{
+			"t": 34403.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "210000005200c3020000"
+		},
+		{
+			"t": 34446.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "22000000520000000000"
+		},
+		{
+			"t": 34447.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "22000000520000001027"
+		},
+		{
+			"t": 34495.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "23000000520000000000"
+		},
+		{
+			"t": 34496.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "230000005200c3020000"
+		},
+		{
+			"t": 34542.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 34543.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 34588,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "25000000520000000000"
+		},
+		{
+			"t": 34589.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "25000000520000000000"
+		},
+		{
+			"t": 34634.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "26000000520000000000"
+		},
+		{
+			"t": 34635.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "26000000520000003200"
+		},
+		{
+			"t": 34680.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "27000000520000000000"
+		},
+		{
+			"t": 34682,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "270000005200e8030000"
+		},
+		{
+			"t": 34728.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "28000000520000000000"
+		},
+		{
+			"t": 34729.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "28000000520000003200"
+		},
+		{
+			"t": 34774.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "29000000520000000000"
+		},
+		{
+			"t": 34775.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "290000005200e8030000"
+		},
+		{
+			"t": 34822,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2a000000520000000000"
+		},
+		{
+			"t": 34823.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2a000000520000003200"
+		},
+		{
+			"t": 34858,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2b000000520000000000"
+		},
+		{
+			"t": 34859.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2b0000005200e8030000"
+		},
+		{
+			"t": 34898.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2c000000520000000000"
+		},
+		{
+			"t": 34900,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2c000000520000006400"
+		},
+		{
+			"t": 34946.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2d000000520000000000"
+		},
+		{
+			"t": 34947.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2d00000052006a040000"
+		},
+		{
+			"t": 34991.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2e000000520000000000"
+		},
+		{
+			"t": 34992.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2e00000052000000f401"
+		},
+		{
+			"t": 35037.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "2f000000520000000000"
+		},
+		{
+			"t": 35039.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "2f0000005200e8030000"
+		},
+		{
+			"t": 35085.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "30000000520000000000"
+		},
+		{
+			"t": 35086.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "30000000520000000000"
+		},
+		{
+			"t": 35129.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "31000000520000000000"
+		},
+		{
+			"t": 35130.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "31000000520000000000"
+		},
+		{
+			"t": 35177.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "32000000520000000000"
+		},
+		{
+			"t": 35178.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "32000000520000000000"
+		},
+		{
+			"t": 35225.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "33000000520000000000"
+		},
+		{
+			"t": 35226.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "33000000520000000000"
+		},
+		{
+			"t": 35272,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "34000000520000000000"
+		},
+		{
+			"t": 35273.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "34000000520000000000"
+		},
+		{
+			"t": 35320,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "35000000520000000000"
+		},
+		{
+			"t": 35321.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "35000000520000000000"
+		},
+		{
+			"t": 35365.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "36000000520000000000"
+		},
+		{
+			"t": 35365.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "36000000520050657266"
+		},
+		{
+			"t": 35412.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "37000000520000000000"
+		},
+		{
+			"t": 35413,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3700000052004366673a"
+		},
+		{
+			"t": 35458.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "38000000520000000000"
+		},
+		{
+			"t": 35459,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "38000000520000000000"
+		},
+		{
+			"t": 35505,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "39000000520000000000"
+		},
+		{
+			"t": 35506,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "39000000520000000000"
+		},
+		{
+			"t": 35551.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "3a000000520000000000"
+		},
+		{
+			"t": 35553,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3a000000520003000000"
+		},
+		{
+			"t": 35598,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "3b000000520000000000"
+		},
+		{
+			"t": 35599,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3b00000052000d000000"
+		},
+		{
+			"t": 35643,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "3c000000520000000000"
+		},
+		{
+			"t": 35643.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3c000000520000000000"
+		},
+		{
+			"t": 35691,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "3d000000520000000000"
+		},
+		{
+			"t": 35691.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3d000000520000000000"
+		},
+		{
+			"t": 35738.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "3e000000520000000000"
+		},
+		{
+			"t": 35740,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3e000000520000000000"
+		},
+		{
+			"t": 35784.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "3f000000520000000000"
+		},
+		{
+			"t": 35785.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3f000000520000000000"
+		},
+		{
+			"t": 35832,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "40000000520000000000"
+		},
+		{
+			"t": 35832.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "4000000052004b697769"
+		},
+		{
+			"t": 35880,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "41000000520000000000"
+		},
+		{
+			"t": 35881,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "41000000520020456172"
+		},
+		{
+			"t": 35926.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "42000000520000000000"
+		},
+		{
+			"t": 35927.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "42000000520073000000"
+		},
+		{
+			"t": 35972,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "43000000520000000000"
+		},
+		{
+			"t": 35973.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "43000000520000000000"
+		},
+		{
+			"t": 36017.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "44000000520000000000"
+		},
+		{
+			"t": 36018.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "44000000520000000000"
+		},
+		{
+			"t": 36064,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "45000000520000000000"
+		},
+		{
+			"t": 36065.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "45000000520000000000"
+		},
+		{
+			"t": 36115.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "46000000520000000000"
+		},
+		{
+			"t": 36115.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "46000000520000000000"
+		},
+		{
+			"t": 36164.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "47000000520000000000"
+		},
+		{
+			"t": 36165,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "47000000520000000000"
+		},
+		{
+			"t": 36207,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "48000000520000000000"
+		},
+		{
+			"t": 36207.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "4800000052004b697769"
+		},
+		{
+			"t": 36251.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "49000000520000000000"
+		},
+		{
+			"t": 36252.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "49000000520020456172"
+		},
+		{
+			"t": 36299.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "4a000000520000000000"
+		},
+		{
+			"t": 36301.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "4a0000005200732d416c"
+		},
+		{
+			"t": 36345,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "4b000000520000000000"
+		},
+		{
+			"t": 36346.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "4b00000052006c656772"
+		},
+		{
+			"t": 36391.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "4c000000520000000000"
+		},
+		{
+			"t": 36392.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "4c00000052006f204d69"
+		},
+		{
+			"t": 36436,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "4d000000520000000000"
+		},
+		{
+			"t": 36437,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "4d00000052006e690000"
+		},
+		{
+			"t": 36482.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "4e000000520000000000"
+		},
+		{
+			"t": 36483.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "4e000000520000000000"
+		},
+		{
+			"t": 36529,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "4f000000520000000000"
+		},
+		{
+			"t": 36530.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "4f000000520000000000"
+		},
+		{
+			"t": 36577.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "50000000520000000000"
+		},
+		{
+			"t": 36578.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "50000000520032303230"
+		},
+		{
+			"t": 36622.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "51000000520000000000"
+		},
+		{
+			"t": 36623.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "5100000052002d30322d"
+		},
+		{
+			"t": 36669.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "52000000520000000000"
+		},
+		{
+			"t": 36670.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "52000000520032302d30"
+		},
+		{
+			"t": 36717,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "53000000520000000000"
+		},
+		{
+			"t": 36718.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "5300000052003030302d"
+		},
+		{
+			"t": 36763,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "54000000520000000000"
+		},
+		{
+			"t": 36763.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "54000000520030303030"
+		},
+		{
+			"t": 36809.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "55000000520000000000"
+		},
+		{
+			"t": 36811.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "5500000052002d303030"
+		},
+		{
+			"t": 36856.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "56000000520000000000"
+		},
+		{
+			"t": 36857.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "56000000520030000000"
+		},
+		{
+			"t": 36902,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "57000000520000000000"
+		},
+		{
+			"t": 36903,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "57000000520000000000"
+		},
+		{
+			"t": 36947,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "58000000520000000000"
+		},
+		{
+			"t": 36948.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "58000000520000000000"
+		},
+		{
+			"t": 36994.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "59000000520000000000"
+		},
+		{
+			"t": 36995.4,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "59000000520000000000"
+		},
+		{
+			"t": 37040.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "5a000000520000000000"
+		},
+		{
+			"t": 37041.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "5a000000520000000000"
+		},
+		{
+			"t": 37086,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "5b000000520000000000"
+		},
+		{
+			"t": 37087.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "5b0000005200b2311101"
+		},
+		{
+			"t": 37132.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "5c000000520000000000"
+		},
+		{
+			"t": 37133.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "5c000000520000000000"
+		},
+		{
+			"t": 37178.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "5d000000520000000000"
+		},
+		{
+			"t": 37179.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "5d000000520000000000"
+		},
+		{
+			"t": 37225,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "5e000000520000000000"
+		},
+		{
+			"t": 37226,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "5e000000520000000000"
+		},
+		{
+			"t": 37272,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "5f000000520000000000"
+		},
+		{
+			"t": 37273.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "5f000000520000000000"
+		},
+		{
+			"t": 37318.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "60000000520000000000"
+		},
+		{
+			"t": 37319.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "60000000520000000000"
+		},
+		{
+			"t": 37365,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "61000000520000000000"
+		},
+		{
+			"t": 37366,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "610000005200312a2a2a"
+		},
+		{
+			"t": 37419.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "62000000520000000000"
+		},
+		{
+			"t": 37419.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "62000000520000000000"
+		},
+		{
+			"t": 37459,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "63000000520000000000"
+		},
+		{
+			"t": 37460,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "63000000520000000000"
+		},
+		{
+			"t": 37503.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "64000000520000000000"
+		},
+		{
+			"t": 37503.5,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "64000000520001000000"
+		},
+		{
+			"t": 37546.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "65000000520000000000"
+		},
+		{
+			"t": 37546.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "65000000520000010000"
+		},
+		{
+			"t": 37582,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "66000000520000000000"
+		},
+		{
+			"t": 37582.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "66000000520000020000"
+		},
+		{
+			"t": 37628.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "67000000520000000000"
+		},
+		{
+			"t": 37630,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "670000005200f5f200c0"
+		},
+		{
+			"t": 37674.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "68000000520000000000"
+		},
+		{
+			"t": 37675.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "680000005200d0070000"
+		},
+		{
+			"t": 37721.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "69000000520000000000"
+		},
+		{
+			"t": 37721.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "69000000520001004701"
+		},
+		{
+			"t": 37767.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "6a000000520000000000"
+		},
+		{
+			"t": 37768.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "6a000000520000000000"
+		},
+		{
+			"t": 37814.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "6b000000520000000000"
+		},
+		{
+			"t": 37815.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "6b000000520000000000"
+		},
+		{
+			"t": 37861.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "6c000000520000000000"
+		},
+		{
+			"t": 37862.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "6c000000520000000000"
+		},
+		{
+			"t": 37907.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "6d000000520000000000"
+		},
+		{
+			"t": 37908.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "6d000000520000000000"
+		},
+		{
+			"t": 37952.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "6e000000520000000000"
+		},
+		{
+			"t": 37953.8,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "6e000000520000000000"
+		},
+		{
+			"t": 37999.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "6f000000520000000000"
+		},
+		{
+			"t": 38001.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "6f000000520000000000"
+		},
+		{
+			"t": 38045.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "70000000520000000000"
+		},
+		{
+			"t": 38046.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "70000000520000000000"
+		},
+		{
+			"t": 57083,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000570001000000"
+		},
+		{
+			"t": 57083.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000570003000000"
+		},
+		{
+			"t": 58907,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 58907.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520001000000"
+		},
+		{
+			"t": 70320.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "260000005700ffff3200"
+		},
+		{
+			"t": 70321,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "26000000570003000000"
+		},
+		{
+			"t": 71300.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "3b00000057000c000000"
+		},
+		{
+			"t": 71302.1,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3b000000570003000000"
+		},
+		{
+			"t": 71706,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "3b000000520000000000"
+		},
+		{
+			"t": 71706.9,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "3b00000052000c000000"
+		},
+		{
+			"t": 72225.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000570000000000"
+		},
+		{
+			"t": 72225.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000570003000000"
+		},
+		{
+			"t": 73116,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 73121.3,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 91705.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000570001000000"
+		},
+		{
+			"t": 91705.7,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000570003000000"
+		},
+		{
+			"t": 92142.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 75,
+			"data": "00000000530000000000"
+		},
+		{
+			"t": 92143.2,
+			"device": 0,
+			"op": "input",
+			"reportId": 75,
+			"data": "00000000530003000000"
+		},
+		{
+			"t": 95194.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "26000000520000000000"
+		},
+		{
+			"t": 95195.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "260000005200ffff3200"
+		},
+		{
+			"t": 95196.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "28000000520000000000"
+		},
+		{
+			"t": 95197.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "28000000520000003200"
+		},
+		{
+			"t": 95198.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2a000000520000000000"
+		},
+		{
+			"t": 95199.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2a000000520000003200"
+		},
+		{
+			"t": 95200.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2c000000520000000000"
+		},
+		{
+			"t": 95201.8,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2c000000520000006400"
+		},
+		{
+			"t": 95202.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2e000000520000000000"
+		},
+		{
+			"t": 95204,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2e00000052000000f401"
+		},
+		{
+			"t": 95204.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "27000000520000000000"
+		},
+		{
+			"t": 95209.1,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "270000005200e8030000"
+		},
+		{
+			"t": 95209.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "29000000520000000000"
+		},
+		{
+			"t": 95210.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "290000005200e8030000"
+		},
+		{
+			"t": 95211.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2b000000520000000000"
+		},
+		{
+			"t": 95212.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2b0000005200e8030000"
+		},
+		{
+			"t": 95213.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2d000000520000000000"
+		},
+		{
+			"t": 95214.8,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2d00000052006a040000"
+		},
+		{
+			"t": 95215.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2f000000520000000000"
+		},
+		{
+			"t": 95216.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2f0000005200e8030000"
+		},
+		{
+			"t": 95217.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 95218.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520001000000"
+		},
+		{
+			"t": 95220.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 95220.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520001000000"
+		},
+		{
+			"t": 95222,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "3b000000520000000000"
+		},
+		{
+			"t": 95225.8,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "3b00000052000c000000"
+		},
+		{
+			"t": 95229.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 95231,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520001000000"
+		},
+		{
+			"t": 95231.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "26000000520000000000"
+		},
+		{
+			"t": 95232.8,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "260000005200ffff3200"
+		},
+		{
+			"t": 95233.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "28000000520000000000"
+		},
+		{
+			"t": 95234.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "28000000520000003200"
+		},
+		{
+			"t": 95235.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2a000000520000000000"
+		},
+		{
+			"t": 95236.8,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2a000000520000003200"
+		},
+		{
+			"t": 95237.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2c000000520000000000"
+		},
+		{
+			"t": 95238.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2c000000520000006400"
+		},
+		{
+			"t": 95243.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2e000000520000000000"
+		},
+		{
+			"t": 95243.3,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2e00000052000000f401"
+		},
+		{
+			"t": 95244,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "27000000520000000000"
+		},
+		{
+			"t": 95244.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "270000005200e8030000"
+		},
+		{
+			"t": 95245.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "29000000520000000000"
+		},
+		{
+			"t": 95246.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "290000005200e8030000"
+		},
+		{
+			"t": 95247.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2b000000520000000000"
+		},
+		{
+			"t": 95249,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2b0000005200e8030000"
+		},
+		{
+			"t": 95249.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2d000000520000000000"
+		},
+		{
+			"t": 95250.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2d00000052006a040000"
+		},
+		{
+			"t": 95251.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "2f000000520000000000"
+		},
+		{
+			"t": 95252.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "2f0000005200e8030000"
+		},
+		{
+			"t": 95253.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 95254.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520001000000"
+		},
+		{
+			"t": 112865.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "26000000570000003200"
+		},
+		{
+			"t": 112866.8,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "26000000570003000000"
+		},
+		{
+			"t": 113305.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "3b00000057000d000000"
+		},
+		{
+			"t": 113306.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "3b000000570003000000"
+		},
+		{
+			"t": 113603.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000570003000000"
+		},
+		{
+			"t": 113605.3,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000570003000000"
+		},
+		{
+			"t": 113820.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 75,
+			"data": "00000000530000000000"
+		},
+		{
+			"t": 113836.9,
+			"device": 1,
+			"op": "input",
+			"reportId": 75,
+			"data": "00000000530003000000"
+		},
+		{
+			"t": 116865.9,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "26000000520000000000"
+		},
+		{
+			"t": 116866.1,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "26000000520000003200"
+		},
+		{
+			"t": 116868,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "28000000520000000000"
+		},
+		{
+			"t": 116868,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "28000000520000003200"
+		},
+		{
+			"t": 116869.9,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2a000000520000000000"
+		},
+		{
+			"t": 116870,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2a000000520000003200"
+		},
+		{
+			"t": 116872.1,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2c000000520000000000"
+		},
+		{
+			"t": 116872.1,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2c000000520000006400"
+		},
+		{
+			"t": 116873.9,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2e000000520000000000"
+		},
+		{
+			"t": 116875.7,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2e00000052000000f401"
+		},
+		{
+			"t": 116877.6,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "27000000520000000000"
+		},
+		{
+			"t": 116879.6,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "270000005200e8030000"
+		},
+		{
+			"t": 116881.6,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "29000000520000000000"
+		},
+		{
+			"t": 116883.5,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "290000005200e8030000"
+		},
+		{
+			"t": 116887.2,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2b000000520000000000"
+		},
+		{
+			"t": 116887.3,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2b0000005200e8030000"
+		},
+		{
+			"t": 116888.1,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2d000000520000000000"
+		},
+		{
+			"t": 116889.1,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2d00000052006a040000"
+		},
+		{
+			"t": 116891.8,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2f000000520000000000"
+		},
+		{
+			"t": 116891.8,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2f0000005200e8030000"
+		},
+		{
+			"t": 116894.3,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 116894.5,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 116896.5,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 116897,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 116899.2,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "3b000000520000000000"
+		},
+		{
+			"t": 116900.2,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "3b00000052000d000000"
+		},
+		{
+			"t": 116904.9,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 116906.6,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 116908.2,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "26000000520000000000"
+		},
+		{
+			"t": 116909,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "26000000520000003200"
+		},
+		{
+			"t": 116910.9,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "28000000520000000000"
+		},
+		{
+			"t": 116910.9,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "28000000520000003200"
+		},
+		{
+			"t": 116911.9,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2a000000520000000000"
+		},
+		{
+			"t": 116912.9,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2a000000520000003200"
+		},
+		{
+			"t": 116913.8,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2c000000520000000000"
+		},
+		{
+			"t": 116914.9,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2c000000520000006400"
+		},
+		{
+			"t": 116915.8,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2e000000520000000000"
+		},
+		{
+			"t": 116916.9,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2e00000052000000f401"
+		},
+		{
+			"t": 116918.9,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "27000000520000000000"
+		},
+		{
+			"t": 116918.9,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "270000005200e8030000"
+		},
+		{
+			"t": 116920,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "29000000520000000000"
+		},
+		{
+			"t": 116921,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "290000005200e8030000"
+		},
+		{
+			"t": 116922.4,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2b000000520000000000"
+		},
+		{
+			"t": 116926.8,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2b0000005200e8030000"
+		},
+		{
+			"t": 116927.8,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2d000000520000000000"
+		},
+		{
+			"t": 116929,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2d00000052006a040000"
+		},
+		{
+			"t": 116930.1,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "2f000000520000000000"
+		},
+		{
+			"t": 116931.7,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "2f0000005200e8030000"
+		},
+		{
+			"t": 116932.8,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 116934.8,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 118475.9,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "24000000520000000000"
+		},
+		{
+			"t": 118476.9,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "24000000520003000000"
+		},
+		{
+			"t": 118477.8,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "3b000000520000000000"
+		},
+		{
+			"t": 118478.9,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "3b00000052000d000000"
+		},
+		{
+			"t": 118479.8,
+			"device": 2,
+			"op": "output",
+			"reportId": 75,
+			"data": "26000000520000000000"
+		},
+		{
+			"t": 118480.8,
+			"device": 2,
+			"op": "input",
+			"reportId": 75,
+			"data": "26000000520000003200"
+		}
+	]
+}

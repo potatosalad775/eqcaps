@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "ktmicro-peq-5-band-12db-full-shelves-no-pregain",
+	"extends": "kiwi-ears-kt0211l",
 	"id": "kiwi-ears-allegro-pro",
 	"device": { "brand": "Kiwi Ears", "model": "Allegro Pro" },
 	"match": {
@@ -9,10 +9,14 @@
 			{ "vendorId": "0x31b2", "productName": "Kiwi Ears-Allegro PRO" }
 		]
 	},
-	"protocol": { "disconnectOnSave": true },
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: supported device list \"Kiwi Ears-Allegro Pro\"; the device table has only 0x31B2:0x0111 for this family",
+				"date": "2026-11-09"
+			},
 			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
@@ -23,6 +27,7 @@
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/ktmicro_kiwi_ears_allegro_pro.json",
 				"date": "2026-10-02"
 			}
-		]
+		],
+		"notes": "Warning: devicePEQ's capture marks this model compensate2X, as if the firmware held half the frequency. Kiwi Ears' app sends and reads it in Hz like the Allegro Mini, so the bridge does too; unconfirmed on a device."
 	}
 }

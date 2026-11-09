@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "kiwi-ears-kt1132l",
+	"id": "kiwi-ears-s-link-type-c-mic",
+	"device": { "brand": "Kiwi Ears", "model": "S-Link (Type-C 0.78 Mic)" },
+	"match": { "usb": [{ "vendorId": "0x31b2", "productId": "0x3001" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x3001 \"KT-3001 S-Link-Typec-0.78-Mic\"",
+				"date": "2026-11-09"
+			}
+		],
+		"notes": "The app gives this S-Link the KT1132L's register map, in order, unlike the S-Link at 0x3016."
+	}
+}

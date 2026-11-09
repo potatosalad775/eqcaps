@@ -22,10 +22,11 @@ const WANTED: Filter[] = [
 ];
 
 /**
- * A HID device that echoes every report back as an input report (enough for KT Micro's acks), and
- * answers the last one's command on the feature report with zeros (enough for Fosi Audio).
+ * A HID device that echoes every report back as an input report, with KT Micro's write flag in
+ * byte 6 where the protocol names one, and answers the last one's command on the feature report
+ * with zeros (enough for Fosi Audio).
  */
-function hidSink(): HidTransport & { count: number } {
+function hidSink(writeAck?: number): HidTransport & { count: number } {
 	const listeners = new Set<(id: number, d: Uint8Array) => void>();
 	let last = new Uint8Array(63);
 	return {
@@ -47,7 +48,9 @@ function hidSink(): HidTransport & { count: number } {
 		async sendReport(id, data) {
 			this.count++;
 			last = Uint8Array.from(data);
-			queueMicrotask(() => listeners.forEach((l) => l(id, data)));
+			const answer = Uint8Array.from(data);
+			if (writeAck !== undefined) answer[6] = writeAck;
+			queueMicrotask(() => listeners.forEach((l) => l(id, answer)));
 		},
 		async sendFeatureReport(_id, data) {
 			this.count++;
@@ -88,7 +91,8 @@ describe.each(Object.entries(PROTOCOLS))('%s', (profileId, protocol) => {
 		const result = fit(profile, WANTED, -4);
 		const { filters } = complete(profile, result.slots);
 		const kind = transportsOf(HANDLERS[protocol.handler])[0]!;
-		const transport = kind === 'hid' ? hidSink() : streamSink(kind);
+		const { writeAck } = (protocol.options ?? {}) as { writeAck?: number };
+		const transport = kind === 'hid' ? hidSink(writeAck) : streamSink(kind);
 		const device = openDevice(transport, protocol, { sleep: noSleep });
 		const preamp = profile.preamp.mode === 'manual' ? result.preamp : undefined;
 		await device.push({ filters, ...(preamp === undefined ? {} : { preamp }) });
