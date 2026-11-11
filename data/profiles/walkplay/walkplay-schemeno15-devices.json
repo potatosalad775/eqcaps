@@ -28,7 +28,6 @@
 					"0xb44d"
 				],
 				"productId": [
-					"0x012a",
 					"0x35d8",
 					"0x39c1",
 					"0x4353",
@@ -44,6 +43,29 @@
 					"0x43ea",
 					"0x43eb"
 				]
+			},
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productId": ["0x012a"]
 			}
 		]
 	},
@@ -56,6 +78,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Every product id devicePEQ assigns to its \"SchemeNo15\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified."
+		"notes": "Every product id devicePEQ assigns to its \"SchemeNo15\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified. 0x35d8:0x012a is left out: Moondrop's Custom EQ web app drives it as the INN Deco75-DH Audio."
 	}
 }

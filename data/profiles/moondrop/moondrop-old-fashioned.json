@@ -6,6 +6,7 @@
 	"device": { "brand": "Moondrop", "model": "Old Fashioned" },
 	"match": {
 		"usb": [
+			{ "vendorId": "0x35d8", "productId": "0x0122" },
 			{
 				"vendorId": [
 					"0x0104",
@@ -36,7 +37,7 @@
 	"band": {
 		"types": ["PK"],
 		"freq": { "min": 20, "max": 20000, "step": 1 },
-		"q": { "min": 0.1, "max": 10, "step": 0.001 },
+		"q": { "min": 0.1, "max": 10, "step": 0.01 },
 		"gain": { "min": -12, "max": 3, "step": 0.1 }
 	},
 	"preamp": { "mode": "none" },
@@ -48,11 +49,16 @@
 		"status": "draft",
 		"sources": [
 			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, Old Fashioned config",
+				"date": "2026-11-11"
+			},
+			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+		"notes": "What Moondrop's Custom EQ web app does with it: it identifies the device by USB vendor id 0x35d8 and product id only, and gives it 5 peaking bands, 20 to 20000 Hz in whole Hz, gain -12 to +3 dB in steps of 0.1 and Q 0.1 to 10 in steps of 0.01, with no pre-gain. These are the app's editor limits, not verified firmware limits. devicePEQ differs in Q step (0.001) and was seeded by scripts/import/seed.ts; the name-based entries come from it."
 	}
 }

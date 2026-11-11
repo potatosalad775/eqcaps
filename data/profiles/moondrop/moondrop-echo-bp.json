@@ -1,0 +1,23 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "moondrop-hub-compact",
+	"id": "moondrop-echo-bp",
+	"device": { "brand": "Moondrop", "model": "Echo-BP" },
+	"match": { "usb": [{ "vendorId": "0x35d8", "productId": "0x0f05" }] },
+	"bandCount": 32,
+	"preamp": { "mode": "manual", "gain": { "min": -80, "max": 0, "step": 0.00390625 } },
+	"protocol": {
+		"options": { "bandFrame": "wide", "commit": "commit", "selectSlot": false, "saveOffsets": true }
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, Echo-BP config",
+				"date": "2026-11-11"
+			}
+		],
+		"notes": "32 bands, and a pre-gain of -80 to 0 dB in steps of 0.1. The app sends the band parameters only and the device computes its own filters (inferred: the coefficient area is left empty). The app does not support it on macOS below firmware 2.0.0. It has no built-in presets and no slot switch. This is not the Conexant protocol of the ECHO-B. Its USB product name is unknown, so only the ids match."
+	}
+}

@@ -1,0 +1,72 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "moondrop-hub-compact",
+	"id": "moondrop-gaming-maestro",
+	"schemaVersion": "1.2",
+	"device": { "brand": "Moondrop", "model": "Gaming Maestro" },
+	"match": { "usb": [{ "vendorId": "0x35d8", "productId": "0x012d" }] },
+	"bandCount": 10,
+	"protocol": {
+		"options": {
+			"bandFrame": "compact",
+			"commit": "none",
+			"customSlot": 99,
+			"saveOffsets": true,
+			"linkCheck": true
+		},
+		"presets": [{ "id": 99, "name": "Custom", "writable": true }],
+		"controls": [
+			{
+				"id": "gainLevel",
+				"name": "Global Gain",
+				"kind": "choice",
+				"role": "output-gain",
+				"values": [
+					{ "value": 2, "name": "Low Gain" },
+					{ "value": 1, "name": "Mid Gain" },
+					{ "value": 0, "name": "High Gain" }
+				]
+			},
+			{
+				"id": "ancMode",
+				"name": "Noise Control",
+				"kind": "choice",
+				"role": "noise-control",
+				"values": [
+					{ "value": 0, "name": "Off" },
+					{ "value": 1, "name": "Noise Cancel" },
+					{ "value": 2, "name": "Transparency" },
+					{ "value": 3, "name": "Wind Noise Reduction" },
+					{ "value": 4, "name": "Adaptive Noise Cancel" },
+					{ "value": 5, "name": "Live Noise Cancel" }
+				]
+			},
+			{ "id": "led", "name": "LED Indicator", "kind": "toggle", "role": "light" },
+			{ "id": "promptTone", "name": "Prompt Tone", "kind": "toggle", "role": "prompt-tone" },
+			{
+				"id": "promptToneVolume",
+				"name": "Prompt Tone Volume",
+				"kind": "range",
+				"role": "prompt-tone-volume",
+				"range": { "min": 0, "max": 100, "step": 1 }
+			},
+			{
+				"id": "dualMicEnc",
+				"name": "Dual-mic ENC",
+				"kind": "toggle",
+				"role": "mic-noise-reduction"
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, Gaming Maestro config; chunks assets/GlobalGain-DdOXvw2r.js, NoiseControl-Cpj_DbDz.js, LedControl-eBproyea.js, PromptTone-Bq1LelB5.js, DualMicEnc-CgBTcUYB.js",
+				"date": "2026-11-11"
+			}
+		],
+		"notes": "10 bands. A wireless headset on a USB dongle: the dongle answers only while the headset is linked. Its custom EQ is the only slot; the app's gaming presets are curves it downloads and writes as a custom EQ, so none are listed. The controls are the app's controller panel, with its names: what it calls Global Gain here is a three-step gain level, not the main family's dB offset. Noise Control lists every value the app accepts from the device; its picker offers Off, Noise Cancel and Transparency, and the other three are noise-cancelling effects. The app writes each control without saving, so whether one outlasts a power cycle is unconfirmed, and which of them it shows is decided by Moondrop's server per firmware. Not listed: the battery level, which is only read, and the prompt tone selection, whose list comes from that server. Its USB product name is unknown, so only the ids match."
+	}
+}

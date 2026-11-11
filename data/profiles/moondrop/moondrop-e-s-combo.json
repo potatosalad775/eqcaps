@@ -1,0 +1,29 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "moondrop-hub",
+	"id": "moondrop-e-s-combo",
+	"device": { "brand": "Moondrop", "model": "E.S. combo" },
+	"match": { "usb": [{ "vendorId": "0x35d8", "productId": "0x98d5" }] },
+	"band": { "types": ["PK", "LPQ", "HPQ"] },
+	"protocol": {
+		"options": { "customSlot": 4 },
+		"presets": [
+			{ "id": 0, "name": "FPS1" },
+			{ "id": 1, "name": "FPS2" },
+			{ "id": 2, "name": "Movie and 3A game" },
+			{ "id": 3, "name": "Music game" },
+			{ "id": 4, "name": "Custom", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, E.S. combo config",
+				"date": "2026-11-11"
+			}
+		],
+		"notes": "The app turns shelves off for it (peaking, low-pass and high-pass only) and keeps its custom EQ in slot 4. Its USB product name is unknown, so only the ids match. Selecting a built-in preset in the app also sets the pre-gain and the global gain to 0."
+	}
+}

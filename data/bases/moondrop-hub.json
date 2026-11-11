@@ -1,0 +1,39 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"abstract": true,
+	"id": "moondrop-hub",
+	"schemaVersion": "1.2",
+	"kind": "hardware",
+	"bandCount": 8,
+	"band": {
+		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ"],
+		"freq": { "min": 20, "max": 20000, "step": 1 },
+		"q": { "min": 0.1015625, "max": 10, "step": 0.00390625 },
+		"gain": { "min": -18, "max": 12, "step": 0.00390625 }
+	},
+	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 0, "step": 0.00390625 } },
+	"protocol": {
+		"handler": "moondrop-usb-hid",
+		"controls": [
+			{
+				"id": "globalGain",
+				"name": "Global Gain",
+				"kind": "range",
+				"role": "output-gain",
+				"unit": "dB",
+				"range": { "min": -18, "max": 0, "step": 1 }
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, per-device configs, EQ editor limits, write sequence",
+				"date": "2026-11-11"
+			}
+		],
+		"notes": "What Moondrop's Custom EQ web app does with the devices of its main family: it identifies each by USB vendor id 0x35d8 and product id only, never by product name, and gives each 8 bands. The ranges are the app's editor limits, not verified firmware limits: 20 to 20000 Hz in whole Hz, gain -18 to +12 dB in steps of 0.1, Q 0.1 to 10 in steps of 0.01, and a pre-gain of -128 to 0 dB in steps of 0.1. The app offers peaking, low and high shelf, low-pass and high-pass filters. The steps here are the grid the device is told: the app rounds gain and pre-gain to 0.1 dB and Q to 0.01 in its editor, then sends each in 1/256ths, so its lowest Q of 0.1 goes out as 26/256. The app computes a pre-gain from the curve and writes it, so the pre-gain is a manual value here. A write selects the custom slot, writes the bands, applies them, writes the pre-gain and saves; the handler follows that order, and a device on which the app does not switch slots has the slot switch turned off by an option. Global Gain is a separate DAC offset from -18 to 0 dB. The app's Global Gain panel works in whole dB (the device class would accept steps of 0.1 dB), and the app writes it with every EQ write (0 when its Global Gain switch is off), whereas here it is a control, written only when the user changes it. devicePEQ differs: gain ±12 dB, peaking and shelves only (no low-pass or high-pass), a pre-gain range reaching +128 dB, a pre-gain read back from what is really the global gain, and matching by product name over a list of Walkplay vendor ids. Devices on which the app turns shelves off narrow the types in their own profile."
+	}
+}

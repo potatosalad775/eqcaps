@@ -1,0 +1,55 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "moondrop-hub",
+	"id": "ddhifi-blue-rose",
+	"device": { "brand": "ddHiFi", "model": "BLUE ROSE" },
+	"match": { "usb": [{ "vendorId": "0x35d8", "productId": "0x0131" }] },
+	"protocol": {
+		"options": { "customSlot": 0, "selectSlot": false, "ledCommand": "0x18" },
+		"controls": [
+			{
+				"id": "globalGain",
+				"name": "Global Gain",
+				"kind": "range",
+				"role": "output-gain",
+				"unit": "dB",
+				"range": { "min": -18, "max": 0, "step": 1 }
+			},
+			{
+				"id": "dacFilter",
+				"name": "Filter",
+				"kind": "choice",
+				"role": "dac-filter",
+				"values": [
+					{ "value": 1, "name": "Sharp Roll-off Low Latency Filter" },
+					{ "value": 2, "name": "Sharp Roll-off Phase-compensated Filter" },
+					{ "value": 3, "name": "Slow Roll-off Low Latency Filter" },
+					{ "value": 4, "name": "Slow Roll-off Phase-compensated Filter" },
+					{ "value": 5, "name": "Non-oversampling Filter" }
+				]
+			},
+			{
+				"id": "dacMode",
+				"name": "DAC Output Mode",
+				"kind": "choice",
+				"role": "amp-mode",
+				"values": [
+					{ "value": 0, "name": "Class H Output" },
+					{ "value": 1, "name": "Class AB Output" }
+				]
+			},
+			{ "id": "led", "name": "LED Indicator", "kind": "toggle", "role": "light" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, BLUE ROSE config; chunks assets/DacFilterType-D-41tuim.js, DacMode-E9SgAdjr.js, LedControl-eBproyea.js, MicGainOffset-CVAKm01u.js, dac-BTHrpc0M.js",
+				"date": "2026-11-11"
+			}
+		],
+		"notes": "The app lists it under the brand ddHiFi and does not switch slots on it (its custom EQ is slot 0); it has no built-in presets. Its controller panel has the DAC's filter, the DAC output mode and the LED, listed here with the app's names; the app writes each without saving, so whether one outlasts a replug is unconfirmed, and which of them it shows is decided by Moondrop's server per firmware. Global Gain is the main family's, repeated here because a profile's control list replaces its base's. Not listed: Microphone Gain, two steps (Low Gain, High Gain) that the app writes and saves but never reads back, keeping its own record of the choice, and a factory reset. Its USB product name is unknown, so only the ids match."
+	}
+}

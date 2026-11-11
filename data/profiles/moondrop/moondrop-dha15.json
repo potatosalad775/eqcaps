@@ -1,10 +1,11 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "moondrop-peq-8-band-12db-full-shelves",
+	"extends": "moondrop-hub",
 	"id": "moondrop-dha15",
 	"device": { "brand": "Moondrop", "model": "DHA15" },
 	"match": {
 		"usb": [
+			{ "vendorId": "0x35d8", "productId": "0x0120" },
 			{
 				"vendorId": [
 					"0x0104",
@@ -31,14 +32,21 @@
 			}
 		]
 	},
+	"protocol": { "options": { "selectSlot": false } },
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, DHA15 config",
+				"date": "2026-11-11"
+			},
 			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
 			}
-		]
+		],
+		"notes": "The app does not switch slots on it and has no built-in presets. It never reads the pre-gain back (it shows 0) but does write it."
 	}
 }

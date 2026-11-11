@@ -1,0 +1,29 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "moondrop-hub-compact",
+	"id": "moondrop-mm3a",
+	"device": { "brand": "Moondrop", "model": "MM3A" },
+	"match": { "usb": [{ "vendorId": "0x35d8", "productId": "0x012e" }] },
+	"bandCount": 8,
+	"protocol": {
+		"options": { "bandFrame": "compact", "commit": "none", "customSlot": 63, "duckPreamp": true },
+		"presets": [
+			{ "id": 0, "name": "Monitor" },
+			{ "id": 1, "name": "Music" },
+			{ "id": 2, "name": "Movie" },
+			{ "id": 3, "name": "Game" },
+			{ "id": 63, "name": "Custom", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, MM3A config",
+				"date": "2026-11-11"
+			}
+		],
+		"notes": "The app holds the pre-gain at its minimum while it writes the bands. It requires firmware 1.2.3 or later and forces an upgrade through Moondrop's mobile app below that. The custom EQ stays in effect together with a selected preset, according to the app's \"overlay\" flag (inferred from the app, unconfirmed). Selecting a built-in preset in the app also sets the pre-gain to 0. Its USB product name is unknown, so only the ids match."
+	}
+}

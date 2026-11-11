@@ -1,0 +1,25 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "moondrop-hub",
+	"id": "moondrop-position",
+	"device": { "brand": "Moondrop", "model": "POSITION" },
+	"match": { "usb": [{ "vendorId": "0x35d8", "productId": "0x0123" }] },
+	"band": { "types": ["PK", "LPQ", "HPQ"] },
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Default" },
+			{ "id": 7, "name": "Custom", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, POSITION config",
+				"date": "2026-11-11"
+			}
+		],
+		"notes": "The app turns shelves off for it (peaking, low-pass and high-pass only). Its USB product name is unknown, so only the ids match. Selecting a built-in preset in the app also sets the pre-gain and the global gain to 0."
+	}
+}

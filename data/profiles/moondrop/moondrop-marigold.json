@@ -1,11 +1,11 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "moondrop-hub",
 	"id": "moondrop-marigold",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Moondrop", "model": "Marigold" },
 	"match": {
 		"usb": [
+			{ "vendorId": "0x35d8", "productId": "0x011c" },
 			{ "vendorId": "0x35d8", "productId": "0x011c", "productName": "MOONDROP Marigold" },
 			{
 				"vendorId": [
@@ -33,18 +33,23 @@
 			}
 		]
 	},
-	"bandCount": 8,
-	"band": {
-		"types": ["PK"],
-		"freq": { "min": 20, "max": 20000, "step": 1 },
-		"q": { "min": 0.1015625, "max": 10, "step": 0.00390625 },
-		"gain": { "min": -12, "max": 6, "step": 0.00390625 }
+	"band": { "types": ["PK", "LPQ", "HPQ"] },
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Default" },
+			{ "id": 1, "name": "Triple A game" },
+			{ "id": 2, "name": "FPS" },
+			{ "id": 7, "name": "Custom", "writable": true }
+		]
 	},
-	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127.99609375, "step": 0.00390625 } },
-	"protocol": { "handler": "moondrop-usb-hid" },
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, Marigold config",
+				"date": "2026-11-11"
+			},
 			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
@@ -56,6 +61,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+		"notes": "The app turns shelves off for it (peaking, low-pass and high-pass only). devicePEQ had peaking only, gain -12 to +6 dB, Q from 0.1015625 and a pre-gain reaching +127.996 dB; the app's limits replace them. Selecting a built-in preset in the app also sets the pre-gain and the global gain to 0."
 	}
 }

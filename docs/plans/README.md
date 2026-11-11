@@ -14,4 +14,5 @@ decisions are recorded in [../DECISIONS.md](../DECISIONS.md), and what the proje
 | [tanchjim.md](tanchjim.md) | Tanchjim's KT Micro devices follow the vendor app (handler options, two bases, 8 new profiles); FOLA identified; the app's Walkplay-chip (TTGK) devices profiled and written as the app does; Space II retest next; Luna has no EQ |
 | [agent-docs.md](agent-docs.md) | AGENTS.md, the `read-vendor-app` skill and D50 done (2026-11-01); a fresh-session check next |
 | [kiwi-ears.md](kiwi-ears.md) | Kiwi Ears aligned with its web EQ (handler options, four bases, 10 new profiles, gain controls); Allegro Mini recorded and maintainer-verified; next a bridge release before the data reaches `main` |
+| [moondrop.md](moondrop.md) | Moondrop aligned with its web app (handler options, `globalGain`, new bases, 7 new profiles); nothing confirmed on a device yet; a bridge release before the data reaches `main` |
 | [fiio.md](fiio.md) | FiiO, Snowsky and JadeAudio aligned with FiiO Control (limits, types, presets, `bandCount()`, 12 new profiles); K17 family, K15 and recording next |
