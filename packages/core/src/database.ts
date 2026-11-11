@@ -12,7 +12,8 @@ import type { Profile } from './types/schema.generated.ts';
  * Rules that span profiles: unique ids, `replacedBy` targets that exist (SPEC §10), and no two
  * non-deprecated profiles with the same engine label claiming the same match entry for
  * overlapping firmware (SPEC §3). Entries that list several values claim each combination of
- * them. Input: every published profile of the database.
+ * them. A group profile and a device profile may share an entry: the group yields (SPEC §3, D43).
+ * Input: every published profile of the database.
  */
 export function checkDatabase(profiles: readonly Profile[]): Issue[] {
 	const issues: Issue[] = [];
@@ -52,6 +53,7 @@ export function checkDatabase(profiles: readonly Profile[]): Issue[] {
 			const k = `${p.engine ?? ''}\u0000${entryKey}`;
 			for (const other of claims.get(k) ?? []) {
 				if (other.profile.id === p.id) continue;
+				if (isGroup(p) !== isGroup(other.profile)) continue;
 				const pair = `${path}\u0000${other.profile.id}\u0000${other.path}`;
 				if (reported.has(pair)) continue;
 				reported.add(pair);
@@ -73,6 +75,8 @@ export function checkDatabase(profiles: readonly Profile[]): Issue[] {
 	}
 	return issues;
 }
+
+const isGroup = (p: Profile) => p.device.group === true;
 
 const usbKey = (e: ScalarUsbMatch) =>
 	JSON.stringify(['usb', e.vendorId, e.productId ?? null, e.productName ?? null]);

@@ -95,7 +95,8 @@ the command class with `sendCommand`/`queryCommand`, and `writeParameters` in th
 6. **Ranges.** ±12 dB (Marigold −12 to +6) against −18 to +12; pre-gain up to +128 against 0.
 7. **Identity.** Profiles matched a product name under a list of Walkplay vendor ids. Two of that
    list's "vendor ids", `0x011b` and `0x011d`, are Moondrop's product ids for the Rays and the
-   DAWN PRO2. → `35d8` and the product id first; the name entries stay.
+   DAWN PRO2. → `35d8` and the product id first; the name entries stay. Seven of the pairs are also
+   in Walkplay's SchemeNo11, 13, 15 and 16 groups, which yield.
 8. **DAWN PRO2** was on the Walkplay handler and base. The app drives it like the FreeDSP Pro.
 9. **Old Fashioned**: bytes agree. The app waits 200 ms after each register, not 100, and 2 s for
    an answer.
@@ -114,6 +115,12 @@ the command class with `sendCommand`/`queryCommand`, and `writeParameters` in th
   product ids, types, presets and custom slots; the Old Fashioned aligned.
 - New: BLUE ROSE (ddHiFi), E.S. combo, POSITION, MM3A, Gaming Maestro, GM01 Pro, Echo-BP.
 
+- Both handlers pad every frame, reads too, to the output report size the descriptor declares
+  (`outputReportSize`), 63 bytes on `moondrop-usb-hid` when it declares none. Never shorter than
+  the frame.
+- Moondrop's ids stay in the Walkplay groups: a group yields to a device profile on the same pair,
+  and CI no longer calls that a collision (D43, 2026-11-11). The Kiwi Ears carve-outs are undone too.
+
 Needs a bridge release before this data reaches `main`: a bridge that doesn't know an option drops
 the protocol (AGENTS.md).
 
@@ -128,11 +135,28 @@ the protocol (AGENTS.md).
   is the user's.
 - **No retry or read-back** after a push; the session's caller decides.
 
+## Coefficients that don't fit Q2.30
+
+Q2.30 holds −2 up to just under 2. A boosted high shelf or a very broad peak high up goes past it:
++6 dB high shelf at 8 kHz, Q 0.7 has b1 = −2.303; +12 dB peak at 15 kHz, Q 0.1 has b0 = 3.014. Of
+1 080 ordinary settings (three types, ten frequencies, six gains, six Q), 159 don't fit. The app
+rounds and keeps the low 32 bits, with no clamp or check, and the handler sends the same bytes
+(`coefficientBytes`). It isn't refused under D33, because that would refuse EQs the vendor's app
+sends, a plain treble shelf among them.
+
+If the firmware filtered by those coefficients, a treble boost would sound broken in Moondrop's own
+app, so it more likely filters by the frequency, Q, gain and type in the same frame; the Echo-BP
+and MM3A, which get no coefficients, point the same way. It is the question
+[tanchjim.md](tanchjim.md) leaves open for Walkplay's frame. To settle it on a main-family device:
+push a +6 dB high shelf at 8 kHz, Q 0.7, and listen or measure. A shelf means the parameters are
+used and nothing changes. Anything else means the coefficients are, and then the limit goes in the
+profiles (or the codec refuses what doesn't fit), for Walkplay's devices too.
+
 ## Next
 
-1. **A device.** Nothing here is confirmed on hardware. First to settle: the output report size,
-   whether the last byte and the length byte matter, whether the save keeps pre-gain without 0x04,
-   the USB product names of the new devices, and that Echo-BP filters from parameters alone.
+1. **A device.** Nothing here is confirmed on hardware. First to settle: whether the last byte and
+   the length byte matter, whether the save keeps pre-gain without 0x04, the USB product names of
+   the new devices, that Echo-BP filters from parameters alone, and the shelf test above.
 2. **A recorder adapter** for the app (`tools/userscripts/`), so an owner can record it.
 3. **Controls**: whether any of them outlasts a replug (the app saves none), BLUE ROSE's
    microphone gain (no read, so not a control yet), the prompt tone selection, and the battery.

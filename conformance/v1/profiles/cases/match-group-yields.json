@@ -1,0 +1,9 @@
+{
+	"description": "A group profile and a device profile may share a match entry: at equal specificity the group yields.",
+	"spec": "§3",
+	"profiles": [
+		{ "id": "group-a", "device": { "model": "Group A", "group": true } },
+		{ "id": "device-b" }
+	],
+	"expect": []
+}

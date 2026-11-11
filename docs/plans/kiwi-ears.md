@@ -62,7 +62,7 @@ minified, not obfuscated. Facts only (D25). The code to compare in a newer build
    the KT_0211L (flag 3 on writes and commit). → `writeAck`, `bandDelay`.
 6. **Identity.** `31B2:0113` was a group of one, now the AD1 Pro; `0x3006` was on the Chorus, now
    the Belle. `3302:20E3` and `12C3` fell in Walkplay's SchemeNo17 and 11 groups, wrong handler and
-   all; carved out of them.
+   all; carved out of them (undone 2026-11-11: a group yields to a device profile, D43).
 7. **Allegro Pro.** devicePEQ's capture says `compensate2X` (half frequency); the app shares its id
    with the Mini and sends Hz. Followed the app, with a warning in the notes.
 

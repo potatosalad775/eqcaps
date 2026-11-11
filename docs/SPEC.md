@@ -116,7 +116,8 @@ holds if any of them matches.
   than `max`; otherwise no firmware matches.
 - CI rejects two non-deprecated profiles whose match entries have a combination in common (the
   same fields with the same values) and whose firmware ranges overlap, unless their `engine`
-  labels differ.
+  labels differ or exactly one of them is a group profile: the group yields (see below). Two
+  group profiles, or two device profiles, still collide.
 
 **Group profiles.** A profile with `device.group: true` stands for several products that its match
 can't tell apart: devices sharing a chipset's firmware scheme, or a default product name that many
@@ -124,10 +125,12 @@ brands ship. Its `brand` and `model` name the group ("Walkplay", "SchemeNo16 dev
 product. A profile for one of those products wins over the group: by specificity when its entry
 is more specific (typically adding the product name), and otherwise because the group yields at
 equal specificity (a product matched by vendor id and name ties with a group matched by vendor id
-and product id). A consumer MAY tell the user that
-the matched profile is generic and that their exact model isn't listed. A device profile for a
-group member SHOULD extend the base the group extends rather than the group itself, since a group
-shrinks or is deprecated as its members get their own profiles. `group` is never inherited (§11).
+and product id). A device profile may also claim a pair the group lists, with identical fields;
+the group needs no carve-out, and a consumer that ignores the tie-break falls back to offering a
+choice. A consumer MAY tell the user that the matched profile is generic and that their exact
+model isn't listed. A device profile for a group member SHOULD extend the base the group extends
+rather than the group itself, since a group shrinks or is deprecated as its members get their own
+profiles. `group` is never inherited (§11).
 
 Measurement or graph names (e.g. a phone_book entry) are **not** part of matching. Binding a
 measurement to a profile is the consuming app's concern (DECISIONS D9).

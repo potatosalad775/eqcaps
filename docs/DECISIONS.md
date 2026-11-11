@@ -128,6 +128,13 @@ bridge and is checked by its tests; the format defines only the envelope.
 entry stands for every combination (SPEC §3). This cut the index from 376 KB to 61 KB. At equal
 specificity a device profile beats a group profile.
 
+*2026-11-11:* a device profile no longer has to be carved out of a group. The `match-collision`
+check skips a pair of profiles when exactly one is a group profile, so a device may claim the same
+vendor and product id the group lists. **Why:** the tie was already resolved at run time (the
+group yields), and the carve-outs only repeated the group's vendor list once per device, which
+grew with every device that got its own profile. Two groups, or two devices, still collide. A
+consumer that ignores the tie-break falls back to offering a choice, never a silent pick.
+
 ### D44. The bypass preset is marked in the data; protocol-family bases
 `"bypass": true` marks the preset that turns EQ off. `walkplay-hid` and `fiio-usb-hid` are bases
 holding what every device on that protocol shares; shape bases extend them.

@@ -42,7 +42,9 @@ Devices that share a chip can share a base in `data/bases/` through `extends` (S
 protocol family's base (`walkplay-hid`, `fiio-usb-hid`) holds what every device on that protocol
 shares, and the shape bases extend it. A device file that extends a base inherits `kind` and
 `schemaVersion` too. In `match`, list several vendor ids, product ids or names in one entry rather
-than writing an entry per combination (SPEC §3).
+than writing an entry per combination (SPEC §3). A device whose vendor and product id a group
+profile (`device.group: true`) also lists needs no carve-out: leave the group's match alone and
+give the device the same pair, because the group yields at equal specificity (D43).
 
 No git needed: the [inspector](https://potatosalad775.github.io/eqcaps/) edits a profile as a form
 or as JSON, checks it as CI will, and opens the pull request on GitHub for you ("Edit this
