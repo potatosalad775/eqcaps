@@ -139,7 +139,8 @@ first additive minor.
 
 ### D49. Device controls: format 1.2 (2026-10-28)
 `protocol.controls` lists a device's settings besides the EQ (volume, output gain, DAC filter,
-upsampling, USB mode, sound modes, lights, tone, amplifier class, mic gain, channel balance),
+upsampling, USB mode, sound modes, lights, tone, amplifier class, mic gain, channel balance, and
+since 2026-11-11 a headset's noise control, microphone noise reduction and prompt tones),
 because they change what the device plays and whether its EQ applies. Like presets, the data
 says which values the device takes and the handler knows how to send them: ids are each
 handler's vocabulary, values are the device's own numbers, and an optional closed `role` lets

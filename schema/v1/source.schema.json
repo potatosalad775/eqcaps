@@ -495,7 +495,11 @@
 						"amp-mode",
 						"mic-gain",
 						"balance-left",
-						"balance-right"
+						"balance-right",
+						"noise-control",
+						"mic-noise-reduction",
+						"prompt-tone",
+						"prompt-tone-volume"
 					]
 				},
 				"values": {

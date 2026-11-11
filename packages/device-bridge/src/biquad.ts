@@ -1,5 +1,7 @@
 // RBJ-cookbook biquads quantized to Q2.30, as Walkplay, Moondrop and Conexant firmware take them
-// alongside the band's own parameters.
+// alongside the band's own parameters. Walkplay and Conexant have coefficients for shelves and
+// peaking only; Moondrop's web app also computes true low-pass and high-pass sections, which
+// `passFilters` turns on for it alone.
 
 import type { FilterType } from '@potatosalad775/eqcaps-core';
 
@@ -7,14 +9,17 @@ const Q30 = 1073741824;
 
 /**
  * [b0, b1, b2, −a1, −a2] normalized by a0 and scaled by 2^30: low and high shelves, and peaking
- * for every other type (these protocols have no other coefficient form).
+ * for every other type (these protocols have no other coefficient form). With `passFilters`,
+ * LPQ and HPQ are the RBJ low-pass and high-pass (alpha = sin(w0) / 2Q, the gain ignored), as
+ * Moondrop's web app computes them.
  */
 export function biquadQ30(
 	type: FilterType,
 	freq: number,
 	gain: number,
 	q: number,
-	sampleRate: number
+	sampleRate: number,
+	passFilters = false
 ): [number, number, number, number, number] {
 	const A = Math.pow(10, gain / 40);
 	const w0 = (2 * Math.PI * freq) / sampleRate;
@@ -39,6 +44,16 @@ export function biquadQ30(
 			a1 = 2 * (A - 1 - (A + 1) * cos);
 			a2 = A + 1 - (A - 1) * cos - s;
 		}
+	} else if (passFilters && (type === 'LPQ' || type === 'HPQ')) {
+		const alpha = sin / (2 * q);
+		const edge = type === 'LPQ' ? 1 - cos : 1 + cos;
+		const sign = type === 'LPQ' ? 1 : -1;
+		b0 = edge / 2;
+		b1 = sign * edge;
+		b2 = edge / 2;
+		a0 = 1 + alpha;
+		a1 = -2 * cos;
+		a2 = 1 - alpha;
 	} else {
 		const alpha = sin / (2 * q);
 		b0 = 1 + alpha * A;

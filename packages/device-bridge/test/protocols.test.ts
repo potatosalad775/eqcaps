@@ -116,6 +116,65 @@ describe('controls (SPEC §9.1)', () => {
 	});
 });
 
+describe('Moondrop USB HID options', () => {
+	const options = {
+		bandFrame: 'compact',
+		commit: 'none',
+		customSlot: '0x03',
+		selectSlot: false,
+		duckPreamp: true,
+		saveOffsets: true,
+		linkCheck: true
+	};
+
+	test('accepts each option', () => {
+		const raw = { handler: 'moondrop-usb-hid', options };
+		expect(protocolProblem(raw)).toBeUndefined();
+		expect(protocolOf({ protocol: raw })?.options).toEqual({ ...options, customSlot: 3 });
+		for (const bandFrame of ['biquad', 'compact', 'wide']) {
+			expect(
+				protocolProblem({ handler: 'moondrop-usb-hid', options: { bandFrame } })
+			).toBeUndefined();
+		}
+		for (const commit of ['apply', 'commit', 'none']) {
+			expect(protocolProblem({ handler: 'moondrop-usb-hid', options: { commit } })).toBeUndefined();
+		}
+	});
+
+	test('refuses what is not a choice, a byte or a flag', () => {
+		const bad: Record<string, unknown> = {
+			bandFrame: 'long',
+			commit: 'save',
+			customSlot: 256,
+			selectSlot: 'yes',
+			duckPreamp: 1,
+			saveOffsets: null,
+			linkCheck: 'true'
+		};
+		for (const [k, v] of Object.entries(bad)) {
+			const raw = { handler: 'moondrop-usb-hid', options: { [k]: v } };
+			expect(protocolOf({ protocol: raw }), k).toBeUndefined();
+			expect(protocolProblem(raw), k).toContain(`options.${k}`);
+		}
+		expect(protocolProblem({ handler: 'moondrop-usb-hid', options: { slot: 7 } })).toMatch(
+			/no option "slot"/
+		);
+	});
+
+	test('drives the global gain control', () => {
+		const gain = {
+			id: 'globalGain',
+			name: 'Global gain',
+			kind: 'range',
+			range: { min: -18, max: 0, step: 0.1 },
+			unit: 'dB'
+		};
+		const raw = { handler: 'moondrop-usb-hid', controls: [gain] };
+		expect(protocolProblem(raw)).toBeUndefined();
+		expect(protocolOf({ protocol: raw })?.controls?.map((c) => c.id)).toEqual(['globalGain']);
+	});
+});
+
 describe('protocolOf', () => {
 	test('reads hex strings as numbers', () => {
 		expect(
@@ -393,4 +452,19 @@ test('handlerTransports names a handler’s transports by id', () => {
 	expect(handlerTransports('airoha')).toEqual(['serial', 'ble']);
 	expect(handlerTransports('no-such-handler')).toEqual([]);
 	expect(handlerTransports('toString')).toEqual([]);
+});
+
+test('the Moondrop USB HID led command is a byte', () => {
+	const at = (ledCommand: unknown) => ({ handler: 'moondrop-usb-hid', options: { ledCommand } });
+	expect(protocolOf({ protocol: at('0x18') })?.options).toEqual({ ledCommand: 0x18 });
+	expect(protocolProblem(at(256))).toMatch(/options.ledCommand/);
+	const control = (id: string) => ({
+		id,
+		name: id,
+		kind: 'range',
+		range: { min: 0, max: 100, step: 1 }
+	});
+	const ids = ['dacFilter', 'dacMode', 'led', 'gainLevel', 'ancMode', 'dualMicEnc', 'promptTone'];
+	const raw = { handler: 'moondrop-usb-hid', controls: [...ids, 'promptToneVolume'].map(control) };
+	expect(protocolProblem(raw)).toBeUndefined();
 });

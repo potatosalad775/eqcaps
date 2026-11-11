@@ -1,7 +1,7 @@
 // Handlers without recorded captures, the device session, and the shared codec rules.
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { wireInt } from '../src/bytes.ts';
 import { airohaCodec, decodeAirohaRecords } from '../src/handlers/airoha.ts';
 import { edifierCodec } from '../src/handlers/edifier-serial.ts';
@@ -11,6 +11,13 @@ import { fiioSerialFrame } from '../src/handlers/fiio-usb-serial.ts';
 import { encodeFiioBand } from '../src/handlers/fiio-usb-hid.ts';
 import { JDS_BANDS } from '../src/handlers/jds-labs-usb-serial.ts';
 import { edgeCodec } from '../src/handlers/moondrop-edge-serial.ts';
+import { moondropOldFashionedHid } from '../src/handlers/moondrop-old-fashioned-hid.ts';
+import {
+	decodeMoondropFirmware,
+	moondropUsbHid,
+	moondropUsbHidCodec,
+	type MoondropUsbHidOptions
+} from '../src/handlers/moondrop-usb-hid.ts';
 import {
 	crc16Modbus,
 	decodeNothingBands,
@@ -25,6 +32,7 @@ import {
 	guessProtocol,
 	isBridgeError,
 	openDevice,
+	type HandlerContext,
 	type HidTransport,
 	type SerialPortIdentity,
 	type StreamTransport
@@ -1059,5 +1067,472 @@ describe("Walkplay writes as the vendors' apps send them", () => {
 		await device.writeControl('dre', 0);
 		expect(t.values.dre).toBe(1);
 		expect(encodeWalkplayControl('dre', 1)).toEqual([0x01, 0x32, 1, 0]);
+	});
+});
+
+/** A HID device simulated by a function from each report sent to the reports it answers with. */
+function scriptedHid(answer: (data: number[]) => number[][] = () => []) {
+	const sent: number[][] = [];
+	const listeners = new Set<(id: number, d: Uint8Array) => void>();
+	const t: HidTransport = {
+		kind: 'hid',
+		vendorId: 0x35d8,
+		productId: 0x011c,
+		productName: 'MOONDROP Marigold',
+		collections: [],
+		sendReport: async (_id, d) => {
+			sent.push([...d]);
+			for (const a of answer([...d])) for (const l of listeners) l(0x4b, Uint8Array.from(a));
+		},
+		sendFeatureReport: async () => {},
+		receiveFeatureReport: async () => new Uint8Array(64),
+		onInputReport: (listener) => {
+			listeners.add(listener);
+			return () => listeners.delete(listener);
+		},
+		close: async () => {}
+	};
+	return { t, sent };
+}
+
+const hidContext = <O>(
+	t: HidTransport,
+	options: O,
+	sleeps: number[] = []
+): HandlerContext<HidTransport, O> => ({
+	transport: t,
+	options,
+	sleep: async (ms) => void sleeps.push(ms),
+	log: () => {}
+});
+
+describe("Moondrop USB HID as Moondrop's web app drives it", () => {
+	const s16 = (db: number) => {
+		const v = Math.round(db * 256) & 0xffff;
+		return [v & 0xff, v >> 8];
+	};
+	const hz = (freq: number) => [freq & 0xff, freq >> 8];
+	/** An answer of 63 bytes: the header, and bytes from the given offsets. */
+	const answer = (header: number[], at: Record<number, number[]> = {}) => {
+		const d = new Array<number>(63).fill(0);
+		header.forEach((b, i) => (d[i] = b));
+		for (const [i, bytes] of Object.entries(at)) bytes.forEach((b, k) => (d[Number(i) + k] = b));
+		return d;
+	};
+	/** The command byte of every frame. */
+	const cmds = (sent: number[][]) => sent.map((d) => d[1]);
+	const run = async (
+		options: MoondropUsbHidOptions,
+		request: Parameters<typeof moondropUsbHid.push>[1]
+	) => {
+		const { t, sent } = scriptedHid();
+		const sleeps: number[] = [];
+		await moondropUsbHid.push(hidContext(t, options, sleeps), request);
+		return { sent, sleeps };
+	};
+	const lpq: Filter = { type: 'LPQ', freq: 8000, gain: 0, q: 0.7 };
+	const two = { filters: [pk(100, -3, 0.7), lpq] };
+
+	test('a push selects the slot, writes the bands, applies once, sets the pre-gain and saves', async () => {
+		const { sent, sleeps } = await run({}, { ...two, preamp: -2 });
+		expect(cmds(sent)).toEqual([0x0f, 9, 9, 0x0a, 0x23, 1]);
+		expect(sent.every((d) => d.length === 63 && d[0] === 1)).toBe(true);
+		expect(sent[0]!.slice(0, 4)).toEqual([1, 0x0f, 1, 7]);
+		expect(sent[3]!.slice(0, 7)).toEqual([1, 0x0a, 4, 0, 0, 0xff, 0xff]);
+		expect(sent[4]!.slice(0, 5)).toEqual([1, 0x23, 2, ...s16(-2)]);
+		expect(sent[5]!.slice(0, 3)).toEqual([1, 1, 0]);
+		expect(sleeps).toEqual([150, 25, 25, 50, 50, 200]);
+		// The band: length 0x21, band index, freq, q, gain, type, 0, slot.
+		expect(sent[1]!.slice(0, 7)).toEqual([1, 9, 0x21, 0, 0, 0, 0]);
+		expect(sent[1]!.slice(27, 36)).toEqual([100, 0, ...s16(0.7), ...s16(-3), 2, 0, 7]);
+		expect(sent[2]![4]).toBe(1);
+		expect(sent[2]![33]).toBe(4);
+	});
+
+	test('a push without a pre-gain writes none', async () => {
+		const { sent } = await run({}, two);
+		expect(cmds(sent)).toEqual([0x0f, 9, 9, 0x0a, 1]);
+	});
+
+	test('every band frame reads back through the codec, whichever its layout', () => {
+		const filters: Filter[] = [
+			pk(100, -3, 0.7),
+			{ type: 'LSC', freq: 200, gain: 4.5, q: 0.5 },
+			{ type: 'HSC', freq: 9000, gain: -2, q: 0.8 },
+			{ type: 'LPQ', freq: 12000, gain: 0, q: 1 },
+			{ type: 'HPQ', freq: 30, gain: 0, q: 0.7 }
+		];
+		const sizes = { biquad: 36, compact: 14, wide: 34 } as const;
+		for (const bandFrame of ['biquad', 'compact', 'wide'] as const) {
+			const o: MoondropUsbHidOptions = { bandFrame };
+			const frames = moondropUsbHidCodec.encode({ filters, preamp: -1.5 }, o);
+			const bands = frames.filter((f) => f.data[1] === 9);
+			expect(bands).toHaveLength(5);
+			for (const f of bands) {
+				expect(f.data).toHaveLength(63);
+				expect(f.data[2]).toBe(sizes[bandFrame] - 3);
+				expect([...f.data.slice(sizes[bandFrame])].every((b) => b === 0)).toBe(true);
+			}
+			const state = moondropUsbHidCodec.decode(frames, o);
+			expect(state.filters.map((f) => f?.type)).toEqual(filters.map((f) => f.type));
+			expect(state.filters).toEqual(filters.map((f) => ({ ...f, q: Math.round(f.q * 256) / 256 })));
+			expect(state.preamp).toBe(-1.5);
+		}
+		const one = { filters: [pk(1000, 2, 1)] };
+		const compact = moondropUsbHidCodec.encode(one, { bandFrame: 'compact' })[1]!.data;
+		expect([...compact.slice(0, 14)]).toEqual([
+			1,
+			9,
+			0x0b,
+			0,
+			0,
+			0,
+			0,
+			0xe8,
+			3,
+			...s16(1),
+			...s16(2),
+			2
+		]);
+		const wide = moondropUsbHidCodec.encode(one, { bandFrame: 'wide' })[1]!.data;
+		expect([...wide.slice(0, 7)]).toEqual([1, 9, 0x1f, 0, 0, 0, 0]);
+		expect([...wide.slice(7, 27)].every((b) => b === 0)).toBe(true);
+		expect([...wide.slice(27, 34)]).toEqual([0xe8, 3, ...s16(1), ...s16(2), 2]);
+	});
+
+	test('the commit is an apply, the commit command, or nothing with its wait kept', async () => {
+		const apply = await run({ commit: 'apply' }, two);
+		expect(apply.sent.filter((d) => d[1] === 0x0a)).toHaveLength(1);
+		const commit = await run({ commit: 'commit' }, two);
+		expect(cmds(commit.sent)).toEqual([0x0f, 9, 9, 0x60, 1]);
+		expect(commit.sent[3]!.slice(0, 3)).toEqual([1, 0x60, 0]);
+		const none = await run({ commit: 'none' }, two);
+		expect(cmds(none.sent)).toEqual([0x0f, 9, 9, 1]);
+		expect(none.sleeps).toEqual([150, 25, 25, 50, 200]);
+	});
+
+	test('selectSlot false skips the selection, and the custom slot is named twice', async () => {
+		const off = await run({ selectSlot: false }, two);
+		expect(cmds(off.sent)).toEqual([9, 9, 0x0a, 1]);
+		expect(off.sleeps).toEqual([25, 25, 50, 200]);
+		const slot = await run({ customSlot: 3 }, two);
+		expect(slot.sent[0]!.slice(0, 4)).toEqual([1, 0x0f, 1, 3]);
+		expect(slot.sent[1]![35]).toBe(3);
+	});
+
+	test('duckPreamp sets -128 dB while the bands are written, and only with a preamp', async () => {
+		const ducked = await run({ duckPreamp: true }, { ...two, preamp: -4 });
+		expect(cmds(ducked.sent)).toEqual([0x0f, 0x23, 9, 9, 0x0a, 0x23, 1]);
+		expect(ducked.sent[1]!.slice(0, 5)).toEqual([1, 0x23, 2, 0x00, 0x80]);
+		expect(ducked.sent[5]!.slice(0, 5)).toEqual([1, 0x23, 2, ...s16(-4)]);
+		expect(ducked.sleeps).toEqual([150, 50, 25, 25, 50, 50, 200]);
+		const frames = moondropUsbHidCodec.encode({ ...two, preamp: -4 }, { duckPreamp: true });
+		expect(moondropUsbHidCodec.decode(frames, { duckPreamp: true }).preamp).toBe(-4);
+		const plain = await run({ duckPreamp: true }, two);
+		expect(plain.sent.some((d) => d[1] === 0x23)).toBe(false);
+	});
+
+	test('saveOffsets ends the push with [1,4,0]', async () => {
+		const { sent, sleeps } = await run({ saveOffsets: true }, two);
+		expect(sent.at(-1)!.slice(0, 3)).toEqual([1, 4, 0]);
+		expect(sent.at(-1)).toHaveLength(63);
+		expect(sleeps.slice(-2)).toEqual([200, 200]);
+	});
+
+	test('a value the wire cannot carry fails before anything is sent', async () => {
+		const { t, sent } = scriptedHid();
+		await expect(
+			moondropUsbHid.push(hidContext(t, {}), { filters: [pk(100, 3, 1), pk(30000, 0)] })
+		).rejects.toMatchObject({ code: 'unrepresentable' });
+		expect(sent).toEqual([]);
+	});
+
+	test('the link is asked about before each part, and an unlinked headset is refused', async () => {
+		const link = (linked: number) =>
+			scriptedHid((d) => (d[0] === 0x80 && d[1] === 0x31 ? [answer([0x80, 0x31, 0, linked])] : []));
+		const unlinked = link(0);
+		const sleeps: number[] = [];
+		await expect(
+			moondropUsbHid.push(hidContext(unlinked.t, { linkCheck: true }, sleeps), two)
+		).rejects.toMatchObject({ code: 'rejected', message: /not linked/ });
+		expect(unlinked.sent).toEqual([[0x80, 0x31, 0]]);
+		expect(sleeps).toEqual([50]);
+		const options = { linkCheck: true };
+		await expect(
+			moondropUsbHid.pull(hidContext(unlinked.t, options), { bands: 1 })
+		).rejects.toMatchObject({
+			code: 'rejected'
+		});
+		const gain = moondropUsbHid.controls!.globalGain!;
+		await expect(gain.read(hidContext(unlinked.t, options))).rejects.toMatchObject({
+			code: 'rejected'
+		});
+		await expect(gain.write(hidContext(unlinked.t, options), -3)).rejects.toMatchObject({
+			code: 'rejected'
+		});
+		expect(unlinked.sent.every((d) => d[0] === 0x80 && d[1] === 0x31)).toBe(true);
+
+		const linked = link(1);
+		await moondropUsbHid.push(hidContext(linked.t, options), two);
+		expect(cmds(linked.sent)).toEqual([0x31, 0x0f, 0x31, 9, 9, 0x31, 0x0a, 0x31, 1]);
+		const plain = link(0);
+		await moondropUsbHid.push(hidContext(plain.t, {}), two);
+		expect(plain.sent.some((d) => d[1] === 0x31)).toBe(false);
+	});
+
+	/** A headset holding bands, a pre-gain, a global gain and a firmware. */
+	const headset = (layout: 'full' | 'compact' = 'full') => {
+		const bands: Record<number, number[]> = {
+			0: [...hz(100), ...s16(0.75), ...s16(-3), 2],
+			1: [...hz(8000), ...s16(1), ...s16(0), 4],
+			2: [...hz(500), ...s16(1), ...s16(2), 0],
+			3: [...hz(5), ...s16(1), ...s16(2), 2],
+			4: [...hz(2000), ...s16(1), ...s16(1.5), 5]
+		};
+		return scriptedHid((d) => {
+			if (d[0] !== 0x80) return [];
+			if (d[1] === 9) {
+				const at = layout === 'compact' ? 7 : 27;
+				return [answer([0x80, 9, 2, 0, d[4]!], { [at]: bands[d[4]!] ?? [0, 0, 0, 0, 0, 0, 0] })];
+			}
+			if (d[1] === 0x23) return [answer([0x80, 0x23, 2, ...s16(-5)])];
+			if (d[1] === 0x03) return [answer([0x80, 0x03, 2, ...s16(-9.5)])];
+			if (d[1] === 0x0f) return [answer([0x80, 0x0f, 1, 7])];
+			if (d[1] === 0x0c) return [answer([0x80, 0x0c, 3, 0x30, 0x2e, 0, 0x31, 0, 0])];
+			return [];
+		});
+	};
+
+	test('a pull reads each band, then the pre-gain from 0x23 and not the global gain', async () => {
+		for (const layout of ['full', 'compact'] as const) {
+			const { t, sent } = headset(layout);
+			const sleeps: number[] = [];
+			const options: MoondropUsbHidOptions = layout === 'compact' ? { bandFrame: 'compact' } : {};
+			const result = await moondropUsbHid.pull(hidContext(t, options, sleeps), { bands: 5 });
+			expect(sent).toEqual([
+				[0x80, 9, 2, 0, 0],
+				[0x80, 9, 2, 0, 1],
+				[0x80, 9, 2, 0, 2],
+				[0x80, 9, 2, 0, 3],
+				[0x80, 9, 2, 0, 4],
+				[0x80, 0x23, 0]
+			]);
+			expect(sleeps).toEqual([50, 50, 50, 50, 50]);
+			expect(result.preamp).toBe(-5);
+			expect(result.filters).toEqual([
+				pk(100, -3, 0.75),
+				{ type: 'LPQ', freq: 8000, gain: 0, q: 1 },
+				null, // type 0: off
+				null, // 5 Hz: unset
+				{ type: 'HPQ', freq: 2000, gain: 1.5, q: 1 }
+			]);
+		}
+	});
+
+	test('a pull waits 2 s for an answer', async () => {
+		vi.useFakeTimers();
+		try {
+			const { t } = scriptedHid();
+			let outcome: unknown;
+			void moondropUsbHid
+				.pull(hidContext(t, {}), { bands: 1 })
+				.catch((e: unknown) => void (outcome = e));
+			await vi.advanceTimersByTimeAsync(1999);
+			expect(outcome).toBeUndefined();
+			await vi.advanceTimersByTimeAsync(1);
+			expect(outcome).toMatchObject({ code: 'timeout' });
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	test('reads the current slot and the firmware, which is null unless a dotted number', async () => {
+		const { t } = headset();
+		expect(await moondropUsbHid.currentSlot!(hidContext(t, {}))).toBe(7);
+		expect(await moondropUsbHid.firmware!(hidContext(t, {}))).toBe('0.1');
+		expect(decodeMoondropFirmware([0x80, 0x0c, 0, 0x31, 0x2e, 0x32, 0x2e, 0x33])).toBe('1.2.3');
+		expect(decodeMoondropFirmware([0x80, 0x0c, 0, 0x76, 0x31])).toBeNull();
+		expect(decodeMoondropFirmware([0x80, 0x0c, 0, 0, 0])).toBeNull();
+		expect(decodeMoondropFirmware([0x80, 0x0c, 0, 0x31, 0x2e])).toBeNull();
+	});
+
+	test('the global gain is read in dB and written with the offset save', async () => {
+		const { t, sent } = headset();
+		const gain = moondropUsbHid.controls!.globalGain!;
+		expect(await gain.read(hidContext(t, {}))).toBe(-9.5);
+		expect(sent).toEqual([[0x80, 3, 0]]);
+		sent.length = 0;
+		const sleeps: number[] = [];
+		await gain.write(hidContext(t, {}, sleeps), -6);
+		expect(sent.map((d) => d.length)).toEqual([63, 63]);
+		expect(sent[0]!.slice(0, 5)).toEqual([1, 3, 2, ...s16(-6)]);
+		expect(sent[1]!.slice(0, 3)).toEqual([1, 4, 0]);
+		expect(sleeps).toEqual([50, 200]);
+		await expect(gain.write(hidContext(t, {}), -200)).rejects.toMatchObject({
+			code: 'unrepresentable'
+		});
+	});
+
+	test('it has no EQ switch, and a push always goes to the custom slot', () => {
+		const caps = moondropUsbHid.capabilities(scriptedHid().t, {});
+		expect(caps).toMatchObject({ canEnable: false, writesSlot: false, readsPreamp: true });
+		expect(() => moondropUsbHidCodec.encode({ ...two, slot: 2 }, {})).toThrow(
+			expect.objectContaining({ code: 'invalid-request' })
+		);
+	});
+});
+
+describe("Moondrop Old Fashioned as Moondrop's web app drives it", () => {
+	/** Answers a read of an even register with 2 dB at 1000 Hz and of an odd one with Q 0.3. */
+	const device = (answerLength = 10) =>
+		scriptedHid((d) => {
+			if (d[4] !== 0x52) return [];
+			const a =
+				d[0]! % 2 === 0
+					? [d[0]!, 0, 0, 0, 0x52, 0, 20, 0, 0xe8, 0x03]
+					: [d[0]!, 0, 0, 0, 0x52, 0, 0x2c, 0x01, 0, 0];
+			return [a.slice(0, answerLength)];
+		});
+
+	test('waits 200 ms after each write, each read and the save', async () => {
+		const { t, sent } = device();
+		const sleeps: number[] = [];
+		await moondropOldFashionedHid.push(hidContext(t, {}, sleeps), { filters: [pk(1000, 2, 1)] });
+		expect(sent).toHaveLength(3);
+		expect(sleeps).toEqual([200, 200, 200]);
+		sleeps.length = 0;
+		const { filters } = await moondropOldFashionedHid.pull(hidContext(t, {}, sleeps), { bands: 1 });
+		expect(sleeps).toEqual([200, 200]);
+		expect(filters).toEqual([pk(1000, 2, 0.3)]);
+	});
+
+	test('refuses an answer under 10 bytes', async () => {
+		const { t } = device(9);
+		await expect(
+			moondropOldFashionedHid.pull(hidContext(t, {}), { bands: 1 })
+		).rejects.toMatchObject({ code: 'bad-response' });
+	});
+
+	test('waits 2 s for an answer', async () => {
+		vi.useFakeTimers();
+		try {
+			const { t } = scriptedHid();
+			let outcome: unknown;
+			void moondropOldFashionedHid
+				.pull(hidContext(t, {}), { bands: 1 })
+				.catch((e: unknown) => void (outcome = e));
+			await vi.advanceTimersByTimeAsync(1999);
+			expect(outcome).toBeUndefined();
+			await vi.advanceTimersByTimeAsync(1);
+			expect(outcome).toMatchObject({ code: 'timeout' });
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+});
+
+describe('Moondrop USB HID features', () => {
+	const answer = (cmd: number, value: number[]) => {
+		const d = new Array<number>(63).fill(0);
+		[0x80, cmd, value.length, ...value].forEach((b, i) => (d[i] = b));
+		return d;
+	};
+	/** A headset that holds each feature's bytes, answers reads with them and takes writes. */
+	const headset = (held: Record<number, number[]> = {}, linked = 1) => {
+		const features = new Map(Object.entries(held).map(([c, v]) => [Number(c), v]));
+		return {
+			features,
+			...scriptedHid((d) => {
+				if (d[0] === 0x01) features.set(d[1]!, d.slice(3, 3 + d[2]!));
+				if (d[0] !== 0x80) return [];
+				if (d[1] === 0x31) return [answer(0x31, [linked])];
+				return [answer(d[1]!, features.get(d[1]!) ?? [0, 0, 0])];
+			})
+		};
+	};
+	const controls = moondropUsbHid.controls!;
+	const cases: [id: string, cmd: number, value: number][] = [
+		['dacFilter', 0x11, 3],
+		['dacMode', 0x1d, 1],
+		['led', 0x28, 1],
+		['gainLevel', 0x26, 2],
+		['ancMode', 0x25, 5],
+		['dualMicEnc', 0x34, 1]
+	];
+
+	test.each(cases)('%s is read from and written to 0x%s', async (id, cmd, value) => {
+		const { t, sent } = headset({ [cmd]: [value] });
+		expect(await controls[id]!.read(hidContext(t, {}))).toBe(value);
+		expect(sent).toEqual([[0x80, cmd, 0]]);
+		sent.length = 0;
+		const sleeps: number[] = [];
+		await controls[id]!.write(hidContext(t, {}, sleeps), 0);
+		expect(sent).toHaveLength(1);
+		expect(sent[0]).toHaveLength(63);
+		expect(sent[0]!.slice(0, 4)).toEqual([1, cmd, 1, 0]);
+		expect(sleeps).toEqual([50]);
+	});
+
+	test('the LED command can be another, as on the BLUE ROSE', async () => {
+		const { t, sent } = headset({ 0x18: [1] });
+		const ctx = hidContext(t, { ledCommand: 0x18 });
+		expect(await controls.led!.read(ctx)).toBe(1);
+		await controls.led!.write(ctx, 0);
+		expect(sent.map((d) => d.slice(0, 4))).toEqual([
+			[0x80, 0x18, 0],
+			[1, 0x18, 1, 0]
+		]);
+	});
+
+	test('the prompt tone is read and written byte by byte, and the tone is kept', async () => {
+		const { t, sent, features } = headset({ 0x2b: [1, 40, 7] });
+		const ctx = hidContext(t, {});
+		expect(await controls.promptTone!.read(ctx)).toBe(1);
+		expect(await controls.promptToneVolume!.read(ctx)).toBe(40);
+		sent.length = 0;
+		await controls.promptToneVolume!.write(ctx, 65);
+		expect(sent.map((d) => d.slice(0, 6))).toEqual([
+			[0x80, 0x2b, 0],
+			[1, 0x2b, 3, 1, 65, 7]
+		]);
+		await controls.promptTone!.write(ctx, 0);
+		expect(features.get(0x2b)).toEqual([0, 65, 7]);
+	});
+
+	test('a value the wire cannot carry is refused, not rounded or clamped', async () => {
+		const { t, sent } = headset();
+		const ctx = hidContext(t, {});
+		for (const [id, value] of [
+			['dacFilter', 1.5],
+			['dacFilter', 256],
+			['dacFilter', -1],
+			['led', 2],
+			['dualMicEnc', 0.5],
+			['promptTone', 2],
+			['promptToneVolume', 300],
+			['ancMode', NaN]
+		] as const) {
+			await expect(controls[id]!.write(ctx, value), `${id} ${value}`).rejects.toMatchObject({
+				code: 'unrepresentable'
+			});
+		}
+		expect(sent).toEqual([]);
+	});
+
+	test('with linkCheck the link is asked about before each read and write', async () => {
+		const options = { linkCheck: true };
+		const linked = headset({ 0x11: [2], 0x2b: [1, 40, 7] });
+		await controls.dacFilter!.read(hidContext(linked.t, options));
+		await controls.dacFilter!.write(hidContext(linked.t, options), 4);
+		await controls.promptToneVolume!.write(hidContext(linked.t, options), 10);
+		expect(linked.sent.map((d) => d[1])).toEqual([0x31, 0x11, 0x31, 0x11, 0x31, 0x2b, 0x2b]);
+		const unlinked = headset({}, 0);
+		await expect(controls.ancMode!.read(hidContext(unlinked.t, options))).rejects.toMatchObject({
+			code: 'rejected'
+		});
+		await expect(controls.led!.write(hidContext(unlinked.t, options), 1)).rejects.toMatchObject({
+			code: 'rejected'
+		});
+		expect(unlinked.sent.every((d) => d[1] === 0x31)).toBe(true);
 	});
 });

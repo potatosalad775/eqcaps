@@ -65,6 +65,14 @@ const nonNegative: Read = (v) =>
 const flag: Read = (v) =>
 	typeof v === 'boolean' ? v : fail(`${JSON.stringify(v)} is not a boolean`);
 
+/** One of a handler's named choices. */
+const oneOf =
+	(...allowed: readonly string[]): Read =>
+	(v) =>
+		typeof v === 'string' && allowed.includes(v)
+			? v
+			: fail(`${JSON.stringify(v)} is not one of ${allowed.map((a) => `"${a}"`).join(', ')}`);
+
 const isObject = (v: unknown): v is Record<string, unknown> =>
 	typeof v === 'object' && v !== null && !Array.isArray(v);
 
@@ -100,7 +108,16 @@ const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOption
 		preampWithBands: flag,
 		frameDelay: nonNegative
 	},
-	'moondrop-usb-hid': {},
+	'moondrop-usb-hid': {
+		bandFrame: oneOf('biquad', 'compact', 'wide'),
+		commit: oneOf('apply', 'commit', 'none'),
+		customSlot: byte,
+		selectSlot: flag,
+		duckPreamp: flag,
+		saveOffsets: flag,
+		linkCheck: flag,
+		ledCommand: byte
+	},
 	'moondrop-old-fashioned-hid': {},
 	'conexant-usb-hid': {},
 	'ktmicro-usb-hid': {
@@ -141,7 +158,11 @@ const ROLES: ReadonlySet<string> = new Set([
 	'amp-mode',
 	'mic-gain',
 	'balance-left',
-	'balance-right'
+	'balance-right',
+	'noise-control',
+	'mic-noise-reduction',
+	'prompt-tone',
+	'prompt-tone-volume'
 ]);
 
 const numbers = (v: unknown, what: string): number[] =>

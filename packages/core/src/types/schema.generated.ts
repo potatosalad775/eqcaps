@@ -258,7 +258,11 @@ export interface Control {
 		| 'amp-mode'
 		| 'mic-gain'
 		| 'balance-left'
-		| 'balance-right';
+		| 'balance-right'
+		| 'noise-control'
+		| 'mic-noise-reduction'
+		| 'prompt-tone'
+		| 'prompt-tone-volume';
 	/** choice only: the values the device takes, with their labels. */
 	values?: ControlValue[];
 	/** range only: a range or stepped range (SPEC §4). */

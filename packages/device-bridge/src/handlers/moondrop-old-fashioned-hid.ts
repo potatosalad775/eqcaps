@@ -4,9 +4,12 @@
 // 10-byte packets [register, 0, 0, 0, 'W' | 'R' | 'S', 0, data…]. Band i has two registers:
 // 38 + 2i (gain s8 ×10 at byte 6, freq u16 LE at byte 8) and 39 + 2i (q s16 LE ×1000 at byte 6).
 // The device answers a read with its next input report. Peaking only; no preamp, no slots.
+// Moondrop's web app (hub.moondroplab.com) waits 200 ms after each register write, each register
+// read and the save, and gives a read 2 s; an answer under 10 bytes is refused, not decoded.
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { field, grid, I16, I8, le16, readI16le, readI8, readU16le, U16 } from '../bytes.ts';
+import { BridgeError } from '../errors.ts';
 import type { Codec, HidFrame, HidHandler, WriteState } from '../handler.ts';
 import { hidFrame, hidRequest, refuseUncarried, sendFrame, typeCodes } from '../io.ts';
 
@@ -15,12 +18,14 @@ const BASE = 38;
 const WRITE = 0x57;
 const SAVE = 0x53;
 const READ = 0x52;
-const DELAY = 100;
+const DELAY = 200;
+const TIMEOUT = 2000;
+const PACKET = 10;
 
 const TYPES = typeCodes('moondrop-old-fashioned', { PK: 0 });
 
 function packet(register: number, command: number, at = 0, data: number[] = []) {
-	const bytes = new Array<number>(10).fill(0);
+	const bytes = new Array<number>(PACKET).fill(0);
 	bytes[0] = register;
 	bytes[4] = command;
 	data.forEach((b, i) => (bytes[at + i] = b));
@@ -86,10 +91,16 @@ export const moondropOldFashionedHid: HidHandler = {
 				REPORT_ID,
 				packet(register, READ),
 				() => true,
-				1000,
+				TIMEOUT,
 				`register ${register}`
 			);
 			await ctx.sleep(DELAY);
+			if (answer.length < PACKET) {
+				throw new BridgeError(
+					'bad-response',
+					`Moondrop Old Fashioned: register ${register} answered ${answer.length} bytes, not ${PACKET}`
+				);
+			}
 			return answer;
 		};
 		const filters: Filter[] = [];

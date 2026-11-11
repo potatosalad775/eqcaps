@@ -20,7 +20,9 @@ import {
 	type WireField,
 	type WireGrid
 } from '../src/index.ts';
-import { tidyF32 } from '../src/bytes.ts';
+import { biquadQ30 } from '../src/biquad.ts';
+import { readI32le, tidyF32 } from '../src/bytes.ts';
+import { moondropUsbHidCodec } from '../src/handlers/moondrop-usb-hid.ts';
 import { PROTOCOLS } from './data.ts';
 
 /** Each distinct handler and options pair, from the profiles and the vendor guesses. */
@@ -213,5 +215,49 @@ describe('tidyF32', () => {
 		expect(tidyF32(Math.fround(0.71))).toBe(0.71);
 		// Recorded from Fosi's web app: 7 digits made this 11094.76, another float32.
 		expect(tidyF32(11094.7578125)).toBe(11094.758);
+	});
+});
+
+describe('Moondrop coefficients', () => {
+	/** The five Q2.30 coefficients of a band frame (bytes 7–26), as numbers. */
+	const coefficients = (type: Filter['type'], gain = 6) => {
+		const [, frame] = moondropUsbHidCodec.encode(
+			{ filters: [{ type, freq: 1000, q: 0.7, gain }] },
+			{}
+		);
+		const data = frame!.data;
+		return Array.from({ length: 5 }, (_, i) => readI32le(data, 7 + 4 * i) / 2 ** 30);
+	};
+	/** H(z) at z = 1 and z = -1, from [b0, b1, b2, −a1, −a2]. */
+	const dc = ([b0, b1, b2, na1, na2]: number[]) => (b0! + b1! + b2!) / (1 - na1! - na2!);
+	const nyquist = ([b0, b1, b2, na1, na2]: number[]) => (b0! - b1! + b2!) / (1 + na1! - na2!);
+
+	test('a low-pass is the RBJ low-pass: unity at DC, silent at Nyquist, whatever the gain', () => {
+		const lpq = coefficients('LPQ');
+		expect(lpq).not.toEqual(coefficients('PK'));
+		expect(dc(lpq)).toBeCloseTo(1, 4);
+		expect(nyquist(lpq)).toBeCloseTo(0, 4);
+		expect(coefficients('LPQ', -9)).toEqual(lpq);
+	});
+
+	test('a high-pass is the RBJ high-pass: silent at DC, unity at Nyquist', () => {
+		const hpq = coefficients('HPQ');
+		expect(dc(hpq)).toBeCloseTo(0, 4);
+		expect(nyquist(hpq)).toBeCloseTo(1, 4);
+		expect(hpq).not.toEqual(coefficients('PK'));
+	});
+
+	test('shelves and peaking keep the forms Walkplay uses', () => {
+		const at = (type: Filter['type']) => biquadQ30(type, 1000, 6, 0.7, 96000);
+		for (const type of ['PK', 'LSC', 'HSC'] as const) {
+			// As the frame carries them: a shelf's b1 can pass the Q2.30 range, and wraps.
+			expect(coefficients(type)).toEqual(at(type).map((c) => (c | 0) / 2 ** 30));
+		}
+	});
+
+	test('Walkplay and Conexant keep peaking coefficients for LPQ and HPQ', () => {
+		for (const type of ['LPQ', 'HPQ'] as const) {
+			expect(biquadQ30(type, 1000, 6, 0.7, 96000)).toEqual(biquadQ30('PK', 1000, 6, 0.7, 96000));
+		}
 	});
 });
