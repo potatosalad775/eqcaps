@@ -3,11 +3,13 @@
 // devicePEQ (moondropUsbHidHandler.js, 0BSD, at 0617f38) differed: a [1,0x0A,index,0,FF,FF,FF]
 // after every band, length byte 0x18, the pre-gain read from cmd 0x03 and no slot select.
 //
-// Report 0x4B, 63-byte writes: [op, cmd, length, payload…], op 0x01 write, 0x80 read; an answer
-// has the same header, so its payload starts at byte 3. A push is: select the custom slot
-// [1,0x0F,1,slot]; one band frame per band; the commit; the pre-gain [1,0x23,2,s16 LE ×256]; the
-// save [1,1,0]; the offset save [1,4,0], each followed by the wait the app makes. Band frame
-// (`bandFrame`):
+// Report 0x4B: [op, cmd, length, payload…], op 0x01 write, 0x80 read; an answer has the same
+// header, so its payload starts at byte 3. The app zero-pads every frame it sends, reads too, to
+// the output report's size in the HID descriptor, never truncating (`fitToReport`); 63 bytes
+// where the descriptor gives none, which is also what the codec produces. A push is: select the
+// custom slot [1,0x0F,1,slot]; one band frame per band; the commit; the pre-gain
+// [1,0x23,2,s16 LE ×256]; the save [1,1,0]; the offset save [1,4,0], each followed by the wait the
+// app makes. Band frame (`bandFrame`):
 //   biquad:  [1,9,0x21,0, band,0,0, Q2.30 coefficients at 96 kHz (20 bytes), freq u16 LE,
 //            q s16 LE ×256, gain s16 LE ×256, type, 0, slot]
 //   compact: [1,9,0x0B,0, band,0,0, freq, q, gain, type]
@@ -40,7 +42,14 @@ import type {
 	PushRequest,
 	WriteState
 } from '../handler.ts';
-import { hidFrame, hidRequest, refuseUncarried, sendFrame, typeCodes } from '../io.ts';
+import {
+	hidFrame,
+	hidRequest,
+	outputReportSize,
+	refuseUncarried,
+	sendFrame,
+	typeCodes
+} from '../io.ts';
 import type { HidTransport } from '../transport.ts';
 
 export interface MoondropUsbHidOptions {
@@ -124,11 +133,41 @@ export function decodeMoondropFirmware(d: ArrayLike<number>): string | null {
 	return /^\d+(\.\d+)*$/.test(text) ? text : null;
 }
 
+/** The payload size of the report when the descriptor gives none. */
+const DEFAULT_SIZE = 63;
+
+// The codec is pure and has no transport, so it cannot know the descriptor's report size: it pads
+// to `DEFAULT_SIZE` (which keeps `decode(encode(x))` as it is), and the handler re-pads every
+// frame it sends, in `fitToReport`, because the size is only known there.
 const padded = (bytes: number[]) => {
-	const data = new Uint8Array(63);
+	const data = new Uint8Array(DEFAULT_SIZE);
 	data.set(bytes);
 	return hidFrame(REPORT_ID, data);
 };
+
+/**
+ * `data` zero-padded to the descriptor's size for report 0x4B (`DEFAULT_SIZE` when it gives none),
+ * as the app pads every frame. The frame's own bytes are never cut: it keeps up to its last
+ * non-zero byte and the 3 + length byte its header declares, so a declared size smaller than that
+ * leaves the frame longer than the report. Works on the codec's padded frames and on short reads.
+ */
+function fitToReport(transport: HidTransport, data: ArrayLike<number>): Uint8Array {
+	let used = 3 + (data[2] ?? 0);
+	for (let i = data.length - 1; i >= used; i--) {
+		if (data[i]) {
+			used = i + 1;
+			break;
+		}
+	}
+	const out = new Uint8Array(
+		Math.max(outputReportSize(transport, REPORT_ID) ?? DEFAULT_SIZE, used)
+	);
+	for (let i = 0; i < used; i++) out[i] = data[i] ?? 0;
+	return out;
+}
+
+const send = (transport: HidTransport, frame: HidFrame) =>
+	sendFrame(transport, hidFrame(frame.reportId, fitToReport(transport, frame.data)));
 
 function bandBytes(index: number, f: Filter, o: MoondropUsbHidOptions): number[] {
 	const freq = field(f.freq, 1, FREQ, 'freq');
@@ -239,7 +278,7 @@ const ask = (ctx: Ctx, cmd: number, what: string, also = (_d: Uint8Array) => tru
 	hidRequest(
 		ctx.transport,
 		REPORT_ID,
-		[READ, cmd, 0x00],
+		fitToReport(ctx.transport, [READ, cmd, 0x00]),
 		(d) => d[0] === READ && d[1] === cmd && also(d),
 		TIMEOUT,
 		what
@@ -263,9 +302,9 @@ const globalGain: HandlerControl<HidTransport, MoondropUsbHidOptions> = {
 	async write(ctx, value) {
 		const bytes = le16(field(value, 256, I16, 'global gain') & 0xffff);
 		await checkLink(ctx);
-		await sendFrame(ctx.transport, padded([WRITE, GLOBAL_GAIN, 0x02, ...bytes]));
+		await send(ctx.transport, padded([WRITE, GLOBAL_GAIN, 0x02, ...bytes]));
 		await ctx.sleep(50);
-		await sendFrame(ctx.transport, padded([WRITE, SAVE_OFFSETS, 0x00]));
+		await send(ctx.transport, padded([WRITE, SAVE_OFFSETS, 0x00]));
 		await ctx.sleep(200);
 	}
 };
@@ -301,7 +340,7 @@ function feature(
 		async write(ctx, value) {
 			const byte = featureByte(value, id, bool ? 1 : 0xff);
 			await checkLink(ctx);
-			await sendFrame(ctx.transport, padded([WRITE, cmd(ctx.options), 0x01, byte]));
+			await send(ctx.transport, padded([WRITE, cmd(ctx.options), 0x01, byte]));
 			await ctx.sleep(50);
 		}
 	};
@@ -328,7 +367,7 @@ function promptTone(
 			const current = await ask(ctx, PROMPT_TONE, `Moondrop ${id}`);
 			const bytes = [current[3] ?? 0, current[4] ?? 0, current[5] ?? 0];
 			bytes[index] = byte;
-			await sendFrame(ctx.transport, padded([WRITE, PROMPT_TONE, 0x03, ...bytes]));
+			await send(ctx.transport, padded([WRITE, PROMPT_TONE, 0x03, ...bytes]));
 			await ctx.sleep(50);
 		}
 	};
@@ -359,7 +398,7 @@ export const moondropUsbHid: HidHandler<MoondropUsbHidOptions> = {
 			const answer = await hidRequest(
 				ctx.transport,
 				REPORT_ID,
-				[READ, BAND, 0x02, 0x00, i],
+				fitToReport(ctx.transport, [READ, BAND, 0x02, 0x00, i]),
 				// The answer echoes the band index at byte 4, as the Marigold capture shows.
 				(d) => d[0] === READ && d[1] === BAND && d[4] === i,
 				TIMEOUT,
@@ -384,7 +423,7 @@ export const moondropUsbHid: HidHandler<MoondropUsbHidOptions> = {
 			// The link is asked about once before each part of the push, the bands counting as one.
 			if (step !== group) await checkLink(ctx);
 			group = step;
-			if (frame) await sendFrame(ctx.transport, frame);
+			if (frame) await send(ctx.transport, frame);
 			await ctx.sleep(WAIT[step]);
 		}
 		return { reconnect: false };

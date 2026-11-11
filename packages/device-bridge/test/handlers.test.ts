@@ -25,7 +25,7 @@ import {
 } from '../src/handlers/nothing-usb-serial.ts';
 import { ritaCodec } from '../src/handlers/tanchjim-rita-serial.ts';
 import { encodeWalkplayControl, walkplayHidCodec } from '../src/handlers/walkplay-hid.ts';
-import { typeCodes } from '../src/io.ts';
+import { outputReportSize, typeCodes } from '../src/io.ts';
 import { utf8Decode, utf8Encode } from '../src/platform.ts';
 import {
 	BridgeError,
@@ -1071,7 +1071,11 @@ describe("Walkplay writes as the vendors' apps send them", () => {
 });
 
 /** A HID device simulated by a function from each report sent to the reports it answers with. */
-function scriptedHid(answer: (data: number[]) => number[][] = () => []) {
+function scriptedHid(
+	answer: (data: number[]) => number[][] = () => [],
+	/** The payload size the descriptor declares for output report `reportId`, if any. */
+	declared?: { reportId: number; size: number }
+) {
 	const sent: number[][] = [];
 	const listeners = new Set<(id: number, d: Uint8Array) => void>();
 	const t: HidTransport = {
@@ -1079,7 +1083,28 @@ function scriptedHid(answer: (data: number[]) => number[][] = () => []) {
 		vendorId: 0x35d8,
 		productId: 0x011c,
 		productName: 'MOONDROP Marigold',
-		collections: [],
+		// The report sits in a nested collection, as WebHID reports a vendor collection's.
+		collections: declared
+			? [
+					{
+						usagePage: 0x0c,
+						usage: 1,
+						inputReports: [],
+						outputReports: [],
+						featureReports: [],
+						children: [
+							{
+								usagePage: 0xff00,
+								usage: 1,
+								inputReports: [],
+								outputReports: [{ reportId: declared.reportId, size: declared.size }],
+								featureReports: [],
+								children: []
+							}
+						]
+					}
+				]
+			: [],
 		sendReport: async (_id, d) => {
 			sent.push([...d]);
 			for (const a of answer([...d])) for (const l of listeners) l(0x4b, Uint8Array.from(a));
@@ -1094,6 +1119,12 @@ function scriptedHid(answer: (data: number[]) => number[][] = () => []) {
 	};
 	return { t, sent };
 }
+
+/** `bytes` zero-padded to `length`. */
+const zeroPadded = (bytes: number[], length = 63) => [
+	...bytes,
+	...new Array<number>(length - bytes.length).fill(0)
+];
 
 const hidContext = <O>(
 	t: HidTransport,
@@ -1255,7 +1286,7 @@ describe("Moondrop USB HID as Moondrop's web app drives it", () => {
 		await expect(
 			moondropUsbHid.push(hidContext(unlinked.t, { linkCheck: true }, sleeps), two)
 		).rejects.toMatchObject({ code: 'rejected', message: /not linked/ });
-		expect(unlinked.sent).toEqual([[0x80, 0x31, 0]]);
+		expect(unlinked.sent).toEqual([zeroPadded([0x80, 0x31, 0])]);
 		expect(sleeps).toEqual([50]);
 		const options = { linkCheck: true };
 		await expect(
@@ -1310,12 +1341,12 @@ describe("Moondrop USB HID as Moondrop's web app drives it", () => {
 			const options: MoondropUsbHidOptions = layout === 'compact' ? { bandFrame: 'compact' } : {};
 			const result = await moondropUsbHid.pull(hidContext(t, options, sleeps), { bands: 5 });
 			expect(sent).toEqual([
-				[0x80, 9, 2, 0, 0],
-				[0x80, 9, 2, 0, 1],
-				[0x80, 9, 2, 0, 2],
-				[0x80, 9, 2, 0, 3],
-				[0x80, 9, 2, 0, 4],
-				[0x80, 0x23, 0]
+				zeroPadded([0x80, 9, 2, 0, 0]),
+				zeroPadded([0x80, 9, 2, 0, 1]),
+				zeroPadded([0x80, 9, 2, 0, 2]),
+				zeroPadded([0x80, 9, 2, 0, 3]),
+				zeroPadded([0x80, 9, 2, 0, 4]),
+				zeroPadded([0x80, 0x23, 0])
 			]);
 			expect(sleeps).toEqual([50, 50, 50, 50, 50]);
 			expect(result.preamp).toBe(-5);
@@ -1360,7 +1391,7 @@ describe("Moondrop USB HID as Moondrop's web app drives it", () => {
 		const { t, sent } = headset();
 		const gain = moondropUsbHid.controls!.globalGain!;
 		expect(await gain.read(hidContext(t, {}))).toBe(-9.5);
-		expect(sent).toEqual([[0x80, 3, 0]]);
+		expect(sent).toEqual([zeroPadded([0x80, 3, 0])]);
 		sent.length = 0;
 		const sleeps: number[] = [];
 		await gain.write(hidContext(t, {}, sleeps), -6);
@@ -1370,6 +1401,99 @@ describe("Moondrop USB HID as Moondrop's web app drives it", () => {
 		expect(sleeps).toEqual([50, 200]);
 		await expect(gain.write(hidContext(t, {}), -200)).rejects.toMatchObject({
 			code: 'unrepresentable'
+		});
+	});
+
+	describe('pads every frame to the descriptor report size', () => {
+		/** Every request of a full session: a push, a pull, the reads, and control reads and writes. */
+		const session = async (declared?: { reportId: number; size: number }) => {
+			const h = scriptedHid((d) => {
+				if (d[0] !== 0x80) return [];
+				if (d[1] === 9) return [answer([0x80, 9, 2, 0, d[4]!])];
+				if (d[1] === 0x31) return [answer([0x80, 0x31, 0, 1])];
+				return [answer([0x80, d[1]!, 2, 0, 0, 0, 0, 0x31, 0x2e, 0x31])];
+			}, declared);
+			const options = { linkCheck: true, saveOffsets: true, duckPreamp: true };
+			const ctx = hidContext(h.t, options);
+			await moondropUsbHid.push(ctx, { ...two, preamp: -2 });
+			await moondropUsbHid.pull(ctx, { bands: 2 });
+			await moondropUsbHid.currentSlot!(ctx);
+			await moondropUsbHid.firmware!(ctx);
+			const { globalGain, led, promptToneVolume } = moondropUsbHid.controls!;
+			await globalGain!.read(ctx);
+			await globalGain!.write(ctx, -3);
+			await led!.read(ctx);
+			await led!.write(ctx, 1);
+			await promptToneVolume!.write(ctx, 10);
+			return h.sent;
+		};
+
+		test('writes and reads alike are the declared size', async () => {
+			const sent = await session({ reportId: 0x4b, size: 64 });
+			// 10 push frames and 4 link checks, 2 band reads, a pre-gain, slot and firmware read,
+			// then the controls' link checks, reads and writes.
+			expect(sent.length).toBeGreaterThan(30);
+			expect(sent.every((d) => d.length === 64)).toBe(true);
+			expect(sent.filter((d) => d[0] === 0x80).length).toBeGreaterThan(10);
+			expect(sent.some((d) => d[0] === 0x01 && d[1] === 9 && d[2] === 0x21)).toBe(true);
+		});
+
+		test('without a declared size it is 63 bytes, also for another report id', async () => {
+			for (const declared of [undefined, { reportId: 0x4c, size: 64 }]) {
+				expect((await session(declared)).every((d) => d.length === 63)).toBe(true);
+			}
+		});
+
+		test('padding only adds zeros, so the frames are the codec frames', async () => {
+			const { t, sent } = scriptedHid(() => [], { reportId: 0x4b, size: 80 });
+			await moondropUsbHid.push(hidContext(t, {}), { ...two, preamp: -2 });
+			const frames = moondropUsbHidCodec.encode({ ...two, preamp: -2 }, {});
+			expect(sent.map((d) => d.slice(0, 63))).toEqual(frames.map((f) => [...f.data]));
+			expect(sent.every((d) => d.slice(63).every((b) => b === 0))).toBe(true);
+		});
+
+		test('a size smaller than a frame never truncates it', async () => {
+			const { t, sent } = scriptedHid(() => [], { reportId: 0x4b, size: 20 });
+			await moondropUsbHid.push(hidContext(t, {}), two);
+			const bands = sent.filter((d) => d[1] === 9);
+			expect(bands.map((d) => d.length)).toEqual([36, 36]);
+			expect(bands[0]!.slice(27, 36)).toEqual([100, 0, ...s16(0.7), ...s16(-3), 2, 0, 7]);
+			// A frame that fits is padded up to the declared size.
+			expect(sent.filter((d) => d[1] !== 9).every((d) => d.length === 20)).toBe(true);
+			const compact = scriptedHid(() => [], { reportId: 0x4b, size: 8 });
+			await moondropUsbHid.push(hidContext(compact.t, { bandFrame: 'compact' }), two);
+			expect(compact.sent.filter((d) => d[1] === 9).map((d) => d.length)).toEqual([14, 14]);
+			expect(compact.sent.filter((d) => d[1] !== 9).every((d) => d.length === 8)).toBe(true);
+		});
+
+		test('outputReportSize finds a report in a nested collection, undefined when not declared', () => {
+			const nested = scriptedHid(() => [], { reportId: 0x4b, size: 64 }).t;
+			expect(outputReportSize(nested, 0x4b)).toBe(64);
+			expect(outputReportSize(nested, 0x4c)).toBeUndefined();
+			expect(outputReportSize(scriptedHid().t, 0x4b)).toBeUndefined();
+			const unsized = {
+				...nested,
+				collections: [
+					{
+						usagePage: 0xff00,
+						usage: 1,
+						inputReports: [],
+						outputReports: [{ reportId: 0x4b }],
+						featureReports: [],
+						children: []
+					}
+				]
+			};
+			expect(outputReportSize(unsized, 0x4b)).toBeUndefined();
+		});
+
+		test('a band whose frame ends in zero bytes keeps its declared length', async () => {
+			// A flat LPQ band: the slot is 0 and the frame's last bytes are zero.
+			const { t, sent } = scriptedHid(() => [], { reportId: 0x4b, size: 20 });
+			await moondropUsbHid.push(hidContext(t, { customSlot: 0 }), {
+				filters: [{ type: 'LPQ', freq: 8000, gain: 0, q: 0.7 }]
+			});
+			expect(sent.find((d) => d[1] === 9)).toHaveLength(36);
 		});
 	});
 
@@ -1404,6 +1528,26 @@ describe("Moondrop Old Fashioned as Moondrop's web app drives it", () => {
 		const { filters } = await moondropOldFashionedHid.pull(hidContext(t, {}, sleeps), { bands: 1 });
 		expect(sleeps).toEqual([200, 200]);
 		expect(filters).toEqual([pk(1000, 2, 0.3)]);
+	});
+
+	test('pads every packet, reads included, to a larger declared size, and never truncates', async () => {
+		const run = async (declared?: { reportId: number; size: number }) => {
+			const { t, sent } = scriptedHid((d) => {
+				if (d[4] !== 0x52) return [];
+				return [[d[0]!, 0, 0, 0, 0x52, 0, 20, 0, 0xe8, 0x03]];
+			}, declared);
+			await moondropOldFashionedHid.push(hidContext(t, {}), { filters: [pk(1000, 2, 1)] });
+			await moondropOldFashionedHid.pull(hidContext(t, {}), { bands: 1 });
+			return sent;
+		};
+		const padded = await run({ reportId: 75, size: 64 });
+		expect(padded).toHaveLength(5);
+		expect(padded.every((d) => d.length === 64)).toBe(true);
+		expect(padded[0]!.slice(0, 10)).toEqual([38, 0, 0, 0, 0x57, 0, 20, 0, 0xe8, 0x03]);
+		expect(padded[3]!.slice(0, 10)).toEqual([38, 0, 0, 0, 0x52, 0, 0, 0, 0, 0]);
+		for (const declared of [undefined, { reportId: 74, size: 64 }, { reportId: 75, size: 4 }]) {
+			expect((await run(declared)).every((d) => d.length === 10)).toBe(true);
+		}
 	});
 
 	test('refuses an answer under 10 bytes', async () => {
@@ -1463,7 +1607,7 @@ describe('Moondrop USB HID features', () => {
 	test.each(cases)('%s is read from and written to 0x%s', async (id, cmd, value) => {
 		const { t, sent } = headset({ [cmd]: [value] });
 		expect(await controls[id]!.read(hidContext(t, {}))).toBe(value);
-		expect(sent).toEqual([[0x80, cmd, 0]]);
+		expect(sent).toEqual([zeroPadded([0x80, cmd, 0])]);
 		sent.length = 0;
 		const sleeps: number[] = [];
 		await controls[id]!.write(hidContext(t, {}, sleeps), 0);
@@ -1479,7 +1623,7 @@ describe('Moondrop USB HID features', () => {
 		expect(await controls.led!.read(ctx)).toBe(1);
 		await controls.led!.write(ctx, 0);
 		expect(sent.map((d) => d.slice(0, 4))).toEqual([
-			[0x80, 0x18, 0],
+			[0x80, 0x18, 0, 0],
 			[1, 0x18, 1, 0]
 		]);
 	});
@@ -1492,7 +1636,7 @@ describe('Moondrop USB HID features', () => {
 		sent.length = 0;
 		await controls.promptToneVolume!.write(ctx, 65);
 		expect(sent.map((d) => d.slice(0, 6))).toEqual([
-			[0x80, 0x2b, 0],
+			[0x80, 0x2b, 0, 0, 0, 0],
 			[1, 0x2b, 3, 1, 65, 7]
 		]);
 		await controls.promptTone!.write(ctx, 0);

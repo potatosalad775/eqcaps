@@ -5,13 +5,24 @@
 // 38 + 2i (gain s8 ×10 at byte 6, freq u16 LE at byte 8) and 39 + 2i (q s16 LE ×1000 at byte 6).
 // The device answers a read with its next input report. Peaking only; no preamp, no slots.
 // Moondrop's web app (hub.moondroplab.com) waits 200 ms after each register write, each register
-// read and the save, and gives a read 2 s; an answer under 10 bytes is refused, not decoded.
+// read and the save, and gives a read 2 s; an answer under 10 bytes is refused, not decoded. It
+// zero-pads every packet it sends, reads too, to the output report's size in the HID descriptor
+// when that is larger than 10 bytes (`fitToReport`), and sends the 10 bytes where it isn't or the
+// descriptor gives none. The codec has no transport and keeps the 10-byte packets.
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { field, grid, I16, I8, le16, readI16le, readI8, readU16le, U16 } from '../bytes.ts';
 import { BridgeError } from '../errors.ts';
 import type { Codec, HidFrame, HidHandler, WriteState } from '../handler.ts';
-import { hidFrame, hidRequest, refuseUncarried, sendFrame, typeCodes } from '../io.ts';
+import {
+	hidFrame,
+	hidRequest,
+	outputReportSize,
+	refuseUncarried,
+	sendFrame,
+	typeCodes
+} from '../io.ts';
+import type { HidTransport } from '../transport.ts';
 
 const REPORT_ID = 75;
 const BASE = 38;
@@ -30,6 +41,13 @@ function packet(register: number, command: number, at = 0, data: number[] = []) 
 	bytes[4] = command;
 	data.forEach((b, i) => (bytes[at + i] = b));
 	return bytes;
+}
+
+/** `data` zero-padded to the descriptor's size for the report, if that is larger than the packet. */
+function fitToReport(transport: HidTransport, data: ArrayLike<number>): Uint8Array {
+	const out = new Uint8Array(Math.max(outputReportSize(transport, REPORT_ID) ?? 0, data.length));
+	out.set(data);
+	return out;
 }
 
 export const oldFashionedCodec: Codec<object, HidFrame> = {
@@ -89,7 +107,7 @@ export const moondropOldFashionedHid: HidHandler = {
 			const answer = await hidRequest(
 				ctx.transport,
 				REPORT_ID,
-				packet(register, READ),
+				fitToReport(ctx.transport, packet(register, READ)),
 				() => true,
 				TIMEOUT,
 				`register ${register}`
@@ -119,7 +137,10 @@ export const moondropOldFashionedHid: HidHandler = {
 
 	async push(ctx, request) {
 		for (const frame of oldFashionedCodec.encode(request, {})) {
-			await sendFrame(ctx.transport, frame);
+			await sendFrame(
+				ctx.transport,
+				hidFrame(frame.reportId, fitToReport(ctx.transport, frame.data))
+			);
 			await ctx.sleep(DELAY);
 		}
 		return { reconnect: false };

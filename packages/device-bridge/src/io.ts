@@ -4,7 +4,7 @@ import type { FilterType } from '@potatosalad775/eqcaps-core';
 import { BridgeError } from './errors.ts';
 import { after } from './platform.ts';
 import type { HidFrame, PushRequest } from './handler.ts';
-import type { HidTransport, StreamTransport } from './transport.ts';
+import type { HidCollectionInfo, HidTransport, StreamTransport } from './transport.ts';
 
 /**
  * Waits for the first input report that `match` accepts. Subscribe before sending the request,
@@ -176,6 +176,22 @@ export const hidFrame = (reportId: number, data: ArrayLike<number>, feature = fa
 	feature
 		? { reportId, feature: true, data: Uint8Array.from(data) }
 		: { reportId, data: Uint8Array.from(data) };
+
+/**
+ * The payload size (report id excluded) the descriptor declares for output report `reportId`,
+ * searching nested collections too. Undefined when no collection has the report or the descriptor
+ * doesn't say its size.
+ */
+export function outputReportSize(transport: HidTransport, reportId: number): number | undefined {
+	const find = (collections: readonly HidCollectionInfo[]): number | undefined => {
+		for (const c of collections) {
+			const size = c.outputReports.find((r) => r.reportId === reportId)?.size ?? find(c.children);
+			if (size !== undefined) return size;
+		}
+		return undefined;
+	};
+	return find(transport.collections);
+}
 
 export function sendFrame(transport: HidTransport, frame: HidFrame): Promise<void> {
 	return frame.feature

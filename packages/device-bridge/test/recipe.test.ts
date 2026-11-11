@@ -50,6 +50,9 @@ function hidSink(writeAck?: number): HidTransport & { count: number } {
 			last = Uint8Array.from(data);
 			const answer = Uint8Array.from(data);
 			if (writeAck !== undefined) answer[6] = writeAck;
+			// Moondrop's link check [0x80, 0x31, 0] is padded to the report size, so its echo would read
+			// as "not linked" at byte 3: this device is linked.
+			if (data[0] === 0x80 && data[1] === 0x31) answer[3] = 1;
 			queueMicrotask(() => listeners.forEach((l) => l(id, answer)));
 		},
 		async sendFeatureReport(_id, data) {
