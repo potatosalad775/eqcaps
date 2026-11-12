@@ -11,6 +11,7 @@ import { fiioSerialFrame } from '../src/handlers/fiio-usb-serial.ts';
 import { encodeFiioBand } from '../src/handlers/fiio-usb-hid.ts';
 import { JDS_BANDS } from '../src/handlers/jds-labs-usb-serial.ts';
 import { edgeCodec } from '../src/handlers/moondrop-edge-serial.ts';
+import { ktmicroCodec } from '../src/handlers/ktmicro-usb-hid.ts';
 import { moondropOldFashionedHid } from '../src/handlers/moondrop-old-fashioned-hid.ts';
 import {
 	decodeMoondropFirmware,
@@ -32,6 +33,8 @@ import {
 	guessProtocol,
 	isBridgeError,
 	openDevice,
+	protocolOf,
+	type Protocol,
 	type HandlerContext,
 	type HidTransport,
 	type SerialPortIdentity,
@@ -557,6 +560,186 @@ describe('KT Micro as Kiwi Ears drives it', () => {
 		const { t } = kiwi(3);
 		const device = openDevice(t, protocol('moondrop-chu-2-dsp'), { sleep: noSleep });
 		expect(device.capabilities).toMatchObject({ readsEnabled: false, canEnable: true });
+	});
+});
+
+describe('KT Micro as Walkplay drives it', () => {
+	const options = {
+		baseRegister: 0x35,
+		enableRegister: 0x34,
+		enableLast: true,
+		typeFlag: 8,
+		preampRegister: false,
+		gainRegister: 0x57
+	};
+	const controls = [
+		{
+			id: 'globalGainDb',
+			name: 'Global Gain',
+			kind: 'range',
+			range: { min: -12, max: 0, step: 0.1 },
+			unit: 'dB'
+		},
+		{
+			id: 'globalGain',
+			name: 'Global Gain',
+			kind: 'choice',
+			values: [
+				{ value: 9, name: '-6 dB' },
+				{ value: 15, name: '+3 dB' }
+			]
+		}
+	] as const;
+	const walkplay = (o: object = options) =>
+		({ handler: 'ktmicro-usb-hid', options: o, controls: [...controls] }) as unknown as Protocol;
+
+	/** Registers that answer a read with what was last written; writes are answered on request. */
+	function walkplayDevice(answerWrites: boolean) {
+		const sent: number[][] = [];
+		const registers = new Map<number, number[]>();
+		const listeners = new Set<(id: number, d: Uint8Array) => void>();
+		const t: HidTransport = {
+			kind: 'hid',
+			vendorId: 0x3302,
+			productId: 0x2010,
+			productName: 'Walkplay',
+			collections: [],
+			sendReport: async (_id, d) => {
+				sent.push([...d]);
+				if (d[4] === 0x57) registers.set(d[0]!, [...d]);
+				if (d[4] === 0x52 || answerWrites) {
+					const answer = [...(d[4] === 0x52 ? (registers.get(d[0]!) ?? d) : d)];
+					answer[4] = d[4]!;
+					answer[6] = d[4] === 0x52 ? answer[6]! : 0; // no success flag in a write's answer
+					for (const l of listeners) l(0x4b, Uint8Array.from(answer));
+				}
+			},
+			sendFeatureReport: async () => {},
+			receiveFeatureReport: async () => new Uint8Array(64),
+			onInputReport: (listener) => {
+				listeners.add(listener);
+				return () => listeners.delete(listener);
+			},
+			close: async () => {}
+		};
+		return { t, sent, registers };
+	}
+
+	const filters: Filter[] = [
+		pk(100, -3),
+		{ type: 'LSC', freq: 200, gain: 2, q: 0.7 },
+		{ type: 'HSC', freq: 8000, gain: -1, q: 0.7 },
+		{ type: 'HPQ', freq: 30, gain: 0, q: 0.7 }
+	];
+
+	test('typeFlag is OR-ed into the type byte and cleared again on the way back', async () => {
+		const { t, sent } = walkplayDevice(false);
+		const device = openDevice(t, walkplay(), { sleep: noSleep, profile: { bandCount: 4 } });
+		await device.push({ filters });
+		const qRegisters = [0x36, 0x38, 0x3a, 0x3c];
+		const types = sent.filter((d) => qRegisters.includes(d[0]!)).map((d) => d[8]);
+		expect(types).toEqual([8 + 0, 8 + 3, 8 + 4, 8 + 2]);
+		expect((await device.pull()).filters).toEqual(filters);
+		const frames = ktmicroCodec.encode({ filters }, options);
+		expect(ktmicroCodec.decode(frames, options).filters).toEqual(filters);
+	});
+
+	test('an answer whose type byte has the flag set reads as the type under it', async () => {
+		const { t, registers } = walkplayDevice(false);
+		// Band 0 of a SchemeNo19 device holding a high shelf: gain 1.5 dB, 3000 Hz, Q 0.8, type 4|8.
+		registers.set(0x35, [0x35, 0, 0, 0, 0x57, 0, 15, 0, 0xb8, 0x0b]);
+		registers.set(0x36, [0x36, 0, 0, 0, 0x57, 0, 0x20, 0x03, 12, 0]);
+		const device = openDevice(t, walkplay(), { sleep: noSleep, profile: { bandCount: 1 } });
+		expect((await device.pull()).filters).toEqual([{ type: 'HSC', freq: 3000, gain: 1.5, q: 0.8 }]);
+	});
+
+	test('without typeFlag a type byte is the bare code and the other bits are not hidden', () => {
+		const frames = ktmicroCodec.encode({ filters: [{ type: 'HSC', freq: 1, gain: 0, q: 1 }] }, {});
+		expect(frames[1]!.data[8]).toBe(4);
+		const flagged = Uint8Array.from([0x27, 0, 0, 0, 0x57, 0, 0xe8, 3, 12, 0]);
+		const decoded = ktmicroCodec.decode(
+			[
+				{ reportId: 0x4b, data: frames[0]!.data },
+				{ reportId: 0x4b, data: flagged }
+			],
+			{ bandRegisters: [{ freq: 0x26, q: 0x27 }] }
+		);
+		expect(decoded.filters[0]!.type).toBe('x-wire-12');
+	});
+
+	test('enableLast writes the 1 after the bands, just before the commit', async () => {
+		const { t, sent } = walkplayDevice(false);
+		const device = openDevice(t, walkplay(), { sleep: noSleep });
+		await device.push({ filters: [pk(100, -3), pk(1000, 2)] });
+		expect(sent.map((d) => d[0])).toEqual([0x35, 0x36, 0x37, 0x38, 0x34, 0]);
+		expect(sent[4]).toEqual([0x34, 0, 0, 0, 0x57, 0, 1, 0, 0, 0]);
+		expect(sent.at(-1)![4]).toBe(0x53);
+	});
+
+	test('by default the switch is written before the bands', async () => {
+		const { t, sent } = walkplayDevice(false);
+		const device = openDevice(t, walkplay({ ...options, enableLast: undefined }), {
+			sleep: noSleep
+		});
+		await device.push({ filters: [pk(100, -3)] });
+		expect(sent.map((d) => d[0])).toEqual([0x34, 0x35, 0x36, 0]);
+	});
+
+	test('writeWait goes on when no answer comes', async () => {
+		const { t, sent } = walkplayDevice(false);
+		const device = openDevice(t, walkplay({ ...options, writeWait: 5 }), { sleep: noSleep });
+		await device.push({ filters: [pk(100, -3)] });
+		expect(sent.map((d) => d[0])).toEqual([0x35, 0x36, 0x34, 0]);
+	});
+
+	test('writeWait goes on when an answer comes, whatever it holds', async () => {
+		const { t, sent } = walkplayDevice(true);
+		const device = openDevice(t, walkplay({ ...options, writeWait: 5000 }), { sleep: noSleep });
+		await device.push({ filters: [pk(100, -3)] });
+		expect(sent.map((d) => d[0])).toEqual([0x35, 0x36, 0x34, 0]);
+	});
+
+	test('writeWait lets only a missing answer go', async () => {
+		const { t } = walkplayDevice(false);
+		t.sendReport = async () => {
+			throw new BridgeError('transport', 'the device went away');
+		};
+		const device = openDevice(t, walkplay({ ...options, writeWait: 5 }), { sleep: noSleep });
+		await expect(device.push({ filters: [pk(100, -3)] })).rejects.toMatchObject({
+			code: 'transport'
+		});
+	});
+
+	test('writeAck keeps priority over writeWait', async () => {
+		const { t } = walkplayDevice(true); // answers with flag 0
+		const device = openDevice(t, walkplay({ ...options, writeAck: 3, writeWait: 5 }), {
+			sleep: noSleep
+		});
+		await expect(device.push({ filters: [pk(100, -3)] })).rejects.toMatchObject({
+			code: 'rejected'
+		});
+	});
+
+	test('gainRegister moves the global gain controls', async () => {
+		const { t, sent } = walkplayDevice(false);
+		const device = openDevice(t, walkplay(), { sleep: noSleep });
+		await device.writeControl('globalGainDb', -6.5);
+		expect(sent.find((d) => d[4] === 0x57)).toEqual([0x57, 0, 0, 0, 0x57, 0, 65, 0, 0, 0]);
+		expect(await device.readControls()).toMatchObject({ globalGainDb: -6.5 });
+		const step = openDevice(t, walkplay({ gainRegister: 0x3b }), { sleep: noSleep });
+		await step.writeControl('globalGain', 9);
+		expect(sent.filter((d) => d[4] === 0x57).at(-1)).toEqual([0x3b, 0, 0, 0, 0x57, 0, 9, 0, 0, 0]);
+	});
+
+	test('the options are read from a profile as bytes and numbers', () => {
+		expect(
+			protocolOf({
+				protocol: {
+					handler: 'ktmicro-usb-hid',
+					options: { typeFlag: '0x08', gainRegister: '0x57', enableLast: true, writeWait: 1000 }
+				}
+			})?.options
+		).toEqual({ typeFlag: 8, gainRegister: 0x57, enableLast: true, writeWait: 1000 });
 	});
 });
 

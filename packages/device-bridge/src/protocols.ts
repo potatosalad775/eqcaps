@@ -129,8 +129,12 @@ const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOption
 		preampRegister: flag,
 		frameDelay: nonNegative,
 		enableRegister: byte,
+		enableLast: flag,
 		writeAck: byte,
-		bandDelay: nonNegative
+		writeWait: nonNegative,
+		bandDelay: nonNegative,
+		typeFlag: byte,
+		gainRegister: byte
 	},
 	'fosi-audio-usb-hid': { reportId: byte, bandwidth: number, defaultSlot: byte },
 	'qudelix-usb-hid': {},
