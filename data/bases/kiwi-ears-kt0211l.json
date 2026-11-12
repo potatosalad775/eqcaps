@@ -54,7 +54,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: KT_0211L register map, KTDeviceManager, equalizerKt store, BandControlsKt",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): the KT0211L register map, how it reads and writes the device, and its band editor",
 				"date": "2026-11-09"
 			}
 		],

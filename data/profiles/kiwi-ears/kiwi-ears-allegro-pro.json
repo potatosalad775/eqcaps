@@ -14,7 +14,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: supported device list \"Kiwi Ears-Allegro Pro\"; the device table has only 0x31B2:0x0111 for this family",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): supported device list \"Kiwi Ears-Allegro Pro\"; the device table has only 0x31B2:0x0111 for this family",
 				"date": "2026-11-09"
 			},
 			{

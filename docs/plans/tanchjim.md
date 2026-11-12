@@ -5,22 +5,22 @@ Started 2026-10-28. Branch `feat/device-controls`, after [walkplay.md](walkplay.
 ## Goal
 
 Tanchjim has no web app; its tools are an Android app (`com.tanchjim.android`) and a Windows app
-(Qt5, native, talks through `hidapi.dll`). The Android app is plain Kotlin, unobfuscated, and was
-decompiled with jadx 1.5.6 for facts only (D25: facts may become data; nothing is copied). Facts
-are cited as a `vendor-app` source. The owner has a **FOLA** (IEM with a USB-C DSP cable) and a
-**Luna** (DAC dongle) to confirm them on.
+(Qt5, native, talks through `hidapi.dll`). The Android app (version 2.5.7.4) was read for facts
+only (D25: facts may become data; nothing is copied), and its facts are cited as a `vendor-app`
+source. How it was read is in the maintainer's private notes (D52). The owner has a **FOLA** (IEM
+with a USB-C DSP cable) and a **Luna** (DAC dongle) to confirm them on.
 
 ## What the app does
 
-- **Three USB protocols, chosen by product name** (`UsbDevice.getProductName()`, e.g.
-  `TANCHJIM-FOLA`, `TANCHJIM-LUNA`; the Rita and Rita AT names map to their DSP cables):
-  - **"FeiFan"** (`DSPCommand`): DSP S, Zero DSP, One DSP, Tanya DSP, Zero Ultima, Fission DSP,
+- **Three USB protocols, chosen by the USB product name** (e.g. `TANCHJIM-FOLA`,
+  `TANCHJIM-LUNA`; the Rita and Rita AT names map to their DSP cables):
+  - **"FeiFan"**: DSP S, Zero DSP, One DSP, Tanya DSP, Zero Ultima, Fission DSP,
     EA Force, **FOLA**, Fission Rational, Origin AT, Bunny DSP. This is the 0x4B register protocol
     `ktmicro-usb-hid` speaks.
-  - **"TTGK"** (`StarGate2Command`, `Space2Command`): Stargate II, DSP M, Space II, Space Pro,
+  - **"TTGK"**: Stargate II, DSP M, Space II, Space Pro,
     Space Pro AT, OLA II DSP, Rita DSP, Pinto DSP, Bunny Game, Rita AT DSP. Walkplay's platform
     (walkplay.md), 64-byte frames: `walkplay-hid`.
-  - **Luna** (`LUNACommand`): Luna, Luna AT, Space. `C1 A5 …` 7-byte frames.
+  - **Luna**: Luna, Luna AT, Space. `C1 A5 …` 7-byte frames.
 - **Transport** (all USB devices): the first interface with a bulk or interrupt endpoint is
   claimed; writes over 8 bytes go to its OUT endpoint, writes of 8 bytes or fewer are a vendor
   control transfer (`bmRequestType` 0x43, `wIndex` 0x09A0), reads likewise (0xC3). Each command is
@@ -41,14 +41,14 @@ are cited as a `vendor-app` source. The owner has a **FOLA** (IEM with a USB-C D
   background.
 - **Editor ranges** (FeiFan gets the defaults): freq 30–20000 Hz, gain −12…+12 dB, Q 0.1–10
   (shown to one decimal). UI limits, not proven firmware limits.
-- **Frequency halving**: for **Zero, One and Tanya** (`DSPProductType`), the app writes freq / 2
+- **Frequency halving**: for **Zero, One and Tanya**, the app writes freq / 2
   and reads ×2. The FOLA and the rest are written in Hz.
 - **Register 0x65** is mic gain (s8, ×2 → 0.5 dB steps); hidden on the FOLA (no mic).
 - **FOLA "virtual channel"**: app-side 5-band presets written as an ordinary EQ, not device presets.
 
 ### Luna
 
-**No EQ.** The app opens its EQ screen ("effect entrance") only for Space II; the Luna screen has
+**No EQ.** The app opens its EQ screen only for Space II; the Luna screen has
 volume, channel balance, DAC digital filter, output level, DAC mode (Class H …), DRE, DEPOP, LED
 and sample rate (read only). Reads are `C1 A5 A0`…`A4` (firmware, sample rate, volume, two config
 blocks). Its frames are 7 bytes, so they go over the vendor control transfer, not an endpoint:
@@ -114,8 +114,8 @@ found under another vendor id.
 
 ## TTGK half (2026-11-01)
 
-Same app build (2.5.7.4), now read for `StarGate2Command` (EQ) and `Space2Command` (the Space
-family's DAC screen) against `walkplay-hid`.
+Same app build (2.5.7.4), now read for the TTGK EQ and the Space family's DAC screen, against
+`walkplay-hid`.
 
 - **Band frame**: the handler's layout byte for byte (report 0x4B, `[1,9,0x18,0,idx,0,0]`, Q2.30
   coefficients at 96 kHz, freq u16, Q and gain ×256, type, 0, preset tag). Types are Walkplay's
@@ -136,7 +136,7 @@ family's DAC screen) against `walkplay-hid`.
   update) is identified by the USB id it keeps in flash (read `0x0D`), which gives Space II
   `0x3302:0x4381`, Space Pro `0x4367`, Stargate II `0x43d4` and `0xf3d4`, DSP M `0x129d`, and any
   other 0x3302 id as Space Pro AT. The two already in profiles match what devicePEQ recorded.
-- **Space family controls** (`Space2Command`): the handler's own commands. DAC filter 0x11 (1–5),
+- **Space family controls**: the handler's own commands. DAC filter 0x11 (1–5),
   gain 0x19 (0 low 2 Vrms, 1 high 4 Vrms), DAC mode 0x1D (**0 class AB, 1 class H**, the reverse of
   the PureAural), volume 0x85 (0–100, followed by `[1,4]`), mic gain 0x02 (−15…+15 whole dB, s16
   ×256), balance 0x16 (one channel cut, up to 127 dB). Not in the handler: **DRE** 0x32, one byte,
@@ -164,7 +164,7 @@ So `walkplay-hid` now writes as the vendor apps do (D50: the vendor app is the r
 bands, `[1,0x0A,4,0,0,FF,FF]`, `[1,1,0]`, then the pre-gain and `[1,4]`, NICEHCK's recorded
 sequence. Tanchjim's order and pacing are options on `tanchjim-walkplay`: `preampWithBands`
 (pre-gain right after the bands, nothing after it), `frameDelay: 400`, and `afterControl`
-(`[1,4]` after volume; the apply and save after mic gain, from `saveDigitalAdc`). New control `dre`
+(`[1,4]` after volume; the apply and save after mic gain). New control `dre`
 (0x32, held as 0 on; the handler turns it round). Data: Space volume 0–60, `dre` on the Space base,
 and `micGain` on a new `tanchjim-walkplay-mic` base for every TTGK device the app shows it for
 (all but the DSP M). The one deliberate difference from the app: the handler sends each filter

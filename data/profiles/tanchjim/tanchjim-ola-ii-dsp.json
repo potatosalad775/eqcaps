@@ -41,7 +41,7 @@
 			},
 			{
 				"kind": "vendor-app",
-				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DeviceBaseInfo, DeviceInfoHelper, StarGate2Command.getDeviceByVidPid",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): the device table and how it finds a device by USB vendor and product id",
 				"date": "2026-11-01"
 			}
 		],

@@ -223,6 +223,11 @@
 		snapshot() {
 			// Measurement curves the app downloads for its graph: large, and not the device's.
 			const { curves: _curves, ...state } = this.state();
+			// Image addresses on the vendor's storage aren't the device's either.
+			if (state.deviceInfo) {
+				const { imageUrl: _img, previewImageUrl: _preview, ...deviceInfo } = state.deviceInfo;
+				state.deviceInfo = deviceInfo;
+			}
 			return { store: 'device', state: JSON.parse(JSON.stringify(state)) };
 		}
 	};
@@ -244,12 +249,15 @@
 				return Object.fromEntries(keys.filter((k) => k in s).map((k) => [k, s[k]]));
 			};
 			const eq = ['currentEQ', 'eqType', 'currentEqType'];
+			// The product's server and image addresses aren't the device's: leave them out.
+			const info = stores.get('product')?.$state?.productInfo;
+			const { BaseUrl: _base, CdnUrl: _cdn, Url: _url, Images: _images, ...product } = info ?? {};
 			return {
 				store: 'pinia',
 				state: JSON.parse(
 					JSON.stringify({
 						device: { ...device.$state, device: undefined },
-						product: stores.get('product')?.$state?.productInfo ?? null,
+						product: info ? product : null,
 						eq: state('eq', eq),
 						eqADC: state('eqADC', eq),
 						filter: stores.get('filter')?.$state ?? null,

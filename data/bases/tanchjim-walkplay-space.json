@@ -79,7 +79,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): Space2Command, DecodingEarAmplifierFragment, MicrophoneGainSetActivity",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): the commands it sends, its DAC and headphone amplifier screen and its microphone gain setting",
 				"date": "2026-11-01"
 			}
 		],

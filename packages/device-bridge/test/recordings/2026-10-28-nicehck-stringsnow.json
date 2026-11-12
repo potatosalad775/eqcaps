@@ -46,8 +46,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "StringSnow",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
 					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
 				},
 				"equalizerSetting": {
@@ -764,8 +762,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "StringSnow",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
 					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
 				},
 				"equalizerSetting": {
@@ -1490,8 +1486,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "StringSnow",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
 					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
 				},
 				"equalizerSetting": {
@@ -2216,8 +2210,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "StringSnow",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
 					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
 				},
 				"equalizerSetting": {
@@ -2942,8 +2934,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "StringSnow",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-detail.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/string-snow-black-preview.png",
 					"features": ["usb.equalizer", "usb.special_mode", "usb.game_mode", "usb.sleep_mode"]
 				},
 				"equalizerSetting": {

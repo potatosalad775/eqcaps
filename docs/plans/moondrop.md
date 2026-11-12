@@ -6,18 +6,9 @@ here is from the app, and the profiles stay `draft`.
 ## How the app was read
 
 `https://hub.moondroplab.com/` ("Moondrop Custom EQ", version 1.8.0, build 26B1107, Beta, built
-2026-11-10), Vue. The main bundle `assets/index-iHwVcdAT.js` (994 520 bytes) holds the device
-classes; the lazy chunk `assets/index-BupSpe5_.js` holds the EQ editor and the order of a write;
-`assets/en-BUhSJ74Z.js` the English strings. Downloaded 2026-11-11 and read statically in a scratch
-directory, pretty-printed with Prettier, never executed. Minified, not obfuscated. Facts only (D25).
-The control panels are further lazy chunks, read the same way: `DacFilterType-D-41tuim.js`,
-`DacMode-E9SgAdjr.js`, `dac-BTHrpc0M.js`, `LedControl-eBproyea.js`, `MicGainOffset-CVAKm01u.js`,
-`GlobalGain-DdOXvw2r.js`, `NoiseControl-Cpj_DbDz.js`, `PromptTone-Bq1LelB5.js`,
-`DualMicEnc-CgBTcUYB.js`. Which panels a device shows is a backend call that wasn't made.
-
-The code to compare in a newer build: the product-id table (`productId: 283` and its neighbours),
-the config defaults (`gainMin: -18`), the device classes by their `config` objects (`name: "Rays"`),
-the command class with `sendCommand`/`queryCommand`, and `writeParameters` in the lazy chunk.
+2026-11-10), downloaded 2026-11-11. Read for facts only (D25). How it was read is in the
+maintainer's private notes (D52). The EQ editor and each control panel are separate parts of the
+app, read the same way. Which panels a device shows is a backend call that wasn't made.
 
 ## What the app does
 
@@ -37,7 +28,7 @@ the command class with `sendCommand`/`queryCommand`, and `writeParameters` in th
   The band count is a constant per device, never asked of it.
 - **Four families**:
 
-  | Class | Devices | Band frame | After the bands | Save |
+  | Family | Devices | Band frame | After the bands | Save |
   | --- | --- | --- | --- | --- |
   | main | Rays, AG Rays, Marigold, POSITION, E.S. combo, FreeDSP Pro, FreeDSP Mini, DAWN PRO2, MOONRIVER 3, DHA15, Deco Audio System, INN Deco75-DH Audio, BLUE ROSE | 36 bytes: 96 kHz Q2.30 coefficients, parameters, custom slot in the last byte | one apply `[1,0x0A,4,0,0,FF,FF]` | 0x01 |
   | MM3A | MM3A | 14 bytes: parameters only | nothing | 0x01 |
@@ -54,7 +45,7 @@ the command class with `sendCommand`/`queryCommand`, and `writeParameters` in th
   combo 0–3, FreeDSP Pro and Mini 0–4, Marigold 0–2, POSITION 0, MM3A 0–3. Selecting one also
   writes pre-gain and global gain 0 (not on the MM3A) and saves. "Official" and "Gaming" presets
   are curves from the backend, written as a custom EQ.
-- **Pre-gain** is computed by the app (a WASM module; 0 when no band boosts) and written with every
+- **Pre-gain** is computed by the app (0 when no band boosts) and written with every
   EQ; the user can't set it. Rays writes none below firmware 0.2, FreeDSP Pro none below 0.6. The
   DHA15's is written but never read back. The MM3A's is held at −128 dB while its bands are written.
 - **Global gain**: a switch and a slider; off writes 0. Main family only.
@@ -72,7 +63,7 @@ the command class with `sendCommand`/`queryCommand`, and `writeParameters` in th
     5 live), LED 0x28, dual-microphone ENC 0x34, prompt tone 0x2B (three bytes: on, volume 0–100,
     selection, the selection list from the backend), battery 0x27 (read only).
   - Which panels a device shows comes from the backend, per product and firmware; the lists above
-    are each device's `features` in the bundle.
+    are what the app shows for each device.
 - **Never sends**: flash clear (0x05) or factory reset (0x17) from the EQ, per-band apply frames, an
   EQ on/off switch (there is none).
 - **Not in the app**: ECHO-A, ECHO-B, FreeDSP (the Conexant pair), CDSP, Chu 2 DSP, Quark2, Edge,
@@ -107,9 +98,9 @@ the command class with `sendCommand`/`queryCommand`, and `writeParameters` in th
 - `moondrop-usb-hid`: follows the app by default. Options `bandFrame` (`biquad`, `compact`, `wide`),
   `commit` (`apply`, `commit`, `none`), `customSlot`, `selectSlot`, `duckPreamp`, `saveOffsets`,
   `linkCheck`, `ledCommand`; controls `globalGain`, `dacFilter`, `dacMode`, `led`, `gainLevel`,
-  `ancMode`, `dualMicEnc`, `promptTone`, `promptToneVolume`; `firmware()`; low-pass and high-pass. The ddHiFi DSP IEM and
-  the Echo A, which aren't in the app, are driven the new way too: it is the same firmware family,
-  and BLUE ROSE shows the app serves ddHiFi.
+  `ancMode`, `dualMicEnc`, `promptTone`, `promptToneVolume`; `firmware()`; low-pass and high-pass.
+  The ddHiFi DSP IEM and the Echo A, which aren't in the app, are driven the new way too: it is the
+  same firmware family, and BLUE ROSE shows the app serves ddHiFi.
 - `moondrop-old-fashioned-hid`: the app's delays and timeout; a short answer is refused.
 - Bases `moondrop-hub` and its relatives; the ten main-family profiles moved onto it with their
   product ids, types, presets and custom slots; the Old Fashioned aligned.

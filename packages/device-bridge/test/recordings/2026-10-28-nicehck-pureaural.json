@@ -46,8 +46,6 @@
 					"model": "NICEHCK DSP Device",
 					"tag": "NICEHCK DSP Device",
 					"customName": "PureAural",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
 					"features": [
 						"usb.equalizer",
 						"usb.digital_filter",
@@ -1128,8 +1126,6 @@
 					"model": "NICEHCK DSP Device",
 					"tag": "NICEHCK DSP Device",
 					"customName": "PureAural",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
 					"features": [
 						"usb.equalizer",
 						"usb.digital_filter",
@@ -2210,8 +2206,6 @@
 					"model": "NICEHCK DSP Device",
 					"tag": "NICEHCK DSP Device",
 					"customName": "PureAural",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
 					"features": [
 						"usb.equalizer",
 						"usb.digital_filter",
@@ -3292,8 +3286,6 @@
 					"model": "NICEHCK DSP Device",
 					"tag": "NICEHCK DSP Device",
 					"customName": "PureAural",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
 					"features": [
 						"usb.equalizer",
 						"usb.digital_filter",
@@ -4374,8 +4366,6 @@
 					"model": "NICEHCK DSP Device",
 					"tag": "NICEHCK DSP Device",
 					"customName": "PureAural",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/pure-aural.png",
 					"features": [
 						"usb.equalizer",
 						"usb.digital_filter",

@@ -15,7 +15,7 @@ import {
 	type Snapshot
 } from './recording.ts';
 
-/** The parts of the app's `equalizerKt` store the checks read. */
+/** The parts of the app's EQ state the checks read. */
 export interface KiwiState {
 	filters: { type: string; frequency: number; gain: number; Q: number }[];
 	dacEqEnabled: boolean;

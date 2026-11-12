@@ -12,7 +12,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): DSPCommand.getHalfOrDoubleFre, DSPProductType",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): the frequency it halves or doubles on the way to the device, and the models it does that for",
 				"date": "2026-10-28"
 			}
 		],

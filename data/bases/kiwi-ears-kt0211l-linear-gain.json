@@ -20,10 +20,10 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: the linear global gain config (dac_vol)",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): the linear global gain setting",
 				"date": "2026-11-09"
 			}
 		],
-		"notes": "On these models Kiwi Ears' app treats register 0x3b as linear (dac_vol): minus ten times the dB, ±12 dB in 0.1 dB steps."
+		"notes": "On these models Kiwi Ears' app treats register 0x3b as linear: minus ten times the dB, ±12 dB in 0.1 dB steps."
 	}
 }

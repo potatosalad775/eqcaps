@@ -7,13 +7,13 @@ Started 2026-10-28. Branch `feat/device-controls`, after [fosi-audio.md](fosi-au
 Support NICEHCK's devices as their official web app (app.nicehck.cn) drives them: the EQ limits it
 allows, its firmware read, and its settings besides the EQ (DAC filter, work mode, gain level,
 volume, mic gain, channel balance), as device controls (SPEC §9.1). The owner has StringSnow,
-Tears, PureAural and the 10th Anniversary Edition to test. The app's code and its public device
-config (`nicehck.cn/api/app/v1/device/config-sync`) are read for facts only, never copied (D25),
-and cited as a `vendor-app` source.
+Tears, PureAural and the 10th Anniversary Edition to test. The app's code and NICEHCK's public
+device config are read for facts only, never copied (D25), and cited as a `vendor-app` source. How
+they were read is in the maintainer's private notes (D52).
 
 ## What the app showed
 
-- Every device is vendor `0x3302` with protocol variant `ttgk_v1`, which is the Walkplay protocol:
+- Every device is vendor `0x3302` and speaks the Walkplay protocol:
   report 0x4B, `[0x80 read | 0x01 write, cmd, …]`, band cmd 0x09 in the layout `walkplay-hid`
   already decodes, pre-gain 0x03. The Octave capture in `test/captures/` answers exactly as the app
   parses. So no new handler: `walkplay-hid` gained `firmware()` (0x0C, ASCII) and controls.
@@ -36,9 +36,8 @@ and cited as a `vendor-app` source.
 - Data: base `nicehck-walkplay` (the app's limits), `nicehck-stringsnow`, `nicehck-tears`,
   `nicehck-10th-anniversary-edition`, `nicehck-pureaural` (format 1.2, with controls). `0x4322`
   left the `walkplay-schemeno16-devices` group, whose match entry was the same.
-- Recorder: adapter `nicehck-app` (React hooks, zustand state; **Read all** calls the app's
-  connect-time read), `recording-nicehck.ts` checks, and `RecordingReplay` answers on input reports.
-  Checked by a synthetic recording against `fake-walkplay.ts`; the adapter's hook walk was
+- Recorder: adapter `nicehck-app` (**Read all** calls the app's connect-time read), `recording-nicehck.ts` checks, and `RecordingReplay` answers on input reports.
+  Checked by a synthetic recording against `fake-walkplay.ts`; the adapter was
   smoke-tested on the live page without a device.
 
 ## Next
@@ -104,7 +103,8 @@ and cited as a `vendor-app` source.
      list and per-scheme product lists, so our groups match every combination (SchemeNo16: 19
      vendor ids × 79 product ids, of which 80 pairs are in the catalog). The catalog lists
      `0x3302:0x4322` as SchemeNo16 with no name; StringSnow, Tears and the 10th Anniversary
-     Edition aren't in it. Whether to rebuild the groups from the real pairs is open.
+     Edition aren't in it. Whether to rebuild the groups from the real pairs is open. *2026-11-12:*
+     done, from the vendor's own catalog (D51, walkplay.md).
    - The commit: the handler's works (by ear, above); no `commit` option.
    - `setEnabled(false)` doesn't turn the EQ off on the PureAural, and the app has no EQ off
      switch: `enableCommand: false` in the `nicehck-walkplay` base, for every NICEHCK device.

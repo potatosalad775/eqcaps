@@ -63,7 +63,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/), bundle assets/index-iHwVcdAT.js: device table, Gaming Maestro config; chunks assets/GlobalGain-DdOXvw2r.js, NoiseControl-Cpj_DbDz.js, LedControl-eBproyea.js, PromptTone-Bq1LelB5.js, DualMicEnc-CgBTcUYB.js",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/): device table, Gaming Maestro config, and its global gain, noise control, LED, prompt tone and dual-mic noise reduction pages",
 				"date": "2026-11-11"
 			}
 		],

@@ -9,7 +9,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x0BDA:0x0023 \"Allegro BAL\"",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): device table, 0x0BDA:0x0023 \"Allegro BAL\"",
 				"date": "2026-11-09"
 			}
 		],

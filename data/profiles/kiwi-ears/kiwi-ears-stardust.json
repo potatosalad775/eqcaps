@@ -9,7 +9,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x3030 \"KT-1132L Kiwi Ears Stardust\"",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): device table, 0x31B2:0x3030 \"KT-1132L Kiwi Ears Stardust\"",
 				"date": "2026-11-09"
 			}
 		]

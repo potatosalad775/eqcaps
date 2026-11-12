@@ -67,7 +67,7 @@ async function check(recording: Recording) {
 /**
  * Talks to a device as Fosi's web app does: each command an output report, its answer read from
  * the feature report, logged as the userscript logs them. Decodes the answers on its own, into
- * the app's store layout.
+ * the app's state layout.
  */
 class FosiLikeApp {
 	readonly events: RecordedEvent[] = [];
@@ -232,7 +232,7 @@ const db16 = (db: number) => {
 
 /**
  * Talks to a device as NICEHCK's web app does: output reports 0x4B, answers as input reports,
- * logged as the userscript logs them. Decodes the answers on its own, into the app's store layout.
+ * logged as the userscript logs them. Decodes the answers on its own, into the app's state layout.
  */
 class NicehckLikeApp {
 	readonly events: RecordedEvent[] = [];

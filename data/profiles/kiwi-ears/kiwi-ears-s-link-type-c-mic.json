@@ -9,7 +9,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x3001 \"KT-3001 S-Link-Typec-0.78-Mic\"",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): device table, 0x31B2:0x3001 \"KT-3001 S-Link-Typec-0.78-Mic\"",
 				"date": "2026-11-09"
 			}
 		],

@@ -23,7 +23,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: KT_3016L register map",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): the KT3016L register map",
 				"date": "2026-11-09"
 			}
 		],

@@ -23,7 +23,7 @@ copied (D25), and cited as a `vendor-app` source.
 - WebHID recorder userscript (`tools/userscripts/`, Fosi adapter `fosi-cc`), and
   `recordings.test.ts`, which checks every recording: reads, the app's writes, and the data.
   It is checked itself by a synthetic recording against the fake DS3, and smoke-tested on the
-  live page without a device (Pinia found; the DS3 store only exists once a DS3 is connected).
+  live page without a device (the DS3's state only exists once a DS3 is connected).
 
 ## Next
 

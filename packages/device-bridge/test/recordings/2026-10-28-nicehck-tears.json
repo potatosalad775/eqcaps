@@ -46,8 +46,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "Tears",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
 					"features": ["usb.equalizer", "usb.special_mode"]
 				},
 				"equalizerSetting": {
@@ -680,8 +678,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "Tears",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
 					"features": ["usb.equalizer", "usb.special_mode"]
 				},
 				"equalizerSetting": {
@@ -1322,8 +1318,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "Tears",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
 					"features": ["usb.equalizer", "usb.special_mode"]
 				},
 				"equalizerSetting": {
@@ -1964,8 +1958,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "Tears",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
 					"features": ["usb.equalizer", "usb.special_mode"]
 				},
 				"equalizerSetting": {
@@ -2606,8 +2598,6 @@
 					"model": "YUANDAO DSP Device",
 					"tag": "YUANDAO DSP Device",
 					"customName": "Tears",
-					"imageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
-					"previewImageUrl": "https://bucket.nicehck.cn/images/device/tears.png",
 					"features": ["usb.equalizer", "usb.special_mode"]
 				},
 				"equalizerSetting": {

@@ -21,7 +21,7 @@ the vendor app comes first, and agents followed CLAUDE.md (the Space II commit, 
 - **A rule exists for agents only if it is a line in AGENTS.md.** DECISIONS.md stays as the human
   record of why, and is not where an agent looks up what to do.
 - **SPEC.md is unchanged**: the public format definition.
-- **Skills for repeated procedures**, first "read a vendor app": decompile or decode, facts only
+- **Skills for repeated procedures**, first "read a vendor app": get at its code, facts only
   (D25), change the handler and data to match, `vendor-app` source, devicePEQ's differences as
   notes. Done three times so far (Walkplay, NICEHCK, Tanchjim), each a little differently.
 
@@ -30,7 +30,7 @@ the vendor app comes first, and agents followed CLAUDE.md (the Space II commit, 
 1. List every rule now in CLAUDE.md, DECISIONS.md and the conventions, and mark stale or
    contradicting ones.
 2. Write AGENTS.md from the list; move descriptive detail to ARCHITECTURE or CONTRIBUTING.
-3. Point CLAUDE.md at it; add the vendor-app skill under `.claude/skills/`.
+3. Point CLAUDE.md at it; add the vendor-app skill (now in the maintainer's private folder, D52).
 4. Check it by starting a fresh session on a past task (e.g. the Tanchjim TTGK read) and seeing
    whether it follows the vendor app without being told.
 
@@ -45,7 +45,9 @@ the vendor app comes first, and agents followed CLAUDE.md (the Space II commit, 
   is `@AGENTS.md`. Description moved out: what the conventions explained is already in
   ARCHITECTURE §4–§9 and CONTRIBUTING.
 - **D50**, the vendor's own app is the reference; D20 points at it, plans cite it.
-- **Skill** `.claude/skills/read-vendor-app/`, from the Walkplay, NICEHCK, Tanchjim and Fosi reads.
+- **Skill** `read-vendor-app`, from the Walkplay, NICEHCK, Tanchjim and Fosi reads. Moved on
+  2026-11-12 from `.claude/skills/` to `../eqcaps_private/.claude/skills/`, beside the notes on
+  how each app was read (D52).
 - **Found on the way and fixed:** ARCHITECTURE §1 put DAC filters and mic gain out of scope (D49
   brought them in), §9 said the handlers come from devicePEQ, §11's roadmap was a month old; the
   bridge README still described `enableCommand` as working; INSPECTOR §3.5 and §4 left

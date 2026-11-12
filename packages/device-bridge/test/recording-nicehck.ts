@@ -21,7 +21,7 @@ import {
 	type Snapshot
 } from './recording.ts';
 
-/** The parts of the app's device store (zustand) the checks read. */
+/** The parts of the app's device state the checks read. */
 export interface NicehckState {
 	firmwareVersion?: string;
 	eqIndex?: number;

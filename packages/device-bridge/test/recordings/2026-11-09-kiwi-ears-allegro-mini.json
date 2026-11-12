@@ -11,7 +11,7 @@
 		"path": "/"
 	},
 	"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
-	"notes": "Allegro Mini on the owner's Windows PC, in Edge. Connect; the app's own read-only __kt.scanRegisters(0x20, 0x70); EQ on; band 1 gain -0.1 dB; global gain to step 12; EQ off; EQ on; Save to flash, which drops USB about 40 ms after its answer and returns 850 ms later (HID disconnect at 92182.7 ms, connect at 93028.3 ms). Then back as found: band flat, step 13, the app's __kt.rawWriteRegister(0x24, 3) at 113603.9 ms, which the app's UI can't send, and a save (disconnect 113900.8 ms, connect 114753.2 ms). Eight events around 15460 ms are put back in request-then-answer order: the wrapper logged a send when it resolved, after a fast answer.",
+	"notes": "Allegro Mini on the owner's Windows PC, in Edge. Connect; the app's own read-only register scan (0x20 to 0x70); EQ on; band 1 gain -0.1 dB; global gain to step 12; EQ off; EQ on; Save to flash, which drops USB about 40 ms after its answer and returns 850 ms later (HID disconnect at 92182.7 ms, connect at 93028.3 ms). Then back as found: band flat, step 13, a raw write of 3 to register 0x24 through the app's debug handle at 113603.9 ms, which the app's UI can't send, and a save (disconnect 113900.8 ms, connect 114753.2 ms). Eight events around 15460 ms are put back in request-then-answer order: the wrapper logged a send when it resolved, after a fast answer.",
 	"devices": [
 		{
 			"vendorId": 12722,

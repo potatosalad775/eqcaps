@@ -51,8 +51,9 @@ Record each USB mode or firmware you want checked as its own file, or switch mod
 
 A recording holds the device's USB ids and product name, the reports exchanged, the app's state
 for the device (presets, bands, settings), the browser's user agent and your notes. WebHID doesn't
-expose serial numbers. Read the file before you submit it, as for inspector evidence (INSPECTOR
-§6).
+expose serial numbers. The Walkplay and NICEHCK adapters leave out the addresses of the vendor's
+servers and image storage that the app's product data holds (D52). Read the file before you submit
+it, as for inspector evidence (INSPECTOR §6).
 
 ### Format
 

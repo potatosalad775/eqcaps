@@ -5,10 +5,8 @@ on; no other Kiwi Ears device.
 
 ## How the app was read
 
-`https://equalizer.kiwiears.com`, Vue with Pinia, bundle `assets/index-DPU6K95a.js` (1 049 421
-bytes), downloaded 2026-11-09 and read statically in a scratch directory, never executed. It is
-minified, not obfuscated. Facts only (D25). The code to compare in a newer build: the
-`KTDeviceManager` class, its register maps and device table, and the `equalizerKt` store.
+`https://equalizer.kiwiears.com`, downloaded 2026-11-09. Read for facts only (D25). How it was read
+is in the maintainer's private notes (D52).
 
 ## What the app does
 
@@ -40,8 +38,9 @@ minified, not obfuscated. Facts only (D25). The code to compare in a newer build
   **Save to Flash** is its own button, and it closes and reopens too.
 - **Global gain** on KT_0211L only, never saved on its own. Index 0–15 (Mute, then −18…+3 dB in 1.5)
   on most, read `& 0x0F`; on `3302:2017` and `12C3` linear, −12…+12 dB, value `round(−dB × 10)`.
-- **Never sends**: register 0x66, slots. `window.__kt` is the manager, left there for debugging.
-- **Not Kiwi's yet**: a `CBDeviceManager` for "CB-5000X" and "CB-3000S". Its filters and its own
+- **Never sends**: register 0x66, slots. The app leaves a debug handle in the page that can read a
+  register range and write a raw value.
+- **Not Kiwi's yet**: a second device manager for "CB-5000X" and "CB-3000S". Its filters and its own
   table disagree (`31B2:5000` against `CB01:5000`), so it can't connect, and no product is listed.
   Ignored.
 
@@ -113,10 +112,10 @@ gain, replug. All worked by ear, so the profile is `maintainer-verified`.
 
 ## Global gain stays a control (owner, 2026-11-09)
 
-It sounds like a pre-gain, but the register's name (`DacAnaGain_ALL`) suggests an analog gain after the
+It sounds like a pre-gain, but the vendor's name for the register suggests an analog gain after the
 EQ, which wouldn't give the EQ headroom; that is unmeasured. As a pre-gain, uniPEQ's Auto would also
-move the user's level on each push, and Mute doesn't fit a dB range. To settle it: +12 dB at 1 kHz, a
-full-scale 1 kHz tone at low volume, global gain down 12 dB. Still distorted means after the EQ.
+move the user's level on each push, and Mute doesn't fit a dB range. To settle it: +12 dB at 1 kHz,
+a full-scale 1 kHz tone at low volume, global gain down 12 dB. Still distorted means after the EQ.
 
 ## Next
 

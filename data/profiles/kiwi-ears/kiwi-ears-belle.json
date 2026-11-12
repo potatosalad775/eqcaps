@@ -9,7 +9,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x3006 \"KT-1132L USB DAC\"; supported device list \"Kiwi Ears Belle(Type-C Version)\"",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): device table, 0x31B2:0x3006 \"KT-1132L USB DAC\"; supported device list \"Kiwi Ears Belle(Type-C Version)\"",
 				"date": "2026-11-09"
 			},
 			{

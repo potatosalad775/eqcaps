@@ -22,7 +22,7 @@ import {
 	type Snapshot
 } from './recording.ts';
 
-/** The parts of a Fosi store's device info (`ds3DeviceInfo` and alike) the checks read. */
+/** The parts of the device info the Fosi app held that the checks read. */
 export interface FosiState {
 	firmwareVersion?: string;
 	eqModeCount?: { total: number; predefined: number } | 0;

@@ -9,9 +9,8 @@ that the Snowsky Tiny A has 10 bands, not 5. FiiO's web app was read for facts o
 cited as a `vendor-app` source; the vendor's app is the reference (D50). Nothing here has run on a
 device: every profile stays `draft`.
 
-Read on 2026-11-03: fiiocontrol.fiio.com, version 4.3.4 of 2026-10-13, bundle `index-7hb30NUo.js`
-and its changelog chunk, as text with plain string searches (minified, not obfuscated), never
-executed.
+Read on 2026-11-03: fiiocontrol.fiio.com, version 4.3.4 of 2026-10-13. How it was read is in the
+maintainer's private notes (D52).
 
 ## What the app showed
 
@@ -28,7 +27,7 @@ executed.
   always sends one byte.
 - **Frames** carry a sequence number at bytes 2–3 and a CRC before `EE`, where the handler sends
   zeros.
-- The official preset API takes encrypted bodies only. It wasn't pursued.
+- FiiO's online preset service wasn't pursued.
 
 ## Done
 
@@ -64,7 +63,7 @@ on what a HID profile means for a device the app drives over serial.
    A serial handler is the real fix. No K17 R2R profile until then.
 3. **K15**: the app uses USER 160–169 and `0xFF` for EQ off, and moved to serial in 4.3.3; the
    profile says USER 7–16 and bypass 240 over HID.
-4. **Record with the recorder** (needs an adapter for this Vue app):
+4. **Record with the recorder** (needs an adapter for this app):
    - the band count of the Tiny A and B, LS-TC2, JA11, JIEZI and the new profiles. A device that
      got devicePEQ's or the old bridge's count write may now report the lower number;
    - whether newer firmware checks the frame's sequence and CRC;

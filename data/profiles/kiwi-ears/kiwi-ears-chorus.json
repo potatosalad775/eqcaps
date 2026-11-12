@@ -9,7 +9,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com), bundle assets/index-DPU6K95a.js: device table, 0x31B2:0x1132 \"KT-1132L B-Media Chorus\"",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): device table, 0x31B2:0x1132 \"KT-1132L B-Media Chorus\"",
 				"date": "2026-11-09"
 			},
 			{

@@ -58,16 +58,11 @@
 					}
 				},
 				"product": {
-					"BaseUrl": "https://walkplay-api.szwalkplay.com",
-					"CdnUrl": "https://walkplay-api.szwalkplay.com",
 					"ChannelNum": 8,
 					"CreateTime": "2026-03-21 14:58:52",
 					"Description": "",
 					"DescriptionEn": "",
 					"Id": 417,
-					"Images": [
-						"http://walkplay-oss.szwalkplay.com/profile/upload/product/20260709101908376-824131.jpg"
-					],
 					"ManufactureName": "科音",
 					"ManufactureNameEn": "CrinEar",
 					"ProductBrand": "科音",
@@ -81,7 +76,6 @@
 					"Title": "Protocol Micro",
 					"TitleEn": "Protocol Micro",
 					"UpdateTime": "2026-03-21 14:58:52",
-					"Url": "https://walkplay-api.szwalkplay.com",
 					"VendorId": "0x3302"
 				},
 				"eq": {
@@ -193,16 +187,11 @@
 					}
 				},
 				"product": {
-					"BaseUrl": "https://walkplay-api.szwalkplay.com",
-					"CdnUrl": "https://walkplay-api.szwalkplay.com",
 					"ChannelNum": 8,
 					"CreateTime": "2026-03-21 14:58:52",
 					"Description": "",
 					"DescriptionEn": "",
 					"Id": 417,
-					"Images": [
-						"http://walkplay-oss.szwalkplay.com/profile/upload/product/20260709101908376-824131.jpg"
-					],
 					"ManufactureName": "科音",
 					"ManufactureNameEn": "CrinEar",
 					"ProductBrand": "科音",
@@ -216,7 +205,6 @@
 					"Title": "Protocol Micro",
 					"TitleEn": "Protocol Micro",
 					"UpdateTime": "2026-03-21 14:58:52",
-					"Url": "https://walkplay-api.szwalkplay.com",
 					"VendorId": "0x3302"
 				},
 				"eq": {
@@ -328,16 +316,11 @@
 					}
 				},
 				"product": {
-					"BaseUrl": "https://walkplay-api.szwalkplay.com",
-					"CdnUrl": "https://walkplay-api.szwalkplay.com",
 					"ChannelNum": 8,
 					"CreateTime": "2026-03-21 14:58:52",
 					"Description": "",
 					"DescriptionEn": "",
 					"Id": 417,
-					"Images": [
-						"http://walkplay-oss.szwalkplay.com/profile/upload/product/20260709101908376-824131.jpg"
-					],
 					"ManufactureName": "科音",
 					"ManufactureNameEn": "CrinEar",
 					"ProductBrand": "科音",
@@ -351,7 +334,6 @@
 					"Title": "Protocol Micro",
 					"TitleEn": "Protocol Micro",
 					"UpdateTime": "2026-03-21 14:58:52",
-					"Url": "https://walkplay-api.szwalkplay.com",
 					"VendorId": "0x3302"
 				},
 				"eq": {
@@ -463,16 +445,11 @@
 					}
 				},
 				"product": {
-					"BaseUrl": "https://walkplay-api.szwalkplay.com",
-					"CdnUrl": "https://walkplay-api.szwalkplay.com",
 					"ChannelNum": 8,
 					"CreateTime": "2026-03-21 14:58:52",
 					"Description": "",
 					"DescriptionEn": "",
 					"Id": 417,
-					"Images": [
-						"http://walkplay-oss.szwalkplay.com/profile/upload/product/20260709101908376-824131.jpg"
-					],
 					"ManufactureName": "科音",
 					"ManufactureNameEn": "CrinEar",
 					"ProductBrand": "科音",
@@ -486,7 +463,6 @@
 					"Title": "Protocol Micro",
 					"TitleEn": "Protocol Micro",
 					"UpdateTime": "2026-03-21 14:58:52",
-					"Url": "https://walkplay-api.szwalkplay.com",
 					"VendorId": "0x3302"
 				},
 				"eq": {

@@ -21,7 +21,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): WireRodFragment, MicrophoneGainSetActivity, CommandProcessingCenter.saveDigitalAdc",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): the microphone gain setting and how it saves it",
 				"date": "2026-11-01"
 			}
 		],
