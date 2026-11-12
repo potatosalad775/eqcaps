@@ -1,0 +1,6 @@
+{
+	"description": "A source date is YYYY-MM-DD.",
+	"spec": "§10",
+	"profile": { "meta": { "sources": [{ "kind": "community", "ref": "x", "date": "2026-13-01" }] } },
+	"expect": [{ "code": "schema", "path": "/meta/sources/0/date" }]
+}

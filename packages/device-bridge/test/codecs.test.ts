@@ -1,0 +1,263 @@
+// Every codec, under every set of options the profiles' protocols use: what `encode` writes, `decode`
+// reads back, for any request on the codec's own wire grid, its end points included; values
+// outside the grid are refused, never clamped, and so are a preamp or slot the write doesn't
+// carry (D33).
+
+import { FILTER_TYPES, type Filter, type FilterType } from '@potatosalad775/eqcaps-core';
+import fc from 'fast-check';
+import { describe, expect, test } from 'vitest';
+import {
+	analyzeCodec,
+	guessProtocol,
+	HANDLERS,
+	isBridgeError,
+	KNOWN_HID_VENDORS,
+	transportsOf,
+	type AnyHandler,
+	type Protocol,
+	type PushRequest,
+	type Transport,
+	type WireField,
+	type WireGrid
+} from '../src/index.ts';
+import { biquadQ30 } from '../src/biquad.ts';
+import { readI32le, tidyF32 } from '../src/bytes.ts';
+import { moondropUsbHidCodec } from '../src/handlers/moondrop-usb-hid.ts';
+import { PROTOCOLS } from './data.ts';
+
+/** Each distinct handler and options pair, from the profiles and the vendor guesses. */
+const variants = new Map<string, { handler: string; options: object }>();
+const add = (handler: string, options: object = {}) =>
+	variants.set(`${handler} ${JSON.stringify(options)}`, { handler, options });
+for (const p of Object.values(PROTOCOLS)) add(p.handler, p.options);
+for (const v of KNOWN_HID_VENDORS) add(guessProtocol(v)!.handler, guessProtocol(v)!.options);
+add('airoha', { ble: true });
+
+function transportFor(kind: Transport['kind']): Transport {
+	if (kind !== 'hid')
+		return { kind, write: async () => {}, read: async () => null, close: async () => {} };
+	return {
+		kind,
+		vendorId: 0,
+		productId: 0,
+		productName: '',
+		collections: [
+			{
+				usagePage: 0xff00,
+				usage: 1,
+				inputReports: [],
+				outputReports: [{ reportId: 8, size: 63 }],
+				featureReports: [],
+				children: []
+			}
+		],
+		sendReport: async () => {},
+		sendFeatureReport: async () => {},
+		receiveFeatureReport: async () => new Uint8Array(64),
+		onInputReport: () => () => {},
+		close: async () => {}
+	};
+}
+
+/**
+ * Grid points of `w` within [lo, hi], plus the grid's own end points: a decoder that reads an
+ * end of the field as "unset" mustn't advertise it.
+ */
+function onGrid(w: WireField, lo: number, hi: number): fc.Arbitrary<number> {
+	const min = Math.max(w.min, lo);
+	const max = Math.min(w.max, hi);
+	if (w.step === undefined)
+		return fc
+			.integer({ min: Math.ceil(min * 100), max: Math.floor(max * 100) })
+			.map((k) => k / 100);
+	const step = w.step;
+	const at = (k: number) => Number((k * step).toPrecision(12));
+	return fc.oneof(
+		fc.integer({ min: Math.ceil(min / step - 1e-9), max: Math.floor(max / step + 1e-9) }).map(at),
+		fc.constantFrom(at(Math.round(w.min / step)), at(Math.round(w.max / step)))
+	);
+}
+
+const freqs = (wire: WireGrid) =>
+	'values' in wire.freq ? fc.constantFrom(...wire.freq.values) : onGrid(wire.freq, 10, 20000);
+
+const close = (a: number | undefined, b: number | undefined) =>
+	a !== undefined && b !== undefined && Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(b));
+
+describe.each(
+	[...variants.values()].map((v) => [`${v.handler} ${JSON.stringify(v.options)}`, v] as const)
+)('%s', (_name, { handler: id, options }) => {
+	const handler = HANDLERS[id as keyof typeof HANDLERS] as AnyHandler;
+	const { codec } = handler;
+	const wire = codec.wire(options);
+	const caps = handler.capabilities(transportFor(transportsOf(handler)[0]!), options);
+	const types = codec.types.filter((t) => !t.startsWith('x-'));
+
+	const filter: fc.Arbitrary<Filter> = fc.record({
+		type: fc.constantFrom(...types),
+		freq: freqs(wire),
+		q: wire.q ? onGrid(wire.q, 0.1, 20) : fc.constant(1),
+		gain: onGrid(wire.gain, -20, 20)
+	});
+	const request: fc.Arbitrary<PushRequest> = fc
+		.record({
+			filters: caps.bands
+				? fc.array(filter, { minLength: caps.bands, maxLength: caps.bands })
+				: fc.array(filter, { minLength: 1, maxLength: 10 }),
+			preamp:
+				wire.preamp && caps.writesPreamp
+					? fc.option(onGrid(wire.preamp, -20, 0), { nil: undefined })
+					: fc.constant(undefined)
+		})
+		.map(({ filters, preamp }) => (preamp === undefined ? { filters } : { filters, preamp }));
+
+	test('decode(encode(request)) gives the request back', () => {
+		fc.assert(
+			fc.property(request, (r) => {
+				const state = codec.decode(codec.encode(r, options), options);
+				expect(state.filters).toHaveLength(r.filters.length);
+				r.filters.forEach((f, i) => {
+					const g = state.filters[i]!;
+					expect(g.type).toBe(f.type);
+					expect(close(g.freq, f.freq), `freq ${g.freq} ≠ ${f.freq}`).toBe(true);
+					if (wire.q) expect(close(g.q, f.q), `q ${g.q} ≠ ${f.q}`).toBe(true);
+					expect(close(g.gain, f.gain), `gain ${g.gain} ≠ ${f.gain}`).toBe(true);
+				});
+				if (r.preamp !== undefined) expect(close(state.preamp, r.preamp)).toBe(true);
+			}),
+			{ numRuns: 50 }
+		);
+	});
+
+	const base = (): Filter => ({
+		type: types[0]!,
+		freq: 'values' in wire.freq ? wire.freq.values[0]! : 1000,
+		q: 1,
+		gain: 0
+	});
+	const write = (f: Filter) =>
+		codec.encode(
+			{ filters: Array.from({ length: caps.bands ?? 1 }, (_, i) => (i === 0 ? f : base())) },
+			options
+		);
+	const refused = (f: Filter, code: string) => {
+		try {
+			write(f);
+		} catch (e) {
+			return isBridgeError(e, code as never);
+		}
+		return false;
+	};
+
+	test('a value outside the wire is refused, not clamped', () => {
+		// Past the last grid point; a float field's range is the float range.
+		const over = (w: WireField) => (w.step === undefined ? w.max * 2 : w.max + w.step);
+		expect(refused({ ...base(), gain: over(wire.gain) }, 'unrepresentable')).toBe(true);
+		const freq = 'values' in wire.freq ? 1001.5 : over(wire.freq);
+		expect(refused({ ...base(), freq }, 'unrepresentable')).toBe(true);
+	});
+
+	test('a preamp or slot the write does not carry is refused', () => {
+		const filters = Array.from({ length: caps.bands ?? 1 }, base);
+		const refusedWith = (extra: Partial<PushRequest>) => {
+			try {
+				codec.encode({ filters, ...extra }, options);
+			} catch (e) {
+				return isBridgeError(e, 'invalid-request');
+			}
+			return false;
+		};
+		if (!caps.writesPreamp) expect(refusedWith({ preamp: 0 })).toBe(true);
+		if (!caps.writesSlot) expect(refusedWith({ slot: 0 })).toBe(true);
+	});
+
+	const missing = (FILTER_TYPES as readonly FilterType[]).filter((t) => !codec.types.includes(t));
+	test.skipIf(missing.length === 0)('a type without a wire code is refused', () => {
+		expect(refused({ ...base(), type: missing[0]! }, 'unsupported-type')).toBe(true);
+	});
+
+	test('the offline analysis agrees with the codec', () => {
+		const analysis = analyzeCodec({ handler: id, options } as Protocol);
+		expect(analysis.types).toEqual(codec.types);
+		if (caps.bands !== undefined) expect(analysis.bands.max).toBe(caps.bands);
+		const { min, max } = analysis.bands;
+		expect(min).toBeGreaterThanOrEqual(1);
+		expect(() =>
+			codec.encode({ filters: Array.from({ length: min }, base) }, options)
+		).not.toThrow();
+		expect(() =>
+			codec.encode({ filters: Array.from({ length: max }, base) }, options)
+		).not.toThrow();
+		// Every bound of every domain is a value the wire writes and reads back as itself.
+		for (const field of ['freq', 'q', 'gain'] as const) {
+			const d = analysis[field];
+			if (!d) continue;
+			const ends =
+				'values' in d ? [d.values[0]!, d.values.at(-1)!] : 'min' in d ? [d.min, d.max] : [];
+			for (const v of ends) {
+				const filters = Array.from({ length: min }, (_, i) =>
+					i === 0 ? { ...base(), [field]: v } : base()
+				);
+				const back = codec.decode(codec.encode({ filters }, options), options).filters[0]!;
+				expect(close(back[field], v), `${field} ${v} reads back as ${back[field]}`).toBe(true);
+			}
+		}
+	});
+});
+
+describe('tidyF32', () => {
+	test('gives back the float32 it was given, as its shortest decimal', () => {
+		fc.assert(
+			fc.property(fc.float({ noNaN: true, noDefaultInfinity: true }), (v) => {
+				expect(Math.fround(tidyF32(v))).toBe(v === 0 ? 0 : v);
+			})
+		);
+		expect(tidyF32(Math.fround(0.71))).toBe(0.71);
+		// Recorded from Fosi's web app: 7 digits made this 11094.76, another float32.
+		expect(tidyF32(11094.7578125)).toBe(11094.758);
+	});
+});
+
+describe('Moondrop coefficients', () => {
+	/** The five Q2.30 coefficients of a band frame (bytes 7–26), as numbers. */
+	const coefficients = (type: Filter['type'], gain = 6) => {
+		const [, frame] = moondropUsbHidCodec.encode(
+			{ filters: [{ type, freq: 1000, q: 0.7, gain }] },
+			{}
+		);
+		const data = frame!.data;
+		return Array.from({ length: 5 }, (_, i) => readI32le(data, 7 + 4 * i) / 2 ** 30);
+	};
+	/** H(z) at z = 1 and z = -1, from [b0, b1, b2, −a1, −a2]. */
+	const dc = ([b0, b1, b2, na1, na2]: number[]) => (b0! + b1! + b2!) / (1 - na1! - na2!);
+	const nyquist = ([b0, b1, b2, na1, na2]: number[]) => (b0! - b1! + b2!) / (1 + na1! - na2!);
+
+	test('a low-pass is the RBJ low-pass: unity at DC, silent at Nyquist, whatever the gain', () => {
+		const lpq = coefficients('LPQ');
+		expect(lpq).not.toEqual(coefficients('PK'));
+		expect(dc(lpq)).toBeCloseTo(1, 4);
+		expect(nyquist(lpq)).toBeCloseTo(0, 4);
+		expect(coefficients('LPQ', -9)).toEqual(lpq);
+	});
+
+	test('a high-pass is the RBJ high-pass: silent at DC, unity at Nyquist', () => {
+		const hpq = coefficients('HPQ');
+		expect(dc(hpq)).toBeCloseTo(0, 4);
+		expect(nyquist(hpq)).toBeCloseTo(1, 4);
+		expect(hpq).not.toEqual(coefficients('PK'));
+	});
+
+	test('shelves and peaking keep the forms Walkplay uses', () => {
+		const at = (type: Filter['type']) => biquadQ30(type, 1000, 6, 0.7, 96000);
+		for (const type of ['PK', 'LSC', 'HSC'] as const) {
+			// As the frame carries them: a shelf's b1 can pass the Q2.30 range, and wraps.
+			expect(coefficients(type)).toEqual(at(type).map((c) => (c | 0) / 2 ** 30));
+		}
+	});
+
+	test('Walkplay and Conexant keep peaking coefficients for LPQ and HPQ', () => {
+		for (const type of ['LPQ', 'HPQ'] as const) {
+			expect(biquadQ30(type, 1000, 6, 0.7, 96000)).toEqual(biquadQ30('PK', 1000, 6, 0.7, 96000));
+		}
+	});
+});

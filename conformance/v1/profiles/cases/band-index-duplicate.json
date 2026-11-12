@@ -1,0 +1,11 @@
+{
+	"description": "Each slot is overridden at most once.",
+	"spec": "§5.2",
+	"profile": {
+		"bands": [
+			{ "index": [0, 1], "label": "A" },
+			{ "index": 1, "label": "B" }
+		]
+	},
+	"expect": [{ "code": "band-index-duplicate", "path": "/bands/1/index" }]
+}

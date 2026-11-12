@@ -1,0 +1,6 @@
+{
+	"description": "freq and q values are > 0.",
+	"spec": "§4",
+	"profile": { "band": { "q": { "min": 0 } } },
+	"expect": [{ "code": "domain-not-positive", "path": "/band/q/min" }]
+}

@@ -1,0 +1,33 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "spotify",
+	"schemaVersion": "1.0",
+	"kind": "software",
+	"device": { "brand": "Spotify", "model": "Equalizer" },
+	"bandCount": 6,
+	"band": {
+		"types": ["PK"],
+		"freq": { "value": 60 },
+		"q": { "value": 1 },
+		"gain": { "min": -12, "max": 12 }
+	},
+	"bands": [
+		{ "index": 1, "freq": { "value": 150 } },
+		{ "index": 2, "freq": { "value": 400 } },
+		{ "index": 3, "freq": { "value": 1000 } },
+		{ "index": 4, "freq": { "value": 2400 } },
+		{ "index": 5, "freq": { "value": 15000 } }
+	],
+	"preamp": { "mode": "unknown" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "community",
+				"ref": "https://github.com/jaakkopasanen/AutoEq/blob/7ae0f56d53074872b028649617a22bbb4232feb7/autoeq/constants.py",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from AutoEQ by scripts/import/seed.ts. Fixed bands from AutoEQ's PEQ_CONFIGS SPOTIFY."
+	}
+}

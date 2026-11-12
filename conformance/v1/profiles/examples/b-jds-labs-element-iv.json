@@ -1,0 +1,28 @@
+{
+	"$schema": "../../../../schema/v1/profile.schema.json",
+	"schemaVersion": "1.0",
+	"id": "jds-labs-element-iv",
+	"kind": "hardware",
+	"device": { "brand": "JDS Labs", "model": "Element IV", "aliases": ["Element 4"] },
+	"engine": "PEQ",
+	"match": { "usb": [{ "vendorId": "0x152a", "productName": "JDS Labs Element IV" }] },
+	"bandCount": 12,
+	"band": {
+		"types": ["PK"],
+		"freq": { "min": 20, "max": 20000 },
+		"q": { "min": 0.1, "max": 10 },
+		"gain": { "min": -12, "max": 12 }
+	},
+	"bands": [
+		{ "index": [0, 1], "types": ["LSC"], "label": "Lowshelf" },
+		{ "index": [10, 11], "types": ["HSC"], "label": "Highshelf" }
+	],
+	"preamp": { "mode": "unknown" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "handler-code", "ref": "devicePEQ jdsLabsUsbSerial.js", "date": "2026-10-02" }
+		],
+		"notes": "SPEC §12 example B: type-partitioned slots. The USB match is illustrative."
+	}
+}

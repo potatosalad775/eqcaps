@@ -1,0 +1,65 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-ktmicro-scheme19",
+	"id": "walkplay-schemeno19-devices",
+	"device": { "brand": "Walkplay", "model": "SchemeNo19 devices", "group": true },
+	"match": {
+		"usb": [
+			{
+				"vendorId": "0x3302",
+				"productId": [
+					"0x231e",
+					"0x231f",
+					"0x2320",
+					"0x2321",
+					"0x2323",
+					"0x2326",
+					"0x232b",
+					"0x232c",
+					"0x232d",
+					"0x2334",
+					"0x233a",
+					"0x233c",
+					"0x233d",
+					"0x2342",
+					"0x234a",
+					"0x23e2",
+					"0x23ee"
+				]
+			},
+			{ "vendorId": "0x373b", "productId": "0x129f" },
+			{
+				"vendorId": ["0x011b", "0x0d8c", "0x60c1", "0x60e1", "0xb445"],
+				"productId": [
+					"0x231e",
+					"0x231f",
+					"0x2320",
+					"0x2321",
+					"0x2323",
+					"0x2326",
+					"0x232b",
+					"0x232c",
+					"0x2334",
+					"0x23e2",
+					"0x23ee"
+				]
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): its product catalog, kept in data/catalogs/walkplay.json",
+				"date": "2026-11-12"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "The vendor and product id pairs Walkplay's product catalog lists under SchemeNo19 (data/catalogs/walkplay.json; this match is generated from it, D51), followed by what only devicePEQ 0617f38 lists: the scheme's product ids under the five vendor ids the catalog never names (most of those pairs don't exist). A device with its own profile matches that instead of this group."
+	}
+}

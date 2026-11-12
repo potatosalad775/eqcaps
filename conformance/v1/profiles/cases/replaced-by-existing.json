@@ -1,0 +1,9 @@
+{
+	"description": "A deprecated profile replaced by an existing one is fine, and is left out of collision checks.",
+	"spec": "§10",
+	"profiles": [
+		{ "meta": { "status": "deprecated", "replacedBy": "base-new" } },
+		{ "id": "base-new" }
+	],
+	"expect": []
+}

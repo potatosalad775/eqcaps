@@ -1,0 +1,52 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "moondrop-hub",
+	"id": "moondrop-dha15",
+	"device": { "brand": "Moondrop", "model": "DHA15" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x35d8", "productId": "0x0120" },
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "DHA15"
+			}
+		]
+	},
+	"protocol": { "options": { "selectSlot": false } },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/): the DHA15 as it drives it",
+				"date": "2026-11-11"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "The app does not switch slots on it and has no built-in presets. It never reads the pre-gain back (it shows 0) but does write it."
+	}
+}

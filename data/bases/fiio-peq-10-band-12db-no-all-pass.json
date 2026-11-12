@@ -1,0 +1,15 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "fiio-usb-hid",
+	"abstract": true,
+	"id": "fiio-peq-10-band-12db-no-all-pass",
+	"bandCount": 10,
+	"band": { "types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP"] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "FiiO Control: every filter but all-pass, ±12 dB."
+	}
+}

@@ -1,0 +1,6 @@
+{
+	"description": "A usb entry needs productId or productName besides vendorId.",
+	"spec": "§3",
+	"profile": { "match": { "usb": [{ "vendorId": "0x0001" }] } },
+	"expect": [{ "code": "schema", "path": "/match/usb/0/productId" }]
+}

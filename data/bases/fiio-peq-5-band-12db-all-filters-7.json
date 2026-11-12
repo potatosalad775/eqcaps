@@ -1,0 +1,35 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "fiio-usb-hid",
+	"abstract": true,
+	"id": "fiio-peq-5-band-12db-all-filters-7",
+	"schemaVersion": "1.1",
+	"bandCount": 5,
+	"band": { "types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "AP"] },
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true },
+			{ "id": 240, "name": "Close EQ", "bypass": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/peqConstraintsConfig.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "devicePEQ's shared constraints \"peq5Band12dBAllFilters7\". Seeded by scripts/import/seed.ts; ranges are what the handler encodes, not verified firmware limits."
+	}
+}

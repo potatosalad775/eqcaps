@@ -1,0 +1,6 @@
+{
+	"description": "v1 has a closed rule set.",
+	"spec": "§7",
+	"profile": { "rules": [{ "type": "maxResponse", "db": 0 }] },
+	"expect": [{ "code": "schema", "path": "/rules/0" }]
+}

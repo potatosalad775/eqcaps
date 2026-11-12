@@ -1,0 +1,6 @@
+{
+	"description": "A software profile has no match.",
+	"spec": "§2",
+	"profile": { "kind": "software" },
+	"expect": [{ "code": "schema", "path": "/match" }]
+}

@@ -1,0 +1,14 @@
+{
+	"description": "A profile that marks writable presets (format 1.1) must declare schemaVersion 1.1 or later.",
+	"spec": "§15",
+	"profile": {
+		"protocol": {
+			"handler": "chip-hid",
+			"presets": [
+				{ "id": 0, "name": "Jazz" },
+				{ "id": 160, "name": "USER1", "writable": true }
+			]
+		}
+	},
+	"expect": [{ "code": "version-too-low", "path": "/schemaVersion" }]
+}

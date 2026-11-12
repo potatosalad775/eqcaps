@@ -1,0 +1,9 @@
+{
+	"description": "Two group profiles may not share a match entry for overlapping firmware: only a device profile is exempt.",
+	"spec": "§3",
+	"profiles": [
+		{ "id": "group-a", "device": { "model": "Group A", "group": true } },
+		{ "id": "group-b", "device": { "model": "Group B", "group": true } }
+	],
+	"expect": [{ "code": "match-collision", "path": "/match/usb/0", "profileId": "group-b" }]
+}

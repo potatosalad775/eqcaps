@@ -1,0 +1,9 @@
+{
+	"description": "Different engine labels may share a match entry.",
+	"spec": "§3",
+	"profiles": [
+		{ "id": "device-a", "engine": "PEQ" },
+		{ "id": "device-b", "engine": "Graphic EQ" }
+	],
+	"expect": []
+}

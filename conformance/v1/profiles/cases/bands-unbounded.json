@@ -1,0 +1,26 @@
+{
+	"description": "An unbounded profile has no per-slot overrides. (A full file: a merge patch cannot set bandCount to null.)",
+	"spec": "§5.2",
+	"files": [
+		{
+			"schemaVersion": "1.0",
+			"id": "software-a",
+			"kind": "software",
+			"device": { "brand": "Example", "model": "Software" },
+			"bandCount": null,
+			"band": {
+				"types": ["PK"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.1, "max": 10 },
+				"gain": { "min": -12, "max": 12 }
+			},
+			"bands": [{ "index": 0, "label": "First" }],
+			"preamp": { "mode": "none" },
+			"meta": {
+				"status": "draft",
+				"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+			}
+		}
+	],
+	"expect": [{ "code": "bands-unbounded", "path": "/bands" }]
+}

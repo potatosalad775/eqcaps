@@ -1,0 +1,6 @@
+{
+	"description": "minSpacing octaves > 0.",
+	"spec": "§7",
+	"profile": { "rules": [{ "type": "minSpacing", "octaves": 0 }] },
+	"expect": [{ "code": "schema", "path": "/rules/0/octaves" }]
+}

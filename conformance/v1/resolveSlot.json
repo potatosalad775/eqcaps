@@ -1,0 +1,308 @@
+{
+	"description": "resolveSlot(profile, slot, filter?) (SPEC §13.1).",
+	"vectors": [
+		{
+			"description": "template merged with an override",
+			"profile": "examples/b-jds-labs-element-iv",
+			"op": "resolveSlot",
+			"input": { "slot": 0 },
+			"expect": {
+				"label": "Lowshelf",
+				"types": ["LSC"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.1, "max": 10 },
+				"gain": { "min": -12, "max": 12 },
+				"locked": { "type": true, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "a slot without override",
+			"profile": "examples/b-jds-labs-element-iv",
+			"op": "resolveSlot",
+			"input": { "slot": 5 },
+			"expect": {
+				"types": ["PK"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.1, "max": 10 },
+				"gain": { "min": -12, "max": 12 },
+				"locked": { "type": true, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "override per key, replace",
+			"profile": "examples/c-partitioned-windows",
+			"op": "resolveSlot",
+			"input": { "slot": 3 },
+			"expect": {
+				"types": ["PK", "HSC"],
+				"freq": { "min": 4000, "max": 20000 },
+				"q": { "min": 0.5, "max": 3, "step": 0.1 },
+				"gain": { "min": -6, "max": 6, "step": 0.5 },
+				"locked": { "type": false, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "without a filter, variants are ignored",
+			"profile": "examples/d-gain-dependent-window",
+			"op": "resolveSlot",
+			"input": { "slot": 0 },
+			"expect": {
+				"types": ["PK"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.5, "max": 4 },
+				"gain": { "min": -12, "max": 12, "step": 0.5 },
+				"locked": { "type": true, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "variant holds: gain > 0",
+			"profile": "examples/d-gain-dependent-window",
+			"op": "resolveSlot",
+			"input": { "slot": 0, "filter": { "type": "PK", "freq": 1000, "q": 1, "gain": 3 } },
+			"expect": {
+				"types": ["PK"],
+				"freq": { "min": 200, "max": 8000 },
+				"q": { "min": 0.5, "max": 4 },
+				"gain": { "min": -12, "max": 12, "step": 0.5 },
+				"locked": { "type": true, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "variant fails: gain = 0",
+			"profile": "examples/d-gain-dependent-window",
+			"op": "resolveSlot",
+			"input": { "slot": 0, "filter": { "type": "PK", "freq": 1000, "q": 1, "gain": 0 } },
+			"expect": {
+				"types": ["PK"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.5, "max": 4 },
+				"gain": { "min": -12, "max": 12, "step": 0.5 },
+				"locked": { "type": true, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "gt uses the tolerance: 1e-12 is not > 0",
+			"profile": "examples/d-gain-dependent-window",
+			"op": "resolveSlot",
+			"input": { "slot": 0, "filter": { "type": "PK", "freq": 1000, "q": 1, "gain": 1e-12 } },
+			"expect": {
+				"types": ["PK"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.5, "max": 4 },
+				"gain": { "min": -12, "max": 12, "step": 0.5 },
+				"locked": { "type": true, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "type condition",
+			"profile": {
+				"band": {
+					"types": ["PK", "LSC", "LPQ"],
+					"variants": [
+						{ "when": { "type": { "in": ["LSC"] } }, "q": { "value": 0.707 } },
+						{
+							"when": { "freq": { "gte": 1000, "lt": 5000 } },
+							"q": { "min": 0.5, "max": 2, "step": 0.1 }
+						},
+						{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 200, "max": 8000 } },
+						{ "when": { "gain": { "eq": -6 } }, "freq": { "value": 100 } }
+					]
+				}
+			},
+			"op": "resolveSlot",
+			"input": { "slot": 0, "filter": { "type": "LSC", "freq": 2000, "q": 1, "gain": 3 } },
+			"expect": {
+				"types": ["PK", "LSC", "LPQ"],
+				"freq": { "min": 200, "max": 8000 },
+				"q": { "value": 0.707 },
+				"gain": { "min": -12, "max": 12, "step": 0.1 },
+				"locked": { "type": false, "freq": false, "q": true, "gain": false }
+			}
+		},
+		{
+			"description": "per field, first match wins",
+			"profile": {
+				"band": {
+					"types": ["PK", "LSC", "LPQ"],
+					"variants": [
+						{ "when": { "type": { "in": ["LSC"] } }, "q": { "value": 0.707 } },
+						{
+							"when": { "freq": { "gte": 1000, "lt": 5000 } },
+							"q": { "min": 0.5, "max": 2, "step": 0.1 }
+						},
+						{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 200, "max": 8000 } },
+						{ "when": { "gain": { "eq": -6 } }, "freq": { "value": 100 } }
+					]
+				}
+			},
+			"op": "resolveSlot",
+			"input": { "slot": 0, "filter": { "type": "PK", "freq": 2000, "q": 1, "gain": 3 } },
+			"expect": {
+				"types": ["PK", "LSC", "LPQ"],
+				"freq": { "min": 200, "max": 8000 },
+				"q": { "min": 0.5, "max": 2, "step": 0.1 },
+				"gain": { "min": -12, "max": 12, "step": 0.1 },
+				"locked": { "type": false, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "gte holds at the bound",
+			"profile": {
+				"band": {
+					"types": ["PK", "LSC", "LPQ"],
+					"variants": [
+						{ "when": { "type": { "in": ["LSC"] } }, "q": { "value": 0.707 } },
+						{
+							"when": { "freq": { "gte": 1000, "lt": 5000 } },
+							"q": { "min": 0.5, "max": 2, "step": 0.1 }
+						},
+						{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 200, "max": 8000 } },
+						{ "when": { "gain": { "eq": -6 } }, "freq": { "value": 100 } }
+					]
+				}
+			},
+			"op": "resolveSlot",
+			"input": { "slot": 0, "filter": { "type": "PK", "freq": 1000, "q": 1, "gain": -3 } },
+			"expect": {
+				"types": ["PK", "LSC", "LPQ"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.5, "max": 2, "step": 0.1 },
+				"gain": { "min": -12, "max": 12, "step": 0.1 },
+				"locked": { "type": false, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "gte holds within tolerance below the bound",
+			"profile": {
+				"band": {
+					"types": ["PK", "LSC", "LPQ"],
+					"variants": [
+						{ "when": { "type": { "in": ["LSC"] } }, "q": { "value": 0.707 } },
+						{
+							"when": { "freq": { "gte": 1000, "lt": 5000 } },
+							"q": { "min": 0.5, "max": 2, "step": 0.1 }
+						},
+						{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 200, "max": 8000 } },
+						{ "when": { "gain": { "eq": -6 } }, "freq": { "value": 100 } }
+					]
+				}
+			},
+			"op": "resolveSlot",
+			"input": {
+				"slot": 0,
+				"filter": { "type": "PK", "freq": 999.9999999999, "q": 1, "gain": -3 }
+			},
+			"expect": {
+				"types": ["PK", "LSC", "LPQ"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.5, "max": 2, "step": 0.1 },
+				"gain": { "min": -12, "max": 12, "step": 0.1 },
+				"locked": { "type": false, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "lt fails at the bound",
+			"profile": {
+				"band": {
+					"types": ["PK", "LSC", "LPQ"],
+					"variants": [
+						{ "when": { "type": { "in": ["LSC"] } }, "q": { "value": 0.707 } },
+						{
+							"when": { "freq": { "gte": 1000, "lt": 5000 } },
+							"q": { "min": 0.5, "max": 2, "step": 0.1 }
+						},
+						{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 200, "max": 8000 } },
+						{ "when": { "gain": { "eq": -6 } }, "freq": { "value": 100 } }
+					]
+				}
+			},
+			"op": "resolveSlot",
+			"input": { "slot": 0, "filter": { "type": "PK", "freq": 5000, "q": 1, "gain": -3 } },
+			"expect": {
+				"types": ["PK", "LSC", "LPQ"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.1, "max": 10, "step": 0.01 },
+				"gain": { "min": -12, "max": 12, "step": 0.1 },
+				"locked": { "type": false, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "eq",
+			"profile": {
+				"band": {
+					"types": ["PK", "LSC", "LPQ"],
+					"variants": [
+						{ "when": { "type": { "in": ["LSC"] } }, "q": { "value": 0.707 } },
+						{
+							"when": { "freq": { "gte": 1000, "lt": 5000 } },
+							"q": { "min": 0.5, "max": 2, "step": 0.1 }
+						},
+						{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 200, "max": 8000 } },
+						{ "when": { "gain": { "eq": -6 } }, "freq": { "value": 100 } }
+					]
+				}
+			},
+			"op": "resolveSlot",
+			"input": { "slot": 0, "filter": { "type": "PK", "freq": 300, "q": 1, "gain": -6 } },
+			"expect": {
+				"types": ["PK", "LSC", "LPQ"],
+				"freq": { "value": 100 },
+				"q": { "min": 0.1, "max": 10, "step": 0.01 },
+				"gain": { "min": -12, "max": 12, "step": 0.1 },
+				"locked": { "type": false, "freq": true, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "gainless types count as gain 0 in conditions",
+			"profile": {
+				"band": {
+					"types": ["PK", "LSC", "LPQ"],
+					"variants": [
+						{ "when": { "type": { "in": ["LSC"] } }, "q": { "value": 0.707 } },
+						{
+							"when": { "freq": { "gte": 1000, "lt": 5000 } },
+							"q": { "min": 0.5, "max": 2, "step": 0.1 }
+						},
+						{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 200, "max": 8000 } },
+						{ "when": { "gain": { "eq": -6 } }, "freq": { "value": 100 } }
+					]
+				}
+			},
+			"op": "resolveSlot",
+			"input": { "slot": 0, "filter": { "type": "LPQ", "freq": 300, "q": 0.7, "gain": 6 } },
+			"expect": {
+				"types": ["PK", "LSC", "LPQ"],
+				"freq": { "min": 20, "max": 20000 },
+				"q": { "min": 0.1, "max": 10, "step": 0.01 },
+				"gain": { "min": -12, "max": 12, "step": 0.1 },
+				"locked": { "type": false, "freq": false, "q": false, "gain": false }
+			}
+		},
+		{
+			"description": "graphic slot: freq and q locked",
+			"profile": "examples/e-graphic-10",
+			"op": "resolveSlot",
+			"input": { "slot": 9 },
+			"expect": {
+				"types": ["PK"],
+				"freq": { "value": 16000 },
+				"q": { "value": 1.41 },
+				"gain": { "min": -10, "max": 10, "step": 1 },
+				"locked": { "type": true, "freq": true, "q": true, "gain": false }
+			}
+		},
+		{
+			"description": "unbounded: any slot is the template",
+			"profile": "examples/g-equalizer-apo",
+			"op": "resolveSlot",
+			"input": { "slot": 99 },
+			"expect": {
+				"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "NO", "AP"],
+				"freq": { "min": 1, "max": 24000 },
+				"q": { "min": 0.01, "max": 100 },
+				"gain": { "min": -30, "max": 30 },
+				"locked": { "type": false, "freq": false, "q": false, "gain": false }
+			}
+		}
+	]
+}

@@ -1,0 +1,6 @@
+{
+	"description": "Published profiles never contain extends.",
+	"spec": "§11",
+	"profile": { "extends": "walkplay-scheme16" },
+	"expect": [{ "code": "schema", "path": "/extends" }]
+}

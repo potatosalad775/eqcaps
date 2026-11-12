@@ -1,0 +1,80 @@
+name: Deploy
+
+# Publishes the data to GitHub Pages after every push to main that passes CI (DECISIONS D18):
+#   /v1/     the format's channel: profiles/, index.json, bundle.json, schema/, conformance/
+#   /        the inspector (apps/inspector), reading /v1/ from the same origin
+# Needs Pages enabled with "GitHub Actions" as its source.
+
+on:
+  # Only a successful CI run of a push to main deploys, and it deploys the commit CI tested.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; a newer push supersedes a queued one but never cancels a running one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site
+    # `branches` above filters on the head branch name, which a fork's pull request can share, so
+    # the event is checked too.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Validates first and fails on any issue, so a broken main never reaches consumers.
+      - name: Build data (/v1/)
+        run: npm run data:build
+
+      # Pages serves the repository's site under /eqcaps/ (DECISIONS D24).
+      - name: Build inspector (/)
+        run: npm run build -w apps/inspector
+        env:
+          BASE_PATH: /eqcaps
+
+      - name: Add inspector to the site
+        run: cp -R apps/inspector/dist/. dist/site/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/site
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

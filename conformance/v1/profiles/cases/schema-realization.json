@@ -1,0 +1,6 @@
+{
+	"description": "v1 has no realization: profiles describe the values the engine is told (DECISIONS D39).",
+	"spec": "§8",
+	"profile": { "realization": { "laws": [], "sources": [] } },
+	"expect": [{ "code": "schema", "path": "/realization" }]
+}

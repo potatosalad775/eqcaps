@@ -1,0 +1,498 @@
+// Browser transports, driven by fake WebHID / Web Serial / Web Bluetooth objects.
+
+import { afterEach, describe, expect, test, vi } from 'vitest';
+import { matchDevice } from '@potatosalad775/eqcaps-client';
+import {
+	grantedHidDevice,
+	requestBleDevice,
+	requestHidDevice,
+	requestSerialPort,
+	waitForGrantedHidDevice,
+	type BluetoothLike,
+	type HidDeviceLike,
+	type SerialPortLike
+} from '../src/browser/index.ts';
+import { ChunkQueue } from '../src/browser/stream.ts';
+import { identityOf } from '../src/index.ts';
+import { protocolFor } from './data.ts';
+import { validateRepository } from '../../build/src/node.ts';
+
+const profiles = [...validateRepository().profiles.values()];
+
+type InputListener = (e: { reportId: number; data: DataView }) => void;
+
+function fakeHid(
+	name: string,
+	vendorId: number,
+	productId: number,
+	collections: HidDeviceLike['collections'] = []
+) {
+	const listeners = new Set<InputListener>();
+	const sent: [number, number[]][] = [];
+	const device: HidDeviceLike & { fire(id: number, bytes: number[]): void; sent: typeof sent } = {
+		opened: false,
+		vendorId,
+		productId,
+		productName: name,
+		collections,
+		sent,
+		async open() {
+			(this as { opened: boolean }).opened = true;
+		},
+		async close() {},
+		async sendReport(id, data) {
+			sent.push([id, [...data]]);
+		},
+		async sendFeatureReport() {},
+		async receiveFeatureReport() {
+			return new DataView(Uint8Array.from([1, 0x77, 0x9d]).buffer);
+		},
+		addEventListener: (_t, l) => void listeners.add(l as InputListener),
+		removeEventListener: (_t, l) => void listeners.delete(l as InputListener),
+		fire(id, bytes) {
+			const buffer = Uint8Array.from([0xff, ...bytes, 0xff]).buffer;
+			for (const l of listeners) l({ reportId: id, data: new DataView(buffer, 1, bytes.length) });
+		}
+	};
+	return device;
+}
+
+describe('WebHID', () => {
+	test('asks for known vendors, opens the device and maps the descriptor', async () => {
+		const device = fakeHid('FIIO KA17', 0x2972, 0x0093, [
+			{
+				usagePage: 0xff00,
+				usage: 1,
+				outputReports: [{ reportId: 7, items: [{ reportSize: 8, reportCount: 63 }] }],
+				children: [
+					{
+						usagePage: 0x0c,
+						inputReports: [{ reportId: 1, items: [{ reportSize: 1, reportCount: 3 }] }]
+					}
+				]
+			}
+		]);
+		let filters: unknown;
+		const transport = await requestHidDevice({
+			hid: {
+				requestDevice: async (o) => ((filters = o.filters), [device]),
+				getDevices: async () => []
+			}
+		});
+		expect(filters).toContainEqual({ vendorId: 0x2972 });
+		expect(device.opened).toBe(true);
+		expect(transport!.collections[0]!.outputReports).toEqual([{ reportId: 7, size: 63 }]);
+		expect(transport!.collections[0]!.children[0]!.inputReports).toEqual([
+			{ reportId: 1, size: 1 }
+		]);
+		expect(matchDevice(profiles, identityOf(transport!)).best?.id).toBe('fiio-ka17');
+	});
+
+	test('input reports arrive as the bytes of their view, and unsubscribe works', async () => {
+		const device = fakeHid('X', 1, 2);
+		const transport = (await requestHidDevice({
+			anyDevice: true,
+			hid: {
+				requestDevice: async (o) => (expect(o.filters).toEqual([]), [device]),
+				getDevices: async () => []
+			}
+		}))!;
+		const got: number[][] = [];
+		const off = transport.onInputReport((_id, d) => got.push([...d]));
+		device.fire(3, [1, 2, 3]);
+		off();
+		device.fire(3, [4]);
+		expect(got).toEqual([[1, 2, 3]]);
+		expect([...(await transport.receiveFeatureReport(1))]).toEqual([1, 0x77, 0x9d]);
+	});
+
+	test('prefers the vendor-defined interface of a multi-interface device', async () => {
+		const audio = fakeHid('Qudelix-5K USB DAC 48KHz', 0x0a12, 0x4005, [{ usagePage: 0x0c }]);
+		const peq = fakeHid('Qudelix-5K USB DAC 48KHz', 0x0a12, 0x4005, [{ usagePage: 0xff00 }]);
+		const transport = await requestHidDevice({
+			hid: { requestDevice: async () => [audio], getDevices: async () => [audio, peq] }
+		});
+		expect(transport!.collections[0]!.usagePage).toBe(0xff00);
+	});
+
+	test('finds a granted device again without the chooser, by its exact identity', async () => {
+		const audio = fakeHid('Protocol Micro', 0x3302, 0xc20f, [{ usagePage: 0x0c }]);
+		const other = fakeHid('Protocol Micro ', 0x3302, 0xc20f, [{ usagePage: 0xff00 }]);
+		const hid = {
+			requestDevice: async () => {
+				throw new Error('no chooser');
+			},
+			getDevices: async () => [other, audio]
+		};
+		const identity = { vendorId: 0x3302, productId: 0xc20f, productName: 'Protocol Micro' };
+		const transport = await grantedHidDevice(identity, hid);
+		expect(transport!.productName).toBe('Protocol Micro');
+		expect(audio.opened).toBe(true);
+		expect(await grantedHidDevice({ ...identity, productId: 1 }, hid)).toBeNull();
+	});
+
+	describe('waiting for a granted device', () => {
+		const identity = { vendorId: 0x31b2, productId: 0x1123, productName: 'TANCHJIM-FOLA' };
+		type Listener = (e: { device: HidDeviceLike }) => void;
+
+		/** A `navigator.hid` whose granted list and connection events the test drives. */
+		function fakeNavigatorHid(granted: HidDeviceLike[]) {
+			const listeners = { connect: new Set<Listener>(), disconnect: new Set<Listener>() };
+			return {
+				granted,
+				listeners,
+				requestDevice: async (): Promise<HidDeviceLike[]> => {
+					throw new Error('no chooser');
+				},
+				getDevices: async () => [...granted],
+				addEventListener: (t: 'connect' | 'disconnect', l: Listener) => void listeners[t].add(l),
+				removeEventListener: (t: 'connect' | 'disconnect', l: Listener) =>
+					void listeners[t].delete(l),
+				fire(t: 'connect' | 'disconnect', device: HidDeviceLike) {
+					for (const l of listeners[t]) l({ device });
+				}
+			};
+		}
+
+		afterEach(() => void vi.useRealTimers());
+
+		test('takes a device already connected straight away', async () => {
+			const fola = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			const hid = fakeNavigatorHid([fola]);
+			const t = await waitForGrantedHidDevice(identity, { timeoutMs: 1000, hid });
+			expect(t?.productName).toBe('TANCHJIM-FOLA');
+			expect(fola.opened).toBe(true);
+			expect(hid.listeners.connect.size).toBe(0);
+		});
+
+		test('resolves on the connect event, skipping the handle from before a re-enumeration', async () => {
+			vi.useFakeTimers();
+			const before = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			const hid = fakeNavigatorHid([before]);
+			const events: string[] = [];
+			const wait = waitForGrantedHidDevice(identity, {
+				timeoutMs: 5000,
+				pollMs: 10_000,
+				ignoreCurrent: true,
+				hid,
+				onEvent: (e) => events.push(e)
+			});
+			await vi.advanceTimersByTimeAsync(100);
+			expect(before.opened).toBe(false);
+			hid.granted.length = 0;
+			hid.fire('disconnect', before);
+			const after = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			hid.granted.push(after);
+			hid.fire('connect', fakeHid('Keyboard', 1, 2));
+			hid.fire('connect', after);
+			expect(await wait).not.toBeNull();
+			expect(after.opened).toBe(true);
+			expect(before.opened).toBe(false);
+			expect(events).toEqual(['disconnect', 'connect', 'gone']);
+			expect(hid.listeners.connect.size + hid.listeners.disconnect.size).toBe(0);
+		});
+
+		test('finds the device by polling when no event comes, preferring the vendor interface', async () => {
+			vi.useFakeTimers();
+			const hid = fakeNavigatorHid([]);
+			const pollOnly = { requestDevice: hid.requestDevice, getDevices: hid.getDevices };
+			const wait = waitForGrantedHidDevice(identity, { timeoutMs: 5000, hid: pollOnly });
+			await vi.advanceTimersByTimeAsync(600);
+			const audio = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123, [{ usagePage: 0x0c }]);
+			const peq = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123, [{ usagePage: 0xff00 }]);
+			hid.granted.push(audio, peq);
+			await vi.advanceTimersByTimeAsync(250);
+			const t = await wait;
+			expect(t!.collections[0]!.usagePage).toBe(0xff00);
+		});
+
+		test('takes an old handle back once it has gone and returned', async () => {
+			vi.useFakeTimers();
+			const fola = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			const hid = fakeNavigatorHid([fola]);
+			const wait = waitForGrantedHidDevice(identity, { timeoutMs: 5000, ignoreCurrent: true, hid });
+			await vi.advanceTimersByTimeAsync(300);
+			expect(fola.opened).toBe(false);
+			hid.granted.length = 0;
+			await vi.advanceTimersByTimeAsync(250);
+			hid.granted.push(fola);
+			await vi.advanceTimersByTimeAsync(250);
+			expect(await wait).not.toBeNull();
+		});
+
+		test('takes back a handle that never went, after reuseAfterMs', async () => {
+			vi.useFakeTimers();
+			const fola = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			const hid = fakeNavigatorHid([fola]);
+			const events: string[] = [];
+			const wait = waitForGrantedHidDevice(identity, {
+				timeoutMs: 5000,
+				ignoreCurrent: true,
+				reuseAfterMs: 1500,
+				hid,
+				onEvent: (e) => events.push(e)
+			});
+			await vi.advanceTimersByTimeAsync(1400);
+			expect(fola.opened).toBe(false);
+			await vi.advanceTimersByTimeAsync(100);
+			expect(await wait).not.toBeNull();
+			expect(fola.opened).toBe(true);
+			expect(events).toEqual(['reused']);
+		});
+
+		test('finds a device that comes back as another of its identities', async () => {
+			vi.useFakeTimers();
+			const uac2 = { vendorId: 0x152a, productId: 0x889b, productName: 'Fosi Audio DS3' };
+			const uac1 = { vendorId: 0x20b1, productId: 0x80d5, productName: 'Fosi Audio DS3' };
+			const before = fakeHid('Fosi Audio DS3', 0x152a, 0x889b);
+			const hid = fakeNavigatorHid([before]);
+			const wait = waitForGrantedHidDevice([uac2, uac1], {
+				timeoutMs: 5000,
+				ignoreCurrent: true,
+				reuseAfterMs: 1500,
+				hid
+			});
+			await vi.advanceTimersByTimeAsync(300);
+			hid.granted.length = 0;
+			await vi.advanceTimersByTimeAsync(250);
+			const after = fakeHid('Fosi Audio DS3', 0x20b1, 0x80d5);
+			hid.granted.push(after);
+			hid.fire('connect', after);
+			const t = await wait;
+			expect(t!.productId).toBe(0x80d5);
+			expect(before.opened).toBe(false);
+			expect(await grantedHidDevice([uac2, uac1], hid)).not.toBeNull();
+		});
+
+		test('gives null after the timeout, never asking for the chooser', async () => {
+			vi.useFakeTimers();
+			const hid = fakeNavigatorHid([]);
+			const wait = waitForGrantedHidDevice(identity, { timeoutMs: 5000, hid });
+			await vi.advanceTimersByTimeAsync(5000);
+			expect(await wait).toBeNull();
+			expect(hid.listeners.connect.size).toBe(0);
+			// A device turning up later is left alone.
+			const fola = fakeHid('TANCHJIM-FOLA', 0x31b2, 0x1123);
+			hid.granted.push(fola);
+			await vi.advanceTimersByTimeAsync(1000);
+			expect(fola.opened).toBe(false);
+		});
+	});
+
+	test("reports the device's own disconnect once, and not another's", async () => {
+		type Listener = (e: { device: HidDeviceLike }) => void;
+		const listeners = new Set<Listener>();
+		const device = fakeHid('FIIO KA17', 0x2972, 0x0093);
+		const twin = fakeHid('FIIO KA17', 0x2972, 0x0093);
+		const transport = (await requestHidDevice({
+			hid: {
+				requestDevice: async () => [device],
+				getDevices: async () => [],
+				addEventListener: (_t, l) => void listeners.add(l),
+				removeEventListener: (_t, l) => void listeners.delete(l)
+			}
+		}))!;
+		const fire = (d: HidDeviceLike) => [...listeners].forEach((l) => l({ device: d }));
+		let lost = 0;
+		transport.onDisconnect!(() => lost++);
+		fire(twin);
+		expect(lost).toBe(0);
+		fire(device);
+		fire(device);
+		expect(lost).toBe(1);
+		expect(listeners.size).toBe(0);
+		transport.onDisconnect!(() => lost++)();
+		fire(device);
+		expect(lost).toBe(1);
+	});
+
+	test('a cancelled chooser gives null', async () => {
+		const t = await requestHidDevice({
+			hid: { requestDevice: async () => [], getDevices: async () => [] }
+		});
+		expect(t).toBeNull();
+	});
+});
+
+describe('Web Serial', () => {
+	function fakePort(info: ReturnType<SerialPortLike['getInfo']>) {
+		const incoming: Uint8Array[] = [];
+		let wake: (() => void) | undefined;
+		const written: number[][] = [];
+		let baud: number | undefined;
+		const gone = new Set<() => void>();
+		const port: SerialPortLike & {
+			feed(b: number[]): void;
+			unplug(): void;
+			written: number[][];
+			baud(): number | undefined;
+		} = {
+			getInfo: () => info,
+			addEventListener: (_t, l) => void gone.add(l),
+			removeEventListener: (_t, l) => void gone.delete(l),
+			unplug: () => [...gone].forEach((l) => l()),
+			async open(o) {
+				baud = o.baudRate;
+			},
+			async close() {},
+			readable: {
+				getReader: () => ({
+					async read() {
+						while (!incoming.length) await new Promise<void>((r) => (wake = r));
+						return { value: incoming.shift()!, done: false };
+					},
+					async cancel() {},
+					releaseLock() {}
+				})
+			},
+			writable: {
+				getWriter: () => ({ write: async (d) => void written.push([...d]), releaseLock() {} })
+			},
+			feed(b) {
+				incoming.push(Uint8Array.from(b));
+				wake?.();
+			},
+			written,
+			baud: () => baud
+		};
+		return port;
+	}
+
+	test("opens at the protocol's baud rate", async () => {
+		const port = fakePort({ usbVendorId: 6790, usbProductId: 21971 });
+		let filters: unknown;
+		const choice = await requestSerialPort({
+			entries: profiles,
+			serial: { requestPort: async (o) => ((filters = o?.filters), port) }
+		});
+		expect(filters).toContainEqual({ usbVendorId: 6790 });
+		expect(choice!.identity).toEqual({ usb: { vendorId: '0x1a86', productId: '0x55d3' } });
+		const transport = await choice!.open(protocolFor('fiio-audio-dsp'));
+		expect(port.baud()).toBe(57600);
+		port.feed([1, 2]);
+		port.feed([3]);
+		await transport.write(Uint8Array.from([9]));
+		expect(port.written).toEqual([[9]]);
+		expect([...(await transport.read(100))!]).toEqual([1, 2]);
+		expect([...(await transport.read(100))!]).toEqual([3]);
+		expect(await transport.read(10)).toBeNull();
+	});
+
+	test('Bluetooth SPP ports show only their service class and default to 9600 baud', async () => {
+		const port = fakePort({ bluetoothServiceClassId: '00001101-0000-1000-8000-00805F9B34FB' });
+		const choice = await requestSerialPort({ serial: { requestPort: async () => port } });
+		expect(choice!.identity).toEqual({
+			bluetooth: { serviceUuids: ['00001101-0000-1000-8000-00805f9b34fb'] }
+		});
+		// No name to match by: the user says which device it is.
+		await choice!.open(protocolFor('tanchjim-rita'));
+		expect(port.baud()).toBe(9600);
+	});
+
+	test('finds a granted device again without the chooser, by its exact identity', async () => {
+		const audio = fakeHid('Protocol Micro', 0x3302, 0xc20f, [{ usagePage: 0x0c }]);
+		const other = fakeHid('Protocol Micro ', 0x3302, 0xc20f, [{ usagePage: 0xff00 }]);
+		const hid = {
+			requestDevice: async () => {
+				throw new Error('no chooser');
+			},
+			getDevices: async () => [other, audio]
+		};
+		const identity = { vendorId: 0x3302, productId: 0xc20f, productName: 'Protocol Micro' };
+		const transport = await grantedHidDevice(identity, hid);
+		expect(transport!.productName).toBe('Protocol Micro');
+		expect(audio.opened).toBe(true);
+		expect(await grantedHidDevice({ ...identity, productId: 1 }, hid)).toBeNull();
+	});
+
+	test('reports the port being unplugged, not being closed', async () => {
+		const port = fakePort({ usbVendorId: 6790, usbProductId: 21971 });
+		const choice = await requestSerialPort({ serial: { requestPort: async () => port } });
+		const transport = await choice!.open(protocolFor('fiio-audio-dsp'));
+		let lost = 0;
+		transport.onDisconnect!(() => lost++);
+		port.unplug();
+		port.unplug();
+		expect(lost).toBe(1);
+		transport.onDisconnect!(() => lost++);
+		await transport.close();
+		port.unplug();
+		expect(lost).toBe(1);
+	});
+
+	test('a cancelled chooser gives null', async () => {
+		const cancel = Object.assign(new Error('cancelled'), { name: 'NotFoundError' });
+		expect(
+			await requestSerialPort({ serial: { requestPort: async () => Promise.reject(cancel) } })
+		).toBeNull();
+	});
+});
+
+describe('Web Bluetooth', () => {
+	test("connects with the GATT layout of the device's protocol and buffers notifications", async () => {
+		let notify: ((e: { target: unknown }) => void) | undefined;
+		const writes: [string, number[]][] = [];
+		const characteristic = (uuid: string) => ({
+			properties: { write: true, writeWithoutResponse: false },
+			value: null,
+			writeValueWithResponse: async (d: Uint8Array) => void writes.push(['with', [...d]]),
+			writeValueWithoutResponse: async (d: Uint8Array) => void writes.push(['without', [...d]]),
+			startNotifications: async () => undefined,
+			addEventListener: (_t: string, l: (e: { target: unknown }) => void) => {
+				if (uuid.startsWith('00001102')) notify = l;
+			}
+		});
+		let request: unknown;
+		const gone = new Set<() => void>();
+		const dropped = () => [...gone].forEach((l) => l());
+		const bluetooth: BluetoothLike = {
+			requestDevice: async (o) => {
+				request = o;
+				return {
+					name: 'FIIO EH13',
+					gatt: {
+						connected: true,
+						connect: async () => ({
+							getPrimaryService: async () => ({
+								getCharacteristic: async (u: string) => characteristic(u)
+							})
+						}),
+						// As the browser does: disconnecting fires `gattserverdisconnected`.
+						disconnect: dropped
+					},
+					addEventListener: (_t, l) => void gone.add(l),
+					removeEventListener: (_t, l) => void gone.delete(l)
+				};
+			}
+		};
+		const choice = await requestBleDevice({ entries: profiles, bluetooth });
+		expect(request).toMatchObject({ filters: expect.arrayContaining([{ name: 'FIIO EH13' }]) });
+		const best = matchDevice(profiles, choice!.identity).best!;
+		expect(best.id).toBe('fiio-eh13');
+		await expect(choice!.open(protocolFor('fiio-ka17')!)).rejects.toMatchObject({
+			code: 'invalid-request'
+		});
+		const transport = await choice!.open(protocolFor(best.id)!);
+		await transport.write(Uint8Array.from([1]));
+		expect(writes).toEqual([['with', [1]]]);
+		notify!({ target: { value: new DataView(Uint8Array.from([5, 6]).buffer) } });
+		expect([...(await transport.read(100))!]).toEqual([5, 6]);
+		expect(transport.bleName).toBe('FIIO EH13');
+
+		let lost = 0;
+		transport.onDisconnect!(() => lost++);
+		dropped();
+		expect(lost).toBe(1);
+		transport.onDisconnect!(() => lost++);
+		await transport.close();
+		expect(lost).toBe(1);
+	});
+});
+
+test('a closed stream rejects pending and later reads', async () => {
+	const q = new ChunkQueue();
+	const pending = q.read(1000);
+	q.fail(new Error('gone'));
+	await expect(pending).rejects.toMatchObject({ code: 'transport' });
+	await expect(q.read(10)).rejects.toMatchObject({ code: 'transport' });
+});

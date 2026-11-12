@@ -1,0 +1,6 @@
+{
+	"description": "Set values are ascending and unique.",
+	"spec": "§4",
+	"profile": { "band": { "freq": { "min": null, "max": null, "values": [100, 100, 200] } } },
+	"expect": [{ "code": "domain-values-order", "path": "/band/freq/values/1" }]
+}

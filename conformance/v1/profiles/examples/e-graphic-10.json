@@ -1,0 +1,33 @@
+{
+	"$schema": "../../../../schema/v1/profile.schema.json",
+	"schemaVersion": "1.0",
+	"id": "example-graphic-10",
+	"kind": "hardware",
+	"device": { "brand": "Example", "model": "10-band graphic" },
+	"engine": "Graphic EQ",
+	"match": { "usb": [{ "vendorId": "0x0001", "productId": "0x0002" }] },
+	"bandCount": 10,
+	"band": {
+		"types": ["PK"],
+		"q": { "value": 1.41 },
+		"gain": { "min": -10, "max": 10, "step": 1 },
+		"freq": { "value": 1000 }
+	},
+	"bands": [
+		{ "index": 0, "freq": { "value": 31 } },
+		{ "index": 1, "freq": { "value": 62 } },
+		{ "index": 2, "freq": { "value": 125 } },
+		{ "index": 3, "freq": { "value": 250 } },
+		{ "index": 4, "freq": { "value": 500 } },
+		{ "index": 6, "freq": { "value": 2000 } },
+		{ "index": 7, "freq": { "value": 4000 } },
+		{ "index": 8, "freq": { "value": 8000 } },
+		{ "index": 9, "freq": { "value": 16000 } }
+	],
+	"preamp": { "mode": "manual", "gain": { "min": -10, "max": 0, "step": 1 } },
+	"meta": {
+		"status": "draft",
+		"sources": [{ "kind": "community", "ref": "SPEC §12 example E", "date": "2026-10-02" }],
+		"notes": "SPEC §12 example E: every slot is freq-locked, so consumers derive isGraphic. Slot 5 keeps the template's 1 kHz. USB ids are placeholders."
+	}
+}

@@ -1,0 +1,40 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-10-band-12db-wide-shelves",
+	"id": "fiio-oak-nano",
+	"schemaVersion": "1.1",
+	"device": { "brand": "FiiO", "model": "Oak Nano" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x2972", "productId": "0x4016", "productName": "FIIO OAK NANO" },
+			{ "vendorId": ["0x0a12", "0x2972"], "productName": ["FIIO OAK NANO", "Oak Nano"] }
+		]
+	},
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 160, "name": "USER1", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/fiio_fiio_oak_nano.json",
+				"date": "2026-10-02"
+			}
+		]
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"description": "Entries of different specificity are not identical; specificity resolves them.",
+	"spec": "§3",
+	"profiles": [
+		{ "id": "device-a" },
+		{
+			"id": "device-b",
+			"match": {
+				"usb": [{ "vendorId": "0x0001", "productId": "0x0001", "productName": "Device B" }]
+			}
+		}
+	],
+	"expect": []
+}

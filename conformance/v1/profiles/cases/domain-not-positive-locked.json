@@ -1,0 +1,6 @@
+{
+	"description": "freq and q values are > 0, locked values included.",
+	"spec": "§4",
+	"profile": { "band": { "freq": { "min": null, "max": null, "value": 0 } } },
+	"expect": [{ "code": "domain-not-positive", "path": "/band/freq/value" }]
+}

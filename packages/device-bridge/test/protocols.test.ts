@@ -1,0 +1,470 @@
+// The profiles' protocols against the bridge (D33, D42): every hardware profile has one this bridge
+// can drive, it runs over a transport the profile's identity implies, and what the profile allows
+// is what the codec can write.
+
+import {
+	domainBounds,
+	indexFields,
+	resolveSlot,
+	type Domain,
+	type FilterType,
+	type Profile
+} from '@potatosalad775/eqcaps-core';
+import { matchDevice } from '@potatosalad775/eqcaps-client';
+import { describe, expect, test } from 'vitest';
+import {
+	chooserFilters,
+	guessProtocol,
+	handlerTransports,
+	HANDLERS,
+	KNOWN_HID_VENDORS,
+	protocolForMatches,
+	protocolOf,
+	protocolProblem,
+	transportsOf,
+	type AnyHandler,
+	type WireField,
+	type WireGrid
+} from '../src/index.ts';
+import { profiles, PROTOCOLS } from './data.ts';
+
+const driven = Object.entries(PROTOCOLS);
+const handlerOf = (id: string) => HANDLERS[PROTOCOLS[id]!.handler] as AnyHandler;
+const profile = (id: string) => profiles.get(id) as Profile;
+
+test('every protocol in the data is one this bridge can drive', () => {
+	const problems = [...profiles.values()]
+		.filter((p) => p.protocol !== undefined)
+		.flatMap((p) => {
+			const problem = protocolProblem(p.protocol);
+			return problem ? [`${p.id}: ${problem}`] : [];
+		});
+	expect(problems).toEqual([]);
+});
+
+// A hardware profile without a protocol is one no handler drives (SPEC §9), such as the RME ADI-2
+// series (MIDI SysEx). It's a mistake only when the bridge knows the vendor's protocol, which is
+// what a forgotten `extends` of the vendor's base looks like.
+test('every hardware profile from a vendor the bridge knows has a protocol', () => {
+	const missing = [...profiles.values()].filter(
+		(p) =>
+			p.kind === 'hardware' &&
+			!(p.id in PROTOCOLS) &&
+			(p.match?.usb ?? []).some((u) => guessProtocol(Number(u.vendorId)) !== undefined)
+	);
+	expect(missing.map((p) => p.id)).toEqual([]);
+});
+
+describe('controls (SPEC §9.1)', () => {
+	const volume = {
+		id: 'volume',
+		name: 'Volume',
+		kind: 'range',
+		range: { min: 0, max: 60, step: 1 }
+	};
+
+	test("keep the profile's controls, in order", () => {
+		const controls = protocolOf(profile('fosi-audio-ds3'))?.controls;
+		expect(controls?.map((c) => c.id)).toEqual([
+			'uacMode',
+			'filterMode',
+			'upsample',
+			'gameMode',
+			'gainMode',
+			'volume',
+			'led'
+		]);
+		expect(controls?.find((c) => c.id === 'upsample')).toEqual(
+			profile('fosi-audio-ds3').protocol?.controls?.find((c) => c.id === 'upsample')
+		);
+	});
+
+	test('a control the handler lacks: CI refuses it, an app leaves it out', () => {
+		for (const c of [
+			{ id: 'bass', name: 'Bass', kind: 'range', range: { min: -10, max: 10 } },
+			{ ...volume, kind: 'dial' }
+		]) {
+			const raw = { handler: 'fosi-audio-usb-hid', controls: [volume, c] };
+			expect(protocolProblem(raw), c.kind).toBeTypeOf('string');
+			expect(protocolOf({ protocol: raw })?.controls?.map((x) => x.id)).toEqual(['volume']);
+		}
+		const unknownRole = {
+			handler: 'fosi-audio-usb-hid',
+			controls: [{ ...volume, role: 'loudness' }]
+		};
+		expect(protocolProblem(unknownRole)).toMatch(/unknown role/);
+		expect(protocolOf({ protocol: unknownRole })?.controls).toEqual([
+			{ id: 'volume', name: 'Volume', kind: 'range', range: { min: 0, max: 60, step: 1 } }
+		]);
+		const none = { handler: 'moondrop-usb-hid', controls: [volume] };
+		expect(protocolOf({ protocol: none })).toEqual({ handler: 'moondrop-usb-hid' });
+	});
+
+	test('a malformed control makes the protocol unreadable', () => {
+		const bad = [
+			{ ...volume, range: { min: 0 } },
+			{ id: 'gainMode', name: 'Gain', kind: 'choice', values: [{ value: 0, name: 'L' }] },
+			{ ...volume, kind: 'toggle' },
+			{ ...volume, when: { control: 'uacMode' } },
+			{ ...volume, reconnect: 'yes' }
+		];
+		for (const c of bad) {
+			expect(
+				protocolOf({ protocol: { handler: 'fosi-audio-usb-hid', controls: [c] } })
+			).toBeUndefined();
+		}
+	});
+});
+
+describe('Moondrop USB HID options', () => {
+	const options = {
+		bandFrame: 'compact',
+		commit: 'none',
+		customSlot: '0x03',
+		selectSlot: false,
+		duckPreamp: true,
+		saveOffsets: true,
+		linkCheck: true
+	};
+
+	test('accepts each option', () => {
+		const raw = { handler: 'moondrop-usb-hid', options };
+		expect(protocolProblem(raw)).toBeUndefined();
+		expect(protocolOf({ protocol: raw })?.options).toEqual({ ...options, customSlot: 3 });
+		for (const bandFrame of ['biquad', 'compact', 'wide']) {
+			expect(
+				protocolProblem({ handler: 'moondrop-usb-hid', options: { bandFrame } })
+			).toBeUndefined();
+		}
+		for (const commit of ['apply', 'commit', 'none']) {
+			expect(protocolProblem({ handler: 'moondrop-usb-hid', options: { commit } })).toBeUndefined();
+		}
+	});
+
+	test('refuses what is not a choice, a byte or a flag', () => {
+		const bad: Record<string, unknown> = {
+			bandFrame: 'long',
+			commit: 'save',
+			customSlot: 256,
+			selectSlot: 'yes',
+			duckPreamp: 1,
+			saveOffsets: null,
+			linkCheck: 'true'
+		};
+		for (const [k, v] of Object.entries(bad)) {
+			const raw = { handler: 'moondrop-usb-hid', options: { [k]: v } };
+			expect(protocolOf({ protocol: raw }), k).toBeUndefined();
+			expect(protocolProblem(raw), k).toContain(`options.${k}`);
+		}
+		expect(protocolProblem({ handler: 'moondrop-usb-hid', options: { slot: 7 } })).toMatch(
+			/no option "slot"/
+		);
+	});
+
+	test('drives the global gain control', () => {
+		const gain = {
+			id: 'globalGain',
+			name: 'Global gain',
+			kind: 'range',
+			range: { min: -18, max: 0, step: 0.1 },
+			unit: 'dB'
+		};
+		const raw = { handler: 'moondrop-usb-hid', controls: [gain] };
+		expect(protocolProblem(raw)).toBeUndefined();
+		expect(protocolOf({ protocol: raw })?.controls?.map((c) => c.id)).toEqual(['globalGain']);
+	});
+});
+
+describe('protocolOf', () => {
+	test('reads hex strings as numbers', () => {
+		expect(
+			protocolOf({ protocol: { handler: 'fiio-usb-hid', options: { saveCommand: '0x19' } } })
+				?.options
+		).toEqual({ saveCommand: 0x19 });
+		expect(
+			protocolOf({
+				protocol: {
+					handler: 'ktmicro-usb-hid',
+					options: { bandRegisters: [{ freq: '0x35', q: 54 }] }
+				}
+			})?.options
+		).toEqual({ bandRegisters: [{ freq: 0x35, q: 0x36 }] });
+	});
+
+	test('index entries carry the protocol', () => {
+		expect(protocolOf(indexFields(profile('crinear-protocol-micro')))).toEqual({
+			handler: 'walkplay-hid',
+			presets: [{ id: 101, name: 'Custom' }],
+			controls: [
+				{
+					id: 'micGain',
+					name: 'MIC Offset',
+					kind: 'range',
+					role: 'mic-gain',
+					range: { min: -15, max: 15, step: 1.5 },
+					unit: 'dB'
+				}
+			]
+		});
+	});
+
+	test("refuses what the bridge can't drive, and says why", () => {
+		const bad = {
+			'no handler': { handler: 'walkplay-bt' },
+			'unknown option': { handler: 'walkplay-hid', options: { reportId: 1 } },
+			'not a byte': { handler: 'fiio-usb-hid', options: { reportId: 256 } },
+			'bad hex': { handler: 'fiio-usb-hid', options: { saveCommand: '0x2G' } },
+			'preset twice': {
+				handler: 'walkplay-hid',
+				presets: [
+					{ id: 1, name: 'A' },
+					{ id: 1, name: 'B' }
+				]
+			},
+			'bad baud rate': { handler: 'fiio-usb-serial', baudRate: 0 },
+			'option the presets say': { handler: 'fiio-usb-hid', options: { disabledPresetId: 240 } },
+			'two bypass presets': {
+				handler: 'fiio-usb-hid',
+				presets: [
+					{ id: 11, name: 'Off', bypass: true },
+					{ id: 240, name: 'BYPASS', bypass: true }
+				]
+			},
+			'bypass the handler has no use for': {
+				handler: 'walkplay-hid',
+				presets: [{ id: 0, name: 'Off', bypass: true }]
+			},
+			'writable bypass preset': {
+				handler: 'fiio-usb-hid',
+				presets: [{ id: 240, name: 'Off', bypass: true, writable: true }]
+			},
+			'writable not a boolean': {
+				handler: 'walkplay-hid',
+				presets: [{ id: 1, name: 'Custom', writable: 'yes' }]
+			}
+		};
+		for (const [what, protocol] of Object.entries(bad)) {
+			expect(protocolOf({ protocol }), what).toBeUndefined();
+			expect(protocolProblem(protocol), what).toBeTypeOf('string');
+		}
+		expect(protocolProblem({ handler: 'walkplay-bt' })).toMatch(/no handler "walkplay-bt"/);
+		expect(protocolOf({})).toBeUndefined();
+		expect(protocolOf(undefined)).toBeUndefined();
+	});
+
+	test('keeps the writable marks: user memories apart from built-in curves', () => {
+		const presets = [
+			{ id: 0, name: 'Jazz' },
+			{ id: 4, name: 'USER1', writable: true },
+			{ id: 10, name: 'BYPASS', bypass: true }
+		];
+		expect(protocolOf({ protocol: { handler: 'fiio-usb-hid', presets } })?.presets).toEqual(
+			presets
+		);
+		const marked = protocolOf(profile('fiio-ka17'))?.presets?.filter((p) => p.writable);
+		expect(marked?.map((p) => p.id)).toEqual([4, 8, 9]);
+		const unmarked = [{ id: 1, name: 'A', writable: false }];
+		expect(
+			protocolOf({ protocol: { handler: 'walkplay-hid', presets: unmarked } })?.presets
+		).toEqual([{ id: 1, name: 'A' }]);
+	});
+
+	test('keeps the bypass preset, for handlers that turn the EQ off with one', () => {
+		const presets = [
+			{ id: 0, name: 'Jazz' },
+			{ id: 240, name: 'BYPASS', bypass: true }
+		];
+		expect(protocolOf({ protocol: { handler: 'fiio-usb-hid', presets } })).toEqual({
+			handler: 'fiio-usb-hid',
+			presets
+		});
+		expect(protocolOf(profile('fiio-btr17'))?.presets).toContainEqual({
+			id: 240,
+			name: 'BYPASS',
+			bypass: true
+		});
+		const off = [{ id: 1, name: 'A', bypass: false }];
+		expect(protocolOf({ protocol: { handler: 'fiio-usb-hid', presets: off } })?.presets).toEqual([
+			{ id: 1, name: 'A' }
+		]);
+	});
+
+	test('ignores extension keys in options', () => {
+		expect(
+			protocolOf({ protocol: { handler: 'walkplay-hid', options: { 'x-note': 'hi' } } })
+		).toEqual({ handler: 'walkplay-hid' });
+	});
+
+	test("still accepts Walkplay's enableCommand, which no longer does anything", () => {
+		const raw = { handler: 'walkplay-hid', options: { enableCommand: false } };
+		expect(protocolOf({ protocol: raw })?.options).toEqual({ enableCommand: false });
+	});
+});
+
+test('protocolForMatches takes the first match with a protocol this bridge can drive', () => {
+	const group = profile('walkplay-schemeno16-devices');
+	expect(protocolForMatches([{ id: 'rme-adi-2-dac-fs' }, group])).toEqual({
+		profileId: 'walkplay-schemeno16-devices',
+		protocol: protocolOf(group)
+	});
+	expect(
+		protocolForMatches([{ id: 'future', protocol: { handler: 'walkplay-bt' } }, group])?.profileId
+	).toBe('walkplay-schemeno16-devices');
+	expect(protocolForMatches([profile('fiio-ka17'), group])?.profileId).toBe('fiio-ka17');
+	expect(protocolForMatches([{ id: 'rme-adi-2-dac-fs' }])).toBeUndefined();
+});
+
+test("each handler runs over a transport the profile's identity implies", () => {
+	const wrong = driven.filter(([id]) => {
+		const kinds = transportsOf(handlerOf(id));
+		const match = profile(id).match ?? {};
+		const usb = !!match.usb && (kinds.includes('hid') || kinds.includes('serial'));
+		const bt = !!match.bluetooth && (kinds.includes('ble') || kinds.includes('serial'));
+		return !usb && !bt;
+	});
+	expect(wrong.map(([id]) => id)).toEqual([]);
+});
+
+test('a profile with a manual preamp has a protocol that writes it', () => {
+	const wrong = driven.filter(([id, p]) => {
+		const h = handlerOf(id);
+		const caps = h.capabilities(
+			{ kind: transportsOf(h)[0], collections: [] } as never,
+			p.options ?? {}
+		);
+		return profile(id).preamp.mode === 'manual' && !caps.writesPreamp;
+	});
+	expect(wrong.map(([id]) => id)).toEqual([]);
+});
+
+/** Where a profile domain isn't inside the codec's wire field. */
+function outside(d: Domain, w: WireField | { values: readonly number[] } | undefined): string[] {
+	if (!w) return [];
+	const { min, max } = domainBounds(d);
+	if ('values' in w) {
+		const values = 'value' in d ? [d.value] : 'values' in d ? d.values : [min, max];
+		const extra = values.filter((v) => !w.values.includes(v));
+		return extra.length ? [`not on the wire: ${extra.join(' ')}`] : [];
+	}
+	const out: string[] = [];
+	if (min < w.min - 1e-9 || max > w.max + 1e-9) out.push(`${min}..${max} past ${w.min}..${w.max}`);
+	if (w.step === undefined) return out;
+	const ws = w.step;
+	const on = (x: number) => Math.abs(x / ws - Math.round(x / ws)) <= 1e-6;
+	if ('value' in d || 'values' in d) {
+		const off = ('value' in d ? [d.value] : d.values).filter((v) => !on(v));
+		if (off.length) out.push(`${off.join(' ')} off the wire's ${ws}`);
+	} else if (!('step' in d)) out.push(`continuous, the wire's step is ${ws}`);
+	else if (!on(d.step) || !on(d.min) || !on(d.max))
+		out.push(`${d.min}..${d.max} step ${d.step} off the wire's ${ws}`);
+	return out;
+}
+
+/**
+ * What the profiles allow that the codecs can't write. These are gaps between the seeded data and
+ * the protocols: devicePEQ lists types its handlers don't encode. Fix the data or the codec once
+ * the device tells which is right; a new entry here is a regression.
+ */
+test('profile domains the wire cannot carry', () => {
+	const findings: Record<string, string[]> = {};
+	for (const [id, p] of driven) {
+		const prof = profile(id);
+		const wire: WireGrid = handlerOf(id).codec.wire(p.options ?? {});
+		const codecTypes = handlerOf(id).codec.types;
+		const found = new Set<string>();
+		for (let i = 0; i < (prof.bandCount ?? 1); i++) {
+			const slot = resolveSlot(prof, i);
+			const types = slot.types.filter((t: FilterType) => !codecTypes.includes(t));
+			if (types.length) found.add(`types ${types.join(' ')}`);
+			for (const t of slot.types) {
+				const s = resolveSlot(prof, i, { type: t, freq: 1000, q: 1, gain: 0 });
+				for (const m of outside(s.freq, wire.freq)) found.add(`freq ${m}`);
+				for (const m of outside(s.q, wire.q)) found.add(`q ${m}`);
+				for (const m of outside(s.gain, wire.gain)) found.add(`gain ${m}`);
+			}
+		}
+		if (prof.preamp.mode === 'manual') {
+			for (const m of outside(prof.preamp.gain, wire.preamp)) found.add(`preamp ${m}`);
+		}
+		if (found.size) findings[`${id} (${p.handler})`] = [...found];
+	}
+	expect(findings).toMatchSnapshot();
+});
+
+test("protocolForMatches takes the client's matches over index entries", () => {
+	const index = [...profiles.values()].map(indexFields);
+	const { matches } = matchDevice(index, {
+		usb: { vendorId: 0x3302, productId: 0xc20f, productName: 'Protocol Micro' }
+	});
+	expect(protocolForMatches(matches)).toEqual({
+		profileId: 'crinear-protocol-micro',
+		protocol: {
+			handler: 'walkplay-hid',
+			presets: [{ id: 101, name: 'Custom' }],
+			controls: [
+				{
+					id: 'micGain',
+					name: 'MIC Offset',
+					kind: 'range',
+					role: 'mic-gain',
+					range: { min: -15, max: 15, step: 1.5 },
+					unit: 'dB'
+				}
+			]
+		}
+	});
+});
+
+describe('devices without a profile', () => {
+	test('a known vendor gets its usual protocol, marked experimental', () => {
+		expect(guessProtocol(0x2972)).toMatchObject({ handler: 'fiio-usb-hid', experimental: true });
+		expect(guessProtocol(0x31b2)).toMatchObject({ handler: 'ktmicro-usb-hid' });
+		expect(guessProtocol(0x1234)).toBeUndefined();
+	});
+
+	test('the guesses never mark the table itself experimental', () => {
+		guessProtocol(0x2972);
+		expect(PROTOCOLS['fiio-ka17']!.experimental).toBeUndefined();
+	});
+});
+
+describe('chooser filters', () => {
+	test('without entries: the guessable HID vendors and every SPP class and GATT service', () => {
+		const f = chooserFilters();
+		expect(f.hidVendorIds).toEqual([...new Set(KNOWN_HID_VENDORS)]);
+		expect(f.serialVendorIds).toEqual([]);
+		expect(f.bleNames).toEqual([]);
+		expect(f.sppServiceClasses).toContain('00001101-0000-1000-8000-00805f9b34fb');
+		expect(f.gattServices).toHaveLength(2);
+	});
+
+	test('with the database: its devices, by the transport their protocol runs over', () => {
+		const f = chooserFilters(profiles.values());
+		expect(f.hidVendorIds).toContain(0x3302);
+		expect(f.serialVendorIds).toContain(0x152a); // JDS Labs
+		expect(f.bleNames).toContainEqual({ name: 'FIIO EH13' });
+		expect(f.bleNames).not.toContainEqual({ namePrefix: 'Nothing Headphone' }); // SPP only
+	});
+});
+
+test('handlerTransports names a handler’s transports by id', () => {
+	expect(handlerTransports('walkplay-hid')).toEqual(['hid']);
+	expect(handlerTransports('airoha')).toEqual(['serial', 'ble']);
+	expect(handlerTransports('no-such-handler')).toEqual([]);
+	expect(handlerTransports('toString')).toEqual([]);
+});
+
+test('the Moondrop USB HID led command is a byte', () => {
+	const at = (ledCommand: unknown) => ({ handler: 'moondrop-usb-hid', options: { ledCommand } });
+	expect(protocolOf({ protocol: at('0x18') })?.options).toEqual({ ledCommand: 0x18 });
+	expect(protocolProblem(at(256))).toMatch(/options.ledCommand/);
+	const control = (id: string) => ({
+		id,
+		name: id,
+		kind: 'range',
+		range: { min: 0, max: 100, step: 1 }
+	});
+	const ids = ['dacFilter', 'dacMode', 'led', 'gainLevel', 'ancMode', 'dualMicEnc', 'promptTone'];
+	const raw = { handler: 'moondrop-usb-hid', controls: [...ids, 'promptToneVolume'].map(control) };
+	expect(protocolProblem(raw)).toBeUndefined();
+});

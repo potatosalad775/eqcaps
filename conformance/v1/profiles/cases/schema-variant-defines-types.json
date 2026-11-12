@@ -1,0 +1,6 @@
+{
+	"description": "A variant may not define types.",
+	"spec": "§6",
+	"profile": { "band": { "variants": [{ "when": { "gain": { "gt": 0 } }, "types": ["PK"] }] } },
+	"expect": [{ "code": "schema", "path": "/band/variants/0/types" }]
+}

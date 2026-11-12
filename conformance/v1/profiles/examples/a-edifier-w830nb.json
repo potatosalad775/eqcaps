@@ -1,0 +1,28 @@
+{
+	"$schema": "../../../../schema/v1/profile.schema.json",
+	"schemaVersion": "1.0",
+	"id": "edifier-w830nb",
+	"kind": "hardware",
+	"device": { "brand": "Edifier", "model": "W830NB" },
+	"match": { "bluetooth": [{ "namePrefix": "EDIFIER W830NB" }] },
+	"bandCount": 4,
+	"band": {
+		"types": ["PK"],
+		"freq": {
+			"values": [
+				20, 50, 75, 76, 77, 100, 150, 175, 200, 400, 500, 1000, 1500, 2000, 3000, 3078, 4000, 5000,
+				6000, 8000, 10000
+			]
+		},
+		"q": { "min": 0.5, "max": 5, "step": 0.07142857142857142 },
+		"gain": { "min": -6, "max": 6, "step": 0.25 }
+	},
+	"preamp": { "mode": "none" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "handler-code", "ref": "devicePEQ edifierUsbSerial.js", "date": "2026-10-02" }
+		],
+		"notes": "SPEC §12 example A: value set, odd steps. Write-only device. The frequency list is the handler's lookup table of captured samples, not the device's set: upstream protocol notes report 1 Hz granularity and 20 Hz-20 kHz on every band, with per-band windows imposed only by the vendor app. The bluetooth namePrefix is a placeholder until confirmed."
+	}
+}

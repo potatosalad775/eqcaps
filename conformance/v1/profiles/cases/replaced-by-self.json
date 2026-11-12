@@ -1,0 +1,6 @@
+{
+	"description": "A deprecated profile is replaced by another one.",
+	"spec": "§10",
+	"profile": { "meta": { "status": "deprecated", "replacedBy": "base" } },
+	"expect": [{ "code": "replaced-by-self", "path": "/meta/replacedBy" }]
+}

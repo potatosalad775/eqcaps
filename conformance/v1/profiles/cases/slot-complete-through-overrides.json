@@ -1,0 +1,9 @@
+{
+	"description": "A field missing from the template is fine when every slot gets it from an override.",
+	"spec": "§5.2",
+	"profile": {
+		"band": { "gain": null },
+		"bands": [{ "index": [0, 1, 2, 3], "gain": { "min": -6, "max": 6 } }]
+	},
+	"expect": []
+}
