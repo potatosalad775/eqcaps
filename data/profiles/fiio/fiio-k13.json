@@ -1,0 +1,40 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-10-band-12db-wide-all-filters",
+	"id": "fiio-k13",
+	"schemaVersion": "1.1",
+	"device": { "brand": "FiiO", "model": "K13" },
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "FIIO K13" }] },
+	"protocol": {
+		"presets": [
+			{ "id": 240, "name": "BYPASS", "bypass": true },
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 8, "name": "Retro" },
+			{ "id": 9, "name": "sDamp-1" },
+			{ "id": 10, "name": "sDamp-2" },
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true },
+			{ "id": 163, "name": "USER4", "writable": true },
+			{ "id": 164, "name": "USER5", "writable": true },
+			{ "id": 165, "name": "USER6", "writable": true },
+			{ "id": 166, "name": "USER7", "writable": true },
+			{ "id": 167, "name": "USER8", "writable": true },
+			{ "id": 168, "name": "USER9", "writable": true },
+			{ "id": 169, "name": "USER10", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
+	}
+}

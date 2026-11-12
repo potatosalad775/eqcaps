@@ -1,0 +1,51 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-peq-10-band-10db-full-shelves",
+	"id": "nicehck-octave",
+	"device": { "brand": "NiceHCK", "model": "Octave" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x3302", "productId": "0x39c3", "productName": "Octave" },
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "Octave"
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			},
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/walkplay_schemeno18_nicehck_octave.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo18\" group, whose settings apply under the device's own.\nStill on devicePEQ's shape: its product id 0x39c3 is not in Walkplay's product catalog (data/catalogs/walkplay.json), so Walkplay's app gives no scheme for it; NICEHCK's own app is the reference for this device (docs/plans/nicehck.md)."
+	}
+}

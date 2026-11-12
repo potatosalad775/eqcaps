@@ -1,0 +1,11 @@
+{
+	"description": "community-verified needs a counting source.",
+	"spec": "§10",
+	"profile": {
+		"meta": {
+			"status": "community-verified",
+			"sources": [{ "kind": "handler-code", "ref": "x", "date": "2026-10-02" }]
+		}
+	},
+	"expect": [{ "code": "status-needs-evidence", "path": "/meta/status" }]
+}

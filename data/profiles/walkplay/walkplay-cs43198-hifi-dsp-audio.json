@@ -1,0 +1,45 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-peq-8-band-10db-ls-lowpass",
+	"id": "walkplay-cs43198-hifi-dsp-audio",
+	"device": { "brand": "Walkplay", "model": "CS43198 HiFi DSP Audio", "group": true },
+	"match": {
+		"usb": [
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "CS43198 HiFi DSP Audio"
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Still on devicePEQ's shape: the product name \"CS43198 HiFi DSP Audio\" is the title of catalog rows (data/catalogs/walkplay.json) in both scheme 11 and scheme 16, so the name alone doesn't give its scheme in Walkplay's app."
+	}
+}

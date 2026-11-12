@@ -1,0 +1,5091 @@
+{
+	"recording": "eqcaps-webhid",
+	"version": 1,
+	"recordedAt": "2026-10-28T11:02:57.823Z",
+	"tool": {
+		"name": "eqcaps WebHID recorder",
+		"version": 2
+	},
+	"page": {
+		"origin": "https://cc.fosiaudio.com",
+		"path": "/#/ds3"
+	},
+	"userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+	"notes": "DS3 firmware 1.4.6. Read all in UAC 2.0; then the owner switched to UAC 1.0 in the app (the device reconnected as 0x80d5) and Read all again. Recorder pasted into the page after the app had connected, not the userscript.",
+	"devices": [
+		{
+			"vendorId": 5418,
+			"productId": 34971,
+			"productName": "Fosi Audio DS3",
+			"collections": [
+				{
+					"usagePage": 65411,
+					"usage": 1,
+					"inputReports": [1],
+					"outputReports": [1],
+					"featureReports": [1],
+					"children": []
+				},
+				{
+					"usagePage": 12,
+					"usage": 1,
+					"inputReports": [2],
+					"outputReports": [],
+					"featureReports": [],
+					"children": []
+				}
+			]
+		},
+		{
+			"vendorId": 8369,
+			"productId": 32981,
+			"productName": "Fosi Audio DS3",
+			"collections": [
+				{
+					"usagePage": 65411,
+					"usage": 1,
+					"inputReports": [1],
+					"outputReports": [1],
+					"featureReports": [1],
+					"children": []
+				},
+				{
+					"usagePage": 12,
+					"usage": 1,
+					"inputReports": [2],
+					"outputReports": [],
+					"featureReports": [],
+					"children": []
+				}
+			]
+		}
+	],
+	"snapshots": [
+		{
+			"t": 13511.9,
+			"label": "read all",
+			"adapter": "fosi-cc",
+			"store": "ds3Store",
+			"state": {
+				"currentUacMode": 0,
+				"currentEqModeIndex": 7,
+				"eqEnable": true,
+				"eqModeInfo": [
+					{
+						"index": 0,
+						"mode": 0,
+						"gain": -6,
+						"name": "Jazz",
+						"nameKey": "eq.presetNames.jazz",
+						"nameRaw": "JAZZ",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 32,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 64,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 3,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 0,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 1,
+						"mode": 1,
+						"gain": -3,
+						"name": "Pop",
+						"nameKey": "eq.presetNames.pop",
+						"nameRaw": "POP",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 32,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 3,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 64,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 1,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": -1.5,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": -3.5,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 3.5,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 1.5,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 1,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 1,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 2,
+						"mode": 2,
+						"gain": -5,
+						"name": "Rock",
+						"nameKey": "eq.presetNames.rock",
+						"nameRaw": "ROCK",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 32,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 1.5,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 64,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": -1.5,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 1.5,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 2,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 3,
+						"mode": 3,
+						"gain": -11,
+						"name": "Classic",
+						"nameKey": "eq.presetNames.classic",
+						"nameRaw": "CLASIC",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 7,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 7,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": -2,
+								"mode": 3,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 4,
+						"mode": 4,
+						"gain": -10,
+						"name": "R&B",
+						"nameKey": "eq.presetNames.rb",
+						"nameRaw": "R&B",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 3.799999952316284,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 6.300000190734863,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 4.800000190734863,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 1.7000000476837158,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 3.200000047683716,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 4.699999809265137,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 4.300000190734863,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 3.200000047683716,
+								"mode": 4,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 5,
+						"mode": 5,
+						"gain": 0,
+						"name": "3A Game",
+						"nameKey": "eq.presetNames.aaaGame",
+						"nameRaw": "3A Game",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 53,
+								"centerFreq": 64,
+								"filterType": 9,
+								"gain": 6,
+								"mode": 5,
+								"q": 1.2000000476837158
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 27,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 5,
+								"q": 4.5
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 37,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 5,
+								"q": 6.71999979019165
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1388,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": -3.5,
+								"mode": 5,
+								"q": 0.7200000286102295
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 800,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": -1,
+								"mode": 5,
+								"q": 2.5
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 2666,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 5,
+								"q": 1.5
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 6956,
+								"centerFreq": 8000,
+								"filterType": 10,
+								"gain": 10,
+								"mode": 5,
+								"q": 1.149999976158142
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 35555,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": 9,
+								"mode": 5,
+								"q": 0.44999998807907104
+							}
+						]
+					},
+					{
+						"index": 6,
+						"mode": 6,
+						"gain": 0,
+						"name": "FPS",
+						"nameKey": "eq.presetNames.fps",
+						"nameRaw": "FPS",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 45,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": -2,
+								"mode": 6,
+								"q": 0.699999988079071
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 176,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": -1,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 707,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 1,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1414,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 3,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 2000,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 6,
+								"q": 1
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 5633,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 11267,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 22535,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": -2,
+								"mode": 6,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 7,
+						"mode": 7,
+						"gain": 0,
+						"name": "Custom1",
+						"nameKey": "eq.presetNames.custom1",
+						"nameRaw": "Custom1",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 63,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1414,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 8,
+						"mode": 8,
+						"gain": 0,
+						"name": "Custom2",
+						"nameKey": "eq.presetNames.custom2",
+						"nameRaw": "Custom2",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1414,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 9,
+						"mode": 9,
+						"gain": 0,
+						"name": "Custom3",
+						"nameKey": "eq.presetNames.custom3",
+						"nameRaw": "Custom3",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1414,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							}
+						]
+					}
+				],
+				"eqModeCount": {
+					"total": 10,
+					"predefined": 7
+				},
+				"volume": 37,
+				"leds": [
+					{
+						"index": 0,
+						"name": "",
+						"r": 255,
+						"g": 0,
+						"b": 0,
+						"status": 1,
+						"color": "#ff0000"
+					}
+				],
+				"ledSwitch": 1,
+				"gainMode": 0,
+				"filterMode": 2,
+				"gameMode": 0,
+				"dsdMode": 0,
+				"sampleRate": 44100,
+				"upsampleEnable": false,
+				"firmwareVersion": "1.4.6",
+				"eqEnableMode": 0,
+				"currentUacName": "UAC2.0",
+				"uacInfo": {
+					"count": 2,
+					"names": ["UAC2.0", "UAC1.0"]
+				}
+			}
+		},
+		{
+			"t": 1325465.6,
+			"label": "read all, UAC 1.0",
+			"adapter": "fosi-cc",
+			"store": "ds3Store",
+			"state": {
+				"currentUacMode": 1,
+				"currentEqModeIndex": 7,
+				"eqEnable": true,
+				"eqModeInfo": [
+					{
+						"index": 0,
+						"mode": 0,
+						"gain": -6,
+						"name": "Jazz",
+						"nameKey": "eq.presetNames.jazz",
+						"nameRaw": "JAZZ",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 32,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 64,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 3,
+								"mode": 0,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 0,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 1,
+						"mode": 1,
+						"gain": -3,
+						"name": "Pop",
+						"nameKey": "eq.presetNames.pop",
+						"nameRaw": "POP",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 32,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 3,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 64,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 1,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": -1.5,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": -3.5,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 3.5,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 1.5,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 1,
+								"mode": 1,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 1,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 2,
+						"mode": 2,
+						"gain": -5,
+						"name": "Rock",
+						"nameKey": "eq.presetNames.rock",
+						"nameRaw": "ROCK",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 32,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 1.5,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 64,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": -1.5,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 1.5,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 2,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 2,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 3,
+						"mode": 3,
+						"gain": -11,
+						"name": "Classic",
+						"nameKey": "eq.presetNames.classic",
+						"nameRaw": "CLASIC",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 7,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 7,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 3,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": -2,
+								"mode": 3,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 4,
+						"mode": 4,
+						"gain": -10,
+						"name": "R&B",
+						"nameKey": "eq.presetNames.rb",
+						"nameRaw": "R&B",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 3.799999952316284,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 6.300000190734863,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 4.800000190734863,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 1.7000000476837158,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 3.200000047683716,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 4.699999809265137,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 4.300000190734863,
+								"mode": 4,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 3.200000047683716,
+								"mode": 4,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 5,
+						"mode": 5,
+						"gain": 0,
+						"name": "3A Game",
+						"nameKey": "eq.presetNames.aaaGame",
+						"nameRaw": "3A Game",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 53,
+								"centerFreq": 64,
+								"filterType": 9,
+								"gain": 6,
+								"mode": 5,
+								"q": 1.2000000476837158
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 27,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 5,
+								"q": 4.5
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 37,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 5,
+								"q": 6.71999979019165
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1388,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": -3.5,
+								"mode": 5,
+								"q": 0.7200000286102295
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 800,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": -1,
+								"mode": 5,
+								"q": 2.5
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 2666,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 5,
+								"q": 1.5
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 6956,
+								"centerFreq": 8000,
+								"filterType": 10,
+								"gain": 10,
+								"mode": 5,
+								"q": 1.149999976158142
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 35555,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": 9,
+								"mode": 5,
+								"q": 0.44999998807907104
+							}
+						]
+					},
+					{
+						"index": 6,
+						"mode": 6,
+						"gain": 0,
+						"name": "FPS",
+						"nameKey": "eq.presetNames.fps",
+						"nameRaw": "FPS",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 45,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": -2,
+								"mode": 6,
+								"q": 0.699999988079071
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 176,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": -1,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 707,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 1,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1414,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 3,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 2000,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 6,
+								"q": 1
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 5633,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 4,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 11267,
+								"centerFreq": 8000,
+								"filterType": 2,
+								"gain": 2,
+								"mode": 6,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 22535,
+								"centerFreq": 16000,
+								"filterType": 2,
+								"gain": -2,
+								"mode": 6,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 7,
+						"mode": 7,
+						"gain": 0,
+						"name": "Custom1",
+						"nameKey": "eq.presetNames.custom1",
+						"nameRaw": "Custom1",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 261.9360046386719,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 2011.217041015625,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1414,
+								"centerFreq": 4000,
+								"filterType": 10,
+								"gain": 0,
+								"mode": 7,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 8,
+						"mode": 8,
+						"gain": 0,
+						"name": "Custom2",
+						"nameKey": "eq.presetNames.custom2",
+						"nameRaw": "Custom2",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1414,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 8,
+								"q": 0.7099999785423279
+							}
+						]
+					},
+					{
+						"index": 9,
+						"mode": 9,
+						"gain": 0,
+						"name": "Custom3",
+						"nameKey": "eq.presetNames.custom3",
+						"nameRaw": "Custom3",
+						"bandList": [
+							{
+								"bandIndex": 0,
+								"bandwidth": 1,
+								"centerFreq": 32,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 1,
+								"bandwidth": 1,
+								"centerFreq": 64,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 2,
+								"bandwidth": 1,
+								"centerFreq": 125,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 3,
+								"bandwidth": 1,
+								"centerFreq": 250,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 4,
+								"bandwidth": 1,
+								"centerFreq": 500,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 5,
+								"bandwidth": 1,
+								"centerFreq": 1000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 6,
+								"bandwidth": 1,
+								"centerFreq": 2000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							},
+							{
+								"bandIndex": 7,
+								"bandwidth": 1414,
+								"centerFreq": 4000,
+								"filterType": 2,
+								"gain": 0,
+								"mode": 9,
+								"q": 0.7099999785423279
+							}
+						]
+					}
+				],
+				"eqModeCount": {
+					"total": 10,
+					"predefined": 7
+				},
+				"volume": 37,
+				"leds": [
+					{
+						"index": 0,
+						"name": "",
+						"r": 0,
+						"g": 255,
+						"b": 255,
+						"status": 1,
+						"color": "#00ffff"
+					}
+				],
+				"ledSwitch": 1,
+				"gainMode": 0,
+				"filterMode": 2,
+				"gameMode": 1,
+				"dsdMode": 0,
+				"sampleRate": 48000,
+				"upsampleEnable": false,
+				"firmwareVersion": "1.4.6",
+				"eqEnableMode": 0,
+				"currentUacName": "UAC1.0",
+				"uacInfo": {
+					"count": 2,
+					"names": ["UAC2.0", "UAC1.0"]
+				}
+			}
+		}
+	],
+	"events": [
+		{
+			"t": 13149.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13150.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a601040600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13171.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "779100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13172.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177910a070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13194.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13194.8,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b00faffffff4a415a5a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13195.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13195.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b01fdffffff504f500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13196.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13196.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b02fbffffff524f434b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13197.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b03000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13197.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b03f5ffffff434c415349430000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13197.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13198.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b04f6ffffff5226420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13198.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b05000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13198.8,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b050000000033412047616d6500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13199.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b06000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13199.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b06000000004650530000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13199.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b07000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13199.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b0700000000437573746f6d3100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13200.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b08000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13200.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b08000000007573657220320000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13200.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b09000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13200.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b09000000007573657233000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13224.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13224.7,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0000020000fa428fc2353f0000004200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13225,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13225.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e00010200007a438fc2353f0000804200008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13225.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13225.7,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0002020000fa438fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13226,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13226.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e00030200007a448fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13226.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13226.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0004020000fa448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13226.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13227.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e00050200007a458fc2353f0000803f00000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13227.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13227.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0006020000fa458fc2353f0000803f00004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13227.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13227.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e00070200007a468fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13228.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13228.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e010002000000428fc2353f0000004200004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13228.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13229,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e010102000080428fc2353f000080420000803f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13229.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13229.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e01020200007a438fc2353f0000803f0000c0bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13229.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13230,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0103020000fa438fc2353f0000803f000060c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13230.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13230.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e01040200007a448fc2353f0000803f00006040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13230.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13230.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0105020000fa448fc2353f0000803f0000c03f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13231,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13231.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0106020000fa458fc2353f0000803f0000803f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13231.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13231.7,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e01070200007a468fc2353f0000803f00000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13232.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13232.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e020002000000428fc2353f000000420000c03f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13232.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13232.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0201020000fa428fc2353f0000804200000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13232.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13233.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e02020200007a438fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13234.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13234.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0203020000fa438fc2353f0000803f0000c0bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13234.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13235,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e02040200007a448fc2353f0000803f0000c03f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13235.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13235.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e02050200007a458fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13235.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13235.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0206020000fa458fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13236.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13236.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e02070200007a468fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13236.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13236.8,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e030002000000428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13237,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13237.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e030102000080428fc2353f0000803f0000e040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13237.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13237.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0302020000fa428fc2353f0000803f0000e040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13237.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13238.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e03030200007a438fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13238.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13238.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0304020000fa438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13238.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13238.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e03050200007a458fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13239.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13239.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0306020000fa458fc2353f0000803f00000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13239.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13240,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e03070200007a468fc2353f0000803f000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13240.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13240.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e040002000000428fc2353f0000803f33337340000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13240.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13240.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e040102000080428fc2353f0000803f9a99c940000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13241.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13241.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0402020000fa428fc2353f0000803f9a999940000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13241.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13241.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0403020000fa438fc2353f0000803f9a99d93f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13242.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13242.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e04040200007a448fc2353f0000803fcdcc4c40000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13242.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13242.7,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0405020000fa448fc2353f0000803f66669640000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13242.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13243.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e04060200007a458fc2353f0000803f9a998940000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13243.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13243.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0407020000fa458fc2353f0000803fcdcc4c40000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13243.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13244.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e050009000080429a99993f000054420000c040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13244.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13244.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0501020000fa42000090400000d84100008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13244.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13244.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05020200007a433d0ad7400000144200000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13245.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13245.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05030200007a44ec51383f0080ad44000060c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13245.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13246.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0504020000fa440000204000004844000080bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13246.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13247.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05050200007a450000c03f00a0264500000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13247.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13247.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05060a0000fa453333933f0060d94500002041000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13247.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13248.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05070200007a466666e63e00e30a4700001041000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13248.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13248.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e060002000000423333333f00003442000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13248.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13248.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0601020000fa428fc2353f00003043000080bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13249.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13249.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0602020000fa438fc2353f00c030440000803f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13249.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13249.8,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e06030200007a448fc2353f00c0b04400004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13250,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13250.3,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0604020000fa440000803f0000fa4400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13250.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13250.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e06050200007a458fc2353f0008b04500008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13250.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13251,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0606020000fa458fc2353f000c304600000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13251.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13251.3,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e06070200007a468fc2353f000eb046000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13251.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13251.7,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e07000200007c428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13252.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13252.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e070102000080428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13253.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13253.3,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0702020000fa428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13253.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13254,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e07030200007a438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13254.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13254.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0704020000fa438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13255.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13255.3,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e07050200007a448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13255.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13256.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0706020000fa448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13256.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13256.8,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e07070200007a458fc2353f00c0b04400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13257.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13257.7,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e080002000000428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13257.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13258.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e080102000080428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13258.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13258.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0802020000fa428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13258.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13258.8,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e08030200007a438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13259,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13259.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0804020000fa438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13259.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13259.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e08050200007a448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13259.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13259.8,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0806020000fa448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13261.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13261.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e08070200007a458fc2353f00c0b04400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13262.1,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13262.3,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e090002000000428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13262.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13262.7,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e090102000080428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13262.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13263.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0902020000fa428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13263.3,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13263.5,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e09030200007a438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13263.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13263.7,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0904020000fa438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13264,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13264.1,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e09050200007a448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13264.4,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13264.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0906020000fa448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13264.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13264.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e09070200007a458fc2353f00c0b04400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13286.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "779e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13286.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779e01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13308.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "779400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13308.9,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779425000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13330.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13330.7,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13352.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13353.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a302000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13375.5,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13375.8,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13397.2,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "778100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13397.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13419.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "779c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13421.2,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779c00554143322e30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13443.7,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "779a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13444.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779a02554143322e300000554143312e3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13466.8,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "779700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13467.6,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779700010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13489.6,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "779f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 13490.4,
+			"device": 0,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779f44ac0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1297004.9,
+			"device": 0,
+			"op": "output",
+			"reportId": 1,
+			"data": "779b01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+			"error": "Failed to write the report."
+		},
+		{
+			"t": 1300537.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300538.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a601040600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300538.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300539.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177910a070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300541.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300541.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779e01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300542.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300543.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b00faffffff4a415a5a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300543.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300543.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b01fdffffff504f500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300544.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300544.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b02fbffffff524f434b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300545.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b03000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300545.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b03f5ffffff434c415349430000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300545.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300546,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b04f6ffffff5226420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300546.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b05000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300546.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b050000000033412047616d6500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300547,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b06000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300547.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b06000000004650530000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300547.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b07000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300548,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b07000000007573657220310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300548.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b08000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300548.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b08000000007573657220320000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300548.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b09000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300549.2,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b09000000007573657233000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300549.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778bff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300549.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b07000000007573657220310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300550.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300550.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e070002000000428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300550.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300551.2,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e070102000080428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300551.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300551.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0702020000fa428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300552.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300552.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e070302cff782438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300552.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300553.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0704020000fa438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300553.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300553.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e07050200007a448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300554.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300554.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e070602f266fb448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300554.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300555.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e07070a00007a458fc2353f00c0b04400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300555.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300555.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779c01554143312e30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300556.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300556.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779700010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300557.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300557.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177980000ffff010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300558,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300558.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779425000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300558.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300558.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779f80bb0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300559.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300559.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300559.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300559.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a501000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300560.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300560.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a302000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300560.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1300561.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325068.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325069.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a601040600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325091.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325092.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177910a070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325115.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325115.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b00faffffff4a415a5a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325116.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325116.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b01fdffffff504f500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325119,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325119.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b02fbffffff524f434b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325120.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b03000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325120.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b03f5ffffff434c415349430000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325121.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325121.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b04f6ffffff5226420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325122.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b05000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325122.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b050000000033412047616d6500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325123.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b06000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325123.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b06000000004650530000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325124.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b07000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325125,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b07000000007573657220310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325125.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b08000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325126,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b08000000007573657220320000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325126.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778b09000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325126.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778b09000000007573657233000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325150.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325150.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0000020000fa428fc2353f0000004200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325151.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325151.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e00010200007a438fc2353f0000804200008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325152,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325152.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0002020000fa438fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325152.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325153.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e00030200007a448fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325153.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325154,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0004020000fa448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325154.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325154.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e00050200007a458fc2353f0000803f00000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325155.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325155.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0006020000fa458fc2353f0000803f00004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325155.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e00070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325157.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e00070200007a468fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325157.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325158.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e010002000000428fc2353f0000004200004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325158.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325159,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e010102000080428fc2353f000080420000803f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325159.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325159.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e01020200007a438fc2353f0000803f0000c0bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325160.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325160.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0103020000fa438fc2353f0000803f000060c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325160.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325161,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e01040200007a448fc2353f0000803f00006040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325161.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325161.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0105020000fa448fc2353f0000803f0000c03f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325162.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325162.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0106020000fa458fc2353f0000803f0000803f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325162.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e01070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325163.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e01070200007a468fc2353f0000803f00000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325163.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325163.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e020002000000428fc2353f000000420000c03f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325164.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325164.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0201020000fa428fc2353f0000804200000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325164.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325165.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e02020200007a438fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325165.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325166,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0203020000fa438fc2353f0000803f0000c0bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325166.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325166.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e02040200007a448fc2353f0000803f0000c03f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325167,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325167.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e02050200007a458fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325167.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325168.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0206020000fa458fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325168.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e02070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325169.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e02070200007a468fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325169.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325169.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e030002000000428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325170.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325171.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e030102000080428fc2353f0000803f0000e040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325172.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325172.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0302020000fa428fc2353f0000803f0000e040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325173.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325173.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e03030200007a438fc2353f0000803f00008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325173.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325174.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0304020000fa438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325174.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325174.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e03050200007a458fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325175,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325175.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0306020000fa458fc2353f0000803f00000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325175.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e03070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325175.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e03070200007a468fc2353f0000803f000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325176.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325176.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e040002000000428fc2353f0000803f33337340000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325176.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325177.2,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e040102000080428fc2353f0000803f9a99c940000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325177.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325177.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0402020000fa428fc2353f0000803f9a999940000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325178.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325178.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0403020000fa438fc2353f0000803f9a99d93f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325178.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325179,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e04040200007a448fc2353f0000803fcdcc4c40000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325179.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325179.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0405020000fa448fc2353f0000803f66669640000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325180,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325180.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e04060200007a458fc2353f0000803f9a998940000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325180.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e04070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325180.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0407020000fa458fc2353f0000803fcdcc4c40000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325181.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325181.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e050009000080429a99993f000054420000c040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325181.9,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325182.2,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0501020000fa42000090400000d84100008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325182.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325182.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05020200007a433d0ad7400000144200000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325183.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325183.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05030200007a44ec51383f0080ad44000060c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325184.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325184.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0504020000fa440000204000004844000080bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325185,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325185.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05050200007a450000c03f00a0264500000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325185.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325186,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05060a0000fa453333933f0060d94500002041000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325186.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e05070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325186.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e05070200007a466666e63e00e30a4700001041000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325187,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325187.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e060002000000423333333f00003442000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325187.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325188,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0601020000fa428fc2353f00003043000080bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325188.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325188.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0602020000fa438fc2353f00c030440000803f000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325189,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325189.2,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e06030200007a448fc2353f00c0b04400004040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325189.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325189.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0604020000fa440000803f0000fa4400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325190.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325190.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e06050200007a458fc2353f0008b04500008040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325190.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325191,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0606020000fa458fc2353f000c304600000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325191.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e06070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325191.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e06070200007a468fc2353f000eb046000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325191.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325192.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e070002000000428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325193.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325193.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e070102000080428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325194.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325194.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0702020000fa428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325195.4,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325195.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e070302cff782438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325196.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325196.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0704020000fa438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325200,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325200.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e07050200007a448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325201.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325201.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e070602f266fb448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325202.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e07070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325202.4,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e07070a00007a458fc2353f00c0b04400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325203.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325203.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e080002000000428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325204,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325204.2,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e080102000080428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325204.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325204.7,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0802020000fa428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325205.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325205.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e08030200007a438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325205.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325206,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0804020000fa438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325206.3,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325206.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e08050200007a448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325207,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325207.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0806020000fa448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325207.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e08070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325207.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e08070200007a458fc2353f00c0b04400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325208.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325208.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e090002000000428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325209,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325209.2,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e090102000080428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325209.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325209.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0902020000fa428fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325210.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325212.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e09030200007a438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325213,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325213.3,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0904020000fa438fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325213.6,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325213.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e09050200007a448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325214.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325214.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e0906020000fa448fc2353f0000803f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325214.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778e09070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325215.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778e09070200007a458fc2353f00c0b04400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325237.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325237.8,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779e01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325259.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325260.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779425000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325281.7,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325282.2,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325304,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325304.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a302000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325327.5,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "77a500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325328.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "0177a501000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325350.2,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "778100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325351.1,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01778100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325373.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325373.6,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779c01554143312e30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325396.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325398.2,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779a02554143322e300000554143312e3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325420.8,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325421.5,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779700010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325444.1,
+			"device": 1,
+			"op": "output",
+			"reportId": 1,
+			"data": "779f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"t": 1325444.9,
+			"device": 1,
+			"op": "feature-in",
+			"reportId": 1,
+			"data": "01779f80bb0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+		}
+	]
+}

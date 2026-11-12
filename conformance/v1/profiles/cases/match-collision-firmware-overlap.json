@@ -1,0 +1,9 @@
+{
+	"description": "Overlapping firmware ranges collide; a missing bound is unbounded.",
+	"spec": "§3",
+	"profiles": [
+		{ "id": "device-a", "match": { "firmware": { "max": "2.1" } } },
+		{ "id": "device-b", "match": { "firmware": { "min": "2.0.5" } } }
+	],
+	"expect": [{ "code": "match-collision", "path": "/match/usb/0", "profileId": "device-b" }]
+}

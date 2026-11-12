@@ -1,0 +1,6 @@
+{
+	"description": "bandCount: null is for software only.",
+	"spec": "§2",
+	"profile": { "bandCount": null },
+	"expect": [{ "code": "schema", "path": "/bandCount" }]
+}

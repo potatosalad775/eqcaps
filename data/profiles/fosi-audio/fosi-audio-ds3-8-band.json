@@ -1,0 +1,34 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fosi-audio-ds3",
+	"id": "fosi-audio-ds3-8-band",
+	"device": { "brand": "Fosi Audio", "model": "DS3" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x152a", "productId": "0x889b", "productName": "Fosi Audio DS3" },
+			{ "vendorId": "0x20b1", "productId": "0x80d5", "productName": "Fosi Audio DS3" },
+			{ "vendorId": "0x152a", "productName": "Fosi Audio DS3" }
+		],
+		"firmware": { "max": "1.4.15" }
+	},
+	"bandCount": 8,
+	"meta": {
+		"status": "maintainer-verified",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "https://cc.fosiaudio.com/, read in UAC 2.0 and UAC 1.0 mode and recorded: packages/device-bridge/test/recordings/2026-10-28-fosi-audio-ds3.json",
+				"firmware": "1.4.6",
+				"date": "2026-10-28",
+				"by": "potatosalad775"
+			},
+			{ "kind": "vendor-app", "ref": "https://cc.fosiaudio.com/", "date": "2026-10-28" },
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/fosi_audio_ds3.json",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Firmware before 1.4.15, where every preset holds 8 bands; otherwise as fosi-audio-ds3. Upsampling needs firmware 1.4.9 or later. Read on firmware 1.4.6: 10 presets, the 7 built-in ones (0 to 6) named by the device as listed (\"CLASIC\" sic; the web app shows Classic) and the user presets 7 to 9 (devicePEQ listed 7 to 11); each preset has its own pre-gain, which this firmware already has. The pre-gain range, -24 to 0 dB, was checked in the web app on 1.4.6."
+	}
+}

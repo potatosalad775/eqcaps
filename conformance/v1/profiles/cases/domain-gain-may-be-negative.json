@@ -1,0 +1,6 @@
+{
+	"description": "gain domains may be entirely negative; only freq and q must be positive.",
+	"spec": "§4",
+	"profile": { "band": { "gain": { "min": -12, "max": -1, "step": 0.5 } } },
+	"expect": []
+}

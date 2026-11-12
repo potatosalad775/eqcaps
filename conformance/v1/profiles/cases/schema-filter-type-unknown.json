@@ -1,0 +1,6 @@
+{
+	"description": "Filter types are the Equalizer APO codes or x-<name>; LSQ is modernGraphTool spelling.",
+	"spec": "§5.3",
+	"profile": { "band": { "types": ["LSQ"] } },
+	"expect": [{ "code": "schema", "path": "/band/types/0" }]
+}

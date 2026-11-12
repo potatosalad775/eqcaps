@@ -1,0 +1,126 @@
+# Contributing to eqcaps
+
+Thanks for helping. Most contributions are **device data**: a new profile, or a correction to one.
+Code and format changes are welcome too.
+
+## Licensing of contributions
+
+By opening a pull request you agree that:
+
+- what you contribute to `data/`, `schema/` and `conformance/` is dedicated to the public domain
+  under [CC0 1.0](LICENSE-DATA), like everything already there;
+- code you contribute (`packages/`, `apps/`, `scripts/`) is licensed under [MIT](LICENSE).
+
+Don't submit material you can't license that way. Copied vendor code, vendor apps' bundles and
+reverse-engineered vendor material are out. Facts are fine: a band count or a gain range you
+learned from a vendor app can go into a profile, with a source that names the app, its version and
+in plain words what you read, and no name from inside the app (D52).
+
+## Adding or fixing a device
+
+The format is defined in [docs/SPEC.md](docs/SPEC.md). In short:
+
+1. One file per EQ engine: `data/profiles/<brand>/<id>.json`, where `<brand>` is the brand in
+   lowercase with dashes (`jds-labs`) and `<id>` is `<brand>-<model>` (`jds-labs-element-iv`).
+   Ids are permanent. To rename, deprecate the old profile with `replacedBy`.
+2. Start the file with `"$schema": "../../../schema/v1/source.schema.json"`, so your editor
+   validates and autocompletes as you type.
+3. Write the values the engine is **told**, in Hz, dB and RBJ-cookbook Q, the way its own software
+   means them. Fold in unit conversions (register units, octaves → Q). Don't correct for how the
+   device sounds: if it's reported to place filters off what it's told, say so in `meta.notes`
+   (DECISIONS D39). If the vendor's own app converts a value before sending it, the handler does
+   too, through the profile's `protocol` options.
+4. Say where every claim comes from in `meta.sources`, and pick the `meta.status` your evidence
+   supports (SPEC §10):
+   - `draft`: no evidence beyond handler code or a report;
+   - `community-verified`: you supplied counting evidence (vendor docs, what the vendor's app lets
+     you set, or a measurement);
+   - `maintainer-verified`: a maintainer checked it on their own hardware or against vendor docs.
+5. Put evidence files (measurements, read-backs) in `data/evidence/<id>/`. Remove anything
+   personal first: Bluetooth names people gave their devices, serial numbers, MAC addresses.
+
+Devices that share a chip can share a base in `data/bases/` through `extends` (SPEC §11). A
+protocol family's base (`walkplay-hid`, `fiio-usb-hid`) holds what every device on that protocol
+shares, and the shape bases extend it. A device file that extends a base inherits `kind` and
+`schemaVersion` too. In `match`, list several vendor ids, product ids or names in one entry rather
+than writing an entry per combination (SPEC §3). A device whose vendor and product id a group
+profile (`device.group: true`) also lists needs no carve-out: leave the group's match alone and
+give the device the same pair, because the group yields at equal specificity (D43). Walkplay's
+groups (`data/profiles/walkplay/walkplay-schemeno*-devices.json`) take their `match.usb` from a
+snapshot of its product catalog (D51), so don't edit it; add a device profile instead.
+
+No git needed: the [inspector](https://potatosalad775.github.io/eqcaps/) edits a profile as a form
+or as JSON, checks it as CI will, and opens the pull request on GitHub for you ("Edit this
+profile" on a profile's page, or "Edit" for a new one). With a supported device, **Connect** reads
+its EQ, checks it against its profile, and turns what it read into an evidence file you review
+before it leaves the page. Attach that file to the pull request; a maintainer commits it to
+`data/evidence/`. A read-back is cited as a `community` source: it shows values the device holds,
+not its limits, so it supports a fix but doesn't verify a profile.
+
+Most profiles were seeded once from devicePEQ, modernGraphTool and AutoEQ
+([DECISIONS D26](docs/DECISIONS.md)) and are `draft`. Their notes say what is known
+to be uncertain. Checking one against your device is one of the most useful things you can do.
+
+## Adding a device to the bridge
+
+If an existing protocol already drives your device, a profile is all it needs: its `match` is how
+apps recognize it, and its `protocol` how the bridge drives it ([SPEC §9](docs/SPEC.md)). A
+profile that extends a base inherits the base's `protocol`, so most devices only add what differs,
+such as FiiO's preset slots (the one that turns the EQ off is marked `"bypass": true`); the
+handlers' options are listed in the
+[bridge's README](packages/device-bridge/README.md). No bridge release is needed: apps pick the
+device up with the data. The tests check that the protocol is one the bridge can drive and that
+the profile only allows what it can write. A recorded exchange with the device in
+`packages/device-bridge/test/captures/` makes it a regression test. New protocols need a handler,
+a codec and a session: see the existing ones and [DECISIONS D33](docs/DECISIONS.md).
+
+The vendor's own app is the reference for what a handler sends and what a profile allows
+([DECISIONS D50](docs/DECISIONS.md)): its ranges, its write sequence, its device settings. For a
+vendor web app, the [WebHID recorder](tools/userscripts/README.md) records what the app sends and
+the device answers; the bridge's tests then check the handler and the profile against it.
+
+## Checking your change
+
+Requires Node 22.18 or later.
+
+```sh
+npm install
+npm run data:validate   # layout, schema, semantic and cross-profile rules
+npm run lint            # formatting (run `npm run format` to fix)
+npm test
+```
+
+CI runs the same checks on every pull request and marks each problem on its line in the diff.
+
+## Working on the code
+
+How the packages fit together is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), and the
+invariants there hold for every change.
+
+```sh
+npm run lint           # Prettier + ESLint
+npm run check          # generated files and conformance vectors up to date + typecheck
+npm test
+npm run build
+npm run codegen        # after editing schema/v1/profile.schema.json
+npm run conformance    # after changing engine behaviour or scripts/conformance.ts
+npm run data:build     # publish /v1/ into dist/site/
+npm run inspector:dev  # the inspector, reading the local dist/site/v1/ and data/
+npm run release -- 0.3.0-rc.1 --pack  # package tarballs in dist/pack/, to try in another app
+npm run release -- minor --dry-run   # owner only: major/minor/patch bump the latest v* tag
+```
+
+Never edit `schema/v1/source.schema.json`, `*.generated.ts` or the engine vectors in
+`conformance/v1/*.json` by hand: they are generated, and `npm run check` fails on drift. Every
+semantic validation rule needs an issue code in `packages/core/src/issues.ts` and a case in
+`conformance/v1/profiles/cases/` that triggers it. A test checks both.
+
+## Review
+
+Every merge needs one maintainer's approval. The reviewer checks your evidence against the status
+you chose. Changes to `schema/`, `docs/SPEC.md`, `packages/core/` and `.github/` also need
+a code owner. Decisions behind the format are in [docs/DECISIONS.md](docs/DECISIONS.md); a
+change to one needs a new or amended entry there.
+
+Not sure how to describe a device? Open a [new device issue](../../issues/new/choose) with what you
+know, and we'll work it out together.

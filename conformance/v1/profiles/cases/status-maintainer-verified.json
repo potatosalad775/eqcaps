@@ -1,0 +1,18 @@
+{
+	"description": "A counting source with by satisfies maintainer-verified; the approving maintainer confirms who by is.",
+	"spec": "§10",
+	"profile": {
+		"meta": {
+			"status": "maintainer-verified",
+			"sources": [
+				{
+					"kind": "measurement",
+					"ref": "evidence/base/2026-10-02-a1b2c3.json",
+					"date": "2026-10-02",
+					"by": "Maintainer-A"
+				}
+			]
+		}
+	},
+	"expect": []
+}

@@ -1,0 +1,110 @@
+{
+	"description": "assign(profile, filters) (SPEC §13.5). Property op: expect.valid says whether an assignment exists in which every active filter has a slot that accepts it as it is; if so, assign must return one. Inactive filters always get no slot.",
+	"vectors": [
+		{
+			"description": "type-partitioned slots",
+			"profile": "examples/b-jds-labs-element-iv",
+			"op": "assign",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 },
+					{ "type": "HSC", "freq": 8000, "q": 0.7, "gain": 2 },
+					{ "type": "PK", "freq": 2000, "q": 1, "gain": -1 },
+					{ "type": "LSC", "freq": 100, "q": 0.7, "gain": 4 },
+					{ "type": "PK", "freq": 500, "q": 1, "gain": 0 }
+				]
+			},
+			"expect": { "valid": true }
+		},
+		{
+			"description": "frequency-partitioned slots, input reversed",
+			"profile": "examples/c-partitioned-windows",
+			"op": "assign",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 5000, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 2000, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 500, "q": 1, "gain": 1 },
+					{ "type": "LSC", "freq": 100, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": { "valid": true }
+		},
+		{
+			"description": "first fit would block the valid assignment",
+			"profile": {
+				"bandCount": 2,
+				"bands": [{ "index": 1, "freq": { "min": 1000, "max": 2000 } }]
+			},
+			"op": "assign",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 1500, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 8000, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": { "valid": true }
+		},
+		{
+			"description": "gain-dependent windows",
+			"profile": "examples/d-gain-dependent-window",
+			"op": "assign",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": -3 },
+					{ "type": "PK", "freq": 300, "q": 1, "gain": 3 },
+					{ "type": "PK", "freq": 4000, "q": 1, "gain": 2 }
+				]
+			},
+			"expect": { "valid": true }
+		},
+		{
+			"description": "graphic: one filter per centre",
+			"profile": "examples/e-graphic-10",
+			"op": "assign",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 1000, "q": 1.41, "gain": 3 },
+					{ "type": "PK", "freq": 31, "q": 1.41, "gain": -2 },
+					{ "type": "PK", "freq": 16000, "q": 1.41, "gain": 4 }
+				]
+			},
+			"expect": { "valid": true }
+		},
+		{
+			"description": "more filters than slots",
+			"profile": {},
+			"op": "assign",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 3 },
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 0.5 },
+					{ "type": "PK", "freq": 400, "q": 1, "gain": -6 },
+					{ "type": "PK", "freq": 800, "q": 1, "gain": 2 },
+					{ "type": "PK", "freq": 1600, "q": 1, "gain": 1 }
+				]
+			},
+			"expect": { "valid": false }
+		},
+		{
+			"description": "a type no slot allows",
+			"profile": {},
+			"op": "assign",
+			"input": { "filters": [{ "type": "LSC", "freq": 100, "q": 0.7, "gain": 3 }] },
+			"expect": { "valid": false }
+		},
+		{
+			"description": "unbounded",
+			"profile": "examples/g-equalizer-apo",
+			"op": "assign",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 0 },
+					{ "type": "HPQ", "freq": 30, "q": 0.707, "gain": 0 }
+				]
+			},
+			"expect": { "valid": true }
+		}
+	]
+}

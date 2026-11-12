@@ -1,0 +1,29 @@
+{
+	"description": "A profile that lists device controls (format 1.2) must declare schemaVersion 1.2 or later.",
+	"spec": "§15",
+	"profile": {
+		"schemaVersion": "1.1",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{
+					"id": "volume",
+					"name": "Volume",
+					"kind": "range",
+					"role": "volume",
+					"range": {
+						"min": 0,
+						"max": 60,
+						"step": 1
+					}
+				}
+			]
+		}
+	},
+	"expect": [
+		{
+			"code": "version-too-low",
+			"path": "/schemaVersion"
+		}
+	]
+}

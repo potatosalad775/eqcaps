@@ -1,0 +1,88 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "tanchjim-walkplay",
+	"abstract": true,
+	"id": "tanchjim-walkplay-space",
+	"schemaVersion": "1.2",
+	"bandCount": 10,
+	"protocol": {
+		"controls": [
+			{
+				"id": "dacFilter",
+				"name": "Filter settings",
+				"kind": "choice",
+				"role": "dac-filter",
+				"values": [
+					{ "value": 1, "name": "Low latency fast steep descent" },
+					{ "value": 2, "name": "Fast descent with phase compensation" },
+					{ "value": 3, "name": "Low latency slow descent" },
+					{ "value": 4, "name": "Slow descent with phase compensation" },
+					{ "value": 5, "name": "Non over-sampling filter" }
+				]
+			},
+			{
+				"id": "gainLevel",
+				"name": "Gain setting",
+				"kind": "choice",
+				"role": "output-gain",
+				"values": [
+					{ "value": 0, "name": "Low gain 2Vrms" },
+					{ "value": 1, "name": "High gain 4Vrms" }
+				]
+			},
+			{
+				"id": "workMode",
+				"name": "DAC mode",
+				"kind": "choice",
+				"role": "amp-mode",
+				"values": [
+					{ "value": 0, "name": "Class AB" },
+					{ "value": 1, "name": "Class H" }
+				]
+			},
+			{
+				"id": "volume",
+				"name": "Volume",
+				"kind": "range",
+				"role": "volume",
+				"range": { "min": 0, "max": 60, "step": 1 }
+			},
+			{
+				"id": "micGain",
+				"name": "Microphone gain",
+				"kind": "range",
+				"role": "mic-gain",
+				"range": { "min": -15, "max": 15, "step": 1 },
+				"unit": "dB"
+			},
+			{
+				"id": "leftGain",
+				"name": "Channel balance (left)",
+				"kind": "range",
+				"role": "balance-left",
+				"range": { "min": -127, "max": 0, "step": 1 },
+				"unit": "dB"
+			},
+			{
+				"id": "rightGain",
+				"name": "Channel balance (right)",
+				"kind": "range",
+				"role": "balance-right",
+				"range": { "min": -127, "max": 0, "step": 1 },
+				"unit": "dB"
+			},
+			{ "id": "dre", "name": "DRE", "kind": "toggle" }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): the commands it sends, its DAC and headphone amplifier screen and its microphone gain setting",
+				"date": "2026-11-01"
+			}
+		],
+		"notes": "Space II, Space Pro and Space Pro AT: the app gives them 10 bands and the same DAC screen, driven with the handler's control commands: DAC filter (0x11), gain (0x19), DAC mode (0x1D; 0 is class AB here, where NICEHCK's PureAural has 0 as class H), volume 0 to 60 (0x85, followed by [1,0x04]; the app's slider runs 0 to 100 and sends ceil(slider × 0.6), and the Space II clamps a larger value to 60, seen 2026-11-01 in uniPEQ), microphone gain as on the other models (tanchjim-walkplay-mic), balance (0x16, one channel cut by up to 127 dB, the other at 0) and DRE (0x32, which the device holds as 0 on and 1 off; the handler turns it round). The app writes these controls with nothing after them but volume and mic gain. An EQ write used to reset the DAC filter, gain and DAC mode of a Space II: devicePEQ's commit sends two of Walkplay's factory reset commands, which the handler no longer sends."
+	}
+}

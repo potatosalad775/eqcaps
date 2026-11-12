@@ -1,0 +1,20 @@
+{
+	"$schema": "../../../../schema/v1/profile.schema.json",
+	"schemaVersion": "1.0",
+	"id": "equalizer-apo",
+	"kind": "software",
+	"device": { "brand": "Equalizer APO", "model": "Parametric" },
+	"bandCount": null,
+	"band": {
+		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ", "BP", "NO", "AP"],
+		"freq": { "min": 1, "max": 24000 },
+		"q": { "min": 0.01, "max": 100 },
+		"gain": { "min": -30, "max": 30 }
+	},
+	"preamp": { "mode": "manual", "gain": { "min": -30, "max": 30 } },
+	"meta": {
+		"status": "draft",
+		"sources": [{ "kind": "community", "ref": "SPEC §12 example G", "date": "2026-10-02" }],
+		"notes": "SPEC §12 example G: software target, unbounded."
+	}
+}

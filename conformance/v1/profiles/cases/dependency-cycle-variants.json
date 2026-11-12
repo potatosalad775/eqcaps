@@ -1,0 +1,13 @@
+{
+	"description": "Variant dependencies are acyclic.",
+	"spec": "§6",
+	"profile": {
+		"band": {
+			"variants": [
+				{ "when": { "freq": { "gt": 1000 } }, "gain": { "min": -6, "max": 6, "step": 0.1 } },
+				{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 200, "max": 8000 } }
+			]
+		}
+	},
+	"expect": [{ "code": "dependency-cycle", "path": "/band/variants" }]
+}

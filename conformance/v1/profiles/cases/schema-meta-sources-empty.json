@@ -1,0 +1,6 @@
+{
+	"description": "sources is always non-empty.",
+	"spec": "§10",
+	"profile": { "meta": { "sources": [] } },
+	"expect": [{ "code": "schema", "path": "/meta/sources" }]
+}

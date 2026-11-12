@@ -1,0 +1,6 @@
+{
+	"description": "\"independent\" is reserved in v1.",
+	"spec": "§9",
+	"profile": { "channels": "independent" },
+	"expect": [{ "code": "schema", "path": "/channels" }]
+}

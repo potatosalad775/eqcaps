@@ -1,0 +1,6 @@
+{
+	"description": "Grid membership is tolerance-based, so non-decimal steps like 1/14 work.",
+	"spec": "§4",
+	"profile": { "band": { "q": { "min": 0.5, "max": 5, "step": 0.07142857142857142 } } },
+	"expect": []
+}

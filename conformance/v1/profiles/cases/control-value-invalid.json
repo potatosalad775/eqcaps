@@ -1,0 +1,24 @@
+{
+	"description": "disablesEq lists only values the control takes.",
+	"spec": "§9.1",
+	"profile": {
+		"schemaVersion": "1.2",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{
+					"id": "upsample",
+					"name": "Upsample",
+					"kind": "toggle",
+					"disablesEq": [2]
+				}
+			]
+		}
+	},
+	"expect": [
+		{
+			"code": "control-value-invalid",
+			"path": "/protocol/controls/0/disablesEq/0"
+		}
+	]
+}

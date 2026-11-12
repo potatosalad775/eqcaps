@@ -1,0 +1,6 @@
+{
+	"description": "A domain uses exactly one form.",
+	"spec": "§4",
+	"profile": { "band": { "freq": { "values": [100, 200] } } },
+	"expect": [{ "code": "schema", "path": "/band/freq" }]
+}

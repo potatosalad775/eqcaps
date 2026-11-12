@@ -1,0 +1,6 @@
+{
+	"description": "id is lowercase kebab-case.",
+	"spec": "§2",
+	"profile": { "id": "Base_Device" },
+	"expect": [{ "code": "schema", "path": "/id" }]
+}

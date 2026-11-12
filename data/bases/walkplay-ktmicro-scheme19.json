@@ -1,0 +1,48 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"abstract": true,
+	"id": "walkplay-ktmicro-scheme19",
+	"schemaVersion": "1.2",
+	"kind": "hardware",
+	"bandCount": 6,
+	"band": {
+		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ"],
+		"freq": { "min": 20, "max": 20000, "step": 1 },
+		"q": { "min": 0.1, "max": 5, "step": 0.001 },
+		"gain": { "min": -10, "max": 10, "step": 0.1 }
+	},
+	"preamp": { "mode": "none" },
+	"protocol": {
+		"handler": "ktmicro-usb-hid",
+		"options": {
+			"baseRegister": "0x35",
+			"enableRegister": "0x34",
+			"enableLast": true,
+			"typeFlag": 8,
+			"preampRegister": false,
+			"writeWait": 1000,
+			"gainRegister": "0x57"
+		},
+		"controls": [
+			{
+				"id": "globalGainDb",
+				"name": "Global Gain",
+				"kind": "range",
+				"role": "output-gain",
+				"range": { "min": -12, "max": 0, "step": 0.1 },
+				"unit": "dB"
+			}
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): the KT register EQ screen (what an apply and a save send) and its filter type list",
+				"date": "2026-11-12"
+			}
+		],
+		"notes": "Walkplay's own app drives SchemeNo19 as a KT Micro register device, not with the Walkplay protocol: 6 bands from register 0x35, each band a gain register (s16 dB x 10, then the frequency in whole Hz) and a Q register (u16 x 1000, then the type), the same layout as Kiwi Ears and Tanchjim. The type byte is the type code plus 8 (bit 3 always set), and the app masks it with 7 on a read. The app writes register 0x34 with a 1 after the bands, where Kiwi Ears' firmware takes it first; that register is also the EQ switch there. Each write waits up to a second for the device's answer, and the app carries on whatever comes back. A save adds the commit. The bridge does the same, and also writes the DAC offset slider as the Global Gain control: register 0x57 holding minus ten times the dB, -12 to 0 dB in 0.1 dB steps. The editor offers peaking, high shelf, low shelf, high pass and low pass, 20 to 20000 Hz, gain +/-10 dB in 0.1 dB steps and Q 0.1 to 5 (typed as a decimal, 0.001 on the wire), with no pre-gain besides the DAC offset. These are the app's editor limits, and nothing here is confirmed on a device. The bridge does not write the register where the app records which of its own presets is selected (0x16); we have no meaningful index to put there, so the app may show a stale selection after a push. The app has no EQ off switch for these devices; the bridge can still write 0 to register 0x34, which is how Kiwi Ears' KT firmware turns its EQ off. devicePEQ differs: it drives this scheme with its Walkplay handler (6 bands, peaking and shelves, +/-10 dB). Out of scope: the app's microphone (ADC) EQ and ADC gain register 0x3a, and a flash erase command."
+	}
+}

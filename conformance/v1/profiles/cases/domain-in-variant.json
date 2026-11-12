@@ -1,0 +1,8 @@
+{
+	"description": "Variant domains follow the domain rules.",
+	"spec": "§4, §6",
+	"profile": {
+		"band": { "variants": [{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 0, "max": 8000 } }] }
+	},
+	"expect": [{ "code": "domain-not-positive", "path": "/band/variants/0/freq/min" }]
+}

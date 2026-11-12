@@ -1,0 +1,22 @@
+{
+	"$schema": "../../../../schema/v1/profile.schema.json",
+	"schemaVersion": "1.0",
+	"id": "example-gain-dependent-window",
+	"kind": "hardware",
+	"device": { "brand": "Example", "model": "Gain-dependent window" },
+	"match": { "bluetooth": [{ "name": "Example Pods" }] },
+	"bandCount": 8,
+	"band": {
+		"types": ["PK"],
+		"freq": { "min": 20, "max": 20000 },
+		"gain": { "min": -12, "max": 12, "step": 0.5 },
+		"q": { "min": 0.5, "max": 4 },
+		"variants": [{ "when": { "gain": { "gt": 0 } }, "freq": { "min": 200, "max": 8000 } }]
+	},
+	"preamp": { "mode": "auto" },
+	"meta": {
+		"status": "draft",
+		"sources": [{ "kind": "community", "ref": "SPEC §12 example D", "date": "2026-10-02" }],
+		"notes": "SPEC §12 example D: boosts are limited to 200 Hz-8 kHz (AirPods-style; values illustrative)."
+	}
+}

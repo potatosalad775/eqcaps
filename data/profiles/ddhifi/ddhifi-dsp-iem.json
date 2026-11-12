@@ -1,0 +1,55 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"id": "ddhifi-dsp-iem",
+	"schemaVersion": "1.0",
+	"kind": "hardware",
+	"device": { "brand": "ddHiFi", "model": "DSP IEM" },
+	"match": {
+		"usb": [
+			{
+				"vendorId": [
+					"0x0104",
+					"0x011b",
+					"0x011d",
+					"0x0661",
+					"0x0663",
+					"0x0666",
+					"0x0762",
+					"0x0909",
+					"0x0d8c",
+					"0x2fc6",
+					"0x3302",
+					"0x34be",
+					"0x35d8",
+					"0x36a7",
+					"0x373b",
+					"0x60c1",
+					"0x60e1",
+					"0xb445",
+					"0xb44d"
+				],
+				"productName": "ddHiFi DSP IEM - Memory"
+			}
+		]
+	},
+	"bandCount": 8,
+	"band": {
+		"types": ["PK"],
+		"freq": { "min": 20, "max": 20000, "step": 1 },
+		"q": { "min": 0.1015625, "max": 10, "step": 0.00390625 },
+		"gain": { "min": -10, "max": 10, "step": 0.00390625 }
+	},
+	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127.99609375, "step": 0.00390625 } },
+	"protocol": { "handler": "moondrop-usb-hid" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
+				"date": "2026-10-02"
+			}
+		],
+		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits."
+	}
+}

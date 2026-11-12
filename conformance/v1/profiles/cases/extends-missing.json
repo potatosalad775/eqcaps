@@ -1,0 +1,19 @@
+{
+	"description": "extends names an existing file.",
+	"spec": "§11",
+	"files": [
+		{
+			"schemaVersion": "1.0",
+			"id": "device-a",
+			"kind": "hardware",
+			"device": { "brand": "Example", "model": "device-a" },
+			"match": { "usb": [{ "vendorId": "0x0001", "productName": "device-a" }] },
+			"meta": {
+				"status": "draft",
+				"sources": [{ "kind": "community", "ref": "conformance", "date": "2026-10-02" }]
+			},
+			"extends": "no-such-base"
+		}
+	],
+	"expect": [{ "code": "extends-missing", "path": "/extends", "profileId": "device-a" }]
+}

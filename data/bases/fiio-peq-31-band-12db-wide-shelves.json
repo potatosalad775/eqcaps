@@ -1,0 +1,48 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "fiio-usb-hid",
+	"abstract": true,
+	"id": "fiio-peq-31-band-12db-wide-shelves",
+	"schemaVersion": "1.1",
+	"bandCount": 31,
+	"band": {
+		"types": ["PK", "LSC", "HSC"],
+		"gain": { "min": -24, "max": 12, "step": 0.1 },
+		"q": { "min": 0.4, "max": 128, "step": 0.01 }
+	},
+	"preamp": { "mode": "manual", "gain": { "min": -24, "max": 12, "step": 0.1 } },
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Rock" },
+			{ "id": 2, "name": "R&B" },
+			{ "id": 3, "name": "Hip-hop" },
+			{ "id": 4, "name": "Pop" },
+			{ "id": 5, "name": "Dance" },
+			{ "id": 6, "name": "Classic" },
+			{ "id": 7, "name": "USER1", "writable": true },
+			{ "id": 8, "name": "USER2", "writable": true },
+			{ "id": 9, "name": "USER3", "writable": true },
+			{ "id": 10, "name": "USER4", "writable": true },
+			{ "id": 11, "name": "USER5", "writable": true },
+			{ "id": 12, "name": "USER6", "writable": true },
+			{ "id": 13, "name": "USER7", "writable": true },
+			{ "id": 14, "name": "USER8", "writable": true },
+			{ "id": 15, "name": "USER9", "writable": true },
+			{ "id": 16, "name": "USER10", "writable": true },
+			{ "id": 17, "name": "Close EQ", "bypass": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "handler-code",
+				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/peqConstraintsConfig.json",
+				"date": "2026-10-02"
+			},
+			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
+		],
+		"notes": "devicePEQ's shared constraints \"peq31Band12dBWideShelves\". Seeded by scripts/import/seed.ts; ranges are what the handler encodes, not verified firmware limits."
+	}
+}

@@ -1,0 +1,6 @@
+{
+	"description": "Two non-deprecated profiles with the same engine label may not share a match entry for overlapping firmware.",
+	"spec": "§3",
+	"profiles": [{ "id": "device-a" }, { "id": "device-b" }],
+	"expect": [{ "code": "match-collision", "path": "/match/usb/0", "profileId": "device-b" }]
+}

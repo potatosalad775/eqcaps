@@ -1,0 +1,6 @@
+{
+	"description": "A listed match field has at least one value.",
+	"spec": "§3",
+	"profile": { "match": { "usb": [{ "vendorId": [], "productId": "0x0001" }] } },
+	"expect": [{ "code": "schema", "path": "/match/usb/0/vendorId" }]
+}

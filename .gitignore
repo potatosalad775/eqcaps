@@ -1,0 +1,27 @@
+node_modules
+
+# Output
+/dist
+packages/*/dist
+apps/*/dist
+apps/*/.svelte-kit
+/coverage
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Vite
+vite.config.*.timestamp-*
+vitest.config.*.timestamp-*
+
+# Claude Code worktrees
+.claude/worktrees
+.claude/settings.local.json
+.claude/settings.json
