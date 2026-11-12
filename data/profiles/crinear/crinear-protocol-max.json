@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "walkplay-peq-10-band-10db-full-shelves",
+	"extends": "walkplay-app-10-band",
 	"id": "crinear-protocol-max",
 	"device": { "brand": "CrinEar", "model": "Protocol Max" },
 	"match": {
@@ -49,8 +49,13 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/walkplay_schemeno16_protocol_max_walkplay_site.json",
 				"date": "2026-10-02"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): its product catalog (data/catalogs/walkplay.json) lists 0x3302:0x43cc \"Protocol Max\" under scheme 16; band count, filter types and Q and pre-gain limits as the app's editor gives them for that scheme",
+				"date": "2026-11-12"
 			}
 		],
-		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo16\" group, whose settings apply under the device's own."
+		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo16\" group, whose settings apply under the device's own.\ndevicePEQ and Walkplay's app agree on 10 bands for this device; the app gives scheme 16 low pass and high pass filters too, where devicePEQ has peaking and shelves only. Its Q and pre-gain limits are those of Walkplay's web app, read back from a scheme 11 device: Q up to 10, as in devicePEQ, and a pre-gain of -16 to +6 dB in whole dB (devicePEQ: -128 to +127); not checked on this device.\ndevicePEQ's recorded capture of this device (walkplay_schemeno16_protocol_max.json) shows it holding a pre-gain of +6 dB, inside the web app's limits and outside the Android app's."
 	}
 }

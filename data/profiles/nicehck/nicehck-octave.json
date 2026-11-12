@@ -46,6 +46,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo18\" group, whose settings apply under the device's own."
+		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo18\" group, whose settings apply under the device's own.\nStill on devicePEQ's shape: its product id 0x39c3 is not in Walkplay's product catalog (data/catalogs/walkplay.json), so Walkplay's app gives no scheme for it; NICEHCK's own app is the reference for this device (docs/plans/nicehck.md)."
 	}
 }

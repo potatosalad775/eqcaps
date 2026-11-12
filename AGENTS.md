@@ -12,6 +12,10 @@ first app on them. How the parts fit: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.m
   `npm run data:validate` too after touching `data/`.
 - `npm run codegen` after editing `schema/v1/profile.schema.json`; `npm run conformance` after
   changing engine behaviour.
+- `npm run data:walkplay` regenerates the Walkplay groups' `match.usb` from
+  `data/catalogs/walkplay.json` (D51). The snapshot is refreshed by the maintainer's fetch script
+  in `../eqcaps_private` (`npm run walkplay:fetch` there; by hand, read the diff; D52), if that
+  folder exists.
 - `npm run data:build` writes `dist/site/v1/`; `npm run inspector:dev` serves it (build first).
 - `npm run release -- <version> --pack` puts tarballs in `dist/pack/` for trying in uniPEQ. A real
   release is the owner's, run locally for npm 2FA.
@@ -25,7 +29,8 @@ first app on them. How the parts fit: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.m
 3. **devicePEQ `0617f38`**, only where no vendor app is known. Note where it differs.
 
 Deviate from the vendor app only where it is plainly broken, and say so in the profile's notes.
-To read a vendor app, use the `read-vendor-app` skill.
+To read a vendor app, follow `../eqcaps_private/.claude/skills/read-vendor-app/SKILL.md`, if that
+folder exists (D52).
 
 ## Always
 
@@ -70,7 +75,12 @@ To read a vendor app, use the `read-vendor-app` skill.
 - Let a codec clamp, pad or convert: round onto the wire grid, else throw a `BridgeError` (D33).
 - Call `push`, `setEnabled` or `writeControl` from the inspector (invariant 9, D40).
 - Write `LSQ`/`HSQ` in a profile: types are Equalizer APO's `PK LSC HSC LPQ HPQ BP NO AP` (D22).
-- Edit by hand: `schema/v1/source.schema.json`, `*.generated.ts`, `conformance/v1/*.json`.
+- Edit by hand: `schema/v1/source.schema.json`, `*.generated.ts`, `conformance/v1/*.json`, the
+  `match.usb` of `data/profiles/walkplay/walkplay-schemeno*-devices.json` (edit `extra` in the
+  catalog file instead).
+- Write how a vendor app was read (tooling, de-obfuscation, backend endpoints, keys, fetch
+  scripts), or the app's class, function or bundle names (in source refs too), in this repository:
+  it goes in `../eqcaps_private` (D52). A source ref says the app, version, and what was read.
 - Edit `docs/history/`, or put developer detail in README.md (it is for users).
 - Edit `../modernGraphTool`, `../devicePEQ` or `../uniPEQ` from a task in this repo.
 
@@ -87,3 +97,5 @@ To read a vendor app, use the `read-vendor-app` skill.
 - [tools/userscripts/](tools/userscripts/): the WebHID recorder for vendor web apps.
 - `../devicePEQ` (0BSD, fallback reference), `../modernGraphTool` (older bridge),
   `../uniPEQ` (the first app): local clones, read only.
+- `../eqcaps_private` (maintainer only, may be absent): the `read-vendor-app` skill, notes on how
+  vendor apps were read, the fetch scripts, scratch work (D52).

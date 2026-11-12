@@ -1,33 +1,54 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-ktmicro-scheme17",
 	"id": "walkplay-schemeno17-devices",
-	"schemaVersion": "1.0",
-	"kind": "hardware",
 	"device": { "brand": "Walkplay", "model": "SchemeNo17 devices", "group": true },
 	"match": {
 		"usb": [
+			{ "vendorId": "0x31b2", "productId": "0x2057" },
 			{
-				"vendorId": [
-					"0x0104",
-					"0x011b",
-					"0x011d",
-					"0x0661",
-					"0x0663",
-					"0x0666",
-					"0x0762",
-					"0x0909",
-					"0x0d8c",
-					"0x2fc6",
-					"0x3302",
-					"0x34be",
-					"0x35d8",
-					"0x36a7",
-					"0x373b",
-					"0x60c1",
-					"0x60e1",
-					"0xb445",
-					"0xb44d"
-				],
+				"vendorId": "0x3302",
+				"productId": [
+					"0x2010",
+					"0x2011",
+					"0x201d",
+					"0x201e",
+					"0x2030",
+					"0x2036",
+					"0x2038",
+					"0x203a",
+					"0x203b",
+					"0x203e",
+					"0x2040",
+					"0x2043",
+					"0x2044",
+					"0x2048",
+					"0x2049",
+					"0x204b",
+					"0x2054",
+					"0x2055",
+					"0x2056",
+					"0x205a",
+					"0x205c",
+					"0x205d",
+					"0x205e",
+					"0x2061",
+					"0x20e1",
+					"0x20e2",
+					"0x20e3",
+					"0x20e5",
+					"0x20e7",
+					"0x20e8",
+					"0x20ea",
+					"0x20ec",
+					"0x20ee",
+					"0x20ef",
+					"0x20ff",
+					"0x2dc1"
+				]
+			},
+			{
+				"vendorId": ["0x011b", "0x0d8c", "0x60c1", "0x60e1", "0xb445"],
 				"productId": [
 					"0x2010",
 					"0x201d",
@@ -58,24 +79,20 @@
 			}
 		]
 	},
-	"bandCount": 5,
-	"band": {
-		"types": ["PK", "LSC", "HSC"],
-		"freq": { "min": 20, "max": 20000, "step": 1 },
-		"q": { "min": 0.1015625, "max": 10, "step": 0.00390625 },
-		"gain": { "min": -10, "max": 10, "step": 0.00390625 }
-	},
-	"preamp": { "mode": "manual", "gain": { "min": -128, "max": 127, "step": 1 } },
-	"protocol": { "handler": "walkplay-hid", "presets": [{ "id": 101, "name": "Custom" }] },
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): its product catalog, kept in data/catalogs/walkplay.json",
+				"date": "2026-11-12"
+			},
 			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Seeded from devicePEQ by scripts/import/seed.ts. Values are what devicePEQ's handler encodes, not verified device limits. Every product id devicePEQ assigns to its \"SchemeNo17\" group, under each vendor id of the vendor block (0x0104, 0x011b, 0x011d, 0x0661, 0x0663, 0x0666, 0x0762, 0x0909, 0x0d8c, 0x2fc6, 0x3302, 0x34be, 0x35d8, 0x36a7, 0x373b, 0x60c1, 0x60e1, 0xb445, 0xb44d). devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified."
+		"notes": "The vendor and product id pairs Walkplay's product catalog lists under SchemeNo17 (data/catalogs/walkplay.json; this match is generated from it, D51), followed by what only devicePEQ 0617f38 lists: the scheme's product ids under the five vendor ids the catalog never names (most of those pairs don't exist). A device with its own profile matches that instead of this group."
 	}
 }

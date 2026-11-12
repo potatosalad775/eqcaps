@@ -18,7 +18,7 @@
 	"scripts": {
 		"lint": "prettier --check . && npm run data:format -- --check && eslint .",
 		"format": "prettier --write . && npm run data:format",
-		"check": "node scripts/codegen.ts --check && node scripts/conformance.ts --check && tsc -p tsconfig.json && npm run check -w apps/inspector",
+		"check": "node scripts/codegen.ts --check && node scripts/conformance.ts --check && node --conditions=eqcaps:source scripts/walkplay-catalog.ts --check && tsc -p tsconfig.json && npm run check -w apps/inspector",
 		"test": "vitest --run",
 		"test:watch": "vitest",
 		"build": "npm run build --workspaces --if-present",
@@ -26,6 +26,7 @@
 		"conformance": "node scripts/conformance.ts",
 		"data:validate": "node --conditions=eqcaps:source packages/build/src/cli.ts validate",
 		"data:format": "node --conditions=eqcaps:source scripts/data-format.ts",
+		"data:walkplay": "node --conditions=eqcaps:source scripts/walkplay-catalog.ts",
 		"data:build": "node --conditions=eqcaps:source packages/build/src/cli.ts build --out dist/site/v1",
 		"release": "node scripts/release.ts",
 		"inspector:dev": "npm run dev -w apps/inspector"

@@ -12,3 +12,6 @@ apps/*/.svelte-kit/
 # in code blocks. Prettier pads every table to its widest cell and reindents the examples, which
 # makes the docs harder to diff and to edit.
 *.md
+
+# Catalog snapshots are written one row per line by their script, so a refresh diffs row by row.
+/data/catalogs/

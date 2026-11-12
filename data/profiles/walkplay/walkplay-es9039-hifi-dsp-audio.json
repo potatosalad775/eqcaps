@@ -41,6 +41,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "devicePEQ marks this device experimental."
+		"notes": "devicePEQ marks this device experimental.\nStill on devicePEQ's shape: Walkplay's product catalog (data/catalogs/walkplay.json) has no product named \"ES9039 HiFi DSP Audio\"; the nearest rows, \"ES9039\" (scheme 15) and \"ES9039Q2M\" (scheme 18), are in different schemes."
 	}
 }

@@ -1,0 +1,24 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "walkplay-hid",
+	"abstract": true,
+	"id": "walkplay-app",
+	"band": { "q": { "min": 0.1015625, "max": 10, "step": 0.00390625 } },
+	"preamp": { "mode": "manual", "gain": { "min": -16, "max": 6, "step": 1 } },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): the EQ editor screen with its filter type list and its frequency, gain and Q limits; band counts from the product details its backend serves",
+				"date": "2026-11-12"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "Walkplay web app (https://peq.szwalkplay.com/): filter type lists per scheme",
+				"date": "2026-10-28"
+			}
+		],
+		"notes": "What Walkplay's own apps let a user set on the devices they drive with Walkplay's own protocol: frequency 20 to 20000 Hz and gain -10 to +10 dB in 0.1 dB steps (both apps), on walkplay-hid's finer wire grid. Q up to 10 and a pre-gain from -16 to +6 dB in whole dB are the limits of Walkplay's web app (https://peq.szwalkplay.com/) as read back from a scheme 11 device (data/evidence/crinear-protocol-micro/2026-10-03-3f3bd4.json). The Android app 2.3.1 offers less, Q 0.1 to 5 and a pre-gain slider (the app calls it the DAC offset) from -8 to +4 dB, and this base takes the wider of the two. Recorded captures of devices in schemes 11, 15 and 16 hold values inside the web app's limits and outside the Android app's (a pre-gain of +6, -9 and -10 dB, and a Q of 6). Whether the web app's limits differ by scheme is not known. These are the apps' editor limits and one device's read-back, not verified firmware limits: the wire grids of walkplay-hid are wider, and the walkplay-peq-* bases keep devicePEQ's view, which seven device profiles of other brands still extend (the catalog cannot place them). Nothing here is confirmed on a device beyond that read."
+	}
+}

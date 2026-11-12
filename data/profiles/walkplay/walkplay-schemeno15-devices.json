@@ -1,32 +1,32 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "walkplay-peq-8-band-10db-full-shelves",
+	"extends": "walkplay-app-8-band",
 	"id": "walkplay-schemeno15-devices",
 	"device": { "brand": "Walkplay", "model": "SchemeNo15 devices", "group": true },
 	"match": {
 		"usb": [
+			{ "vendorId": "0x011d", "productId": "0x35d8" },
 			{
-				"vendorId": [
-					"0x0104",
-					"0x011b",
-					"0x011d",
-					"0x0661",
-					"0x0663",
-					"0x0666",
-					"0x0762",
-					"0x0909",
-					"0x0d8c",
-					"0x2fc6",
-					"0x3302",
-					"0x34be",
-					"0x35d8",
-					"0x36a7",
-					"0x373b",
-					"0x60c1",
-					"0x60e1",
-					"0xb445",
-					"0xb44d"
-				],
+				"vendorId": "0x3302",
+				"productId": [
+					"0x39c1",
+					"0x4353",
+					"0x4357",
+					"0x4362",
+					"0x4370",
+					"0x43cb",
+					"0x43d6",
+					"0x43d9",
+					"0x43df",
+					"0x43e2",
+					"0x43e3",
+					"0x43ea",
+					"0x43eb"
+				]
+			},
+			{ "vendorId": "0x35d8", "productId": "0x012a" },
+			{
+				"vendorId": ["0x011b", "0x0d8c", "0x60c1", "0x60e1", "0xb445"],
 				"productId": [
 					"0x012a",
 					"0x35d8",
@@ -51,11 +51,16 @@
 		"status": "draft",
 		"sources": [
 			{
+				"kind": "vendor-app",
+				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): its product catalog, kept in data/catalogs/walkplay.json",
+				"date": "2026-11-12"
+			},
+			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Every product id devicePEQ assigns to its \"SchemeNo15\" group, under each vendor id of the vendor block. devicePEQ doesn't record which vendor id goes with which product id, so most of these pairs don't exist. Replace with device profiles as devices are identified."
+		"notes": "The vendor and product id pairs Walkplay's product catalog lists under SchemeNo15 (data/catalogs/walkplay.json; this match is generated from it, D51), followed by what only devicePEQ 0617f38 lists: the scheme's product ids under the five vendor ids the catalog never names (most of those pairs don't exist). A device with its own profile matches that instead of this group. Walkplay's app gives this scheme 8 bands of PK, LS, HS, HP and LP; devicePEQ gives it 8 bands of PK, LS and HS."
 	}
 }

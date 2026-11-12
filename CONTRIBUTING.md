@@ -13,7 +13,8 @@ By opening a pull request you agree that:
 
 Don't submit material you can't license that way. Copied vendor code, vendor apps' bundles and
 reverse-engineered vendor material are out. Facts are fine: a band count or a gain range you
-learned from a vendor app can go into a profile, with a source that says where it came from.
+learned from a vendor app can go into a profile, with a source that names the app, its version and
+in plain words what you read, not the app's class, function or file names (D52).
 
 ## Adding or fixing a device
 
@@ -44,7 +45,9 @@ shares, and the shape bases extend it. A device file that extends a base inherit
 `schemaVersion` too. In `match`, list several vendor ids, product ids or names in one entry rather
 than writing an entry per combination (SPEC §3). A device whose vendor and product id a group
 profile (`device.group: true`) also lists needs no carve-out: leave the group's match alone and
-give the device the same pair, because the group yields at equal specificity (D43).
+give the device the same pair, because the group yields at equal specificity (D43). Walkplay's
+groups (`data/profiles/walkplay/walkplay-schemeno*-devices.json`) take their `match.usb` from a
+snapshot of its product catalog (D51), so don't edit it; add a device profile instead.
 
 No git needed: the [inspector](https://potatosalad775.github.io/eqcaps/) edits a profile as a form
 or as JSON, checks it as CI will, and opens the pull request on GitHub for you ("Edit this

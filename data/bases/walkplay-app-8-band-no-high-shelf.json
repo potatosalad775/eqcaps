@@ -1,0 +1,19 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"extends": "walkplay-app",
+	"abstract": true,
+	"id": "walkplay-app-8-band-no-high-shelf",
+	"bandCount": 8,
+	"band": { "types": ["PK", "LSC", "LPQ", "HPQ"] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): the EQ editor screen with its filter type list and its frequency, gain and Q limits; band counts from the product details its backend serves",
+				"date": "2026-11-12"
+			}
+		],
+		"notes": "The shape of Walkplay's app for the schemes with 8 bands of peaking, low shelf, low pass and high pass filters, with no high shelf."
+	}
+}

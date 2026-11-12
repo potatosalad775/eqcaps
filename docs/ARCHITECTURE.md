@@ -60,7 +60,6 @@ EQ applies.
 ```
 eqcaps/
 ├── AGENTS.md                     rules for coding agents (CLAUDE.md imports it)
-├── .claude/skills/               agent procedures, such as reading a vendor app
 ├── docs/                         SPEC, ARCHITECTURE, DECISIONS, INSPECTOR;
 │                                 plans/, research/, history/
 ├── schema/v1/
@@ -69,6 +68,7 @@ eqcaps/
 ├── data/
 │   ├── profiles/<brand>/<id>.json
 │   ├── bases/<id>.json           abstract bases: protocol families and shapes
+│   ├── catalogs/walkplay.json    snapshot of Walkplay's product catalog; the groups' match (D51)
 │   └── evidence/<id>/<date>-<hash>.json
 ├── conformance/v1/
 │   ├── *.json                    engine vectors, one file per op (generated)
@@ -86,6 +86,7 @@ eqcaps/
     ├── conformance.ts            engine vectors in conformance/v1/
     ├── data-format.ts            formats data/ like the inspector writes it
     ├── release.ts                npm publish, tag and GitHub Release (run locally)
+    ├── walkplay-catalog.ts       generate the Walkplay groups' match from the snapshot (D51, D52)
     └── sample-consumer.ts        fetch, match and fit against the built data, as an app would
 ```
 
@@ -216,7 +217,8 @@ Work in progress has a plan in [plans/](plans/), with its status in the plans RE
   for each step; this path hasn't run on hardware yet (INSPECTOR §3.4).
 - **Qudelix 5K reads.** The USB handler can only write, and devicePEQ's writes are reported
   unstable. A capture of the vendor app's USB traffic would settle both.
-- **Smaller group profiles.** As devices are identified, give them device profiles with their
-  real ids and drop the pairs from the groups, most of which don't exist. Walkplay's product
-  catalog lists the real vendor/product pairs per scheme (plans/nicehck.md).
+- **Smaller group profiles.** Walkplay's groups are generated from its product catalog, so they
+  list the real vendor/product pairs per scheme (D51). What remains: device profiles for the
+  products the catalog names (D37), and the `extra` entries only devicePEQ lists. Devices of
+  other groups get profiles with their real ids as they are identified.
 - **modernGraphTool** adopting `core` and `client` in place of its own constraint model.

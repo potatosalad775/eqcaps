@@ -45,6 +45,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "Registered by modernGraphTool only. Constraints are devicePEQ's \"SchemeNo16\" group, which its recorded capture's product id belongs to."
+		"notes": "Registered by modernGraphTool only. Constraints are devicePEQ's \"SchemeNo16\" group, which its recorded capture's product id belongs to.\nStill on devicePEQ's shape: Walkplay's product catalog (data/catalogs/walkplay.json) has no product named \"HiFi DSP Audio with PD\", so its scheme in Walkplay's app is unknown."
 	}
 }

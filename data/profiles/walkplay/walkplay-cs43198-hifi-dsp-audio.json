@@ -39,6 +39,7 @@
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
 			}
-		]
+		],
+		"notes": "Still on devicePEQ's shape: the product name \"CS43198 HiFi DSP Audio\" is the title of catalog rows (data/catalogs/walkplay.json) in both scheme 11 and scheme 16, so the name alone doesn't give its scheme in Walkplay's app."
 	}
 }

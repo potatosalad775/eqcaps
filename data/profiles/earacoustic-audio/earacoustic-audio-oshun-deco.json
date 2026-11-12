@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "walkplay-peq-10-band-10db-full-shelves",
+	"extends": "walkplay-app-10-band",
 	"id": "earacoustic-audio-oshun-deco",
 	"device": { "brand": "EarAcoustic Audio", "model": "OSHUN DECO" },
 	"match": {
@@ -16,8 +16,13 @@
 				"ref": "evidence/earacoustic-audio-oshun-deco/2026-10-04-245292.json",
 				"date": "2026-10-04",
 				"by": "potatosalad775"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): its product catalog (data/catalogs/walkplay.json) lists 0x3302:0x4312 \"Oshun DECO\" under scheme 16; band count, filter types and Q and pre-gain limits as the app's editor gives them for that scheme",
+				"date": "2026-11-12"
 			}
 		],
-		"notes": "Guided read with the eqcaps inspector on 2026-10-04: the values were set in https://peq.szwalkplay.com/ and read back from the device. The EQ at the end differs from the EQ at the start. Bands 2–10 not checked: assumed to match band 1. Preamp not checked: from walkplay-schemeno16-devices."
+		"notes": "Guided read with the eqcaps inspector on 2026-10-04: the values were set in https://peq.szwalkplay.com/ and read back from the device. The EQ at the end differs from the EQ at the start. Bands 2–10 not checked: assumed to match band 1. Pre-gain not checked: its read-back held 0.\nAgainst devicePEQ's shape, Walkplay's Android app (2.3.1) lists this device under scheme 16: the same 10 bands, with the low pass and high pass filters that the 2026-10-04 read found beside peaking and the shelves. The read-back held Q 9.8984375 on band 1, which fits walkplay-app's Q limit of 10 (Walkplay's web app, read from a scheme 11 device) and not the Android app's editor limit of 5. The gain, frequency, Q and pre-gain limits were not read on this device (those experiments were skipped): they are walkplay-app's, not checked on the device."
 	}
 }

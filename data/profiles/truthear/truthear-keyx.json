@@ -44,6 +44,7 @@
 				"ref": "https://github.com/potatosalad775/modernGraphTool/blob/fd55b9f8fdf6ac2c080aaf6fb59dab584c5dfe93/src/lib/device-peq/handlers/walkplay-hid.ts",
 				"date": "2026-10-02"
 			}
-		]
+		],
+		"notes": "Still on devicePEQ's shape: Walkplay's product catalog (data/catalogs/walkplay.json) has no product named \"TRUTHEAR KEYX\", so its scheme in Walkplay's app is unknown."
 	}
 }

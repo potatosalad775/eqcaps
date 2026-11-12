@@ -1,6 +1,6 @@
 {
 	"$schema": "../../../schema/v1/source.schema.json",
-	"extends": "walkplay-peq-8-band-10db-full-shelves",
+	"extends": "walkplay-app-8-band",
 	"id": "ddhifi-dsp-cable",
 	"device": { "brand": "ddHiFi", "model": "DSP Cable" },
 	"match": {
@@ -44,8 +44,13 @@
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/walkplay_schemeno15_ddhifi_dsp_cable.json",
 				"date": "2026-10-02"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): its product catalog (data/catalogs/walkplay.json) lists 0x3302:0x4357 \"Memory USB\" under scheme 15; band count, filter types and Q and pre-gain limits as the app's editor gives them for that scheme",
+				"date": "2026-11-12"
 			}
 		],
-		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo15\" group, whose settings apply under the device's own."
+		"notes": "Its recorded capture's product id is in devicePEQ's \"SchemeNo15\" group, whose settings apply under the device's own.\ndevicePEQ gives this device 8 bands of peaking and shelf filters; Walkplay's app gives scheme 15 the same 8 bands with low pass and high pass filters too. Its Q and pre-gain limits are those of Walkplay's web app, read back from a scheme 11 device: Q up to 10, as in devicePEQ, and a pre-gain of -16 to +6 dB in whole dB (devicePEQ: -128 to +127); not checked on this device.\ndevicePEQ's recorded capture of this device (walkplay_schemeno15_ddhifi_dsp_cable.json) shows it holding a pre-gain of -9 dB, inside the web app's limits and outside the Android app's."
 	}
 }

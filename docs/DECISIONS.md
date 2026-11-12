@@ -6,7 +6,7 @@ and the decisions since superseded or removed (D23, D29, D31, D38), is archived 
 [history/decisions.md](history/decisions.md).
 
 To change a decision, edit its entry here with a dated note, and update [SPEC.md](SPEC.md) in the
-same change if the format is affected. A new decision takes the next free number (D51). The rules
+same change if the format is affected. A new decision takes the next free number (D53). The rules
 agents follow are in [AGENTS.md](../AGENTS.md); this file is the record of why.
 
 ---
@@ -235,10 +235,13 @@ devicePEQ (0BSD), modernGraphTool (MIT) and AutoEQ (MIT, facts only) impose noth
 Nothing is copied from devicePEQ's captured vendor bundles or reverse-engineered vendor notes
 (`fiio-js-capture/`, `walkplayJS/`, `walkplayPreprocessor/walkplay.js`, `Q5K/`,
 `bluetooth_tools/`); facts learned from them may become data with a `community` source.
+*2026-11-12:* how a vendor app was read stays out of the repository (D52).
 
 ### D26. No upstream coordination
 `data/` was seeded once from devicePEQ, modernGraphTool and AutoEQ (D31, archived) and is
 maintained here by hand. Upstream changes are reviewed as diffs and taken over manually.
+*2026-11-12:* the Walkplay groups' `match.usb` is the exception: a script refreshes it from the
+vendor's own product catalog (D51).
 
 ### D32. Data pipeline, client and releases
 `packages/build` validates `data/` (with file and line, annotated in PR diffs) and publishes
@@ -268,6 +271,42 @@ theirs. **Why:** the app is how the firmware is meant to be driven. devicePEQ's 
 chip's factory-reset commands, which reset a Tanchjim Space II's DAC settings on every write, and
 neither Walkplay's, NICEHCK's nor Tanchjim's app sends them. D39's 2026-10-28 note is the same
 rule for unit conversions.
+
+### D51. Walkplay's groups are generated from its product catalog (2026-11-12)
+Walkplay's app downloads its whole product catalog at startup, with no login: vendor id, product
+id, `SchemeNo`, brand and model of every product. `data/catalogs/walkplay.json` keeps a trimmed
+snapshot of it, facts only (D25), CC0 like the rest of `data/` and not published under `/v1/`.
+The `match.usb` of the ten Walkplay group profiles is generated from the snapshot, one entry per
+vendor id with its real product ids, and is not edited by hand. What the catalog doesn't list, and
+only devicePEQ `0617f38` does, is kept by hand in the snapshot's `extra` list. The snapshot is
+refreshed by the maintainer's fetch script, kept outside this repository (D52), run by hand, never
+in CI or on a schedule; `npm run data:walkplay` regenerates the groups from the snapshot, and CI
+checks that they match it. A device profile still beats its group on the same pair (D43).
+**Why:** the groups matched every vendor id with every product id of a scheme, a cross product of
+which about 80 of 1501 pairs exist for SchemeNo16. The real pairs are known, so the groups can say
+what exists, and a refresh is a diff someone reads: the fetch asks a vendor's backend, a new
+scheme needs a base chosen by hand, a named product may deserve its own profile (D37), and `main`
+deploys `/v1/` on every push.
+
+### D52. How a vendor app was read stays out of the repository (2026-11-12)
+The repository holds the facts read from vendor apps and names the app, its version and the date
+it was read. How it was read does not belong here: tooling, de-obfuscation recipes, backend
+endpoints and how their answers decode, fetch scripts, keys, and pointers into an app's internals
+for re-reading it, and any vendor material, live in the maintainer's private repository
+(`../eqcaps_private`) and never in this one. A script that needs them lives there too and writes
+facts into this repository (the Walkplay catalog snapshot, D51). The repository builds, checks and
+tests without that repository. A `vendor-app` source ref names the app, its version or build, its
+URL or package id, and in plain words what was read; never the app's class, function, store or
+bundle file names, which are kept in the private notes. The same holds for plans, code comments
+and test names: say what the app does, not where in its code. Recordings and captures carry what
+the device and the app's screen showed, not the vendor's backend addresses. The procedure for
+reading an app (the `read-vendor-app` skill) lives in the private folder. One exception: the
+WebHID recorder's adapters (`tools/userscripts/`) name the page state they must find in a vendor
+web app to record a session, the minimum a contributor's recorder needs, and stay public. History
+is not rewritten: what earlier commits held stays in them. **Why:** publishing a recipe adds
+nothing a consumer of the data needs, and vendors may object to it even when the facts themselves
+are theirs to be read. The cost is that only the maintainer can refresh such data, so a plan still
+says which app and version was read, and when.
 
 ### D34. Inspector: a static SvelteKit SPA on the same origin as the data
 adapter-static, never server-rendered; `404.html` is the SPA fallback, so profile links are real

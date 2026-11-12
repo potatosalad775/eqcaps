@@ -41,6 +41,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "devicePEQ marks this device experimental."
+		"notes": "devicePEQ marks this device experimental.\nStill on devicePEQ's shape: Walkplay's product catalog (data/catalogs/walkplay.json) has no product named \"MD-QT-042\", so its scheme in Walkplay's app is unknown."
 	}
 }
