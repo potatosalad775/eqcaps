@@ -12,6 +12,7 @@ import {
 	type StreamTransport
 } from '../src/index.ts';
 import { profiles, PROTOCOLS } from './data.ts';
+import { FakeQudelix, FakeQudelixV2 } from './fake-qudelix.ts';
 import { noSleep } from './replay.ts';
 
 const WANTED: Filter[] = [
@@ -88,6 +89,16 @@ function streamSink(kind: 'serial' | 'ble'): StreamTransport & { count: number }
 	};
 }
 
+/**
+ * Qudelix devices answer an opening request that no echo can, so they get the fakes built from
+ * the vendor app: the 5K Plus by its handler, the T71 by its vendor id, else the 5K.
+ */
+function qudelixFake(profile: Profile, handler: string) {
+	if (handler === 'qudelix-v2-usb-hid') return new FakeQudelixV2();
+	if (handler !== 'qudelix-usb-hid') return undefined;
+	return new FakeQudelix(profile.match?.usb?.some((u) => u.vendorId === '0x1fc9') ? 't71' : '5k');
+}
+
 describe.each(Object.entries(PROTOCOLS))('%s', (profileId, protocol) => {
 	test('fit → complete → push writes without a codec error', async () => {
 		const profile = profiles.get(profileId) as Profile;
@@ -95,7 +106,9 @@ describe.each(Object.entries(PROTOCOLS))('%s', (profileId, protocol) => {
 		const { filters } = complete(profile, result.slots);
 		const kind = transportsOf(HANDLERS[protocol.handler])[0]!;
 		const { writeAck } = (protocol.options ?? {}) as { writeAck?: number };
-		const transport = kind === 'hid' ? hidSink(writeAck) : streamSink(kind);
+		const transport =
+			qudelixFake(profile, protocol.handler) ??
+			(kind === 'hid' ? hidSink(writeAck) : streamSink(kind));
 		const device = openDevice(transport, protocol, { sleep: noSleep });
 		const preamp = profile.preamp.mode === 'manual' ? result.preamp : undefined;
 		await device.push({ filters, ...(preamp === undefined ? {} : { preamp }) });
