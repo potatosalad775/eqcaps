@@ -12,6 +12,7 @@ import { moondropOldFashionedHid } from './moondrop-old-fashioned-hid.ts';
 import { moondropUsbHid } from './moondrop-usb-hid.ts';
 import { nothingUsbSerial } from './nothing-usb-serial.ts';
 import { qudelixUsbHid } from './qudelix-usb-hid.ts';
+import { qudelixV2UsbHid } from './qudelix-v2-usb-hid.ts';
 import { tanchjimRitaSerial } from './tanchjim-rita-serial.ts';
 import { walkplayHid } from './walkplay-hid.ts';
 
@@ -25,6 +26,7 @@ export const HANDLERS = {
 	'ktmicro-usb-hid': ktmicroUsbHid,
 	'fosi-audio-usb-hid': fosiAudioUsbHid,
 	'qudelix-usb-hid': qudelixUsbHid,
+	'qudelix-v2-usb-hid': qudelixV2UsbHid,
 	'jds-labs-usb-serial': jdsLabsUsbSerial,
 	'nothing-usb-serial': nothingUsbSerial,
 	'fiio-usb-serial': fiioUsbSerial,

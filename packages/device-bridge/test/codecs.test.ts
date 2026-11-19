@@ -32,6 +32,11 @@ const add = (handler: string, options: object = {}) =>
 for (const p of Object.values(PROTOCOLS)) add(p.handler, p.options);
 for (const v of KNOWN_HID_VENDORS) add(guessProtocol(v)!.handler, guessProtocol(v)!.options);
 add('airoha', { ble: true });
+// Qudelix: the speaker EQ, which no profile selects yet.
+add('qudelix-usb-hid');
+add('qudelix-usb-hid', { group: 'spk' });
+add('qudelix-v2-usb-hid');
+add('qudelix-v2-usb-hid', { group: 'spk' });
 
 function transportFor(kind: Transport['kind']): Transport {
 	if (kind !== 'hid')
