@@ -1,0 +1,84 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "qudelix-app",
+	"id": "qudelix-t71",
+	"device": { "brand": "Qudelix", "model": "T71" },
+	"match": {
+		"usb": [
+			{
+				"vendorId": "0x1fc9",
+				"productId": [
+					"0x7100",
+					"0x7101",
+					"0x7102",
+					"0x7110",
+					"0x7111",
+					"0x7112",
+					"0x7130",
+					"0x7131",
+					"0x7132",
+					"0x7200",
+					"0x7201",
+					"0x7300",
+					"0x7301",
+					"0x7302",
+					"0x7310",
+					"0x7311",
+					"0x7312",
+					"0x7330",
+					"0x7331",
+					"0x7332",
+					"0x7400",
+					"0x7401"
+				]
+			}
+		]
+	},
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Flat" },
+			{ "id": 1, "name": "Acoustic" },
+			{ "id": 2, "name": "Bass Booster" },
+			{ "id": 3, "name": "Bass Reducer" },
+			{ "id": 4, "name": "Classical" },
+			{ "id": 5, "name": "Dance" },
+			{ "id": 6, "name": "Deep" },
+			{ "id": 7, "name": "Electronic" },
+			{ "id": 8, "name": "Hip-Hop" },
+			{ "id": 9, "name": "Jazz" },
+			{ "id": 10, "name": "Latin" },
+			{ "id": 11, "name": "Loudness" },
+			{ "id": 12, "name": "Lounge" },
+			{ "id": 13, "name": "Piano" },
+			{ "id": 14, "name": "Pop" },
+			{ "id": 15, "name": "R&B" },
+			{ "id": 16, "name": "Rock" },
+			{ "id": 17, "name": "Small Speaker" },
+			{ "id": 18, "name": "Spoken Word" },
+			{ "id": 19, "name": "Treble Booster" },
+			{ "id": 20, "name": "Treble Reducer" },
+			{ "id": 21, "name": "Vocal" },
+			{ "id": 22, "name": "Custom #1", "writable": true },
+			{ "id": 23, "name": "Custom #2", "writable": true },
+			{ "id": 24, "name": "Custom #3", "writable": true },
+			{ "id": 25, "name": "Custom #4", "writable": true },
+			{ "id": 26, "name": "Custom #5", "writable": true },
+			{ "id": 27, "name": "Custom #6", "writable": true },
+			{ "id": 28, "name": "Custom #7", "writable": true },
+			{ "id": 29, "name": "Custom #8", "writable": true },
+			{ "id": 30, "name": "Custom #9", "writable": true },
+			{ "id": 31, "name": "Custom #10", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Qudelix app for Chrome 4.0.3.1 (Chrome extension phaodiidhofhdmfkjiacigibgikhfafn): the T71's product ids, its firmware check for the graphic EQ, its EQ groups, channels and memories",
+				"date": "2026-11-19"
+			}
+		],
+		"notes": "As Qudelix's app for Chrome 4.0.3.1 drives the T71, read from the app without a device (2026-11-19); the limits, filter types and built-in presets are the app's. It speaks the 5K's protocol, but through a different USB chip. Identity: the app lists twenty-two product ids under vendor 0x1fc9 and accepts a device only when its product name contains \"Qudelix\". A match can't say \"contains\", so the ids match with any name. The USB product name the T71 reports is unknown, and nothing in the app says what tells the ids apart (perhaps the USB mode: high resolution, surround, PS5 or Switch). 0x1fc9 is the USB chip vendor's id (NXP), shared with other makers, so the vendor alone says nothing. The T71 has no single-EQ mode: its user EQ of 10 bands is always layered on a headphone EQ of 10 bands per channel, and the bridge drives the user EQ. The device can report five channels for the user EQ instead of one (front, center, LFE, back, side; likely in its surround USB mode), and the app then edits one at a time. The user EQ keeps 10 memories (22 to 31). This profile describes the user EQ. The headphone EQ has its own values: 10 bands per channel, parametric only, the same limits and a pre-gain per channel, on 2, 4 or 8 channels (left and right; the QX-over's low and high; or a multi-driver earphone's drivers), with Flat (0) and 20, 5 or 5 memories of its own (from 22). The bridge drives it when its handler option group is spk, writing left and right alike, and refuses it on 4 or 8 channels; this profile does not set it, since a profile describes one EQ and how to offer the second is still open. The app offers the graphic EQ (user EQ only) from firmware 1.5.6; it is not driven, nor are crossfeed, headroom, the per-channel mute and the device's other settings (DAC filter, USB mode, bass boost)."
+	}
+}
