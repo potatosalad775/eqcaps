@@ -95,8 +95,8 @@ const afterControl: Read = (v) =>
 		: fail(`${JSON.stringify(v)} is not a map of control ids to "done" or "save"`);
 
 /**
- * The options a profile may set, per handler. Options a handler derives itself (Qudelix's report
- * from the descriptor, Airoha's layout from the transport) aren't data and are left out.
+ * The options a profile may set, per handler. Options a handler derives itself (Qudelix's framing
+ * and EQ state from the device, Airoha's layout from the transport) aren't data and are left out.
  */
 const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOptions<K>]?: Read } } = {
 	'fiio-usb-hid': { reportId: byte, saveCommand: byte },
@@ -137,7 +137,8 @@ const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOption
 		gainRegister: byte
 	},
 	'fosi-audio-usb-hid': { reportId: byte, bandwidth: number, defaultSlot: byte },
-	'qudelix-usb-hid': {},
+	'qudelix-usb-hid': { group: oneOf('usr', 'spk') },
+	'qudelix-v2-usb-hid': { group: oneOf('usr', 'spk') },
 	'jds-labs-usb-serial': {},
 	'nothing-usb-serial': { customSlot: byte },
 	'fiio-usb-serial': { saveCommand: byte },

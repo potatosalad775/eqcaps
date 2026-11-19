@@ -215,8 +215,9 @@ Work in progress has a plan in [plans/](plans/), with its status in the plans RE
   firmware and matches again (plans/fosi-audio.md).
 - **Guided reads with a phone or desktop vendor app.** The inspector reconnects a granted device
   for each step; this path hasn't run on hardware yet (INSPECTOR §3.4).
-- **Qudelix 5K reads.** The USB handler can only write, and devicePEQ's writes are reported
-  unstable. A capture of the vendor app's USB traffic would settle both.
+- **Qudelix on a device.** The handlers read and write the 5K, T71 and 5K Plus as Qudelix's
+  Chrome app does, but no device has answered them yet. A capture of the app's USB traffic
+  would confirm the opening handshake, the input reports and the stored-preset layouts.
 - **Smaller group profiles.** Walkplay's groups are generated from its product catalog, so they
   list the real vendor/product pairs per scheme (D51). What remains: device profiles for the
   products the catalog names (D37), and the `extra` entries only devicePEQ lists. Devices of
