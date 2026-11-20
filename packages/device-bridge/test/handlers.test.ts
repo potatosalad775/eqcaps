@@ -24,6 +24,14 @@ import {
 	decodeNothingBands,
 	nothingFrame
 } from '../src/handlers/nothing-usb-serial.ts';
+import {
+	parseToppingFrame,
+	toppingCodec,
+	toppingFirmware,
+	toppingFrame,
+	toppingPreampWord,
+	type ToppingFamily
+} from '../src/handlers/topping-usb-hid.ts';
 import { ritaCodec } from '../src/handlers/tanchjim-rita-serial.ts';
 import { encodeWalkplayControl, walkplayHidCodec } from '../src/handlers/walkplay-hid.ts';
 import { outputReportSize, typeCodes } from '../src/io.ts';
@@ -42,6 +50,7 @@ import {
 } from '../src/index.ts';
 import { protocolFor } from './data.ts';
 import { FakeDs3 } from './fake-ds3.ts';
+import { FakeTopping, NO_CONFIG, toppingConfig } from './fake-topping.ts';
 import { FakeWalkplay } from './fake-walkplay.ts';
 import { noSleep } from './replay.ts';
 
@@ -1861,5 +1870,533 @@ describe('Moondrop USB HID features', () => {
 			code: 'rejected'
 		});
 		expect(unlinked.sent.every((d) => d[1] === 0x31)).toBe(true);
+	});
+});
+
+describe('Topping', () => {
+	test("every pre-gain step reads back as itself, the three the app's table repeats included", () => {
+		for (let tenths = -120; tenths <= 120; tenths++) {
+			const frames = toppingCodec.encode({ filters: [], preamp: tenths / 10 }, { family: 'dx5' });
+			expect(toppingCodec.decode(frames, { family: 'dx5' }).preamp).toBe(tenths / 10 || 0);
+		}
+		// The app's own words where it has one: -3 dB as the app sent it to a DX5 II.
+		expect(toppingPreampWord(-3)).toBe(0x16a77c4);
+		expect(toppingPreampWord(-2.9)).toBe(0x16eaa4b);
+	});
+
+	const FAMILIES: [ToppingFamily, string][] = [
+		['dx1', 'topping-dx1-ii'],
+		['dx5', 'topping-dx5-ii'],
+		['e50', 'topping-e50-ii'],
+		['dx9d', 'topping-dx9-discrete'],
+		['d900', 'topping-d900']
+	];
+	const profileOf = (family: ToppingFamily) => FAMILIES.find(([f]) => f === family)![1];
+	const topping = (family: ToppingFamily) => {
+		const t = new FakeTopping(family);
+		return { t, device: open(t, profileOf(family)) };
+	};
+	const filter = (type: Filter['type'], freq: number, gain: number, q: number): Filter => ({
+		type,
+		freq,
+		gain,
+		q
+	});
+	/** The commands that change a config: selecting one and every parameter. */
+	const writes = (t: FakeTopping) =>
+		t.sent.filter((s) => s.kind === 0x20 && (s.command === 0x110e || s.command >> 12 === 9));
+	const padded = (f: Filter[]) => [...f, ...Array<null>(10 - f.length).fill(null)];
+	const band = (i: number, field: number) => 0x9000 | ((i + 1) << 8) | field;
+
+	describe('codec', () => {
+		test('firmware words read as their hex digits', () => {
+			expect(toppingFirmware(0x239)).toBe('2.39');
+			expect(toppingFirmware(0x46)).toBe('0.46');
+			expect(toppingFirmware(0x152)).toBe('1.52');
+			expect(toppingFirmware(0x2a9)).toBeNull();
+			expect(toppingFirmware(0)).toBeNull();
+		});
+
+		test('parses a report with or without one byte in front', () => {
+			const frame = toppingFrame(0x9c01, 0x2000000, 0x20, 1, 1);
+			const expected = { kind: 0x20, frames: 1, frame: 1, command: 0x9c01, data: 0x2000000 };
+			expect(frame).toHaveLength(16);
+			expect(parseToppingFrame(frame)).toEqual(expected);
+			expect(parseToppingFrame([0, ...frame])).toEqual(expected);
+			expect(parseToppingFrame(frame.subarray(0, 14))).toBeNull();
+			const bad = Uint8Array.from(frame);
+			bad[14] = 0x76;
+			expect(parseToppingFrame(bad)).toBeNull();
+			expect(parseToppingFrame(new Uint8Array(16))).toBeNull();
+		});
+
+		test('encodes and decodes a write', () => {
+			const request = {
+				filters: [filter('LSC', 120, -2.5, 0.7), filter('HPQ', 8000, 0, 1.4142)],
+				preamp: -3.5,
+				slot: 2
+			};
+			const frames = toppingCodec.encode(request, { family: 'dx1' });
+			expect(frames).toHaveLength(1 + 4 + 11 * 10);
+			expect(toppingCodec.decode(frames, { family: 'dx1' })).toEqual(request);
+		});
+	});
+
+	describe.each(FAMILIES)('%s pull and push', (family, id) => {
+		test('pulls the active config: left bands, switched-off ones as null, and the pre-gain', async () => {
+			const { t, device } = topping(family);
+			const left = [
+				filter('PK', 100, 3, 1),
+				filter('LSC', 200, -2.5, 0.7),
+				null,
+				filter('HSC', 8000, 4.5, 0.5),
+				filter('LPQ', 15000, 0, 0.7071),
+				filter('HPQ', 30, 0, 0.9),
+				null,
+				null,
+				null,
+				filter('PK', 19000, -12, 15),
+				filter('PK', 5000, 1, 1)
+			];
+			const right = left.map((f) => (f ? { ...f, freq: f.freq + 1 } : f));
+			t.configs[1] = toppingConfig('Mine', -4.5, left, right);
+			t.active = 1;
+			expect(device.protocol.options).toEqual({ family });
+			expect(id).toBe(profileOf(family));
+			const result = await device.pull();
+			expect(result.slot).toBe(1);
+			expect(result.preamp).toBe(-4.5);
+			expect(result.filters).toEqual(left.slice(0, 10));
+			expect(await device.pull({ slot: 0 })).toEqual({
+				filters: padded([]),
+				preamp: 0,
+				slot: 0
+			});
+		});
+
+		test('reads answers with a byte in front of each frame', async () => {
+			const { t, device } = topping(family);
+			t.prefixed = true;
+			t.configs[0] = toppingConfig('A', 2, [filter('PK', 1000, 1, 1)]);
+			expect((await device.pull({ slot: 0 })).filters).toEqual(padded([filter('PK', 1000, 1, 1)]));
+		});
+
+		test('a pull of a config the device does not hold is invalid-request', async () => {
+			const { device } = topping(family);
+			await expect(device.pull({ slot: 7 })).rejects.toMatchObject({ code: 'invalid-request' });
+		});
+
+		test('a push reads back, every filter type and the pre-gain, on both channels', async () => {
+			const { t, device } = topping(family);
+			const left = [filter('PK', 5000, 2, 1)];
+			t.configs[2] = toppingConfig('Mine', 0, left, [filter('HSC', 77, 1, 3)]);
+			const filters = [
+				filter('PK', 100, 3.5, 1),
+				filter('LSC', 200, -12, 0.7071),
+				filter('HSC', 8000, 12, 0.5),
+				filter('LPQ', 15000, 0, 0.7),
+				filter('HPQ', 30, 0, 15),
+				filter('PK', 20000, -0.1, 0.1),
+				filter('PK', 20, 0.1, 0.0001)
+			];
+			const before = [...t.configs[2]!];
+			await device.push({ filters, preamp: 2.5, slot: 2 });
+			expect(await device.pull({ slot: 2 })).toEqual({
+				filters: [...filters, null, null, null],
+				preamp: 2.5,
+				slot: 2
+			});
+			const w = t.configs[2]!;
+			const bands = family === 'd900' ? 10 : 11;
+			expect(w.slice(41, 41 + 3 * bands)).toEqual(w.slice(8, 8 + 3 * bands));
+			expect(w[7]).toBe(w[5]);
+			expect(w[5]).toBe(toppingPreampWord(2.5, family));
+			// The name and the other configs are left alone.
+			expect(w.slice(0, 4)).toEqual(before.slice(0, 4));
+			expect(t.configs[0]).toEqual(toppingConfig('Config 1', 0, []));
+			if (family === 'd900') {
+				// The 11th band is written back as it was read, on each channel.
+				expect(w.slice(38, 41)).toEqual(before.slice(38, 41));
+				expect(w.slice(71, 74)).toEqual(before.slice(71, 74));
+			}
+		});
+
+		test('a push without a slot writes the active config', async () => {
+			const { t, device } = topping(family);
+			t.active = 1;
+			await device.push({ filters: [filter('PK', 1000, 1, 1)] });
+			expect(writes(t)[0]).toMatchObject({ command: 0x110e, data: 1 });
+			expect((await device.pull({ slot: 1 })).filters).toEqual(padded([filter('PK', 1000, 1, 1)]));
+		});
+
+		test('a push to a config the device does not hold is invalid-request and writes nothing', async () => {
+			const { t, device } = topping(family);
+			await expect(device.push({ filters: [], slot: 3 })).rejects.toMatchObject({
+				code: 'invalid-request'
+			});
+			expect(writes(t)).toEqual([]);
+		});
+
+		test('a filter outside the wire is unrepresentable', async () => {
+			const { t, device } = topping(family);
+			await expect(
+				device.push({ filters: [filter('PK', 100, 1e9, 1)], slot: 0 })
+			).rejects.toMatchObject({ code: 'unrepresentable' });
+			await expect(device.push({ filters: [], preamp: 1e6, slot: 0 })).rejects.toMatchObject({
+				code: 'unrepresentable'
+			});
+			expect(writes(t)).toEqual([]);
+		});
+
+		test('reads the firmware', async () => {
+			const { t, device } = topping(family);
+			expect(device.capabilities.readsFirmware).toBe(true);
+			expect(await device.firmware()).toBe('2.39');
+			t.firmware = 0x252;
+			expect(await topping(family).device.firmware()).toBe('2.39');
+			const other = topping(family);
+			other.t.firmware = 0x252;
+			expect(await other.device.firmware()).toBe('2.52');
+		});
+
+		test('reads the active config', async () => {
+			const { t, device } = topping(family);
+			expect(device.capabilities).toMatchObject({ readsCurrentSlot: true, canEnable: true });
+			t.active = 2;
+			expect(await device.currentSlot()).toBe(2);
+			await device.setEnabled(true, 1);
+			expect(await device.currentSlot()).toBe(1);
+		});
+	});
+
+	describe('what a push sends', () => {
+		const left = (i: number) => [band(i, 1), band(i, 2), band(i, 3), band(i, 4), band(i, 5)];
+		const right = (i: number) => [band(i, 6), band(i, 7), band(i, 8), band(i, 9), band(i, 10)];
+		const indexes = [...Array(11).keys()];
+
+		test('the DX1 II selects, sets the pre-gain, then each band left then right', async () => {
+			const { t, device } = topping('dx1');
+			await device.push({
+				filters: [filter('LSC', 120, -2.5, 0.7), filter('PK', 1000, 3, 1)],
+				preamp: -6,
+				slot: 1
+			});
+			const sent = writes(t);
+			expect(sent.map((s) => s.command)).toEqual([
+				0x110e,
+				0x9c01,
+				0x9c02,
+				0x9c03,
+				0x9c04,
+				...indexes.flatMap((i) => [...left(i), ...right(i)])
+			]);
+			expect(sent.every((s) => s.frames === 1 && s.frame === 1)).toBe(true);
+			const gain = toppingPreampWord(-6);
+			expect(sent.slice(0, 5).map((s) => s.data)).toEqual([1, gain, 1, gain, 1]);
+			// Band 1 on each side: type 4, 120 Hz, -2.5 dB as 32-bit two's complement, Q 7000, on.
+			expect(sent.slice(5, 15).map((s) => s.data)).toEqual([
+				4, 120, 0xffffffe7, 7000, 1, 4, 120, 0xffffffe7, 7000, 1
+			]);
+			// The unused band 3 is switched off at the app's defaults.
+			expect(sent.slice(25, 35).map((s) => s.data)).toEqual([
+				1, 632, 0, 7070, 0, 1, 632, 0, 7070, 0
+			]);
+		});
+
+		test('the D900 sends all left bands, then all right, numbered frame 0', async () => {
+			const { t, device } = topping('d900');
+			await device.push({ filters: [filter('PK', 1000, 3, 1)], preamp: 1, slot: 0 });
+			const sent = writes(t);
+			expect(sent.map((s) => s.command)).toEqual([
+				0x110e,
+				0x9c01,
+				0x9c02,
+				0x9c03,
+				0x9c04,
+				...indexes.flatMap(left),
+				...indexes.flatMap(right)
+			]);
+			expect(sent[0]).toMatchObject({ frames: 1, frame: 1 });
+			expect(sent.slice(1).every((s) => s.frames === 1 && s.frame === 0)).toBe(true);
+		});
+
+		test('a push of more bands than the config holds is invalid-request', async () => {
+			const { device } = topping('d900');
+			const filters = Array.from({ length: 11 }, () => filter('PK', 1000, 0, 1));
+			await expect(device.push({ filters, slot: 0 })).rejects.toMatchObject({
+				code: 'invalid-request'
+			});
+		});
+	});
+
+	describe('session', () => {
+		test.each([
+			['dx5', 0x236],
+			['dx5', 0x100],
+			['e50', 0x151]
+		] as [ToppingFamily, number][])(
+			'a %s on firmware 0x%s is refused as unsupported',
+			async (family, word) => {
+				const { t, device } = topping(family);
+				t.firmware = word;
+				await expect(device.pull()).rejects.toMatchObject({ code: 'unsupported' });
+				await expect(device.push({ filters: [], slot: 0 })).rejects.toMatchObject({
+					code: 'unsupported'
+				});
+				expect(writes(t)).toEqual([]);
+			}
+		);
+
+		test('the first firmware the app controls is accepted', async () => {
+			for (const [family, word] of [
+				['dx5', 0x237],
+				['e50', 0x152]
+			] as [ToppingFamily, number][]) {
+				const { t, device } = topping(family);
+				t.firmware = word;
+				expect((await device.pull({ slot: 0 })).slot).toBe(0);
+			}
+		});
+
+		test('a D900 with a different capabilities answer is refused as unsupported', async () => {
+			for (const edit of [
+				(c: number[]) => (c[0] = 3),
+				(c: number[]) => (c[9] = 77),
+				(c: number[]) => (c[6] = 0x1e0),
+				(c: number[]) => c.pop()
+			]) {
+				const { t, device } = topping('d900');
+				edit(t.capabilities);
+				await expect(device.pull()).rejects.toMatchObject({ code: 'unsupported' });
+				expect(t.sent.map((s) => s.command)).toEqual([0x7144]);
+			}
+		});
+
+		test('the D900 asks again until its connection is granted', async () => {
+			const { t, device } = topping('d900');
+			t.connectDenials = 3;
+			expect(await device.firmware()).toBe('2.39');
+			expect(t.sent.filter((s) => s.command === 0x1101)).toHaveLength(4);
+			const stuck = topping('d900');
+			stuck.t.connectDenials = 100;
+			await expect(stuck.device.pull()).rejects.toMatchObject({ code: 'rejected' });
+		});
+
+		test('a session that failed to start is tried again', async () => {
+			const { t, device } = topping('dx5');
+			t.firmware = 0x100;
+			await expect(device.pull()).rejects.toMatchObject({ code: 'unsupported' });
+			t.firmware = 0x240;
+			expect((await device.pull({ slot: 0 })).slot).toBe(0);
+		});
+
+		test('starts each family as its app does', async () => {
+			const starts = {
+				dx1: [
+					[0x1101, 1],
+					[0x1120, 1],
+					[0x1106, 0]
+				],
+				e50: [
+					[0x1101, 1],
+					[0x1120, 1],
+					[0x710c, 0],
+					[0x1106, 0]
+				],
+				dx5: [
+					[0x1101, 2],
+					[0x1202, 0],
+					[0x1120, 1]
+				],
+				dx9d: [
+					[0x1101, 2],
+					[0x1120, 1]
+				],
+				d900: [
+					[0x7144, 0],
+					[0x1101, 2],
+					[0x1120, 1],
+					[0x1106, 0]
+				]
+			} as Record<ToppingFamily, number[][]>;
+			for (const [family] of FAMILIES) {
+				const { t, device } = topping(family);
+				await device.pull({ slot: 0 });
+				expect(
+					t.sent.map((s) => [s.command, s.data]),
+					family
+				).toEqual(starts[family]);
+			}
+		});
+	});
+
+	describe('EQ switch', () => {
+		test.each(FAMILIES)('%s reads its EQ switch', async (family) => {
+			const { t, device } = topping(family);
+			expect(device.capabilities.readsEnabled).toBe(true);
+			expect(await device.eqEnabled()).toBe(true);
+			t.eqOn = false;
+			expect(await device.eqEnabled()).toBe(false);
+		});
+
+		test.each([['dx1'], ['e50']] as [ToppingFamily][])(
+			'the %s has no switch: no config is off, a config is on',
+			async (family) => {
+				const { t, device } = topping(family);
+				t.active = 2;
+				await device.setEnabled(false);
+				expect(t.sent.at(-1)).toMatchObject({ command: 0x110e, data: NO_CONFIG });
+				expect(t.eqOn).toBe(false);
+				expect(await device.eqEnabled()).toBe(false);
+				expect(t.sent.some((s) => s.command === 0x7132)).toBe(false);
+				t.sent.length = 0;
+				await device.setEnabled(true);
+				const selects = writes(t);
+				expect(selects.map((s) => s.data)).toEqual(family === 'dx1' ? [2, 2] : [2]);
+				expect(await device.eqEnabled()).toBe(true);
+				await device.setEnabled(true, 1);
+				expect(writes(t).at(-1)).toMatchObject({ command: 0x110e, data: 1 });
+				expect(await device.currentSlot()).toBe(1);
+			}
+		);
+
+		test.each([['dx5'], ['dx9d'], ['d900']] as [ToppingFamily][])(
+			'the %s sets its switch with 0x7132',
+			async (family) => {
+				const { t, device } = topping(family);
+				await device.setEnabled(false);
+				expect(t.sent.at(-1)).toMatchObject({ command: 0x7132, data: 0 });
+				expect(t.eqOn).toBe(false);
+				t.sent.length = 0;
+				await device.setEnabled(true, 2);
+				expect(t.sent.map((s) => [s.command, s.data])).toEqual([
+					[0x110e, 2],
+					[0x7132, 1]
+				]);
+				expect(t.eqOn).toBe(true);
+				expect(t.active).toBe(2);
+				t.sent.length = 0;
+				await device.setEnabled(false, 1);
+				expect(t.sent.map((s) => [s.command, s.data])).toEqual([[0x7132, 0]]);
+			}
+		);
+
+		test('the D900 rejects a switch whose result status is not 0', async () => {
+			const { t, device } = topping('d900');
+			await device.setEnabled(false);
+			t.eqResultStatus = 2;
+			await expect(device.setEnabled(true)).rejects.toMatchObject({ code: 'rejected' });
+		});
+	});
+
+	describe('DX5 II settings', () => {
+		const settingWrites = (t: FakeTopping) =>
+			t.sent.filter((s) => s.kind === 0x20 && s.command >> 8 === 0x71);
+
+		test('reads every control from the settings block', async () => {
+			const { device } = topping('dx5');
+			expect(await device.readControls()).toEqual({
+				volume: -30,
+				mute: 0,
+				input: 0,
+				output: 3,
+				gain: 0,
+				lineMode: 0,
+				dacFilter: 0,
+				balance: 0,
+				polarity: 0,
+				crossfeed: 2,
+				brightness: 1
+			});
+		});
+
+		test('writes each one-word control as its command and reads it back', async () => {
+			const { t, device } = topping('dx5');
+			const commands = {
+				mute: [0x7103, 1],
+				input: [0x7104, 2],
+				output: [0x7105, 1],
+				gain: [0x7117, 1],
+				lineMode: [0x710e, 0],
+				dacFilter: [0x710d, 5],
+				polarity: [0x711d, 0],
+				crossfeed: [0x712b, 2],
+				brightness: [0x710a, 0]
+			} as const;
+			for (const [id, [command, value]] of Object.entries(commands)) {
+				t.sent.length = 0;
+				expect(await device.writeControl(id, value)).toEqual({ reconnect: false });
+				expect(settingWrites(t), id).toEqual([
+					{ command, data: value, kind: 0x20, frames: 1, frame: 1 }
+				]);
+				expect((await device.readControls())[id], id).toBe(value);
+			}
+		});
+
+		test('volume is attenuation in half dB, or whole dB in the 1 dB step mode', async () => {
+			const { t, device } = topping('dx5');
+			t.sent.length = 0;
+			await device.writeControl('volume', -45.5);
+			expect(settingWrites(t).map((s) => [s.command, s.data])).toEqual([[0x7102, 91]]);
+			expect((await device.readControls()).volume).toBe(-45.5);
+			await device.writeControl('volume', 0);
+			expect((await device.readControls()).volume).toBe(0);
+			t.dx5Settings[32] = 1;
+			t.sent.length = 0;
+			await device.writeControl('volume', -45);
+			expect(settingWrites(t).map((s) => [s.command, s.data])).toEqual([[0x7102, 45]]);
+			expect((await device.readControls()).volume).toBe(-45);
+		});
+
+		test('balance is signed tenths of a dB', async () => {
+			const { t, device } = topping('dx5');
+			t.sent.length = 0;
+			await device.writeControl('balance', -0.5);
+			expect(settingWrites(t).map((s) => [s.command, s.data])).toEqual([[0x7116, 0xfffffffb]]);
+			expect((await device.readControls()).balance).toBe(-0.5);
+			await device.writeControl('balance', 9.5);
+			expect((await device.readControls()).balance).toBe(9.5);
+		});
+
+		test('refuses a volume while a line output is in DAC mode, and sends nothing for it', async () => {
+			for (const output of [2, 5, 6]) {
+				const { t, device } = topping('dx5');
+				t.dx5Settings[19] = 1;
+				t.dx5Settings[12] = output;
+				await expect(device.writeControl('volume', -20), String(output)).rejects.toMatchObject({
+					code: 'rejected'
+				});
+				expect(settingWrites(t)).toEqual([]);
+			}
+			const { t, device } = topping('dx5');
+			t.dx5Settings[19] = 1;
+			t.dx5Settings[12] = 3;
+			await device.writeControl('volume', -20);
+			expect(t.dx5Settings[9]).toBe(40);
+		});
+
+		test('gain is absent on a line-only output', async () => {
+			const { t, device } = topping('dx5');
+			t.dx5Settings[12] = 2;
+			expect((await device.readControls()).gain).toBeNull();
+			t.sent.length = 0;
+			await expect(device.writeControl('gain', 1)).rejects.toMatchObject({ code: 'unsupported' });
+			expect(settingWrites(t)).toEqual([]);
+		});
+
+		test('another family has no settings to drive', async () => {
+			const t = new FakeTopping('dx1');
+			const device = openDevice(
+				t,
+				{
+					handler: 'topping-usb-hid',
+					options: { family: 'dx1' },
+					controls: [{ id: 'mute', name: 'Mute', kind: 'toggle' }]
+				},
+				{ sleep: noSleep }
+			);
+			await expect(device.writeControl('mute', 1)).rejects.toMatchObject({ code: 'unsupported' });
+			expect(settingWrites(t)).toEqual([]);
+		});
 	});
 });

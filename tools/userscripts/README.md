@@ -20,6 +20,7 @@ Pages it knows:
 | NICEHCK web app, `https://app.nicehck.cn` | `nicehck-app` | PureAural, StringSnow, Tears, 10th Anniversary Edition (checked); Octave (checked against a simulated device only) |
 | Walkplay web app, `https://peq.szwalkplay.com` | `walkplay-peq` | Walkplay-chipset devices (writes checked; snapshots recorded, not checked) |
 | Kiwi Ears web EQ, `https://equalizer.kiwiears.com` | `kiwi-ears-eq` | Kiwi Ears' KT Micro devices (Allegro Mini checked) |
+| Topping's web app, `https://home.toppingaudio.com` | `topping-home` | DX5 II (checked); DX1 II, E50 II, DX9 Discrete, D900 (not recorded) |
 
 On NICEHCK's app, **Read all** runs the reads the app makes when it connects (firmware, every band,
 pre-gain, every control), and waits for the answers, which arrive as input reports. Open the
@@ -27,6 +28,11 @@ device's page first (Device or Equalizer); the connect page doesn't have the rea
 
 Walkplay's and Kiwi Ears' apps have no **Read all**: they read the device when they connect, so
 start the recording before you connect, then use the app and press **Snapshot**.
+
+Topping's app is the same, and its snapshot holds no app state: write down in the notes what the
+app showed (the firmware, the active config, each thing you changed and to what). The recorder
+leaves out the level meter reports, the empty reports the device sends between messages, and the
+two answers that carry codes identifying your unit.
 
 ### Recording a device
 
