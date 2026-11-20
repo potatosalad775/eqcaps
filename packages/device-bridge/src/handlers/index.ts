@@ -14,6 +14,7 @@ import { nothingUsbSerial } from './nothing-usb-serial.ts';
 import { qudelixUsbHid } from './qudelix-usb-hid.ts';
 import { qudelixV2UsbHid } from './qudelix-v2-usb-hid.ts';
 import { tanchjimRitaSerial } from './tanchjim-rita-serial.ts';
+import { toppingUsbHid } from './topping-usb-hid.ts';
 import { walkplayHid } from './walkplay-hid.ts';
 
 /** Every handler, by id. */
@@ -25,6 +26,7 @@ export const HANDLERS = {
 	'conexant-usb-hid': conexantUsbHid,
 	'ktmicro-usb-hid': ktmicroUsbHid,
 	'fosi-audio-usb-hid': fosiAudioUsbHid,
+	'topping-usb-hid': toppingUsbHid,
 	'qudelix-usb-hid': qudelixUsbHid,
 	'qudelix-v2-usb-hid': qudelixV2UsbHid,
 	'jds-labs-usb-serial': jdsLabsUsbSerial,

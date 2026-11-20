@@ -148,6 +148,7 @@ const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOption
 		gainRegister: byte
 	},
 	'fosi-audio-usb-hid': { reportId: byte, bandwidth: number, defaultSlot: byte },
+	'topping-usb-hid': { family: oneOf('dx1', 'dx5', 'e50', 'dx9d', 'd900') },
 	'qudelix-usb-hid': {},
 	'qudelix-v2-usb-hid': {},
 	'jds-labs-usb-serial': {},
