@@ -79,8 +79,8 @@ export interface QudelixLink {
 	reportSize: number;
 }
 
-/** What a codec assumes without a device: a 0x0a12 device's report 8 of 64 bytes. */
-export const OFFLINE_LINK: QudelixLink = { vendorId: 0x0a12, reportId: 8, reportSize: 64 };
+/** What a codec assumes without a device: a 0x0a12 device's report 8, 63 bytes on a 5K. */
+export const OFFLINE_LINK: QudelixLink = { vendorId: 0x0a12, reportId: 8, reportSize: 63 };
 
 function stackOf(vendorId: number): Stack {
 	const stack = STACKS[vendorId];

@@ -107,6 +107,8 @@ abstract class FakeHid implements HidTransport {
 	readonly errors: string[] = [];
 	/** Answers the opening request. */
 	answerOpening = true;
+	/** Echoes each band write in a notification, as a 5K does (recorded 2026-11-20). */
+	echoes = true;
 	deviceId: number;
 	readonly #listeners = new Set<(reportId: number, data: Uint8Array) => void>();
 	readonly #inputId: number;
@@ -393,7 +395,13 @@ export class FakeQudelix extends FakeHid {
 						q: u16be(d, 8)
 					};
 				}
-				return edited(eq);
+				edited(eq);
+				// 0x2000 [0x89, group, mask, band, 0, type, freq, gain, Q], after the write.
+				if (this.echoes) {
+					const echo = [0x20, 0x00, 0x89, g, d[1]!, band, 0, ...d.subarray(3, 10)];
+					queueMicrotask(() => this.reply(echo));
+				}
+				return;
 			}
 			case 0x070a: {
 				const eq = this.#eq(g);

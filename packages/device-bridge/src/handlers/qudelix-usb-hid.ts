@@ -11,8 +11,9 @@
 //   0x070A [group, custom n, length, UTF-8 name]   0x0708 [group, preset index] saves
 //   0x0709 [group, preset index] loads
 // A push is the switch on, the type (not on the speaker EQ, which is parametric only), the
-// pre-gain, one band frame per band and channel, then, for a slot, the name (empty: the default
-// "Custom #n") and the save. Reads: 0x0120 [mask] (0x80 on the 5K, 0x40 on the T71) is answered by
+// pre-gain, one band frame per band and channel, each waiting for the device's echo of it (a
+// 0x2000 notification [0x89, group, mask, band, …]), then, for a slot, the name (empty: the
+// default "Custom #n") and the save. Reads: 0x0120 [mask] (0x80 on the 5K, 0x40 on the T71) is answered by
 // 0x0121 [mask, EQ block]: [0, user configuration (4), its preset configuration (4), 1, speaker
 // configuration (4), its preset configuration (4)], or on a 5K in single-EQ mode [2, all-band
 // configuration (4), its preset configuration (4)]. 0x0123 [1 << group] is answered by 0x0128
@@ -62,7 +63,10 @@ export interface QudelixDeviceState {
 }
 
 export interface QudelixUsbHidOptions {
-	/** The EQ to drive: `usr`, the user EQ (default), or `spk`, the speaker (headphone) EQ. */
+	/**
+	 * The EQ the frames are for: `usr`, the user EQ (default), or `spk`, the speaker (headphone)
+	 * EQ. Set by the handler, from the operation's EQ (SPEC §9.2); not a profile's option.
+	 */
 	group?: QudelixGroupName;
 	/** Set by the handler. Without it the codec writes to a 5K in its layered mode, on report 8. */
 	device?: QudelixDeviceState;
@@ -80,6 +84,10 @@ const CONFIG = 0x0121;
 const ASK_PRESET = 0x0123;
 const PRESET = 0x0128;
 const TIMEOUT = 2000;
+/** The device's notification of a change it made, and the kind that echoes a band write. */
+const NOTIFICATION = 0x2000;
+const BAND_ECHO = 0x89;
+const ECHO_TIMEOUT = 250;
 
 /** The device-configuration bit of the EQ block, by device id. */
 const EQ_CONFIG_MASK: Readonly<Record<number, number>> = { [FIVE_K]: 0x80, [T71]: 0x40 };
@@ -131,11 +139,13 @@ export const qudelixUsbHidCodec: Codec<QudelixUsbHidOptions, HidFrame> = {
 		return packets.map((p) => hidOut(link, p));
 	},
 	decode(frames, o) {
-		const { link } = target(o);
+		const { link, group } = target(o);
 		const state: WriteState = { filters: [] };
 		for (const frame of frames) {
 			const p = sentPacket(link, frame);
 			const command = readU16be(p, 0);
+			// Every EQ write names its group first: another EQ's frames are not this one's state.
+			if (p[2] !== group.id) continue;
 			if (command === BAND) {
 				state.filters[p[4]!] = filterOf({
 					filter: p[5]!,
@@ -151,6 +161,9 @@ export const qudelixUsbHidCodec: Codec<QudelixUsbHidOptions, HidFrame> = {
 };
 
 type Ctx = HandlerContext<HidTransport, QudelixUsbHidOptions>;
+
+/** The EQ an operation names (`spk`), or the user EQ. */
+const groupName = (ctx: Ctx): QudelixGroupName => (ctx.eq === 'spk' ? 'spk' : 'usr');
 
 /** The session of a 5K or T71; refuses another model, and 5K firmware older than 3.0.0. */
 async function open(ctx: Ctx) {
@@ -197,7 +210,7 @@ async function readConfig(s: QudelixSession, model: QudelixModel) {
 async function drive(ctx: Ctx) {
 	const { s, model } = await open(ctx);
 	const config = await readConfig(s, model);
-	const group = groupOf(model, ctx.options.group ?? 'usr', config.single);
+	const group = groupOf(model, groupName(ctx), config.single);
 	return { s, model, group, single: config.single, config: config.groups.get(group.id)! };
 }
 
@@ -237,6 +250,7 @@ async function readStored(s: QudelixSession, model: QudelixModel, group: Qudelix
 export const qudelixUsbHid: HidHandler<QudelixUsbHidOptions> = {
 	id: 'qudelix-usb-hid',
 	transport: 'hid',
+	eqs: ['spk'],
 	codec: qudelixUsbHidCodec,
 
 	capabilities: () => ({
@@ -264,10 +278,39 @@ export const qudelixUsbHid: HidHandler<QudelixUsbHidOptions> = {
 			? (await readStored(s, model, group)).length
 			: group.channels[0]!;
 		const frames = qudelixUsbHidCodec.encode(request, {
-			...ctx.options,
+			group: groupName(ctx),
 			device: { link: s.link, model, single, channels }
 		});
-		for (const frame of frames) await sendFrame(ctx.transport, frame);
+		// A 5K echoes each band write in a notification, about 6 ms later. The app sends one band
+		// per edit; a whole EQ's bands back to back (20 in single-EQ mode) can leave a 5K deaf to
+		// what follows, so each band waits for its echo. A device that doesn't echo the first one
+		// gets the rest back to back.
+		let echoes = true;
+		for (const frame of frames) {
+			const p = sentPacket(s.link, frame);
+			if (!echoes || readU16be(p, 0) !== BAND) {
+				await sendFrame(ctx.transport, frame);
+				continue;
+			}
+			const echo = s.expect(
+				({ command, payload: e }) =>
+					command === NOTIFICATION &&
+					e[0] === BAND_ECHO &&
+					e[1] === p[2] &&
+					e[2] === p[3] &&
+					e[3] === p[4],
+				ECHO_TIMEOUT,
+				'a band write'
+			);
+			const heard = echo.then(
+				() => true,
+				() => false
+			);
+			await sendFrame(ctx.transport, frame);
+			echoes = await heard;
+			if (!echoes)
+				ctx.log(`Qudelix ${model.name}: no echo of a band write; sending the rest at once`);
+		}
 		return { reconnect: false };
 	},
 

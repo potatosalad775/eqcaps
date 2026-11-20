@@ -1,11 +1,11 @@
-// Replays devicePEQ's recorded device captures (tests/captures/, 0BSD, at 0617f38) as HID
-// transports: a send that matches a recorded one (null bytes are wildcards) gets that exchange's
-// recorded answers. FiiO captures recorded concurrent requests, so their answers don't line up
-// with the sends: they form a pool, and a request gets the first unused answer to the same
-// command (and band).
+// Replays recorded device captures (devicePEQ's tests/captures/, 0BSD, at 0617f38, and this
+// repository's own, which say so in their `_comment`) as HID transports: a send that matches a
+// recorded one (null bytes are wildcards) gets that exchange's recorded answers. FiiO captures
+// recorded concurrent requests, so their answers don't line up with the sends: they form a pool,
+// and a request gets the first unused answer to the same command (and band).
 
 import { readdirSync, readFileSync } from 'node:fs';
-import type { HidFrame, HidTransport } from '../src/index.ts';
+import type { HidCollectionInfo, HidFrame, HidTransport } from '../src/index.ts';
 
 type Bytes = (number | null)[];
 
@@ -23,7 +23,13 @@ export interface Exchange {
 export interface Capture {
 	file: string;
 	_comment?: string;
-	device: { vendorId?: number; productId?: number; productName: string };
+	device: {
+		vendorId?: number;
+		productId?: number;
+		productName: string;
+		/** The HID descriptor, where a handler reads its reports from it (Qudelix). */
+		collections?: HidCollectionInfo[];
+	};
 	exchanges?: Exchange[];
 	/** FiiO: answers to GET requests, matched by command and band. */
 	sequence?: Answer[];
@@ -84,7 +90,7 @@ export class ReplayHid implements HidTransport {
 		this.vendorId = capture.device.vendorId ?? 0;
 		this.productId = capture.device.productId ?? 0;
 		this.productName = capture.device.productName;
-		this.collections = [];
+		this.collections = capture.device.collections ?? [];
 		const exchanges = (capture.exchanges ?? []).filter((e) => isFiio(sendOf(e).data ?? []));
 		this.pool = [...(capture.sequence ?? []), ...exchanges.flatMap((e) => e.responses ?? [])];
 	}
