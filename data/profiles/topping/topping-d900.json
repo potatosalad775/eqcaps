@@ -1,0 +1,42 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "topping-home",
+	"id": "topping-d900",
+	"device": { "brand": "Topping", "model": "D900" },
+	"match": {
+		"usb": [{ "vendorId": "0x152a", "productId": "0x8750", "productName": ["D900"] }],
+		"firmware": { "min": "1.52" }
+	},
+	"band": { "freq": { "min": 20, "max": 22000, "step": 1 } },
+	"protocol": {
+		"options": { "family": "d900" },
+		"presets": [
+			{ "id": 0, "name": "Config 1", "writable": true },
+			{ "id": 1, "name": "Config 2", "writable": true },
+			{ "id": 2, "name": "Config 3", "writable": true },
+			{ "id": 3, "name": "Config 4", "writable": true },
+			{ "id": 4, "name": "Config 5", "writable": true },
+			{ "id": 5, "name": "Config 6", "writable": true },
+			{ "id": 6, "name": "Config 7", "writable": true },
+			{ "id": 7, "name": "Config 8", "writable": true },
+			{ "id": 8, "name": "Config 9", "writable": true },
+			{ "id": 9, "name": "Config 10", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Topping Home web app v1.17.0 (https://home.toppingaudio.com/): the D900's session and capability check, its 10 configs and its frequency limit",
+				"date": "2026-11-20"
+			},
+			{
+				"kind": "vendor-docs",
+				"ref": "https://home.toppingaudio.com/ (supported models and firmware note)",
+				"date": "2026-11-20"
+			}
+		],
+		"notes": "As topping-home, with frequencies up to 22000 Hz. Up to 10 stored configs. The firmware minimum is the one on Topping's page; the app checks no version, it refuses a device whose capabilities answer is not the one it expects, and so does the handler. The app keeps the config's 11th band as it read it; the handler writes it back the same way. The product name is a guess: the app tells its devices apart by a product name it strips of spaces and case, so the exact string a device reports is not known until one is read."
+	}
+}

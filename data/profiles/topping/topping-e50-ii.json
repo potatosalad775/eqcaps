@@ -1,0 +1,34 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "topping-home",
+	"id": "topping-e50-ii",
+	"device": { "brand": "Topping", "model": "E50 II" },
+	"match": {
+		"usb": [{ "vendorId": "0x152a", "productId": "0x8750", "productName": ["E50 II", "E50II"] }],
+		"firmware": { "min": "1.52" }
+	},
+	"protocol": {
+		"options": { "family": "e50" },
+		"presets": [
+			{ "id": 0, "name": "Config 1", "writable": true },
+			{ "id": 1, "name": "Config 2", "writable": true },
+			{ "id": 2, "name": "Config 3", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Topping Home web app v1.17.0 (https://home.toppingaudio.com/): the E50 II's session, its 3 configs and the firmware it refuses",
+				"date": "2026-11-20"
+			},
+			{
+				"kind": "vendor-docs",
+				"ref": "https://home.toppingaudio.com/ (supported models and firmware note)",
+				"date": "2026-11-20"
+			}
+		],
+		"notes": "As topping-home. Up to 3 stored configs; the app cannot delete one. The app refuses to control firmware below 1.52, and so does the handler; Topping's page asks for 1.56 or later. The EQ has no switch of its own: selecting no config turns it off. The app shows the EQ as unavailable in DSD and above 192 kHz. Config numbers count from 0 here, as the app's device screen sends them; its EQ screen has a mode that counts from 1 on some firmware, which only a device can settle. The product name is a guess: the app tells its devices apart by a product name it strips of spaces and case, so the exact string a device reports is not known until one is read."
+	}
+}

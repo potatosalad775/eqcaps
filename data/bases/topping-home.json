@@ -1,0 +1,27 @@
+{
+	"$schema": "../../schema/v1/source.schema.json",
+	"abstract": true,
+	"id": "topping-home",
+	"schemaVersion": "1.1",
+	"kind": "hardware",
+	"bandCount": 10,
+	"band": {
+		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ"],
+		"freq": { "min": 20, "max": 20000, "step": 1 },
+		"q": { "min": 0.1, "max": 15, "step": 0.0001 },
+		"gain": { "min": -12, "max": 12, "step": 0.1 }
+	},
+	"preamp": { "mode": "manual", "gain": { "min": -12, "max": 12, "step": 0.1 } },
+	"protocol": { "handler": "topping-usb-hid" },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Topping Home web app v1.17.0 (https://home.toppingaudio.com/): the EQ editor's limits and filter types, how it starts a session, reads the stored configs and writes one",
+				"date": "2026-11-20"
+			}
+		],
+		"notes": "What Topping's web app does with its DACs on USB id 0x152a:0x8750; checked on a DX5 II only (see its profile). The ranges are the app's editor limits, not verified firmware limits: 10 bands, 20 to 20000 Hz in whole Hz, gain -12 to +12 dB in steps of 0.1, Q 0.1 to 15 in steps of 0.0001, a pre-gain of -12 to +12 dB in steps of 0.1, and peak, low and high shelf, low-pass and high-pass filters (the app hides the gain of the last two). The device is told the frequency in Hz, the gain in tenths of a dB and Q in ten-thousandths. A config holds 11 bands per channel; the app shows 10 and writes the 11th switched off. Left and right can differ on the device; a write here sets both the same and a read returns the left channel. The app takes the pre-gain's wire value from a table, and computes it instead for the D900; the handler does the same, because the app reads a value that is not in its table as the neighbouring 0.1 dB step and writes that back when it connects (seen with a DX5 II). The table is one 0.1 dB step off above +7.7 dB and below -10.3 dB and wrong at +3.5 and -4.9 dB, so there the device applies a slightly different gain than the number says, as it does from Topping's app. The table repeats the step before at -4.9, -10.4 and +7.8 dB; for those the handler sends a value halfway to the next step, which the app reads as the step meant. The app sends no save command after a config's parameters, so whether a write survives a power cycle is unknown. The presets are the device's stored configs, which the user names and can have fewer of than listed: the app creates and deletes them, the bridge writes only one that exists. The app's store allows Q up to 20 on some paths and its text import clamps to 20; the editor's 15 is used. The app keeps a session alive with a heartbeat every 1 or 5 s, which the bridge does not send. devicePEQ has no Topping support (it turned Topping detection off)."
+	}
+}
