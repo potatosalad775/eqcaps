@@ -1,0 +1,43 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "topping-home",
+	"id": "topping-dx9-discrete",
+	"device": { "brand": "Topping", "model": "DX9 Discrete" },
+	"match": {
+		"usb": [
+			{ "vendorId": "0x152a", "productId": "0x8750", "productName": ["DX9 Discrete", "DX9D"] }
+		],
+		"firmware": { "min": "0.46" }
+	},
+	"protocol": {
+		"options": { "family": "dx9d" },
+		"presets": [
+			{ "id": 0, "name": "Config 1", "writable": true },
+			{ "id": 1, "name": "Config 2", "writable": true },
+			{ "id": 2, "name": "Config 3", "writable": true },
+			{ "id": 3, "name": "Config 4", "writable": true },
+			{ "id": 4, "name": "Config 5", "writable": true },
+			{ "id": 5, "name": "Config 6", "writable": true },
+			{ "id": 6, "name": "Config 7", "writable": true },
+			{ "id": 7, "name": "Config 8", "writable": true },
+			{ "id": 8, "name": "Config 9", "writable": true },
+			{ "id": 9, "name": "Config 10", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Topping Home web app v1.17.0 (https://home.toppingaudio.com/): the DX9 Discrete's session, its 10 configs and its settings",
+				"date": "2026-11-20"
+			},
+			{
+				"kind": "vendor-docs",
+				"ref": "https://home.toppingaudio.com/ (supported models and firmware note)",
+				"date": "2026-11-20"
+			}
+		],
+		"notes": "As topping-home. Up to 10 stored configs. The firmware minimum is the one on Topping's page; the app itself checks no version for this device. The product name is a guess: the app tells its devices apart by a product name it strips of spaces and case, so the exact string a device reports is not known until one is read."
+	}
+}
