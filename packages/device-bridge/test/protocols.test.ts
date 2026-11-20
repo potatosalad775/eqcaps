@@ -160,6 +160,11 @@ describe('other EQs (SPEC §9.2)', () => {
 			expect(protocolOf({ protocol: raw(bad) }), JSON.stringify(bad)).toBeUndefined();
 		}
 	});
+
+	test('every EQ the data lists has the slots its profile gives it', () => {
+		const plus = protocolOf(profile('qudelix-5k-plus'))!;
+		expect(plus.eqs?.map((e) => [e.id, e.bandCount, e.presets?.length])).toEqual([['spk', 20, 21]]);
+	});
 });
 
 describe('Moondrop USB HID options', () => {

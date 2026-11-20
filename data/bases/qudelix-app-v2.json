@@ -4,7 +4,39 @@
 	"abstract": true,
 	"id": "qudelix-app-v2",
 	"band": { "q": { "min": 0.009765625, "max": 63, "step": 0.0009765625 } },
-	"protocol": { "handler": "qudelix-v2-usb-hid" },
+	"protocol": {
+		"handler": "qudelix-v2-usb-hid",
+		"eqs": [
+			{
+				"id": "spk",
+				"name": "SPK EQ",
+				"bandCount": 20,
+				"presets": [
+					{ "id": 0, "name": "Flat" },
+					{ "id": 22, "name": "Custom #1", "writable": true },
+					{ "id": 23, "name": "Custom #2", "writable": true },
+					{ "id": 24, "name": "Custom #3", "writable": true },
+					{ "id": 25, "name": "Custom #4", "writable": true },
+					{ "id": 26, "name": "Custom #5", "writable": true },
+					{ "id": 27, "name": "Custom #6", "writable": true },
+					{ "id": 28, "name": "Custom #7", "writable": true },
+					{ "id": 29, "name": "Custom #8", "writable": true },
+					{ "id": 30, "name": "Custom #9", "writable": true },
+					{ "id": 31, "name": "Custom #10", "writable": true },
+					{ "id": 32, "name": "Custom #11", "writable": true },
+					{ "id": 33, "name": "Custom #12", "writable": true },
+					{ "id": 34, "name": "Custom #13", "writable": true },
+					{ "id": 35, "name": "Custom #14", "writable": true },
+					{ "id": 36, "name": "Custom #15", "writable": true },
+					{ "id": 37, "name": "Custom #16", "writable": true },
+					{ "id": 38, "name": "Custom #17", "writable": true },
+					{ "id": 39, "name": "Custom #18", "writable": true },
+					{ "id": 40, "name": "Custom #19", "writable": true },
+					{ "id": 41, "name": "Custom #20", "writable": true }
+				]
+			}
+		]
+	},
 	"meta": {
 		"status": "draft",
 		"sources": [

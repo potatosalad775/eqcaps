@@ -1,7 +1,9 @@
 # Qudelix's Chrome app, against qudelix-usb-hid
 
-Started 2026-11-19, after [moondrop.md](moondrop.md). No Qudelix device was at hand: everything
-here is from the app, and the profiles stay `draft` with `experimental` protocols.
+Started 2026-11-19, after [moondrop.md](moondrop.md). No Qudelix device was at hand then:
+everything up to "Checked on a 5K and a 5K Plus" is from the app. Both were checked on 2026-11-20
+(below): their protocols are no longer `experimental`, the T71's is, and all three profiles stay
+`draft`.
 
 ## How the app was read
 
@@ -208,8 +210,8 @@ As they stood before this work: `qudelix-usb-hid` was devicePEQ's 5K handler, an
   its two recorded names as more specific entries.
 - New `qudelix-5k-plus` (fourteen ids, any name) and `qudelix-t71` (twenty-two ids under
   `0x1fc9`, its 10 user-EQ memories 22–31).
-- The profiles describe the user EQ, with `bandCount` 10 and no `group` option; their notes cover
-  the headphone EQ, the modes, the firmware gates and what changed.
+- The profiles describe the user EQ, with `bandCount` 10, and list the headphone EQ (format 1.3,
+  below); their notes cover the modes, the firmware gates and what changed.
 - `qudelix-usb-hid` follows the app for the 5K (firmware 3.0.0 and later) and the T71: the opening
   request, reads, the app's framing on both USB chips, no options besides `group`.
   - Every operation opens the session if it isn't open (quiet for 20 ms, the opening request, 5 s
@@ -243,12 +245,11 @@ As they stood before this work: `qudelix-usb-hid` was devicePEQ's 5K handler, an
 - Neither handler sends the app's session-info element, its warranty messages, its disconnect
   message or its preset-name requests.
 - Both handlers drive the user EQ, or the all-band EQ in single-EQ mode, and report that count
-  (20 on the 5K, 30 on the 5K Plus). Option `group: "spk"` drives the headphone EQ instead:
-  parametric, both channels alike, absent in single-EQ mode, refused on the T71's 4 and 8 channels.
-  `group` is in `OPTIONS` and the bridge README for both handlers. On the 5K the headphone EQ
+  (20 on the 5K, 30 on the 5K Plus). An operation on the EQ `spk` drives the headphone EQ instead:
+  parametric, both channels alike, absent in single-EQ mode, refused on the T71's 4 and 8 channels. On the 5K the headphone EQ
   stays a left/right pair in the QX-over output mode too, so it is written there as well.
 - Tests run against a fake device built from this reading: they show the handlers agree with the
-  reading, not with a device.
+  reading. The devices' own answers are tested apart (Checked on a 5K and a 5K Plus).
 - Needs a bridge release before this data reaches `main`: an older bridge has no
   `qudelix-v2-usb-hid` and drops the 5K Plus's protocol.
 
@@ -258,8 +259,6 @@ As they stood before this work: `qudelix-usb-hid` was devicePEQ's 5K handler, an
   "contains", and only two names are known.
 - **10 bands in the data** while the device is in single-EQ mode has 20 or 30: the handler reports
   the device's count, and 10 fit either mode.
-- **One EQ per profile**: the profiles describe the user EQ; the headphone EQ is driven only
-  through the `group` option and described in notes, until the format change decided below.
 - **The headphone EQ writes left and right alike**: the format has linked channels only. The app
   can set each channel.
 - **5K firmware 2.x is not driven**; the app drives it with older commands.
@@ -267,13 +266,26 @@ As they stood before this work: `qudelix-usb-hid` was devicePEQ's 5K handler, an
 - **Custom memory names** in the data are the app's label for an unnamed memory; the device holds
   the user's names.
 
-## Decision: two EQs on one device (2026-11-19)
+## Decision: two EQs on one device (2026-11-19), made 2026-11-20
 
-The EQ is chosen per operation: `pull` and `push` say which EQ they act on, and the profile lists
-the device's EQs, each with its own band count and presets. That is an additive format minor
-(SPEC §15) with a DECISIONS entry, and a bridge API addition. It is made after a device confirms
-the basics (Next); SPEC and DECISIONS are not touched until then. Meanwhile the handlers' `group`
-option reaches both EQs, and the profiles describe the user EQ.
+The EQ is chosen per operation, and the profile lists the device's EQs, each with its own band
+count and presets: format 1.3, D53, SPEC §9.2. Made once both devices confirmed that the EQs are
+independent.
+
+- **Format**: `protocol.eqs` lists the EQs besides the one the profile describes, each `{ id,
+  name, bandCount?, presets? }`. Issue code `eq-duplicate`; a listed EQ's slots must be complete
+  (`slot-incomplete`); `version-too-low` below 1.3. Six conformance cases.
+- **Core**: `profileEqs(profile)` and `eqProfile(profile, id)`, the profile of one EQ for the
+  engine.
+- **Bridge**: `eq` on `pull` and `push`, and on `currentSlot`, `eqEnabled`, `setEnabled` and
+  `bandCount`; `capabilities.eqs`; a handler names its EQs in `eqs` and reads `ctx.eq`. The
+  `group` option is gone from the data's options (no profile set it); the codecs keep it as what
+  the handler passes them.
+- **Data**: `qudelix-app` has `engine` "USR EQ" and lists `spk` "SPK EQ" (Flat and memories 22 to
+  41); `qudelix-app-v2` lists it with 20 bands. The T71 inherits the base's.
+- **Inspector**: the read (T2) chooses the EQ and checks it against that EQ's profile.
+- **Not modelled**: single-EQ mode. The handler drives the all-band EQ as the profile's own and
+  reports its band count; `spk` is `unsupported` there.
 
 Rejected:
 
@@ -281,6 +293,128 @@ Rejected:
   share it only with different `engine` labels), so every connect would ask which EQ.
 - **A switch held by the bridge**: session state posing as a device control, and the profile's
   band count would be wrong for the 5K Plus's headphone EQ (20 bands, not 10).
+
+## Checked on a 5K and a 5K Plus (2026-11-20)
+
+The maintainer's 5K (firmware 3.2.9) and 5K Plus (firmware 1.0.3), both as the handlers read
+them, on macOS 27.2: `qudelix-usb-hid` and `qudelix-v2-usb-hid` as they stand, over a Node HID
+library (the OS's HID layer, not Chrome's WebHID), every report logged. Nothing was plugged into
+the outputs. The vendor app was not compared.
+
+**Both devices**
+
+- **The opening request is answered** within 10 ms, on input report 9; every later answer and
+  notification came there too. devicePEQ's "write-only" is wrong: it never asked.
+- **Pull and push work on both EQs.** A push to the user EQ (pre-gain −3.5; PK 1000 Hz −3 dB
+  Q 1.5, LSC 105 Hz −2 dB Q 0.75, HSC 9000 Hz −1.5 dB Q 0.5, HPQ 25 Hz and LPQ 19000 Hz Q
+  724/1024) read back exactly, the bands past it as they were, the switch on. So the channel
+  mask 1, all five type codes, the gain's sign and scale, Q in 1/1024ths and the stored layouts
+  hold. Frames go back to back, with no delay.
+- **The headphone EQ**: a push with mask 3 took on left and right alike and left the user EQ
+  alone; its preset became 255.
+- **A save**: the empty name, then the save to memory 22, leaves the EQ on preset 22. Selecting
+  Flat (0) then 22 again brought the curve back. Memory 22 of each device's user EQ now holds
+  the test curve.
+- **Limits**: both ends of the editor's ranges are stored as written (10 and 22000 Hz, ±50 dB,
+  Q 0.01 as 10/1024 and 15, or 63 on the 5K Plus, pre-gain ±24; Q 1.111111 lands on 1138/1024).
+  The firmware does not clamp to the editor: it keeps what its fields hold (±51.1 dB; Q
+  16383/1024 on the 5K, 65535/1024 on the 5K Plus, which also kept 65535 Hz). What the DSP does
+  past the editor's limits was not measured, so the profiles keep the app's ranges.
+- **Left as found**, read back byte for byte, but for memory 22.
+
+**5K** (`0x0a12`/`0x4007`, "Qudelix-5K USB DAC", manufacturer "QTIL", behind a hub of its own,
+`0x0a12`/`0x4010`)
+
+- **Descriptor**, the 0xFF00 collection (usage 1): output reports 1, 5 and 7 of 65 bytes and 8
+  of 63; input reports 9 of 63, 2 of 65 and 6 of 13; feature reports 3 and 4 of 3. The codec
+  assumed 64 bytes without a device (`OFFLINE_LINK`), now 63. A second HID interface is consumer
+  control.
+- **Opening answer** `38 01 01 00 01 03 83 90 …`: device id 1, status 3, firmware `83 90` =
+  3.2.9.
+- **The EQ configuration** `01 21 80 | 00 | 00 ff 00 00 | 00 00 00 00 | 01 | 00 1a 00 00 |
+  0f 00 00 00` as found: layered, the user EQ off on preset 255, the headphone EQ off on preset
+  26. The preset configurations (`00…`, `0f…`) did not change with the save; their meaning is
+  open.
+- **Stored presets** come as `0x0128` fragments of at most 50 bytes, about 10 ms apart: 88 bytes
+  for the user EQ, 128 for the headphone EQ.
+- **Notifications** `0x2000`, about 6 ms after a write, first byte a kind: `82` the switch (only
+  when it changes), `8d` the type, `81 [group, 0, 0, 0, preset]`, `84` the pre-gain, `89
+  [group, mask, band, 0, type, freq, gain, Q]` a band, `04` a status that comes unasked.
+- **A band write while the EQ is off is stored** and notified. The app drops such edits; that is
+  the app's choice.
+
+**5K Plus** (`0x0a12`/`0x5004`, "Qudelix-5K+ USB DAC", manufacturer "Qualcomm", also behind a
+`0x0a12`/`0x4010` hub)
+
+- **Descriptor**: one HID interface with several top-level collections. On 0xFF00: usage 1 with
+  output reports 1 (62 bytes) and 5 (254), input 2 (16) and 6 (12), feature 3 and 4 (62); usage 3
+  with output report 8 and input report 9, 127 bytes each; usage 3 again with feature report
+  0x20 (255). The second handler's codec now assumes 127 bytes without a device.
+- **Opening answer**: `0x9000` in four fragments 3 ms apart, 119 bytes of message each, not
+  waiting for acks from the host. Protocol `02 00 00 78`: version 2.0.0, packet size 120.
+  Firmware element `01 00 03 02`. It carries the EQ mode (0x80) and both groups' configuration
+  (0x90, 0xA0) and preset configuration (0x91, 0xA1), as the handler assumed, among device
+  status, settings and Bluetooth pairings (names included: the captures zero those).
+- **A request** for a stored preset is answered in 3 to 6 ms: 78 bytes in one packet for the
+  user EQ, 256 in three for the headphone EQ.
+- **Acks**: a headphone-EQ push with a pre-gain sends the 256-byte preset in three fragments; the
+  device acked each but the last in about 6 ms, `90 01 80 [fragment, 0]`. No message of the user
+  EQ needs a second fragment at packet size 120.
+- **Selecting a preset** is setting the group's configuration; the device answers with a
+  notification holding the configuration and the whole preset. A save is answered with the
+  preset configuration (a bit per stored memory) and the configuration.
+- As found: the user EQ off on preset 41, the headphone EQ on, on Flat.
+
+**Kept as captures** in `packages/device-bridge/test/captures/`, each device as found
+(`qudelix_qudelix_5k.json`, `qudelix_qudelix_5k_plus.json`) and after the pushes
+(`…_pushed.json`: the writes, their notifications and acks, the reads after). The opening
+answers have their status, settings and pairing data zeroed. `captures.test.ts` pulls from all
+four and re-encodes the recorded band frames; `qudelix.test.ts` reads the firmware, switches,
+presets and both EQs from them, and replays the 5K's pushes frame for frame. That found one bug:
+the first handler's codec decoded another EQ's frames as its own.
+
+**Single-EQ mode** (both devices, switched with the app's own command: `0x070E [1]` on the 5K,
+the EQ mode element 0x80 set to mode 1 on the 5K Plus, and back)
+
+- The device answers the switch with notifications: the 5K with its new configuration and the
+  all-band preset, the 5K Plus with the mode, the all-band configuration and its preset.
+- The handlers read the all-band EQ as the profile's own: 20 bands on the 5K (parametric, Flat),
+  30 on the 5K Plus (graphic by default, as the app has it, Q 4.318). The EQ `spk` is refused as
+  `unsupported` on both.
+- A push of every band (20 and 30) read back exactly. On the 5K Plus it made the EQ parametric,
+  as a push does; setting the attributes element back made it graphic again.
+- Back in layered mode the user EQ and the headphone EQ read byte for byte as before.
+- **The 5K can go deaf after 20 band frames back to back.** In 1 run of 3 (and once before),
+  a request sent right after them got no answer, nor did later ones in that session; only 12 of
+  the 20 echoes came. Every band had still been written, and a new session answered at once.
+  With a 300 ms pause the request was answered. The app never sends a whole EQ as single band
+  frames (it writes the preset block, `0x0129`), so this is the handler's own burst. The handler
+  now waits for the device's echo of each band (the `89` notification, within 250 ms) before
+  the next; a device that doesn't echo the first gets the rest at once. Paced, 12 of 12 runs
+  answered, 20 bands taking about 65 ms. The 5K Plus showed no such thing with 30 band elements.
+
+**Over Chromium's WebHID** (Helium 157 on macOS, the local inspector's origin, the device
+granted earlier by the owner): the bridge's own `grantedHidDevice`, `openDevice` and the client's
+`matchDevice`, run in the page against the built 1.3 data. The 5K matched `qudelix-5k` at
+specificity 4, reported firmware 3.2.9, and both EQs read with no violations. The vendor app had
+the device open in another tab at the same time: both hold it at once, each sees the answers to
+the other's requests, and the handler read past them. The chooser itself and the 5K Plus were
+not driven this way (the chooser needs the owner's click).
+
+**In the data**: both profiles cite the check as a `community` source with `by` and `firmware`,
+say in their notes what was and was not checked, and clear the base's `experimental`; the 5K
+Plus has its product name as a specific match entry. Status stays `draft`: no counting source has
+`by`, and the app's screen was not compared.
+
+**Checked by the owner** (2026-11-20): the vendor app shows the same firmware versions (3.2.9,
+1.0.3) and, for memory 22 of each user EQ, the curve the bridge saved there, value for value;
+the inspector's own connect flow works on the devices.
+
+**An unsaved EQ survives a restart** on both: a push to the user EQ without a slot, then the
+cable pulled and the device powered off and on by the owner. Both came back with the pushed bands
+and pre-gain, the switch on and no preset selected (255), the headphone EQ as it was.
+
+Not checked: a bypassed band, other OSes, 5K firmware 2.x, the T71.
 
 ## Checking on a device
 
@@ -337,10 +471,9 @@ profiles, and the bridge's captures.
    bypassed) and a pre-gain of −3 dB. Read in the inspector. Write down every band, bypassed ones
    too, the pre-gain, the current preset and the on/off state, next to what the app shows; any
    difference is a finding.
-4. **Pull the headphone EQ.** The inspector has no way to choose the EQ; until the format change,
-   locally add `"options": { "group": "spk" }` to the profile's `protocol`,
-   rerun `npm run data:build`, reload, and do not commit it. Set a different curve on left and
-   right in the app's SPK tab, read, and write down what comes back for each channel.
+4. **Pull the headphone EQ.** Choose "SPK EQ" in the inspector's EQ selector. Set a different
+   curve on left and right in the app's SPK tab, read, and write down what comes back for each
+   channel.
 5. **Limits, by guided read** (INSPECTOR §3) on the user EQ: the app's lowest and highest
    frequency (10, 22000), gain (−50, +50), Q (0.01, 15; 63 on the 5K Plus), each type, the
    pre-gain (−24, +24), and the grid check (type Q 1.111111). Expected reads: Q 0.01 as
@@ -352,7 +485,7 @@ profiles, and the bridge's captures.
    inspector, then replug without saving and pull again. Write down all four. Push 3 filters
    onto a device holding 10 and write down what the other 7 bands hold afterwards.
    Expected: they keep what they held; the handler writes only the bands it is given.
-7. **Push to the headphone EQ** (`group: "spk"` as in step 4): write down whether left and right
+7. **Push to the headphone EQ** (the EQ `spk`): write down whether left and right
    both took it in the app, whether the user EQ stayed as it was, what is heard, and what a replug
    keeps.
 8. **Save to a custom memory**: push with slot 22. In the app, look at the memory's name and
@@ -364,7 +497,7 @@ profiles, and the bridge's captures.
    20 or 30 bands. On the 5K Plus, note whether the all-band EQ is graphic, and switch it to
    parametric in the app before pushing. Push a full set (uniPEQ takes the count from the device's
    `bandCount()`), then switch back to layered mode and pull the user EQ: write down
-   whether it kept its values. A push with `group: "spk"` should be refused in this mode.
+   whether it kept its values. A push to the EQ `spk` should be refused in this mode.
 10. **5K Plus acknowledgements**: during a push long enough to need several fragments (a pre-gain
     change resends the whole preset in the app), the console should show acks (`90 01` after the
     length byte, then the fragment id and a result of 0) after every fragment but the last. Write
@@ -382,22 +515,25 @@ and presets match it. Then set the status, and drop `experimental` from that pro
 
 ## Next
 
-1. **A device** (Checking on a device). Nothing is confirmed on hardware. First: whether the
-   device answers the opening request over WebHID on each OS (devicePEQ saw no input on macOS),
-   which input report (2 or 9) and output report (8 or 7) each firmware uses, and the report
-   sizes.
-2. **5K firmware 3.x writes**: the user EQ with mask 1, save and load as `[group, 22 + slot]`, a
-   save without a name.
-3. **Identity**: the USB product names of the 5K Plus, the T71 and the 5K's other nine ids; what
+1. **The rest of the device check** (Checking on a device). The 5K and 5K Plus open, read and
+   write both EQs and save (Checked on a 5K and a 5K Plus). Still open, all needing the owner at
+   the device: other OSes.
+2. **Status**: `maintainer-verified` needs a counting source with `by` (SPEC §10): the guided
+   read against the app (step 5), or `by` on the app reading.
+3. **Identity**: the USB product names of the T71 and of the other ids of the 5K and 5K Plus; what
    the product ids within a model mean; whether other makers' devices use these ids under `0x0a12`
    or `0x1fc9`, since the data matches any name.
-4. **Firmware limits against the editor's**: 22 kHz at 44.1 kHz, ±50 dB, Q 63 on the 5K Plus.
-5. **Persistence**: whether the 5K Plus and T71 keep an unsaved EQ across a restart.
+4. **What the DSP does at the limits**, which both firmwares store: 22 kHz at 44.1 kHz, ±50 dB,
+   Q 63 on the 5K Plus. A measurement, not a read-back.
+5. **Persistence**: whether the T71 keeps an unsaved EQ across a restart; the 5K and 5K Plus do.
 6. **The T71**: its sequence after the opening answer, and its user EQ on 5 channels.
-7. **The two-EQ format change** decided above: a DECISIONS entry, the SPEC minor, the bridge's
-   per-operation EQ, and the three profiles listing both EQs.
-8. **Graphic EQ and device controls** (headroom, crossfeed, DAC filter, gain, output, USB mode and
+7. **A whole EQ as the app writes it**: the preset block in `0x0129` fragments (first protocol),
+   instead of one band frame per band paced by echoes. Its layout is read from the app but no
+   device has taken it from the bridge.
+8. **Releases**: the bridge (the second handler, the EQ of an operation) and core (format 1.3)
+   before uniPEQ can offer the headphone EQ. An older bridge ignores `eqs` and drives the user EQ.
+9. **Graphic EQ and device controls** (headroom, crossfeed, DAC filter, gain, output, USB mode and
    the rest), after a device confirms the basics. Their facts are under "What the app does".
-9. **5K firmware 2.x**, if an owner still runs it: its own layout, codes and save form.
-10. **Recording**: no way yet to record the app itself (Checking on a device); a capture built
-    from the console logs of steps 2, 6 and 10 instead.
+10. **5K firmware 2.x**, if an owner still runs it: its own layout, codes and save form.
+11. **Recording**: no way yet to record the app itself (Checking on a device). Both devices
+    have captures of the bridge's own sessions.
