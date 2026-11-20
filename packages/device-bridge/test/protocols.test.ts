@@ -116,6 +116,52 @@ describe('controls (SPEC §9.1)', () => {
 	});
 });
 
+describe('other EQs (SPEC §9.2)', () => {
+	const spk = { id: 'spk', name: 'SPK EQ', bandCount: 20, presets: [{ id: 0, name: 'Flat' }] };
+	const raw = (eqs: unknown) => ({ handler: 'qudelix-v2-usb-hid', eqs });
+
+	test('keeps the EQs the handler drives, with their band count and presets', () => {
+		expect(protocolOf({ protocol: raw([spk]) })?.eqs).toEqual([spk]);
+		expect(protocolOf({ protocol: raw([{ id: 'spk', name: 'SPK EQ' }]) })?.eqs).toEqual([
+			{ id: 'spk', name: 'SPK EQ' }
+		]);
+		expect(protocolProblem(raw([spk]))).toBeUndefined();
+	});
+
+	test('an EQ the handler lacks: CI refuses it, an app leaves it out', () => {
+		const mic = { id: 'mic', name: 'Microphone EQ' };
+		expect(protocolProblem(raw([spk, mic]))).toBe('eqs.mic: qudelix-v2-usb-hid has no EQ "mic"');
+		expect(protocolOf({ protocol: raw([spk, mic]) })?.eqs).toEqual([spk]);
+		expect(protocolOf({ protocol: raw([mic]) })).toEqual({ handler: 'qudelix-v2-usb-hid' });
+		expect(protocolProblem({ handler: 'walkplay-hid', eqs: [spk] })).toBe(
+			'eqs.spk: walkplay-hid has no EQ "spk"'
+		);
+	});
+
+	test('a malformed EQ makes the protocol unreadable', () => {
+		for (const bad of [
+			'spk',
+			[{ id: 'SPK', name: 'SPK EQ' }],
+			[{ id: 'spk' }],
+			[spk, spk],
+			[{ ...spk, bandCount: 0 }],
+			[
+				{
+					...spk,
+					presets: [
+						{ id: 0, name: 'Flat' },
+						{ id: 0, name: 'Again' }
+					]
+				}
+			],
+			// These handlers have an EQ switch, so no preset of any of their EQs is a bypass.
+			[{ ...spk, presets: [{ id: 0, name: 'Off', bypass: true }] }]
+		]) {
+			expect(protocolOf({ protocol: raw(bad) }), JSON.stringify(bad)).toBeUndefined();
+		}
+	});
+});
+
 describe('Moondrop USB HID options', () => {
 	const options = {
 		bandFrame: 'compact',

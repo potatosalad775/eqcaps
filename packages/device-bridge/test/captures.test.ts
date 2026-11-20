@@ -1,5 +1,5 @@
-// Against devicePEQ's recorded device captures (D20, D33). For each capture the protocol is found
-// the way an app finds it: the client matches the device to a profile, whose `protocol` drives
+// Against recorded device captures, devicePEQ's and our own (D20, D33). For each capture the
+// protocol is found the way an app finds it: the client matches the device to a profile, whose `protocol` drives
 // it. A pull replays the recorded answers and the decoded state is snapshotted, with what the
 // draft profile says about it. The recorded writes are reference frames: decoding them and
 // encoding the result gives the same band frames back.
@@ -58,7 +58,12 @@ const BANDS: Partial<Record<Protocol['handler'], (f: HidFrame) => number | undef
 	'fiio-usb-hid': ({ data: d }) => (d[0] === 0xaa && d[4] === 0x15 ? d[6] : undefined),
 	'walkplay-hid': ({ data: d }) => (d[0] === 0x01 && d[1] === 0x09 ? d[4] : undefined),
 	'ktmicro-usb-hid': ({ data: d }) => (d[4] === 0x57 ? d[0] : undefined),
-	'fosi-audio-usb-hid': (f) => (f.feature && f.data[1] === 0x8d ? f.data[3] : undefined)
+	'fosi-audio-usb-hid': (f) => (f.feature && f.data[1] === 0x8d ? f.data[3] : undefined),
+	// The user EQ's bands: the captures also hold a push to the speaker EQ.
+	'qudelix-usb-hid': ({ data: d }) =>
+		d[2] === 0x07 && d[3] === 0x0f && d[4] === 0 ? d[6] : undefined,
+	'qudelix-v2-usb-hid': ({ data: d }) =>
+		d[2] === 0x90 && d[3] === 0x04 && d[4] === 0x80 && d[5] === 0x95 ? d[8] : undefined
 };
 
 /**

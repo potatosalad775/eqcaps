@@ -22,6 +22,8 @@ export interface PullRequest {
 	slot?: number;
 	/** Bands to read, where the protocol can't tell. Default: the profile's `bandCount`. */
 	bands?: number;
+	/** Which of the device's EQs to read (SPEC §9.2): an id of `capabilities.eqs`. Default: the profile's own. */
+	eq?: string;
 }
 
 /** What the device holds, in canonical units: written values (D39). */
@@ -49,6 +51,19 @@ export interface PushRequest {
 	preamp?: number;
 	/** Preset slot to write to. Refused, like `preamp`, where the write names none (`writesSlot`). */
 	slot?: number;
+	/** Which of the device's EQs to write (SPEC §9.2): an id of `capabilities.eqs`. Default: the profile's own. */
+	eq?: string;
+}
+
+/** Another EQ of the device, as its profile lists it (SPEC §9.2). */
+export interface EqInfo {
+	/** The handler's id of the EQ: what `eq` takes. */
+	id: string;
+	name: string;
+	/** Its band count, where the profile gives one that differs from its own. */
+	bandCount?: number;
+	/** Its own preset slots. */
+	slots: readonly Slot[];
 }
 
 export interface PushResult {
@@ -136,7 +151,12 @@ export interface HandlerCapabilities {
 export interface HandlerContext<T extends Transport, O> {
 	transport: T;
 	options: O;
-	/** The preset the profile marks `bypass`: selecting it turns the EQ off (SPEC §9). */
+	/**
+	 * The EQ the operation is for (SPEC §9.2), one of the handler's `eqs`; undefined for the EQ the
+	 * handler drives by default.
+	 */
+	eq?: string;
+	/** The preset that EQ's list marks `bypass`: selecting it turns the EQ off (SPEC §9). */
 	bypass?: number;
 	/** Waits between writes. Tests replace it to run without real delays. */
 	sleep(ms: number): Promise<void>;
@@ -165,6 +185,11 @@ export interface Handler<T extends Transport, O, F> {
 	readonly sppServiceClass?: string;
 	/** The protocol turns the EQ off by selecting a preset, which the profile marks `bypass`. */
 	readonly bypassPreset?: boolean;
+	/**
+	 * The device's other EQs this handler drives, by id: the vocabulary of a profile's
+	 * `protocol.eqs` (SPEC §9.2). An operation names one in `ctx.eq`.
+	 */
+	readonly eqs?: readonly string[];
 	capabilities(transport: T, options: O): HandlerCapabilities;
 	/** `bands` is always set when `needsBandCount` is. */
 	pull(ctx: HandlerContext<T, O>, request: { slot?: number; bands?: number }): Promise<PullResult>;

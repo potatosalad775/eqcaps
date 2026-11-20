@@ -808,6 +808,289 @@ exports[`ktmicro_tanchjim_one_dsp.json > pull decodes the recorded answers 1`] =
 }
 `;
 
+exports[`qudelix_qudelix_5k.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 31,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 63,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 125,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 250,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 500,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "qudelix-usb-hid",
+}
+`;
+
+exports[`qudelix_qudelix_5k_plus.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 31,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 63,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 125,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 250,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 500,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 1000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": 0,
+  "protocol": "qudelix-v2-usb-hid",
+  "slot": 41,
+}
+`;
+
+exports[`qudelix_qudelix_5k_plus_pushed.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 1000,
+      "gain": -3,
+      "q": 1.5,
+      "type": "PK",
+    },
+    {
+      "freq": 105,
+      "gain": -2,
+      "q": 0.75,
+      "type": "LSC",
+    },
+    {
+      "freq": 9000,
+      "gain": -1.5,
+      "q": 0.5,
+      "type": "HSC",
+    },
+    {
+      "freq": 25,
+      "gain": 0,
+      "q": 0.70703125,
+      "type": "HPQ",
+    },
+    {
+      "freq": 19000,
+      "gain": 0,
+      "q": 0.70703125,
+      "type": "LPQ",
+    },
+    {
+      "freq": 1000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -3.5,
+  "protocol": "qudelix-v2-usb-hid",
+  "slot": 22,
+}
+`;
+
+exports[`qudelix_qudelix_5k_pushed.json > pull decodes the recorded answers 1`] = `
+{
+  "filters": [
+    {
+      "freq": 1000,
+      "gain": -3,
+      "q": 1.5,
+      "type": "PK",
+    },
+    {
+      "freq": 105,
+      "gain": -2,
+      "q": 0.75,
+      "type": "LSC",
+    },
+    {
+      "freq": 9000,
+      "gain": -1.5,
+      "q": 0.5,
+      "type": "HSC",
+    },
+    {
+      "freq": 25,
+      "gain": 0,
+      "q": 0.70703125,
+      "type": "HPQ",
+    },
+    {
+      "freq": 19000,
+      "gain": 0,
+      "q": 0.70703125,
+      "type": "LPQ",
+    },
+    {
+      "freq": 1000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 2000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 4000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 8000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+    {
+      "freq": 16000,
+      "gain": 0,
+      "q": 1.4140625,
+      "type": "PK",
+    },
+  ],
+  "findings": [],
+  "preamp": -3.5,
+  "protocol": "qudelix-usb-hid",
+  "slot": 22,
+}
+`;
+
 exports[`walkplay_default_moondrop_marigold.json > pull decodes the recorded answers 1`] = `
 {
   "filters": [
