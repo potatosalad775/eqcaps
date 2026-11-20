@@ -2,8 +2,9 @@
 	"$schema": "../../schema/v1/source.schema.json",
 	"abstract": true,
 	"id": "qudelix-app",
-	"schemaVersion": "1.1",
+	"schemaVersion": "1.3",
 	"kind": "hardware",
+	"engine": "USR EQ",
 	"bandCount": 10,
 	"band": {
 		"types": ["PK", "LSC", "HSC", "LPQ", "HPQ"],
@@ -58,6 +59,35 @@
 			{ "id": 40, "name": "Custom #19", "writable": true },
 			{ "id": 41, "name": "Custom #20", "writable": true }
 		],
+		"eqs": [
+			{
+				"id": "spk",
+				"name": "SPK EQ",
+				"presets": [
+					{ "id": 0, "name": "Flat" },
+					{ "id": 22, "name": "Custom #1", "writable": true },
+					{ "id": 23, "name": "Custom #2", "writable": true },
+					{ "id": 24, "name": "Custom #3", "writable": true },
+					{ "id": 25, "name": "Custom #4", "writable": true },
+					{ "id": 26, "name": "Custom #5", "writable": true },
+					{ "id": 27, "name": "Custom #6", "writable": true },
+					{ "id": 28, "name": "Custom #7", "writable": true },
+					{ "id": 29, "name": "Custom #8", "writable": true },
+					{ "id": 30, "name": "Custom #9", "writable": true },
+					{ "id": 31, "name": "Custom #10", "writable": true },
+					{ "id": 32, "name": "Custom #11", "writable": true },
+					{ "id": 33, "name": "Custom #12", "writable": true },
+					{ "id": 34, "name": "Custom #13", "writable": true },
+					{ "id": 35, "name": "Custom #14", "writable": true },
+					{ "id": 36, "name": "Custom #15", "writable": true },
+					{ "id": 37, "name": "Custom #16", "writable": true },
+					{ "id": 38, "name": "Custom #17", "writable": true },
+					{ "id": 39, "name": "Custom #18", "writable": true },
+					{ "id": 40, "name": "Custom #19", "writable": true },
+					{ "id": 41, "name": "Custom #20", "writable": true }
+				]
+			}
+		],
 		"experimental": true
 	},
 	"meta": {
@@ -69,6 +99,6 @@
 				"date": "2026-11-19"
 			}
 		],
-		"notes": "What Qudelix's app for Chrome does with the devices on its first USB protocol, the 5K and the T71; the 5K Plus speaks a second protocol (qudelix-app-v2) with the same EQ layout. Nothing here has run on a device. The app accepts a device by USB vendor and product id, and only if its product name contains \"Qudelix\", which a match cannot say; it learns the model from the device's answer to its first request, not from the product id. Each device has up to three EQs, each with its own values, pre-gain, on/off switch and memories: a user EQ of 10 bands on one channel; a headphone EQ that the user EQ is layered on, parametric only, with its own bands per channel and the headphone's impedance and sensitivity; and, on the 5K and 5K Plus, an all-band EQ on one channel that replaces both when the user puts the device in single-EQ mode. The profile describes the user EQ, and its handler drives it by default: the user EQ, or the all-band EQ when the device is in single-EQ mode, reporting that band count itself; 10 bands fit either. The handler's group option set to spk drives the headphone EQ instead, writing left and right alike, but no profile sets it: a profile describes one EQ, and how to offer the second is open. The headphone EQ's presets are Flat and its own memories, numbered like the user EQ's. The graphic-EQ type (fixed frequencies, ±12 dB), crossfeed, the per-EQ headroom (0, -6 or -12 dB) and the device's other settings are not driven. The ranges are the app's editor limits, not verified firmware limits, written as the device is told them: 10 to 22000 Hz in whole Hz, gain -50 to +50 dB in steps of 0.1, Q from 0.01 to 15, and a pre-gain of -24 to +24 dB in steps of 0.1 that the user sets. The app sends Q in 1/1024ths, so its lowest Q of 0.01 goes out as 10/1024 and the step here is 1/1024. Low-pass and high-pass take no gain. The editor allows 22 kHz at any sample rate; what the firmware does with a band above half the sample rate is unknown. Presets are the app's numbers: 0 to 21 are curves the device holds, which the app can only select; from 22 come the user's memories, which the user can name on the device. Their names here are what the app shows for an unnamed memory. The EQ has its own on/off switch, so no preset is a bypass. Band edits take effect at once, with no apply or commit; a save names a memory, then stores it. The vendor ids are the chip makers' (0x0a12 the Bluetooth chip's, 0x1fc9 NXP's) and are shared with other makers' devices, so the product ids carry the match."
+		"notes": "What Qudelix's app for Chrome does with the devices on its first USB protocol, the 5K and the T71; the 5K Plus speaks a second protocol (qudelix-app-v2) with the same EQ layout. A 5K and a 5K Plus have been driven this way (see their profiles); the T71 has not, so the protocol is marked experimental here and the two checked devices clear it. The app accepts a device by USB vendor and product id, and only if its product name contains \"Qudelix\", which a match cannot say; it learns the model from the device's answer to its first request, not from the product id. Each device has up to three EQs, each with its own values, pre-gain, on/off switch and memories: a user EQ of 10 bands on one channel; a headphone EQ that the user EQ is layered on, parametric only, with its own bands per channel and the headphone's impedance and sensitivity; and, on the 5K and 5K Plus, an all-band EQ on one channel that replaces both when the user puts the device in single-EQ mode. The profile describes the user EQ (the app's USR), and its handler drives it by default: the user EQ, or the all-band EQ when the device is in single-EQ mode, reporting that band count itself; 10 bands fit either. The headphone EQ (the app's SPK) is listed as the device's other EQ (protocol.eqs, format 1.3) with the same limits; the handler writes its left and right alike, and it is absent in single-EQ mode. Its presets are Flat and its own memories, numbered like the user EQ's. The graphic-EQ type (fixed frequencies, ±12 dB), crossfeed, the per-EQ headroom (0, -6 or -12 dB) and the device's other settings are not driven. The ranges are the app's editor limits, not verified firmware limits, written as the device is told them: 10 to 22000 Hz in whole Hz, gain -50 to +50 dB in steps of 0.1, Q from 0.01 to 15, and a pre-gain of -24 to +24 dB in steps of 0.1 that the user sets. The app sends Q in 1/1024ths, so its lowest Q of 0.01 goes out as 10/1024 and the step here is 1/1024. Low-pass and high-pass take no gain. The editor allows 22 kHz at any sample rate; what the firmware does with a band above half the sample rate is unknown. Presets are the app's numbers: 0 to 21 are curves the device holds, which the app can only select; from 22 come the user's memories, which the user can name on the device. Their names here are what the app shows for an unnamed memory. The EQ has its own on/off switch, so no preset is a bypass. Band edits take effect at once, with no apply or commit; a save names a memory, then stores it. The vendor ids are the chip makers' (0x0a12 the Bluetooth chip's, 0x1fc9 NXP's) and are shared with other makers' devices, so the product ids carry the match."
 	}
 }
