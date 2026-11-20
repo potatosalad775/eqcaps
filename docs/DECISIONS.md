@@ -160,6 +160,24 @@ back, and can read the device's firmware so apps can choose between firmware-spl
 inspector reads controls at most and never writes them (invariant 9). First data: the Fosi Audio
 DS3, from Fosi's web control center.
 
+### D53. A device's other EQs are listed in its profile: format 1.3 (2026-11-20)
+Qudelix's devices run a user EQ on top of a headphone EQ, each with its own values, switch and
+memories, over one connection. `protocol.eqs` lists the EQs besides the one the profile
+describes, each with the handler's id for it, the vendor's label, its band count and its own
+presets; everything else in the profile holds for it. The bridge takes the EQ per operation
+(`eq` on `pull` and `push`, and on the switch, the current preset and the band count), so one
+connection drives them all, and core's `eqProfile` gives the engine the profile of one. Checked
+on a 5K and a 5K Plus first: both EQs read and written, neither touching the other.
+Rejected: a profile per EQ sharing the match under different `engine` labels (SPEC §3), which
+ties at every connect, so the user is asked which EQ before anything is read; and a handler
+option or a switch held by the bridge, which is session state posing as device data and leaves
+the profile's band count wrong for the 5K Plus's 20-band headphone EQ. The list sits in `protocol` because its ids are the handler's
+vocabulary, like controls, and the index already carries `protocol`; the engine still never
+reads it. It covers EQs that differ in band count and presets only: one with other filter types
+or domains still needs its own profile. The device's mode that swaps both EQs for one larger EQ
+(Qudelix's single-EQ mode) is not modelled: the handler drives that EQ as the profile's own and
+reports its band count.
+
 ---
 
 ## Engine

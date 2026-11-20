@@ -2,7 +2,8 @@
 
 > **Status: frozen as v1 (format 1.0) on 2026-10-03** ([DECISIONS D36](DECISIONS.md)); **format
 > 1.1** (2026-10-10, D48) adds `writable` presets (§9); **format 1.2** (2026-10-28, D49) adds
-> device controls (§9.1). This file is the single place the format is defined. From here on it
+> device controls (§9.1); **format 1.3** (2026-11-20, D53) adds a device's other EQs (§9.2). This
+> file is the single place the format is defined. From here on it
 > changes only by minors that add (§15); anything else needs v2. Published under `/v1/`.
 > MUST / SHOULD / MAY are used as in RFC 2119. Rationale for each choice is in
 > [DECISIONS.md](DECISIONS.md), and the evidence is in [research/prior-art.md](research/prior-art.md).
@@ -11,7 +12,7 @@
 
 | Term | Meaning |
 | --- | --- |
-| **Profile** | Describes one *EQ engine*: the set of filter configurations it accepts. A device with two independent EQs (say a PEQ and a 10-band graphic) has two profiles. |
+| **Profile** | Describes one *EQ engine*: the set of filter configurations it accepts. A device with two independent EQs (say a PEQ and a 10-band graphic) has two profiles; where the EQs differ only in band count and presets and one connection drives both, one profile may list the others (§9.2). |
 | **Slot** | One band position of the engine, index `0 … bandCount-1`. |
 | **Filter** | `{ type, freq, q, gain }`. An app holds a *list of filters* that describes the response the user wants; an engine has *slots*. `assign` maps one onto the other (§13.5). |
 | **Domain** | Allowed values of one numeric field (§4). |
@@ -304,7 +305,9 @@ wire grids are the handler's (D42).
               { "id": 240, "name": "BYPASS", "bypass": true }],
   "disconnectOnSave": false,                     // the device drops the connection after a save
   "baudRate": 57600,                             // serial devices, where the default doesn't fit
-  "experimental": true                           // the protocol is unconfirmed for this device
+  "experimental": true,                          // the protocol is unconfirmed for this device
+  "controls": [ ],                               // §9.1, format 1.2
+  "eqs": [ ]                                     // §9.2, format 1.3
 }
 ```
 
@@ -385,6 +388,52 @@ Rules for consumers:
 - A consumer that doesn't know a control's `id`, `kind` or `role` ignores that control (for an
   unknown `role`, the role alone) and keeps the rest of the protocol.
 
+### 9.2 Other EQs (`protocol.eqs`, format 1.3)
+
+Some devices run several EQs at once over one connection: a user EQ layered on a headphone
+correction EQ, each with its own values, switch and memories. Where such an EQ takes the same
+filters as the one the profile describes and differs only in how many bands and which presets it
+has, the profile lists it instead of a second profile taking the same `match` (§3), so a device
+is matched once and an app offers its EQs side by side.
+
+```jsonc
+"engine": "USR EQ",                              // the label of the EQ the profile describes
+"bandCount": 10,
+"protocol": {
+  "handler": "qudelix-v2-usb-hid",
+  "presets": [{ "id": 0, "name": "Flat" }, { "id": 1, "name": "Acoustic" },
+              { "id": 22, "name": "Custom #1", "writable": true }],
+  "eqs": [
+    { "id": "spk", "name": "SPK EQ", "bandCount": 20,
+      "presets": [{ "id": 0, "name": "Flat" }, { "id": 22, "name": "Custom #1", "writable": true }] }
+  ]
+}
+```
+
+- The profile itself describes the EQ its handler drives when none is named; `engine` is that
+  EQ's label. `eqs` lists the others.
+- `id` is the handler's name for the EQ, from the bridge's vocabulary like a control's, and
+  unique within the list. `name` is the device's or vendor app's label.
+- A listed EQ is the profile with that EQ's `bandCount` (the profile's when left out) and
+  `presets` in place of the profile's: `band`, `bands`, `rules`, `preamp` and `channels` hold for
+  it unchanged. `bands` overrides apply by slot index; those of slots the EQ lacks don't apply,
+  and its slots past the profile's `bandCount` have the template alone, which MUST complete them
+  (`slot-incomplete`).
+- `presets` follows the rules of `protocol.presets` (§9), and its ids are that EQ's own preset
+  numbers. An EQ without `presets` has none: the profile's presets are never a listed EQ's.
+- `controls`, `options` and the rest of `protocol` are the device's, not one EQ's.
+- An EQ that takes other filter types or domains than the profile's needs a profile of its own
+  with another `engine` label (§3).
+
+Rules for consumers:
+
+- The EQs are independent: reading or writing one never touches another, and an app says which
+  EQ a read or a write is for. An app SHOULD show each EQ under its label and let the user choose.
+- To fit or validate filters for a listed EQ, a consumer runs the engine (§13) on that EQ's
+  profile as defined above; `packages/core` builds it (`eqProfile`, §13.9).
+- A consumer that doesn't know `eqs` drives the EQ the profile describes, as before. One that
+  doesn't know an EQ's `id` ignores that EQ and keeps the rest.
+
 ## 10. Provenance (`meta`)
 
 ```jsonc
@@ -446,7 +495,8 @@ Source files under `data/` MAY use:
   `device`.
 - `"extends": "<id>"`. Start from that profile and apply this file's keys on top: top-level keys
   replace; `band` and `protocol` merge per key (§5.2 rule), so a base can name the handler and a
-  device add its presets; `bands` merge by index: for each slot this file overrides, its keys
+  device add its presets (a key of `protocol` replaces whole: a file that sets `eqs` or `presets`
+  writes the full list); `bands` merge by index: for each slot this file overrides, its keys
   replace the base's keys for that slot, again per key, and the base's overrides of other slots
   stay. `match`, `device`, `meta` and `id` are **never inherited**,
   because provenance of the base doesn't transfer silently. `meta.sources` of the base are copied
@@ -829,7 +879,9 @@ case format. The issue codes are listed in `ISSUE_CODES` of `packages/core`.
 
 `packages/core` also exports `isGraphic(profile)` (§5.4), `describe(profile)` (English summaries
 of slots, preamp and rules for UIs) and `unsupported(profile)`, which lists the rule types and
-filter types this engine version doesn't know, so a consumer can meet §7 and §15.
+filter types this engine version doesn't know, so a consumer can meet §7 and §15. For a device
+with other EQs (§9.2), `profileEqs(profile)` lists them, the profile's own first, and
+`eqProfile(profile, id)` gives the profile of one, which the engine functions take as any other.
 
 ## 14. Published artifacts
 
@@ -869,3 +921,4 @@ the host app: the database enhances an app and never blocks it. The reference cl
 | 1.0 | 2026-10-03 | the frozen v1 format (D36) |
 | 1.1 | 2026-10-10 | `protocol.presets[].writable` (§9, D48) |
 | 1.2 | 2026-10-28 | `protocol.controls` (§9.1, D49) |
+| 1.3 | 2026-11-20 | `protocol.eqs` (§9.2, D53) |
