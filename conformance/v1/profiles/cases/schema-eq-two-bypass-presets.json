@@ -1,0 +1,34 @@
+{
+	"description": "A listed EQ's presets follow the rules of protocol.presets: at most one bypass preset.",
+	"spec": "§9.2",
+	"profile": {
+		"schemaVersion": "1.3",
+		"protocol": {
+			"handler": "chip-hid",
+			"eqs": [
+				{
+					"id": "spk",
+					"name": "Headphone EQ",
+					"presets": [
+						{
+							"id": 0,
+							"name": "Off",
+							"bypass": true
+						},
+						{
+							"id": 1,
+							"name": "Off too",
+							"bypass": true
+						}
+					]
+				}
+			]
+		}
+	},
+	"expect": [
+		{
+			"code": "schema",
+			"path": "/protocol/eqs/0/presets"
+		}
+	]
+}

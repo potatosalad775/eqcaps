@@ -7,6 +7,7 @@ import {
 } from './dependencies.ts';
 import { domainBounds, domainForm, near, onGrid } from './domain.ts';
 import { controlTakes } from './controls.ts';
+import { eqProfile } from './eqs.ts';
 import { compareFirmware } from './firmware.ts';
 import { error, type Issue } from './issues.ts';
 import { mergeSlotFields, overrideIndices, slotOverrides } from './slots.ts';
@@ -46,6 +47,7 @@ export function validateProfile(profile: Profile): Issue[] {
 		...checkDependencies(profile),
 		...checkMatch(profile),
 		...checkControls(profile),
+		...checkEqs(profile),
 		...checkMeta(profile),
 		...checkVersion(profile)
 	];
@@ -334,6 +336,29 @@ function checkControls(profile: Profile): Issue[] {
 	return issues;
 }
 
+// §9.2 ----------------------------------------------------------------------------------------
+
+function checkEqs(profile: Profile): Issue[] {
+	const issues: Issue[] = [];
+	const seen = new Set<string>();
+	(profile.protocol?.eqs ?? []).forEach((eq, i) => {
+		const path = `/protocol/eqs/${i}`;
+		if (seen.has(eq.id)) {
+			issues.push(error('eq-duplicate', `${path}/id`, `EQ "${eq.id}" is listed twice`));
+			return;
+		}
+		seen.add(eq.id);
+		// The EQ is the profile with another band count: its slots past the profile's have the
+		// template alone, which must complete them.
+		for (const issue of checkBands(eqProfile(profile, eq.id)!)) {
+			if (issue.code === 'slot-incomplete') {
+				issues.push(error('slot-incomplete', path, `EQ "${eq.id}": ${issue.message}`));
+			}
+		}
+	});
+	return issues;
+}
+
 // §10 -----------------------------------------------------------------------------------------
 
 /**
@@ -394,11 +419,15 @@ function checkMeta(profile: Profile): Issue[] {
 function checkVersion(profile: Profile): Issue[] {
 	const declared = Number(profile.schemaVersion.split('.')[1]);
 	const needs: { minor: number; field: string }[] = [];
-	if (profile.protocol?.presets?.some((p) => p.writable !== undefined)) {
+	const lists = [profile.protocol?.presets, ...(profile.protocol?.eqs ?? []).map((e) => e.presets)];
+	if (lists.some((list) => list?.some((p) => p.writable !== undefined))) {
 		needs.push({ minor: 1, field: 'protocol.presets[].writable' });
 	}
 	if (profile.protocol?.controls !== undefined) {
 		needs.push({ minor: 2, field: 'protocol.controls' });
+	}
+	if (profile.protocol?.eqs !== undefined) {
+		needs.push({ minor: 3, field: 'protocol.eqs' });
 	}
 	return needs
 		.filter((n) => n.minor > declared)

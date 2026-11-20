@@ -11,7 +11,8 @@ export const ISSUE_CODES = {
 	'bands-unbounded': '§5.2: bands[] overrides on an unbounded (bandCount: null) profile.',
 	'band-index-out-of-range': '§5.2: an override index is ≥ bandCount.',
 	'band-index-duplicate': '§5.2: a slot is overridden more than once.',
-	'slot-incomplete': '§2, §5: after merging, a slot lacks types, freq, q or gain.',
+	'slot-incomplete':
+		'§2, §5: after merging, a slot lacks types, freq, q or gain; §9.2: a slot of a listed EQ does.',
 	'variant-self-reference': "§6: a variant's `when` references a field the variant defines.",
 	'dependency-cycle': '§6: variant dependencies form a cycle.',
 	'firmware-range-empty':
@@ -21,6 +22,7 @@ export const ISSUE_CODES = {
 	'control-when-invalid':
 		"§9.1: `when` names no other control, a control with a `when` of its own, or a value that control doesn't take.",
 	'control-value-invalid': "§9.1: `disablesEq` lists a value the control doesn't take.",
+	'eq-duplicate': '§9.2: two EQs in protocol.eqs share an id.',
 	'status-needs-evidence': '§10: a verified status without a counting source.',
 	'status-needs-maintainer':
 		'§10: maintainer-verified without a counting source whose `by` names who checked it.',

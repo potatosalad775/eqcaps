@@ -1,5 +1,5 @@
 /** Format version this package implements (SPEC §15). */
-export const SCHEMA_VERSION = '1.2';
+export const SCHEMA_VERSION = '1.3';
 
 export type * from './types/schema.generated.ts';
 export { ISSUE_CODES } from './issues.ts';
@@ -9,6 +9,8 @@ export type { DomainForm } from './domain.ts';
 export { compareFirmware, firmwareInRange, firmwareRangesOverlap } from './firmware.ts';
 export { controlPresent, controlTakes, eqDisabledBy } from './controls.ts';
 export type { ControlValues } from './controls.ts';
+export { eqProfile, profileEqs } from './eqs.ts';
+export type { ProfileEq } from './eqs.ts';
 export { mergeSlotFields, overrideIndices, slotOverrides } from './slots.ts';
 export type { SlotOverride } from './slots.ts';
 export { COUNTING_SOURCE_KINDS, isCountingSource, validateProfile } from './validate-profile.ts';

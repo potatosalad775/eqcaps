@@ -1,0 +1,49 @@
+{
+	"description": "A device with a second EQ (format 1.3): the profile lists it with its own band count and presets.",
+	"spec": "§9.2",
+	"profile": {
+		"schemaVersion": "1.3",
+		"engine": "User EQ",
+		"protocol": {
+			"handler": "chip-hid",
+			"presets": [
+				{
+					"id": 0,
+					"name": "Flat"
+				},
+				{
+					"id": 1,
+					"name": "Rock"
+				},
+				{
+					"id": 22,
+					"name": "Custom #1",
+					"writable": true
+				}
+			],
+			"eqs": [
+				{
+					"id": "spk",
+					"name": "Headphone EQ",
+					"bandCount": 8,
+					"presets": [
+						{
+							"id": 0,
+							"name": "Flat"
+						},
+						{
+							"id": 22,
+							"name": "Custom #1",
+							"writable": true
+						}
+					]
+				},
+				{
+					"id": "mic",
+					"name": "Microphone EQ"
+				}
+			]
+		}
+	},
+	"expect": []
+}
