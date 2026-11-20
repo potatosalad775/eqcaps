@@ -9,6 +9,7 @@ import {
 import { BridgeError, isBridgeError } from './errors.ts';
 import type {
 	AnyHandler,
+	EqInfo,
 	HandlerCapabilities,
 	HandlerContext,
 	PullRequest,
@@ -41,8 +42,13 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	types: readonly FilterType[];
 	/** What the write frames can carry. A profile domain outside it can't be written. */
 	wire: WireGrid;
-	/** The protocol's preset slots. */
+	/** The preset slots of the EQ the profile describes. */
 	slots: readonly Slot[];
+	/**
+	 * The device's other EQs (SPEC §9.2), each with its own slots: `pull`, `push` and the EQ's
+	 * switch and preset take one's id as `eq`. Empty for a device with one EQ.
+	 */
+	eqs: readonly EqInfo[];
 	/** The device drops the connection after a push that saves; reconnect afterwards. */
 	disconnectOnSave: boolean;
 	/** The protocol for this device is unconfirmed. */
@@ -71,21 +77,24 @@ export interface BridgeDevice {
 	pull(request?: PullRequest): Promise<PullResult>;
 	push(request: PushRequest): Promise<PushResult>;
 	/**
+	 * Each of the next four takes the id of one of `capabilities.eqs` as `eq`, and is about the
+	 * profile's own EQ without it.
+	 *
 	 * The active preset slot; null when the protocol can't say, or (on some bypass-preset
 	 * protocols) when the EQ is off. Where the EQ switch is separate state (`readsEnabled`), this is
 	 * the preset the device plays when its EQ is on, whether it is on or not.
 	 */
-	currentSlot(): Promise<number | null>;
+	currentSlot(eq?: string): Promise<number | null>;
 	/** Whether the EQ is on (`readsEnabled`); null when the protocol or device doesn't say. */
-	eqEnabled(): Promise<boolean | null>;
-	setEnabled(enabled: boolean, slot?: number): Promise<void>;
+	eqEnabled(eq?: string): Promise<boolean | null>;
+	setEnabled(enabled: boolean, slot?: number, eq?: string): Promise<void>;
 	/** The device's firmware version, read once; null when the protocol or device doesn't say. */
 	firmware(): Promise<string | null>;
 	/**
 	 * The band count the device reports, asked each time; null when the protocol or device doesn't
 	 * say. It can differ from the profile's `bandCount`: the bridge doesn't reconcile them.
 	 */
-	bandCount(): Promise<number | null>;
+	bandCount(eq?: string): Promise<number | null>;
 	/**
 	 * The current value of every control in `capabilities.controls`; null for one the device
 	 * doesn't have now (SPEC §9.1: its firmware range or `when` doesn't hold). Opt-in: pull and
@@ -128,13 +137,31 @@ export function openDevice(
 		);
 	}
 	const handlerOptions = protocol.options ?? {};
-	const bypass = protocol.presets?.find((p) => p.bypass)?.id;
-	const ctx: HandlerContext<Transport, object> = {
-		transport,
-		options: handlerOptions,
-		...(bypass !== undefined ? { bypass } : {}),
-		sleep: options.sleep ?? realSleep,
-		log: options.log ?? (() => {})
+	const context = (
+		presets: readonly Slot[] | undefined,
+		eq?: string
+	): HandlerContext<Transport, object> => {
+		const bypass = presets?.find((p) => p.bypass)?.id;
+		return {
+			transport,
+			options: handlerOptions,
+			...(eq !== undefined ? { eq } : {}),
+			...(bypass !== undefined ? { bypass } : {}),
+			sleep: options.sleep ?? realSleep,
+			log: options.log ?? (() => {})
+		};
+	};
+	/** The profile's own EQ, and everything that isn't about one EQ. */
+	const ctx = context(protocol.presets);
+	// The data's other EQs that this handler drives: one it doesn't know is left out (SPEC §9.2).
+	const eqs = (protocol.eqs ?? []).filter((e) => (handler.eqs ?? []).includes(e.id));
+	const contexts = new Map(eqs.map((e) => [e.id, context(e.presets, e.id)]));
+	/** The context of an operation on `eq`; an EQ the profile doesn't list is refused. */
+	const on = (eq: string | undefined) => {
+		if (eq === undefined) return ctx;
+		const found = contexts.get(eq);
+		if (!found) throw new BridgeError('invalid-request', `${handler.id}: no EQ "${eq}" here`);
+		return found;
 	};
 	const own = handler.capabilities(transport, handlerOptions);
 	const capabilities: DeviceCapabilities = {
@@ -142,6 +169,7 @@ export function openDevice(
 		types: handler.codec.types,
 		wire: handler.codec.wire(handlerOptions),
 		slots: protocol.presets ?? [],
+		eqs: eqs.map(({ presets, ...e }) => ({ ...e, slots: presets ?? [] })),
 		disconnectOnSave: protocol.disconnectOnSave ?? false,
 		experimental: protocol.experimental ?? false,
 		readsFirmware: handler.firmware !== undefined,
@@ -204,8 +232,10 @@ export function openDevice(
 					}
 					r.slot = request.slot;
 				}
+				const target = on(request.eq);
 				if (capabilities.needsBandCount) {
-					const bands = request.bands ?? options.profile?.bandCount ?? undefined;
+					const listed = eqs.find((e) => e.id === request.eq)?.bandCount;
+					const bands = request.bands ?? listed ?? options.profile?.bandCount ?? undefined;
 					if (typeof bands !== 'number' || !Number.isInteger(bands) || bands < 0) {
 						throw new BridgeError(
 							'invalid-request',
@@ -214,7 +244,7 @@ export function openDevice(
 					}
 					r.bands = bands;
 				}
-				return handler.pull(ctx, r);
+				return handler.pull(target, r);
 			});
 		},
 
@@ -223,25 +253,26 @@ export function openDevice(
 				if (!capabilities.canWrite) {
 					throw new BridgeError('unsupported', `${handler.id} can't write to this device`);
 				}
-				const result = await handler.push(ctx, request);
+				const { eq, ...rest } = request;
+				const result = await handler.push(on(eq), rest);
 				return { reconnect: result.reconnect || capabilities.disconnectOnSave };
 			});
 		},
 
-		currentSlot() {
-			return serial(async () => (handler.currentSlot ? handler.currentSlot(ctx) : null));
+		currentSlot(eq) {
+			return serial(async () => (handler.currentSlot ? handler.currentSlot(on(eq)) : null));
 		},
 
-		eqEnabled() {
-			return serial(async () => (handler.eqEnabled ? handler.eqEnabled(ctx) : null));
+		eqEnabled(eq) {
+			return serial(async () => (handler.eqEnabled ? handler.eqEnabled(on(eq)) : null));
 		},
 
-		setEnabled(enabled, slot) {
+		setEnabled(enabled, slot, eq) {
 			return serial(async () => {
 				if (!handler.setEnabled) {
 					throw new BridgeError('unsupported', `${handler.id} has no EQ switch`);
 				}
-				await handler.setEnabled(ctx, enabled, slot);
+				await handler.setEnabled(on(eq), enabled, slot);
 			});
 		},
 
@@ -249,10 +280,11 @@ export function openDevice(
 			return serial(readFirmware);
 		},
 
-		bandCount() {
+		bandCount(eq) {
 			return serial(async () => {
+				const target = on(eq);
 				try {
-					return (await handler.bandCount?.(ctx)) ?? null;
+					return (await handler.bandCount?.(target)) ?? null;
 				} catch (e) {
 					ctx.log(`${handler.id}: no band count (${(e as Error).message})`);
 					return null;

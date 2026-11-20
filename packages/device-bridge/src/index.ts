@@ -16,6 +16,7 @@ export type {
 export type {
 	AnyHandler,
 	Codec,
+	EqInfo,
 	Handler,
 	HandlerCapabilities,
 	HandlerContext,
@@ -42,7 +43,7 @@ export {
 	protocolOf,
 	protocolProblem
 } from './protocols.ts';
-export type { Protocol } from './protocols.ts';
+export type { Protocol, ProtocolEq } from './protocols.ts';
 export { chooserFilters } from './chooser.ts';
 export type { ChooserEntry, ChooserFilters } from './chooser.ts';
 export { identityOf, usbHex } from './identity.ts';

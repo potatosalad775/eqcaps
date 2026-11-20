@@ -32,7 +32,7 @@ const add = (handler: string, options: object = {}) =>
 for (const p of Object.values(PROTOCOLS)) add(p.handler, p.options);
 for (const v of KNOWN_HID_VENDORS) add(guessProtocol(v)!.handler, guessProtocol(v)!.options);
 add('airoha', { ble: true });
-// Qudelix: the speaker EQ, which no profile selects yet.
+// Qudelix: the speaker EQ, which an operation selects (SPEC §9.2), not a profile's options.
 add('qudelix-usb-hid');
 add('qudelix-usb-hid', { group: 'spk' });
 add('qudelix-v2-usb-hid');

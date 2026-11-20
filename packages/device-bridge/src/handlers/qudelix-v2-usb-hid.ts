@@ -43,7 +43,6 @@ import {
 	groupOf,
 	hidOut,
 	modelFor,
-	OFFLINE_LINK,
 	packet,
 	PARAMETRIC,
 	presetSize,
@@ -81,16 +80,21 @@ export interface QudelixV2DeviceState {
 }
 
 export interface QudelixV2UsbHidOptions {
-	/** The EQ to drive: `usr`, the user EQ (default), or `spk`, the speaker (headphone) EQ. */
+	/**
+	 * The EQ the frames are for: `usr`, the user EQ (default), or `spk`, the speaker (headphone)
+	 * EQ. Set by the handler, from the operation's EQ (SPEC §9.2); not a profile's option.
+	 */
 	group?: QudelixGroupName;
 	/**
 	 * Set by the handler. Without it the codec writes to a 5K Plus in its layered mode, from a
-	 * zeroed configuration and preset, in 40-byte packets on report 8.
+	 * zeroed configuration and preset, in 40-byte packets on report 8 (127 bytes).
 	 */
 	device?: QudelixV2DeviceState;
 }
 
 const MODEL = QUDELIX_MODELS[FIVE_K_PLUS]!;
+/** What the codec assumes without a device: the 5K Plus's report 8 of 127 bytes. */
+const OFFLINE_LINK_V2: QudelixLink = { vendorId: 0x0a12, reportId: 8, reportSize: 127 };
 /** Each group's first element, by group id. */
 const BASE = [0x90, 0xa0, 0xb0] as const;
 const CONFIG = 0;
@@ -132,7 +136,7 @@ function target(o: QudelixV2UsbHidOptions) {
 	const single = o.device?.single ?? false;
 	const group = groupOf(MODEL, o.group ?? 'usr', single);
 	const device = o.device ?? {
-		link: OFFLINE_LINK,
+		link: OFFLINE_LINK_V2,
 		packetSize: SMALLEST_PACKET,
 		single,
 		config: new Uint8Array(4),
@@ -216,6 +220,9 @@ export const qudelixV2UsbHidCodec: Codec<QudelixV2UsbHidOptions, HidFrame> = {
 
 type Ctx = HandlerContext<HidTransport, QudelixV2UsbHidOptions>;
 
+/** The EQ an operation names (`spk`), or the user EQ. */
+const groupName = (ctx: Ctx): QudelixGroupName => (ctx.eq === 'spk' ? 'spk' : 'usr');
+
 /**
  * Sends fragments, each but the last of a message answered by its ack within 1 s. A missing or
  * bad ack, or a failed send, ends the session, as the app reconnects then.
@@ -286,7 +293,7 @@ async function drive(ctx: Ctx) {
 	modelFor(s, 2);
 	const [mode] = await elements(s, [EQ_MODE]);
 	const single = MODE.read(mode!).mode === SINGLE;
-	const group: QudelixGroup = groupOf(MODEL, ctx.options.group ?? 'usr', single);
+	const group: QudelixGroup = groupOf(MODEL, groupName(ctx), single);
 	const base = BASE[group.id];
 	const [config] = await elements(s, [base + CONFIG]);
 	return { s, group, single, base, config: config! };
@@ -302,6 +309,7 @@ async function storedPreset(s: QudelixSession, group: QudelixGroup, base: number
 export const qudelixV2UsbHid: HidHandler<QudelixV2UsbHidOptions> = {
 	id: 'qudelix-v2-usb-hid',
 	transport: 'hid',
+	eqs: ['spk'],
 	codec: qudelixV2UsbHidCodec,
 
 	capabilities: () => ({
@@ -326,7 +334,7 @@ export const qudelixV2UsbHid: HidHandler<QudelixV2UsbHidOptions> = {
 		const { s, group, single, base, config } = await drive(ctx);
 		const { bytes } = await storedPreset(s, group, base);
 		const frames = qudelixV2UsbHidCodec.encode(request, {
-			...ctx.options,
+			group: groupName(ctx),
 			device: { link: s.link, packetSize: s.device.packetSize, single, config, preset: bytes }
 		});
 		await sendFragments(s, frames);

@@ -1,23 +1,45 @@
 // The Qudelix handlers against fakes built from the reading of Qudelix's app for Chrome (4.0.3.1).
 // No device answered these: they show the handlers agree with that reading (fake-qudelix.ts).
+// The last block is the exception: a 5K's recorded answers (test/captures/).
 
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { qudelixUsbHidCodec } from '../src/handlers/qudelix-usb-hid.ts';
 import { QUDELIX_MODELS, T71 } from '../src/handlers/qudelix.ts';
-import { openDevice, type Protocol, type Transport } from '../src/index.ts';
+import { openDevice, type BridgeDevice, type Protocol, type Transport } from '../src/index.ts';
 import { flatEq, FakeQudelix, FakeQudelixV2 } from './fake-qudelix.ts';
-import { noSleep } from './replay.ts';
+import { loadCaptures, noSleep, ReplayHid } from './replay.ts';
 
 const pk = (freq: number, gain: number, q = 1): Filter => ({ type: 'PK', freq, gain, q });
 const padded = (bytes: number[], size = 63) => [
 	...bytes,
 	...new Array<number>(size - bytes.length).fill(0)
 ];
-const first = (group?: 'usr' | 'spk'): Protocol =>
-	group ? { handler: 'qudelix-usb-hid', options: { group } } : { handler: 'qudelix-usb-hid' };
-const open = (t: Transport, protocol: Protocol, log?: (m: string) => void) =>
-	openDevice(t, protocol, { sleep: noSleep, ...(log ? { log } : {}) });
+/** The EQ a test's protocol was asked for: `open` then names it in every operation (SPEC §9.2). */
+const chosen = new WeakMap<Protocol, string>();
+const protocolFor = (
+	handler: 'qudelix-usb-hid' | 'qudelix-v2-usb-hid',
+	group?: 'usr' | 'spk'
+): Protocol => {
+	const protocol: Protocol = { handler, eqs: [{ id: 'spk', name: 'SPK EQ' }] };
+	if (group === 'spk') chosen.set(protocol, group);
+	return protocol;
+};
+const first = (group?: 'usr' | 'spk') => protocolFor('qudelix-usb-hid', group);
+const open = (t: Transport, protocol: Protocol, log?: (m: string) => void): BridgeDevice => {
+	const device = openDevice(t, protocol, { sleep: noSleep, ...(log ? { log } : {}) });
+	const eq = chosen.get(protocol);
+	if (eq === undefined) return device;
+	return {
+		...device,
+		pull: (request = {}) => device.pull({ ...request, eq }),
+		push: (request) => device.push({ ...request, eq }),
+		currentSlot: () => device.currentSlot(eq),
+		eqEnabled: () => device.eqEnabled(eq),
+		setEnabled: (enabled, slot) => device.setEnabled(enabled, slot, eq),
+		bandCount: () => device.bandCount(eq)
+	};
+};
 
 /** The EQ writes, 0x07xx, as sent. */
 const eqWrites = (fake: FakeQudelix) =>
@@ -191,6 +213,35 @@ describe("Qudelix 5K as Qudelix's app drives it", () => {
 			code: 'unrepresentable'
 		});
 		expect(eqWrites(fake)).toEqual([]);
+	});
+
+	test('each band waits for the device’s echo; a device without one gets the rest at once', async () => {
+		// The fake echoes on the next microtask: a band sent before the last one's echo fails here.
+		const fake = new FakeQudelix('5k');
+		let pending = 0;
+		const send = fake.sendReport.bind(fake);
+		fake.sendReport = async (reportId, data) => {
+			if (data[2] === 0x07 && data[3] === 0x0f) {
+				expect(pending).toBe(0);
+				pending++;
+			}
+			await send(reportId, data);
+		};
+		fake.onInputReport((_id, d) => {
+			if (d[1] === 0x20 && d[3] === 0x89) pending--;
+		});
+		await open(fake, first()).push({ filters: five });
+		expect(pending).toBe(0);
+
+		const quiet = new FakeQudelix('5k');
+		quiet.echoes = false;
+		const log = vi.fn();
+		const device = open(quiet, first(), log);
+		await device.push({ filters: five });
+		expect(log).toHaveBeenCalledTimes(1);
+		expect(log.mock.calls[0]![0]).toMatch(/no echo of a band write/);
+		expect((await device.pull()).filters.slice(0, 5)).toEqual(five);
+		expect(quiet.errors).toEqual([]);
 	});
 
 	test('drops input until 20 ms pass without any, then opens', async () => {
@@ -370,10 +421,7 @@ describe("Qudelix T71 as Qudelix's app drives it", () => {
 });
 
 describe("Qudelix 5K Plus as Qudelix's app drives it", () => {
-	const second = (group?: 'usr' | 'spk'): Protocol =>
-		group
-			? { handler: 'qudelix-v2-usb-hid', options: { group } }
-			: { handler: 'qudelix-v2-usb-hid' };
+	const second = (group?: 'usr' | 'spk') => protocolFor('qudelix-v2-usb-hid', group);
 	/** Each message received: its command, then its elements' ids. */
 	const ids = (fake: FakeQudelixV2) =>
 		fake.messages.map((m) => [m.command, ...m.elements.map((e) => e.id)]);
@@ -573,5 +621,138 @@ describe("Qudelix 5K Plus as Qudelix's app drives it", () => {
 			open(fake, second()).push({ filters: [pk(100, 1)], slot: 42 })
 		).rejects.toMatchObject({ code: 'invalid-request' });
 		expect(ids(fake).filter(([c]) => c !== REQ)).toEqual([]);
+	});
+});
+
+// The devices' own answers (test/captures/): each as its owner left it, and after a push to the
+// user EQ saved to memory 22 and a push to the speaker EQ.
+describe.each([
+	{ name: '5K', file: 'qudelix_qudelix_5k', handler: 'qudelix-usb-hid', firmware: '3.2.9' },
+	{
+		name: '5K Plus',
+		file: 'qudelix_qudelix_5k_plus',
+		handler: 'qudelix-v2-usb-hid',
+		firmware: '1.0.3'
+	}
+] as const)('a recorded Qudelix $name', ({ name, file, handler, firmware }) => {
+	const recorded = (state: '' | '_pushed', group?: 'usr' | 'spk') => {
+		const transport = new ReplayHid(loadCaptures().find((c) => c.file === `${file}${state}.json`)!);
+		const log = vi.fn();
+		return { transport, log, device: open(transport, protocolFor(handler, group), log) };
+	};
+	const plus = name === '5K Plus';
+	const curve: Filter[] = [
+		pk(1000, -3, 1.5),
+		{ type: 'LSC', freq: 105, gain: -2, q: 0.75 },
+		{ type: 'HSC', freq: 9000, gain: -1.5, q: 0.5 },
+		{ type: 'HPQ', freq: 25, gain: 0, q: 724 / 1024 },
+		{ type: 'LPQ', freq: 19000, gain: 0, q: 724 / 1024 }
+	];
+	const speaker: Filter[] = [pk(3000, -4, 2), { type: 'LSC', freq: 80, gain: -1, q: 0.75 }];
+
+	test('as found: the firmware, the user EQ off and flat', async () => {
+		const { transport, device } = recorded('');
+		expect(await device.firmware()).toBe(firmware);
+		expect(await device.eqEnabled()).toBe(false);
+		// The 5K's was edited (no preset); the 5K Plus's sat on its last memory.
+		expect(await device.currentSlot()).toBe(plus ? 41 : null);
+		expect(await device.bandCount()).toBe(10);
+		expect((await device.pull()).filters).toEqual(flatFilters(10));
+		expect(transport.unmatched).toEqual([]);
+	});
+
+	test('as found: the speaker EQ, left and right alike', async () => {
+		const { transport, log, device } = recorded('', 'spk');
+		// The 5K's was off on its memory 26; the 5K Plus's on, on Flat.
+		expect(await device.eqEnabled()).toBe(plus);
+		expect(await device.currentSlot()).toBe(plus ? 0 : 26);
+		expect(await device.bandCount()).toBe(plus ? 20 : 10);
+		const pulled = await device.pull();
+		expect(pulled.preamp).toBe(0);
+		expect(pulled.filters).toHaveLength(plus ? 20 : 10);
+		expect(pulled.filters.every((f) => f?.type === 'PK' && f.gain === 0)).toBe(true);
+		expect(log).not.toHaveBeenCalled();
+		expect(transport.unmatched).toEqual([]);
+	});
+
+	test('after the pushes: the user EQ on, on memory 22, holding what was pushed', async () => {
+		const { transport, device } = recorded('_pushed');
+		expect(await device.eqEnabled()).toBe(true);
+		expect(await device.currentSlot()).toBe(22);
+		const pulled = await device.pull();
+		expect(pulled).toMatchObject({ preamp: -3.5, slot: 22 });
+		expect(pulled.filters.slice(0, 5)).toEqual(curve);
+		expect(pulled.filters.slice(5)).toEqual(flatFilters(10).slice(5));
+		expect(transport.unmatched).toEqual([]);
+	});
+
+	test('after the pushes: the speaker EQ on, edited, both channels holding what was pushed', async () => {
+		const { transport, log, device } = recorded('_pushed', 'spk');
+		expect(await device.eqEnabled()).toBe(true);
+		expect(await device.currentSlot()).toBeNull();
+		const pulled = await device.pull();
+		expect(pulled.preamp).toBe(-2);
+		expect(pulled.filters.slice(0, 2)).toEqual(speaker);
+		expect(log).not.toHaveBeenCalled();
+		expect(transport.unmatched).toEqual([]);
+	});
+
+	// The 5K's frames don't depend on what it holds, so the replay knows every one of them. The
+	// 5K Plus's preset element does (captures.test.ts checks its band frames).
+	test.skipIf(plus)('the same pushes send the frames the device was sent', async () => {
+		const usr = recorded('_pushed');
+		await usr.device.push({ filters: curve, preamp: -3.5, slot: 22 });
+		expect(usr.transport.unmatched).toEqual([]);
+		const spk = recorded('_pushed', 'spk');
+		await spk.device.push({ filters: speaker, preamp: -2 });
+		expect(spk.transport.unmatched).toEqual([]);
+	});
+});
+
+describe('the EQ of an operation (SPEC §9.2)', () => {
+	const flat = { id: 0, name: 'Flat' };
+	const protocol: Protocol = {
+		handler: 'qudelix-v2-usb-hid',
+		presets: [flat, { id: 1, name: 'Acoustic' }],
+		eqs: [{ id: 'spk', name: 'SPK EQ', bandCount: 20, presets: [flat] }]
+	};
+
+	test('capabilities list the other EQs with their own slots', () => {
+		const device = openDevice(new FakeQudelixV2(), protocol, { sleep: noSleep });
+		expect(device.capabilities.slots).toEqual(protocol.presets);
+		expect(device.capabilities.eqs).toEqual([
+			{ id: 'spk', name: 'SPK EQ', bandCount: 20, slots: [flat] }
+		]);
+		const plain = openDevice(new FakeQudelixV2(), { handler: 'qudelix-v2-usb-hid' });
+		expect(plain.capabilities.eqs).toEqual([]);
+	});
+
+	test('one device drives both EQs, each operation naming its own', async () => {
+		const fake = new FakeQudelixV2();
+		const device = openDevice(fake, protocol, { sleep: noSleep });
+		await device.push({ filters: [pk(200, 2)], preamp: -1, eq: 'spk' });
+		await device.push({ filters: [pk(1000, -3)] });
+		expect((await device.pull({ eq: 'spk' })).filters[0]).toEqual(pk(200, 2));
+		expect((await device.pull()).filters[0]).toEqual(pk(1000, -3));
+		expect(await device.bandCount('spk')).toBe(20);
+		expect(await device.bandCount()).toBe(10);
+		await device.setEnabled(false, undefined, 'spk');
+		expect(await device.eqEnabled('spk')).toBe(false);
+		expect(await device.eqEnabled()).toBe(true);
+		expect(await device.currentSlot('spk')).toBeNull();
+		expect(fake.errors).toEqual([]);
+	});
+
+	test('an EQ the profile does not list is refused, and nothing is sent', async () => {
+		const fake = new FakeQudelixV2();
+		const device = openDevice(fake, { handler: 'qudelix-v2-usb-hid' }, { sleep: noSleep });
+		const refused = { code: 'invalid-request', message: 'qudelix-v2-usb-hid: no EQ "spk" here' };
+		await expect(device.pull({ eq: 'spk' })).rejects.toMatchObject(refused);
+		await expect(device.push({ filters: [pk(100, 1)], eq: 'spk' })).rejects.toMatchObject(refused);
+		await expect(device.setEnabled(true, undefined, 'spk')).rejects.toMatchObject(refused);
+		await expect(device.eqEnabled('spk')).rejects.toMatchObject(refused);
+		await expect(device.currentSlot('spk')).rejects.toMatchObject(refused);
+		await expect(device.bandCount('spk')).rejects.toMatchObject(refused);
+		expect(fake.sent).toEqual([]);
 	});
 });

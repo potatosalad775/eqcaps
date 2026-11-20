@@ -5,7 +5,12 @@
 	// push or setEnabled (D40).
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import type { Filter, IndexEntry, Profile } from '@potatosalad775/eqcaps-core';
+	import {
+		eqProfile,
+		type Filter,
+		type IndexEntry,
+		type Profile
+	} from '@potatosalad775/eqcaps-core';
 	import type { DeviceMatch } from '@potatosalad775/eqcaps-client';
 	import {
 		guessProtocol,
@@ -76,6 +81,8 @@
 	let device = $state.raw<ReadOnlyDevice | null>(null);
 	let pulled = $state.raw<PullResult | null>(null);
 	let bandsWanted = $state(10);
+	/** The id of the device's other EQ to read (SPEC §9.2); empty for the profile's own. */
+	let eqId = $state('');
 	let busy = $state('');
 	let error = $state('');
 	let reportText = $state('');
@@ -185,7 +192,10 @@
 				const bandCount = profile?.bandCount ?? bandsWanted;
 				device = openReadOnly(transport, protocol, { profile: { bandCount } });
 			}
-			pulled = await device.pull(profile ? {} : { bands: bandsWanted });
+			pulled = await device.pull({
+				...(profile ? {} : { bands: bandsWanted }),
+				...(listedEq ? { eq: listedEq.id } : {})
+			});
 		} catch (e) {
 			fail(e);
 		} finally {
@@ -218,8 +228,20 @@
 		}
 	});
 
+	/** The other EQ chosen, when the protocol in use lists it. */
+	const listedEq = $derived(protocol?.eqs?.find((e) => e.id === eqId));
+	/** The profile of the EQ being read: the chosen profile, or that of its listed EQ. */
+	const eqShown = $derived(
+		profile && listedEq ? (eqProfile(profile, listedEq.id) ?? profile) : profile
+	);
+	// Another EQ holds other values: what was read is the previous one's.
+	$effect(() => {
+		void listedEq;
+		pulled = null;
+	});
+
 	const findings = $derived(
-		profile && pulled && device ? readFindings(profile, pulled, device.capabilities) : null
+		eqShown && pulled && device ? readFindings(eqShown, pulled, device.capabilities) : null
 	);
 	const present = (xs: (Filter | null)[]) => xs.filter((x): x is Filter => x !== null);
 
@@ -483,6 +505,20 @@
 						/>
 					</label>
 				{/if}
+				{#if protocol.eqs?.length}
+					<label class="flex items-center gap-2 text-sm">
+						EQ
+						<select
+							bind:value={eqId}
+							class="rounded border border-zinc-300 bg-white px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
+						>
+							<option value="">{profile?.engine ?? 'The profile’s own'}</option>
+							{#each protocol.eqs as eq (eq.id)}
+								<option value={eq.id}>{eq.name}</option>
+							{/each}
+						</select>
+					</label>
+				{/if}
 				{#if writeOnly || (device && !device.capabilities.canRead)}
 					<p class="rounded bg-zinc-100 px-3 py-2 text-sm dark:bg-zinc-900">
 						This protocol can only write to the device: it has no way to read the EQ back. So this
@@ -570,7 +606,9 @@
 
 				{#if findings}
 					<div>
-						<h3 class="font-medium">Check against {profile?.id}</h3>
+						<h3 class="font-medium">
+							Check against {profile?.id}{listedEq ? ` (${listedEq.name})` : ''}
+						</h3>
 						{#if !findings.bandCount && findings.violations.length === 0}
 							<p class="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
 								Everything the device holds fits the profile.
@@ -613,13 +651,19 @@
 					>
 				{/if}
 
-				{#if evidence}
+				{#if listedEq}
+					<p class="text-xs text-zinc-500">
+						Evidence and guided reads are for the EQ the profile describes; choose it above to make
+						one.
+					</p>
+				{/if}
+				{#if evidence && !listedEq}
 					{#key evidence.report}
 						<EvidenceReview report={evidence.report} handoff={evidence.handoff} {groupBase} />
 					{/key}
 				{/if}
 
-				{#if evidence && device}
+				{#if evidence && device && !listedEq}
 					{#key pulled}
 						<GuidedRead
 							{device}

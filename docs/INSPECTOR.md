@@ -51,6 +51,8 @@ D40).
   profile says 10.
 - Show what the handler's codec can represent (if the handler exposes a codec, §4), which explains
   read-back rounding.
+- Where the profile lists other EQs (SPEC §9.2), choose which to read; it is checked against that
+  EQ's profile. Evidence reports and guided reads stay with the EQ the profile describes.
 
 ### T3: Guided read (read-only)
 

@@ -22,6 +22,16 @@ interface ProtocolBase {
 	baudRate?: number;
 	/** The device's controls besides the EQ that this bridge's handler drives (SPEC §9.1). */
 	controls?: readonly Control[];
+	/** The device's other EQs that this bridge's handler drives (SPEC §9.2). */
+	eqs?: readonly ProtocolEq[];
+}
+
+/** Another EQ of the device, as `protocol.eqs` lists it: its own band count and presets. */
+export interface ProtocolEq {
+	id: string;
+	name: string;
+	bandCount?: number;
+	presets?: readonly Slot[];
 }
 
 /** How to drive one device: a handler and its settings. */
@@ -96,7 +106,8 @@ const afterControl: Read = (v) =>
 
 /**
  * The options a profile may set, per handler. Options a handler derives itself (Qudelix's framing
- * and EQ state from the device, Airoha's layout from the transport) aren't data and are left out.
+ * and EQ state from the device and its EQ from the operation, Airoha's layout from the transport)
+ * aren't data and are left out.
  */
 const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOptions<K>]?: Read } } = {
 	'fiio-usb-hid': { reportId: byte, saveCommand: byte },
@@ -137,8 +148,8 @@ const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOption
 		gainRegister: byte
 	},
 	'fosi-audio-usb-hid': { reportId: byte, bandwidth: number, defaultSlot: byte },
-	'qudelix-usb-hid': { group: oneOf('usr', 'spk') },
-	'qudelix-v2-usb-hid': { group: oneOf('usr', 'spk') },
+	'qudelix-usb-hid': {},
+	'qudelix-v2-usb-hid': {},
 	'jds-labs-usb-serial': {},
 	'nothing-usb-serial': { customSlot: byte },
 	'fiio-usb-serial': { saveCommand: byte },
@@ -264,9 +275,72 @@ function readControls(raw: unknown, id: HandlerId, strict: boolean): Control[] {
 	return out;
 }
 
+/** A preset list: the profile's own, or one of its other EQs'. */
+function readPresets(presets: unknown, id: HandlerId, at: string): Slot[] {
+	const ids = new Set<number>();
+	let bypassed = false;
+	return (Array.isArray(presets) ? presets : fail(`${at}: not a list`)).map((p): Slot => {
+		const { id: slot, name, bypass, writable } = isObject(p) ? p : fail(`${at}: not an object`);
+		if (typeof slot !== 'number' || !Number.isInteger(slot) || slot < 0) {
+			fail(`${at}: id ${JSON.stringify(slot)}`);
+		}
+		if (typeof name !== 'string' || !name) fail(`${at}: name of ${String(slot)}`);
+		if (ids.has(slot as number)) fail(`${at}: id ${String(slot)} twice`);
+		ids.add(slot as number);
+		if (writable !== undefined && typeof writable !== 'boolean') {
+			fail(`${at}: writable of ${String(slot)} is not a boolean`);
+		}
+		const base = { id: slot as number, name: name as string };
+		if (bypass === undefined || bypass === false) {
+			return writable ? { ...base, writable: true } : base;
+		}
+		if (bypass !== true) fail(`${at}: bypass of ${String(slot)} is not a boolean`);
+		if (writable) fail(`${at}: bypass preset ${String(slot)} is writable`);
+		if (bypassed) fail(`${at}: more than one bypass preset`);
+		if (!HANDLERS[id].bypassPreset) fail(`${at}: ${id} turns the EQ off without a preset`);
+		bypassed = true;
+		return { ...base, bypass: true };
+	});
+}
+
+/**
+ * A profile's other EQs (SPEC §9.2). Strict (CI): each must be one this bridge's handler drives.
+ * Lenient (apps): one it doesn't is left out, so newer data never stops the rest being driven.
+ */
+function readEqs(raw: unknown, id: HandlerId, strict: boolean): ProtocolEq[] {
+	const driven: readonly string[] = (HANDLERS[id] as AnyHandler).eqs ?? [];
+	const out: ProtocolEq[] = [];
+	for (const e of Array.isArray(raw) ? raw : fail('eqs: not a list')) {
+		const { id: key, name, bandCount, presets } = isObject(e) ? e : fail('eqs: not an object');
+		if (typeof key !== 'string' || !/^[a-z][A-Za-z0-9]*$/.test(key)) {
+			fail(`eqs: id ${JSON.stringify(key)}`);
+		}
+		const at = `eqs.${key as string}`;
+		if (out.some((x) => x.id === key)) fail(`${at}: listed twice`);
+		if (!driven.includes(key as string)) {
+			if (strict) fail(`${at}: ${id} has no EQ "${key as string}"`);
+			continue;
+		}
+		if (typeof name !== 'string' || !name) fail(`${at}: name`);
+		if (
+			bandCount !== undefined &&
+			!(typeof bandCount === 'number' && Number.isInteger(bandCount) && bandCount >= 1)
+		) {
+			fail(`${at}: bandCount ${JSON.stringify(bandCount)}`);
+		}
+		out.push({
+			id: key as string,
+			name: name as string,
+			...(bandCount !== undefined ? { bandCount: bandCount as number } : {}),
+			...(presets !== undefined ? { presets: readPresets(presets, id, `${at}.presets`) } : {})
+		});
+	}
+	return out;
+}
+
 function read(raw: unknown, strict = false): Protocol {
 	if (!isObject(raw)) fail('not an object');
-	const { handler, options, presets, disconnectOnSave, experimental, baudRate, controls } =
+	const { handler, options, presets, disconnectOnSave, experimental, baudRate, controls, eqs } =
 		raw as Record<string, unknown>;
 	if (typeof handler !== 'string' || !Object.hasOwn(HANDLERS, handler)) {
 		fail(`this bridge has no handler "${String(handler)}"`);
@@ -289,30 +363,10 @@ function read(raw: unknown, strict = false): Protocol {
 		}
 		if (Object.keys(parsed).length) out.options = parsed;
 	}
-	if (presets !== undefined) {
-		const ids = new Set<number>();
-		let bypassed = false;
-		out.presets = (Array.isArray(presets) ? presets : fail('presets: not a list')).map((p) => {
-			const { id: slot, name, bypass, writable } = isObject(p) ? p : fail('presets: not an object');
-			if (typeof slot !== 'number' || !Number.isInteger(slot) || slot < 0) {
-				fail(`presets: id ${JSON.stringify(slot)}`);
-			}
-			if (typeof name !== 'string' || !name) fail(`presets: name of ${String(slot)}`);
-			if (ids.has(slot as number)) fail(`presets: id ${String(slot)} twice`);
-			ids.add(slot as number);
-			if (writable !== undefined && typeof writable !== 'boolean') {
-				fail(`presets: writable of ${String(slot)} is not a boolean`);
-			}
-			if (bypass === undefined || bypass === false) {
-				return writable ? { id: slot, name, writable: true } : { id: slot, name };
-			}
-			if (bypass !== true) fail(`presets: bypass of ${String(slot)} is not a boolean`);
-			if (writable) fail(`presets: bypass preset ${String(slot)} is writable`);
-			if (bypassed) fail('presets: more than one bypass preset');
-			if (!HANDLERS[id].bypassPreset) fail(`presets: ${id} turns the EQ off without a preset`);
-			bypassed = true;
-			return { id: slot, name, bypass: true };
-		});
+	if (presets !== undefined) out.presets = readPresets(presets, id, 'presets');
+	if (eqs !== undefined) {
+		const list = readEqs(eqs, id, strict);
+		if (list.length) out.eqs = list;
 	}
 	for (const [k, v] of [
 		['disconnectOnSave', disconnectOnSave],
