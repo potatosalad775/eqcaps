@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         eqcaps WebHID recorder
 // @namespace    https://github.com/potatosalad775/eqcaps
-// @version      3
+// @version      4
 // @description  Records a vendor web app's WebHID traffic, and what the app made of it, for eqcaps' protocol tests. It sends nothing to the device itself.
 // @match        https://cc.fosiaudio.com/*
 // @match        https://app.nicehck.cn/*
 // @match        https://peq.szwalkplay.com/*
 // @match        https://equalizer.kiwiears.com/*
+// @match        https://home.toppingaudio.com/*
 // @run-at       document-start
 // @grant        none
 // @license      MIT
@@ -21,7 +22,7 @@
 (() => {
 	'use strict';
 
-	const RECORDER_VERSION = 3;
+	const RECORDER_VERSION = 4;
 	const start = performance.now();
 	const devices = [];
 	const events = [];
@@ -62,6 +63,8 @@
 
 	function log(device, op, reportId, data, error) {
 		const event = { t: ms(), device: indexOf(device), op, reportId };
+		// What an adapter leaves out is never held, so it can't be exported.
+		if (data !== undefined && adapter?.leaveOut?.(op, bytes(data))) return event;
 		if (data !== undefined) event.data = hex(bytes(data));
 		if (error !== undefined) event.error = String(error?.message ?? error);
 		events.push(event);
@@ -294,7 +297,27 @@
 		}
 	};
 
-	const adapter = [fosi, nicehck, walkplay, kiwiEars].find((a) => a.matches());
+	/**
+	 * Topping's web app (home.toppingaudio.com). It reads the device when it connects and keeps its
+	 * state where a script can't reach it, so a snapshot only marks a moment: record, connect, use
+	 * the app, snapshot. The level meters (commands 0x7130 and 0x7131) and empty reports arrive many
+	 * times a second and say nothing about the protocol; 0x1207 and 0x7133 carry codes that identify the unit.
+	 */
+	const topping = {
+		id: 'topping-home',
+		matches: () => location.hostname === 'home.toppingaudio.com',
+		leaveOut(op, data) {
+			// Between messages the device sends reports of nothing but zeros.
+			if (op === 'input' && data.every((b) => b === 0)) return true;
+			const at = data[0] === 0x22 ? 0 : 1;
+			if (data[at] !== 0x22 || data[at + 1] !== 0x33) return false;
+			const command = (data[at + 5] << 8) | data[at + 6];
+			return [0x7130, 0x7131, 0x7133, 0x1207].includes(command) && op === 'input';
+		},
+		snapshot: () => ({ store: 'none', state: {} })
+	};
+
+	const adapter = [fosi, nicehck, walkplay, kiwiEars, topping].find((a) => a.matches());
 
 	function takeSnapshot(label) {
 		if (!adapter) throw new Error('no adapter for this page');

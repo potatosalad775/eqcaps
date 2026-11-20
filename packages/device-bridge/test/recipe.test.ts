@@ -13,6 +13,8 @@ import {
 } from '../src/index.ts';
 import { profiles, PROTOCOLS } from './data.ts';
 import { FakeQudelix, FakeQudelixV2 } from './fake-qudelix.ts';
+import { FakeTopping } from './fake-topping.ts';
+import type { ToppingFamily } from '../src/handlers/topping-usb-hid.ts';
 import { noSleep } from './replay.ts';
 
 const WANTED: Filter[] = [
@@ -99,6 +101,12 @@ function qudelixFake(profile: Profile, handler: string) {
 	return new FakeQudelix(profile.match?.usb?.some((u) => u.vendorId === '0x1fc9') ? 't71' : '5k');
 }
 
+/** Topping's devices answer a session start and a config list that no echo can. */
+function toppingFake(handler: string, options: unknown) {
+	if (handler !== 'topping-usb-hid') return undefined;
+	return new FakeTopping((options as { family?: ToppingFamily }).family ?? 'dx1');
+}
+
 describe.each(Object.entries(PROTOCOLS))('%s', (profileId, protocol) => {
 	test('fit → complete → push writes without a codec error', async () => {
 		const profile = profiles.get(profileId) as Profile;
@@ -108,6 +116,7 @@ describe.each(Object.entries(PROTOCOLS))('%s', (profileId, protocol) => {
 		const { writeAck } = (protocol.options ?? {}) as { writeAck?: number };
 		const transport =
 			qudelixFake(profile, protocol.handler) ??
+			toppingFake(protocol.handler, protocol.options ?? {}) ??
 			(kind === 'hid' ? hidSink(writeAck) : streamSink(kind));
 		const device = openDevice(transport, protocol, { sleep: noSleep });
 		const preamp = profile.preamp.mode === 'manual' ? result.preamp : undefined;

@@ -12,22 +12,38 @@ import {
 	exchangesOf,
 	loadRecordings,
 	type RecordedEvent,
-	type Recording
+	type Recording,
+	type Snapshot
 } from './recording.ts';
 import { FakeWalkplay } from './fake-walkplay.ts';
 import * as fosi from './recording-fosi.ts';
 import { checkReads, checkWrites, type FosiState } from './recording-fosi.ts';
 import * as kiwi from './recording-kiwi.ts';
 import * as nicehck from './recording-nicehck.ts';
+import * as topping from './recording-topping.ts';
 import type { NicehckState } from './recording-nicehck.ts';
 
 const all = [...profiles.values()];
 
 /** Each vendor app's checks, by the userscript adapter that recorded it. */
-const CHECKS: Record<string, typeof fosi | typeof nicehck | typeof kiwi> = {
+interface Checks {
+	profileFor(
+		recording: Recording,
+		state: FosiState & NicehckState,
+		all: Profile[],
+		device: number
+	): Profile | string;
+	checkReads(recording: Recording, snapshot: Snapshot, profile: Profile): Promise<string[]>;
+	/** The recording too, for an app whose snapshot holds no state (Topping's). */
+	checkData(snapshot: Snapshot, profile: Profile, recording: Recording): string[];
+	checkWrites(recording: Recording): Promise<string[]>;
+}
+
+const CHECKS: Record<string, Checks> = {
 	'fosi-cc': fosi,
 	'nicehck-app': nicehck,
-	'kiwi-ears-eq': kiwi
+	'kiwi-ears-eq': kiwi,
+	'topping-home': topping
 };
 
 /**
@@ -56,7 +72,7 @@ async function check(recording: Recording) {
 		}
 		out.push(
 			...(await checks.checkReads(recording, snapshot, profile)),
-			...checks.checkData(snapshot, profile)
+			...checks.checkData(snapshot, profile, recording)
 		);
 	}
 	const adapter = recording.snapshots[0]?.adapter;
@@ -432,6 +448,36 @@ describe('the NICEHCK checks, on a synthetic recording', () => {
 });
 
 const recordings = loadRecordings();
+
+describe.runIf(recordings.some((r) => r.snapshots[0]?.adapter === 'topping-home'))(
+	'the Topping checks, on an altered recording',
+	() => {
+		const original = recordings.find((r) => r.snapshots[0]?.adapter === 'topping-home')!;
+
+		test('a write the handler would send differently is reported', async () => {
+			const recording = structuredClone(original);
+			// The first band frame the app wrote, numbered 0 of 1 instead of 1 of 1.
+			const event = recording.events.find(
+				(e) => e.op === 'output' && e.data?.slice(10, 14) === '9101'
+			)!;
+			event.data = `${event.data!.slice(0, 8)}00${event.data!.slice(10)}`;
+			expect(await topping.checkWrites(recording)).toEqual([
+				'the handler encodes the config written at 6177.3 ms, frame 4: 0x9101=0x4 (kind 0x20, 1 of 1), the app sent 0x9101=0x4 (kind 0x20, 0 of 1) at 6177.3 ms'
+			]);
+		});
+
+		test('a profile that lists fewer configs than the device holds is reported', () => {
+			const profile = profiles.get('topping-dx5-ii') as Profile;
+			const short = {
+				...profile,
+				protocol: { ...profile.protocol!, presets: profile.protocol!.presets!.slice(0, 3) }
+			};
+			expect(topping.checkData(original.snapshots[0]!, short, original)).toEqual([
+				'the device holds 5 configs, topping-dx5-ii lists 3'
+			]);
+		});
+	}
+);
 
 describe.runIf(recordings.length > 0).each(recordings.map((r) => [r.file, r] as const))(
 	'%s',
