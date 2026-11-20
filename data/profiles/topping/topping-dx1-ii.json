@@ -1,0 +1,28 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "topping-home",
+	"id": "topping-dx1-ii",
+	"device": { "brand": "Topping", "model": "DX1 II" },
+	"match": {
+		"usb": [{ "vendorId": "0x152a", "productId": "0x8750", "productName": ["DX1 II", "DX1II"] }]
+	},
+	"protocol": {
+		"options": { "family": "dx1" },
+		"presets": [
+			{ "id": 0, "name": "Config 1", "writable": true },
+			{ "id": 1, "name": "Config 2", "writable": true },
+			{ "id": 2, "name": "Config 3", "writable": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "Topping Home web app v1.17.0 (https://home.toppingaudio.com/): the DX1 II's session, its 3 configs and its EQ switch",
+				"date": "2026-11-20"
+			}
+		],
+		"notes": "As topping-home. Up to 3 stored configs; the app cannot delete one. The EQ has no switch of its own: selecting no config turns it off. The app shows the EQ as unavailable in DSD and above 192 kHz. The app names no minimum firmware for the EQ (its home screen needs 2.30). The product name is a guess: the app tells its devices apart by a product name it strips of spaces and case, so the exact string a device reports is not known until one is read."
+	}
+}
