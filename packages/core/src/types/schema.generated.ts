@@ -225,6 +225,20 @@ export interface Protocol {
 	experimental?: boolean;
 	/** The device's settings besides the EQ (volume, gain, DAC filter, USB mode…), by the handler's control ids. Format 1.2 (SPEC §9.1). */
 	controls?: Control[];
+	/** The device's other EQs that the handler drives over the same connection, by the handler's EQ ids; the profile itself describes the one the handler drives when none is named. Format 1.3 (SPEC §9.2). */
+	eqs?: Eq[];
+}
+
+/** Another EQ of the device: this profile with its own band count and presets (SPEC §9.2). Format 1.3. */
+export interface Eq {
+	/** The handler's name for the EQ. */
+	id: string;
+	/** The device's or vendor app's label for the EQ. */
+	name: string;
+	/** The EQ's number of slots, where it differs from the profile's bandCount. */
+	bandCount?: number;
+	/** The EQ's own presets, as protocol.presets lists the profile's. Left out, the EQ has none. */
+	presets?: Preset[];
 }
 
 export interface Preset {
@@ -342,4 +356,6 @@ export interface AuthoringProtocol {
 	experimental?: boolean;
 	/** The device's settings besides the EQ (volume, gain, DAC filter, USB mode…), by the handler's control ids. Format 1.2 (SPEC §9.1). */
 	controls?: Control[];
+	/** The device's other EQs that the handler drives over the same connection, by the handler's EQ ids; the profile itself describes the one the handler drives when none is named. Format 1.3 (SPEC §9.2). */
+	eqs?: Eq[];
 }

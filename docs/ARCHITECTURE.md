@@ -167,6 +167,10 @@ Device controls (D49) are separate and opt-in: `pull` and `push` never touch the
 `writeControl` only when the user changes one. The bridge refuses a value the profile doesn't
 list and reads each write back.
 
+A device with several EQs (D53) lists the others in `protocol.eqs`. An app picks one, fits against
+its profile (`eqProfile`), and names it in the bridge operation (`eq`); without one, everything
+above is about the EQ the profile describes.
+
 ## 9. Device bridge
 
 - **Transports.** Handlers see only `HidTransport` and `StreamTransport` (`src/transport.ts`).

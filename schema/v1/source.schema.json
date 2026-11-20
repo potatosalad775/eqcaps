@@ -433,11 +433,54 @@
 					"type": "array",
 					"items": { "$ref": "#/$defs/control" },
 					"minItems": 1
+				},
+				"eqs": {
+					"description": "The device's other EQs that the handler drives over the same connection, by the handler's EQ ids; the profile itself describes the one the handler drives when none is named. Format 1.3 (SPEC §9.2).",
+					"type": "array",
+					"items": { "$ref": "#/$defs/eq" },
+					"minItems": 1
 				}
 			},
 			"patternProperties": { "^x-": true },
 			"additionalProperties": false,
 			"required": ["handler"]
+		},
+		"eq": {
+			"description": "Another EQ of the device: this profile with its own band count and presets (SPEC §9.2). Format 1.3.",
+			"type": "object",
+			"properties": {
+				"id": {
+					"description": "The handler's name for the EQ.",
+					"type": "string",
+					"pattern": "^[a-z][A-Za-z0-9]*$"
+				},
+				"name": {
+					"description": "The device's or vendor app's label for the EQ.",
+					"type": "string",
+					"minLength": 1
+				},
+				"bandCount": {
+					"description": "The EQ's number of slots, where it differs from the profile's bandCount.",
+					"type": "integer",
+					"minimum": 1
+				},
+				"presets": {
+					"description": "The EQ's own presets, as protocol.presets lists the profile's. Left out, the EQ has none.",
+					"type": "array",
+					"items": { "$ref": "#/$defs/preset" },
+					"minItems": 1,
+					"contains": {
+						"type": "object",
+						"properties": { "bypass": { "const": true } },
+						"required": ["bypass"]
+					},
+					"minContains": 0,
+					"maxContains": 1
+				}
+			},
+			"patternProperties": { "^x-": true },
+			"additionalProperties": false,
+			"required": ["id", "name"]
 		},
 		"preset": {
 			"type": "object",
@@ -688,6 +731,12 @@
 					"description": "The device's settings besides the EQ (volume, gain, DAC filter, USB mode…), by the handler's control ids. Format 1.2 (SPEC §9.1).",
 					"type": "array",
 					"items": { "$ref": "#/$defs/control" },
+					"minItems": 1
+				},
+				"eqs": {
+					"description": "The device's other EQs that the handler drives over the same connection, by the handler's EQ ids; the profile itself describes the one the handler drives when none is named. Format 1.3 (SPEC §9.2).",
+					"type": "array",
+					"items": { "$ref": "#/$defs/eq" },
 					"minItems": 1
 				}
 			},
