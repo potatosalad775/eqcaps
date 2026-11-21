@@ -121,10 +121,9 @@ describe.each(
 			filters: caps.bands
 				? fc.array(filter, { minLength: caps.bands, maxLength: caps.bands })
 				: fc.array(filter, { minLength: 1, maxLength: 10 }),
-			preamp:
-				wire.preamp && caps.writesPreamp
-					? fc.option(onGrid(wire.preamp, -20, 0), { nil: undefined })
-					: fc.constant(undefined)
+			preamp: wire.preamp
+				? fc.option(onGrid(wire.preamp, -20, 0), { nil: undefined })
+				: fc.constant(undefined)
 		})
 		.map(({ filters, preamp }) => (preamp === undefined ? { filters } : { filters, preamp }));
 
@@ -207,7 +206,7 @@ describe.each(
 			}
 			return false;
 		};
-		if (!caps.writesPreamp) expect(refusedWith({ preamp: 0 })).toBe(true);
+		if (!wire.preamp) expect(refusedWith({ preamp: 0 })).toBe(true);
 		if (!caps.writesSlot) expect(refusedWith({ slot: 0 })).toBe(true);
 	});
 

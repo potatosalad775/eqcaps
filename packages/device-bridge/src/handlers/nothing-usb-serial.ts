@@ -153,11 +153,8 @@ export const nothingUsbSerial: StreamHandler<NothingOptions> = {
 		canWrite: true,
 		readsPreamp: true,
 		readsSlot: false,
-		writesPreamp: true,
 		writesSlot: true,
-		needsBandCount: false,
-		readsCurrentSlot: true,
-		canEnable: false
+		needsBandCount: false
 	}),
 
 	async pull(ctx) {

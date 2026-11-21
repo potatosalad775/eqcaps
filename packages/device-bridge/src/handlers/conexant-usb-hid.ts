@@ -46,7 +46,7 @@ export const conexantCodec: Codec<object, HidFrame> = {
 		gain: grid(256, I32)
 	}),
 	encode(request) {
-		refuseUncarried('conexant-usb-hid', request, {});
+		refuseUncarried('conexant-usb-hid', request, conexantCodec.wire({}));
 		const { filters } = request;
 		if (filters.length > BANDS) {
 			throw new BridgeError(
@@ -98,12 +98,9 @@ export const conexantUsbHid: HidHandler = {
 		canWrite: true,
 		readsPreamp: false,
 		readsSlot: false,
-		writesPreamp: false,
 		writesSlot: false,
 		bands: BANDS,
-		needsBandCount: false,
-		readsCurrentSlot: false,
-		canEnable: false
+		needsBandCount: false
 	}),
 
 	async pull() {

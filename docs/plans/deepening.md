@@ -11,7 +11,7 @@ Each step is one commit; none changes the format.
 | 3 | The inspector's read session; the bridge's reading side; shared connect rules to their owners | inspector, `device-bridge`, `client` | D40 (note) | done 2026-11-22 |
 | 4 | The editor's edit rules and its starting file, out of the route | inspector | none | done 2026-11-22 |
 | 5 | The schema's value lists generated; option readers typed and total; the README's tables checked | `core`, `device-bridge`, inspector | D13 (note) | done 2026-11-22 |
-| 6 | Capabilities said once: method-backed flags by default, `writesPreamp` from the wire grid | `device-bridge` | none | next |
+| 6 | Capabilities said once: method-backed flags by default, `writesPreamp` from the wire grid | `device-bridge` | none | done 2026-11-22 |
 
 ## 1. The device viewed as one EQ (done)
 
@@ -109,13 +109,32 @@ it threw. A copy may now be made of a base too.
 - **The README's tables** are checked by `protocols.test.ts`: a row per handler naming each of
   its options, and each control a handler drives.
 
+## 6. Capabilities said once (done)
+
+- **The flags a method backs** (`readsCurrentSlot`, `canEnable`, `readsEnabled`, `editsSlots`)
+  are the handler having the method, and a handler states one only where its options decide (KT
+  Micro, Topping). 34 lines went from the other handlers' capability literals.
+- **The device session answers for the handler** where a capability says no: null for
+  `currentSlot()` and `eqEnabled()`, `unsupported` for `setEnabled()` and the preset edits. It
+  read only `editsSlots` before, so KT Micro refused for itself three times and Topping checked
+  again; those guards are gone. `setEnabled()`'s refusal now reads "`<handler>` has no EQ switch
+  here".
+- **`writesPreamp`** is the codec's wire grid carrying a preamp (`wire.preamp`), in the device's
+  capabilities and in the codec's own refusal (`refuseUncarried` takes the grid). A handler no
+  longer states it. `writesSlot` has no wire field and stays stated.
+- `protocols.test.ts` checks all of it for every profile's device, against a transport that
+  fails any I/O.
+
+For apps: `device.capabilities` has the same fields with the same meaning. For a handler written
+outside this repository: `writesPreamp` leaves `HandlerCapabilities`, and `readsCurrentSlot` and
+`canEnable` are optional.
+
 ## What is left
 
 - A bridge release (breaking: step 1), then `core` and `client` (additive), before apps take
   them; the owner's, run locally. uniPEQ's follow-up is listed under each step above.
 - The inspector reading the firmware and matching again where `firmwareDecides`
   (`fosi-audio.md`).
-- Step 6 above.
 - Two candidates of the review were withdrawn, with the reasons in D33's note of 2026-11-22: the
   codec saying what each frame is, and a handler's per-device state owned by the bridge device.
   What is left of them needs no step: a step list for KT Micro's and Topping's `push`, and one

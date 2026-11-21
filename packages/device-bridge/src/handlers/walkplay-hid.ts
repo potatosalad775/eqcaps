@@ -327,14 +327,11 @@ export const walkplayHid: HidHandler<WalkplayHidOptions> = {
 		canWrite: true,
 		readsPreamp: true,
 		readsSlot: false,
-		writesPreamp: true,
 		writesSlot: true,
-		needsBandCount: true,
-		readsCurrentSlot: true,
+		needsBandCount: true
 		// Walkplay's app (peq.szwalkplay.com) and NICEHCK's have no EQ switch. devicePEQ's off,
 		// [1,1,0,…], is their Save, and left the EQ on on a NICEHCK PureAural and a CrinEar
 		// Protocol Micro.
-		canEnable: false
 	}),
 
 	async pull(ctx, { bands = 0 }) {

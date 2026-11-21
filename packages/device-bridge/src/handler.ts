@@ -107,7 +107,7 @@ export interface WireGrid {
 	/** Missing when the protocol has no Q field. */
 	q?: WireField;
 	gain: WireField;
-	/** Missing when the write carries no preamp. */
+	/** Missing when the write carries no preamp: a push with one is refused (`writesPreamp`). */
 	preamp?: WireField;
 }
 
@@ -149,7 +149,10 @@ export interface Codec<O, F> {
 	decode(frames: readonly F[], options: O): WriteState;
 }
 
-/** What a handler can do with one of its EQs, given its options and transport. */
+/**
+ * What a handler can do with one of its EQs, given its options and transport. Whether a push
+ * writes a preamp isn't here: the codec's wire grid says it (`WireGrid.preamp`).
+ */
 export interface HandlerCapabilities {
 	canRead: boolean;
 	canWrite: boolean;
@@ -157,8 +160,6 @@ export interface HandlerCapabilities {
 	readsPreamp: boolean;
 	/** Pull reads the preset `slot` it is given. */
 	readsSlot: boolean;
-	/** Push writes `preamp` when given. */
-	writesPreamp: boolean;
 	/** Push writes to the preset `slot` when given. */
 	writesSlot: boolean;
 	/** The band count, when the protocol fixes it. */
@@ -168,15 +169,21 @@ export interface HandlerCapabilities {
 	 * protocol reads band by band and can't report its count.
 	 */
 	needsBandCount: boolean;
-	/** `currentSlot()` asks the device rather than returning a constant. */
-	readsCurrentSlot: boolean;
-	/** `setEnabled()` sends a command. */
-	canEnable: boolean;
-	/** `eqEnabled()` asks the device, where that depends on the options. Default: it has the method. */
+	/**
+	 * The next four say whether a method of the handler does anything here. Each is left out where
+	 * having the method says it, and given only where it depends on the options or the transport;
+	 * the device session answers for the handler where one is false, without calling it.
+	 *
+	 * `currentSlot()` asks the device. Default: it has the method.
+	 */
+	readsCurrentSlot?: boolean;
+	/** `setEnabled()` sends a command. Default: it has the method. */
+	canEnable?: boolean;
+	/** `eqEnabled()` asks the device. Default: it has the method. */
 	readsEnabled?: boolean;
 	/**
-	 * Presets are created, renamed and deleted (`createSlot`, `renameSlot`, `deleteSlot`), where
-	 * that depends on the options. Default: it has the three methods.
+	 * Presets are created, renamed and deleted (`createSlot`, `renameSlot`, `deleteSlot`). Default:
+	 * it has the three methods.
 	 */
 	editsSlots?: boolean;
 	/**

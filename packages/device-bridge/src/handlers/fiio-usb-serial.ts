@@ -99,11 +99,8 @@ export const fiioUsbSerial: StreamHandler<FiioUsbSerialOptions> = {
 		canWrite: true,
 		readsPreamp: true,
 		readsSlot: false,
-		writesPreamp: true,
 		writesSlot: true,
-		needsBandCount: false,
-		readsCurrentSlot: true,
-		canEnable: true
+		needsBandCount: false
 	}),
 
 	async pull(ctx) {

@@ -135,7 +135,7 @@ export const ktmicroCodec: Codec<KtmicroHidOptions, HidFrame> = {
 		...(hasPreamp(o) ? { preamp: grid(1, I8) } : {})
 	}),
 	encode(request, o) {
-		refuseUncarried('ktmicro-usb-hid', request, { preamp: hasPreamp(o) });
+		refuseUncarried('ktmicro-usb-hid', request, ktmicroCodec.wire(o));
 		const { filters, preamp } = request;
 		const frames = filters.flatMap((f, i) => {
 			const regs = ktmicroRegisters(o, i);
@@ -229,7 +229,6 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 		canWrite: true,
 		readsPreamp: hasPreamp(o),
 		readsSlot: false,
-		writesPreamp: hasPreamp(o),
 		writesSlot: false,
 		readsEnabled: o.enableRegister !== undefined,
 		...(o.bandRegisters ? { bands: o.bandRegisters.length } : {}),
@@ -274,24 +273,20 @@ export const ktmicroUsbHid: HidHandler<KtmicroHidOptions> = {
 		return { reconnect: false };
 	},
 
+	// The session calls each of the next three only where the capabilities above say it does
+	// something: with preset slots, with an EQ switch register, with either.
 	async currentSlot(ctx) {
-		if (!hasSlots(ctx.options)) return null;
 		const slot = await readSlot(ctx);
 		return slot === (ctx.bypass ?? 2) ? null : slot;
 	},
 
 	async eqEnabled(ctx) {
-		const register = ctx.options.enableRegister;
-		if (register === undefined) return null;
-		return (await readRegister(ctx, register, 'KT Micro EQ switch')) === 1;
+		return (await readRegister(ctx, ctx.options.enableRegister!, 'KT Micro EQ switch')) === 1;
 	},
 
 	async setEnabled(ctx, enabled, slot) {
 		const register = ctx.options.enableRegister;
 		if (register !== undefined) return writeRegister(ctx, register, enabled ? 1 : 0);
-		if (!hasSlots(ctx.options)) {
-			throw new BridgeError('unsupported', 'ktmicro-usb-hid: this device has no EQ switch');
-		}
 		await selectSlot(ctx, enabled ? (slot ?? ctx.options.customSlot ?? 3) : (ctx.bypass ?? 2));
 	},
 

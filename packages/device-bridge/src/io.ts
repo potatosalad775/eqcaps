@@ -3,7 +3,7 @@
 import type { FilterType } from '@potatosalad775/eqcaps-core';
 import { BridgeError } from './errors.ts';
 import { after } from './platform.ts';
-import type { HidFrame, PushRequest } from './handler.ts';
+import type { HidFrame, PushRequest, WireGrid } from './handler.ts';
 import type { HidCollectionInfo, HidTransport, StreamTransport } from './transport.ts';
 
 /**
@@ -151,17 +151,20 @@ export function typeCodes(
 
 /**
  * Refuses the request fields a protocol's write doesn't carry. Dropped silently, a preamp or slot
- * would look applied (D33).
+ * would look applied (D33). Whether it carries a preamp is the codec's wire grid's to say
+ * (`wire.preamp`), the one statement the device's `writesPreamp` comes from too; `slot` says
+ * whether it names a preset.
  */
 export function refuseUncarried(
 	handler: string,
 	request: PushRequest,
-	carries: { preamp?: boolean; slot?: boolean }
+	wire: Pick<WireGrid, 'preamp'>,
+	slot = false
 ) {
-	if (request.preamp !== undefined && !carries.preamp) {
+	if (request.preamp !== undefined && wire.preamp === undefined) {
 		throw new BridgeError('invalid-request', `${handler}: the write carries no preamp`);
 	}
-	if (request.slot !== undefined && !carries.slot) {
+	if (request.slot !== undefined && !slot) {
 		throw new BridgeError('invalid-request', `${handler}: the write names no preset slot`);
 	}
 }
