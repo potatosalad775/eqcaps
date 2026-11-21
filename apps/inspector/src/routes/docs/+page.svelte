@@ -9,7 +9,7 @@
 	const readme = (name: string) => `${REPO_URL}/tree/main/packages/${name}#readme`;
 
 	const clientCode = `import { createClient, webStorageStore } from '@potatosalad775/eqcaps-client';
-import { complete, fit, validateList } from '@potatosalad775/eqcaps-core';
+import { plan, validateList } from '@potatosalad775/eqcaps-core';
 
 const client = createClient({ store: webStorageStore(localStorage) });
 
@@ -20,8 +20,9 @@ const { best } = await client.matchDevice({
 const profile = best && (await client.loadProfile(best.id));
 if (profile) {
   validateList(profile, wanted, preamp);                // while editing: flag, don't rewrite
-  const result = fit(profile, wanted, preamp);          // before writing: what to send
-  const bands = complete(profile, result.slots).filters; // every slot, neutral fillers included
+  const { write, channels } = plan(profile, { filters: wanted, preamp }); // before writing
+  write.filters;            // what to send: every slot, neutral fillers included
+  channels[0].fit.changes;  // what had to move to fit
 }`;
 
 	const bridgeCode = `import { identityOf, openDevice, protocolForMatches } from '@potatosalad775/eqcaps-device-bridge';
@@ -32,10 +33,11 @@ const transport = await requestHidDevice({ entries: index?.profiles ?? [] });
 const { best, matches } = await client.matchDevice(identityOf(transport));
 const { protocol } = protocolForMatches(matches);  // from the data: no bridge release per device
 const device = openDevice(transport, protocol, { profile });
-const state = await device.pull();                // written values, band order
-// Empty slots keep the device's layout, written flat, instead of neutral fillers.
-const bands = complete(profile, fit(profile, wanted, preamp).slots, { hints: state.filters }).filters;
-await device.push({ filters: bands });            // exactly what you give it: fit + complete first`;
+const held = await device.pull();                 // written values, band order
+// Empty slots keep the device's layout, written flat, instead of neutral fillers. The preamp and
+// the right channel go out only where the device takes them.
+const { write } = plan(profile, { filters: wanted, preamp }, { ...device.capabilities, held });
+await device.push(write);                         // exactly what you give it: plan first`;
 </script>
 
 <svelte:head><title>Use the data · eqcaps</title></svelte:head>

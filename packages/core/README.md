@@ -6,14 +6,17 @@ configurations an EQ engine (a hardware DSP or a software EQ) accepts. Zero depe
 environment types, synchronous.
 
 - **Engine** (format SPEC §13): `resolveSlot`, `project`, `validate`,
-  `validateList`, `assign`, `fit`, `complete`, plus `isGraphic`, `describe` and `unsupported`.
+  `validateList`, `assign`, `fit`, `complete`, `plan`, plus `isGraphic`, `describe` and
+  `unsupported`.
 - **Validation**: `validateProfile` (semantic rules of one profile), `checkDatabase`
   (cross-profile rules), `flattenProfile` (authoring `extends` → published form).
 - **Types** generated from the JSON Schema, including the published `index.json` and
   `bundle.json`.
 
-Writing to a device: `fit` → `complete` → encode the written values; pass what the device holds
-as `complete`'s `hints` and empty slots keep its layout. Reading from one: decode.
+Writing to a device: `plan` → encode the written values. `plan` is `fit` → `complete` for each
+channel that is written; pass what the device holds as `held` and empty slots keep its layout,
+and say what the write carries (`writesPreamp`, `perChannel`) so it sends the preamp and the
+right channel only where they go. Reading from one: decode.
 While editing: `validateList`.
 
 To load profiles, use [`@potatosalad775/eqcaps-client`](https://www.npmjs.com/package/@potatosalad775/eqcaps-client).

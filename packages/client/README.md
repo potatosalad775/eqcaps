@@ -6,7 +6,7 @@ browsers, Node and WebViews.
 
 ```ts
 import { createClient, webStorageStore } from '@potatosalad775/eqcaps-client';
-import { fit, complete, validateList } from '@potatosalad775/eqcaps-core';
+import { plan, validateList } from '@potatosalad775/eqcaps-core';
 
 const client = createClient({ store: webStorageStore(localStorage) });
 
@@ -17,10 +17,10 @@ const { best, matches } = await client.matchDevice({
 const profile = best && (await client.loadProfile(best.id));
 if (profile) {
 	const problems = validateList(profile, filters); // while editing: flag, don't rewrite
-	const result = fit(profile, filters, preamp); // before writing: what to send
-	// Every slot filled. Given what the device holds (if it can be read), empty slots keep that
-	// layout, written flat, instead of neutral fillers.
-	const slots = complete(profile, result.slots, { hints: readBack }).filters;
+	// Before writing: what to send. Every slot filled; given what the device holds (if it can be
+	// read), empty slots keep that layout, written flat, instead of neutral fillers.
+	const { write, channels } = plan(profile, { filters, preamp }, { writesPreamp, held: readBack });
+	channels[0].fit.changes; // what the device made of it, to show before writing
 }
 ```
 

@@ -38,5 +38,7 @@ export { fit } from './fit.ts';
 export type { Change, FitResult } from './fit.ts';
 export { complete } from './complete.ts';
 export type { CompleteOptions, CompleteResult, CompleteWarning } from './complete.ts';
+export { plan } from './plan.ts';
+export type { Plan, PlanChannel, PlanHeld, PlanOptions, PlanWanted, PlanWrite } from './plan.ts';
 export { describe, describeDomain, isGraphic, unsupported } from './describe.ts';
 export type { ProfileDescription, SlotGroupDescription } from './describe.ts';

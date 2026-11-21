@@ -13,7 +13,7 @@ regenerate. A change to a vector is a change every port has to follow, so review
 ## Files
 
 One file per operation, named after it: `project.json`, `resolveSlot.json`, `validate.json`,
-`assign.json`, `fit.json`, `complete.json`.
+`assign.json`, `fit.json`, `complete.json`, `plan.json`.
 
 ```jsonc
 {
@@ -53,6 +53,7 @@ Filters are `{ "type", "freq", "q", "gain" }`, and `slots` arrays use `null` for
 | `assign` | `filters` | `{ "valid" }`: whether an assignment exists in which every active filter has a slot that accepts it as is |
 | `fit` | `filters`, `preamp` | `{ "feasible" }` |
 | `complete` | `slots`, and `hints` when given | `{ "warnings" }`: the `{ slot, code }` warnings, in slot order |
+| `plan` | `filters`, and `preamp`, `right`, `writesPreamp`, `perChannel` and `held` when given | `{ "channels", "preamp" }`: how many channels are written (1 or 2), and whether a preamp is sent |
 
 JSON has no NaN or infinities, so `project` inputs spell them `"NaN"`, `"Infinity"` and
 `"-Infinity"`.
@@ -62,8 +63,8 @@ JSON has no NaN or infinities, so `project` inputs spell them `"NaN"`, `"Infinit
 - **Exact ops** (`project`, `resolveSlot`, `validate`): the output
   must equal `expect`. Numbers compare with the SPEC §4 tolerance, `|a − b| ≤ 1e-9 · max(1, |a|,
   |b|)`, and everything else exactly, object keys included.
-- **Property ops**: the output isn't fixed. A runner checks the properties of SPEC §13.5–§13.7 on
-  every vector, plus the facts in `expect`:
+- **Property ops**: the output isn't fixed. A runner checks the properties of SPEC §13.5–§13.7 and
+  §13.10 on every vector, plus the facts in `expect`:
   - `assign`: inactive filters get no slot; if `valid`, every active filter gets a slot whose types
     and domains accept it.
   - `fit`: sound, safe, faithful (on active filters), idempotent, and no added active filters;
@@ -71,6 +72,11 @@ JSON has no NaN or infinities, so `project` inputs spell them `"NaN"`, `"Infinit
   - `complete`: exactly `bandCount` filters, filled slots unchanged, fillers (hints included) in
     their domains and neutral unless warned, `ascendingFrequency` kept when `validate` found room; `warnings` as
     given.
+  - `plan`: each written channel is the implementation's own `complete(fit(…).slots, { hints })`
+    with that channel's filters, preamp and hints; the right channel is written apart exactly
+    where the profile's channels are independent, `perChannel` is true and `right` is given; a
+    preamp is sent exactly where `writesPreamp` is true and the mode is `manual` or `unknown`;
+    `channels` and `preamp` as given.
 
 The reference runner is
 [`packages/core/test/conformance.test.ts`](../../packages/core/test/conformance.test.ts), with the

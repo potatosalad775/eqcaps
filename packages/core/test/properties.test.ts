@@ -16,10 +16,12 @@ import {
 	checkFaithful,
 	checkIdempotent,
 	checkNoAddedBands,
+	checkPlan,
 	checkSound
 } from './checks.ts';
 
-// The normative engine properties (SPEC §13.5–§13.7) over random valid profiles and filter lists.
+// The normative engine properties (SPEC §13.5–§13.7, §13.10) over random valid profiles and filter
+// lists.
 // The exit criterion of Phase 2 is ≥ 10k cases per property.
 
 /** Cases per property. Set EQCAPS_PROPERTY_RUNS to search harder, e.g. 100000. */
@@ -94,6 +96,39 @@ describe('complete properties (SPEC §13.7)', () => {
 				const slots = fit(c.profile, c.filters, c.preamp).slots;
 				checkComplete(c.profile, slots, c.hints);
 			}),
+			{ numRuns: RUNS }
+		);
+	});
+});
+
+describe('plan properties (SPEC §13.10)', () => {
+	it('each written channel is fit then complete; right and preamp go out exactly where they may', () => {
+		const flag = fc.constantFrom(true, false, undefined);
+		fc.assert(
+			fc.property(
+				caseArb,
+				caseArb,
+				fc.constantFrom('linked' as const, 'independent' as const, undefined),
+				flag,
+				flag,
+				fc.boolean(),
+				fc.boolean(),
+				(c, other, channels, writesPreamp, perChannel, wantsRight, readApart) => {
+					const profile = { ...c.profile, ...(channels ? { channels } : {}) };
+					// The right channel's filters come from another profile: fit has to move them.
+					const right = { filters: other.filters, ...(readApart ? { preamp: other.preamp } : {}) };
+					const hints = c.filters.map((f) => ({ ...f, gain: 1 }));
+					checkPlan(
+						profile,
+						{ filters: c.filters, preamp: c.preamp, ...(wantsRight ? { right } : {}) },
+						{
+							writesPreamp,
+							perChannel,
+							held: { filters: hints, ...(readApart ? { right: { filters: other.filters } } : {}) }
+						}
+					);
+				}
+			),
 			{ numRuns: RUNS }
 		);
 	});
