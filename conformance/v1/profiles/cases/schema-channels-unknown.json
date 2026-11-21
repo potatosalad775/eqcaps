@@ -1,0 +1,6 @@
+{
+	"description": "channels is \"linked\" or \"independent\"; nothing else.",
+	"spec": "§9",
+	"profile": { "channels": "stereo" },
+	"expect": [{ "code": "schema", "path": "/channels" }]
+}

@@ -2,9 +2,10 @@
 
 > **Status: frozen as v1 (format 1.0) on 2026-10-03** ([DECISIONS D36](DECISIONS.md)); **format
 > 1.1** (2026-10-10, D48) adds `writable` presets (§9); **format 1.2** (2026-10-28, D49) adds
-> device controls (§9.1); **format 1.3** (2026-11-20, D53) adds a device's other EQs (§9.2). This
-> file is the single place the format is defined. From here on it
-> changes only by minors that add (§15); anything else needs v2. Published under `/v1/`.
+> device controls (§9.1); **format 1.3** (2026-11-20, D53) adds a device's other EQs (§9.2);
+> **format 1.4** (2026-11-21, D54) adds independent left and right channels (§9). This file is the
+> single place the format is defined. From here on it changes only by minors that add (§15);
+> anything else needs v2. Published under `/v1/`.
 > MUST / SHOULD / MAY are used as in RFC 2119. Rationale for each choice is in
 > [DECISIONS.md](DECISIONS.md), and the evidence is in [research/prior-art.md](research/prior-art.md).
 
@@ -63,7 +64,7 @@ never folded in, even a constant one (DECISIONS D39).
 | `bands` | – | §5.2 |
 | `rules` | – | default `[]` |
 | `preamp` | ✔ | §9; `{ "mode": "unknown" }` is allowed and honest. |
-| `channels` | – | default `"linked"` |
+| `channels` | – | §9; default `"linked"`; `"independent"` is format 1.4 |
 | `protocol` | – | §9; hardware only. How the device bridge drives the device. |
 | `meta` | ✔ | §10 |
 
@@ -288,8 +289,18 @@ and the device bridge applies it (§9); the domain stays in the app's units.
 "preamp": { "mode": "unknown" }    // e.g. seeded data
 ```
 
-`channels`: only `"linked"` (one filter set drives both channels) in v1. `"independent"` is
-reserved for per-channel engines.
+**Channels (`channels`).** `"linked"`, the default: one filter set and one preamp drive both
+output channels. `"independent"` (format 1.4): the EQ holds a filter set and a preamp for each of
+two output channels, left and right, set apart. Each channel is the profile on its own:
+`bandCount`, `band`, `bands`, `rules` and `preamp` hold for each, and no rule spans the two. An EQ
+of more channels than a stereo pair (a surround EQ, a crossover's drivers) is not described.
+
+Rules for consumers:
+
+- The engine (§13) is the same for both: to fit, validate or complete an independent EQ, a
+  consumer runs it once per channel, on that channel's filters and preamp.
+- A consumer that knows only linked EQs MAY drive an independent one as linked, writing both
+  channels alike.
 
 **Protocol (`protocol`).** Which handler of the device bridge (`packages/device-bridge`) drives the
 device, and the settings that differ between the devices one handler drives. Hardware only. The
@@ -922,3 +933,4 @@ the host app: the database enhances an app and never blocks it. The reference cl
 | 1.1 | 2026-10-10 | `protocol.presets[].writable` (§9, D48) |
 | 1.2 | 2026-10-28 | `protocol.controls` (§9.1, D49) |
 | 1.3 | 2026-11-20 | `protocol.eqs` (§9.2, D53) |
+| 1.4 | 2026-11-21 | `channels: "independent"` (§9, D54) |
