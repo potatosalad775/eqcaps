@@ -147,11 +147,14 @@ first additive minor.
 ### D49. Device controls: format 1.2 (2026-10-28)
 `protocol.controls` lists a device's settings besides the EQ (volume, output gain, DAC filter,
 upsampling, USB mode, sound modes, lights, tone, amplifier class, mic gain, channel balance, and
-since 2026-11-11 a headset's noise control, microphone noise reduction and prompt tones),
+since 2026-11-11 a headset's noise control, microphone noise reduction and prompt tones, since
+2026-11-21 mute, input, output, a one-value balance, polarity, crossfeed and display brightness),
 because they change what the device plays and whether its EQ applies. Like presets, the data
 says which values the device takes and the handler knows how to send them: ids are each
 handler's vocabulary, values are the device's own numbers, and an optional closed `role` lets
-apps present them alike. A control can depend on another
+apps present them alike. Since 2026-11-21 every control in `data/` has a role unless it is a
+setting only its vendor has (a test lists those): an app translates a control by its role, so one
+left without shows the vendor's English label in every language. A control can depend on another
 control (`when`, one level deep) and on firmware (unknown firmware: absent), mark values at which
 the EQ stops applying (`disablesEq`), and mark writes that reconnect the device. Opt-in:
 `pull`/`push` never touch controls, apps write one only when the user changes it, and never raise

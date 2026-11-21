@@ -378,8 +378,13 @@ the device accepts and the handler knows how to send them.
   class H), `mic-gain` (the gain of a built-in microphone input), `balance-left`, `balance-right`
   (the gain of one output channel), `noise-control` (a headset's noise cancelling and transparency
   modes), `mic-noise-reduction` (noise reduction on a built-in microphone), `prompt-tone` (the
-  device's own announcement sounds) and `prompt-tone-volume` (their level). A device with both
-  balance roles holds a gain per channel; an app MAY show the pair as one balance control.
+  device's own announcement sounds), `prompt-tone-volume` (their level), `mute`, `input` (the
+  source the device plays), `output` (the outputs it plays to), `balance` (one value for both
+  channels, negative towards the left), `polarity` (the output's absolute phase), `crossfeed` and
+  `display-brightness` (a screen's, where `light` is an indicator's). A device with both
+  `balance-left` and `balance-right` holds a gain per channel; an app MAY show the pair as one
+  balance control. A control without a role is a setting only that vendor has, under the
+  vendor's name for it.
 - `when` (optional): the control exists only while the control named in `when.control` holds one
   of `when.values`. That control MUST be another one in the list, MUST NOT have a `when` of its
   own, and MUST take every listed value.

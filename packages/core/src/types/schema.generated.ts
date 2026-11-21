@@ -278,7 +278,14 @@ export interface Control {
 		| 'noise-control'
 		| 'mic-noise-reduction'
 		| 'prompt-tone'
-		| 'prompt-tone-volume';
+		| 'prompt-tone-volume'
+		| 'mute'
+		| 'input'
+		| 'output'
+		| 'balance'
+		| 'polarity'
+		| 'crossfeed'
+		| 'display-brightness';
 	/** choice only: the values the device takes, with their labels. */
 	values?: ControlValue[];
 	/** range only: a range or stepped range (SPEC §4). */
