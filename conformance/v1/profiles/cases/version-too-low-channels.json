@@ -1,0 +1,6 @@
+{
+	"description": "A profile with independent channels (format 1.4) must declare schemaVersion 1.4 or later.",
+	"spec": "§15",
+	"profile": { "schemaVersion": "1.3", "channels": "independent" },
+	"expect": [{ "code": "version-too-low", "path": "/schemaVersion" }]
+}

@@ -1,0 +1,6 @@
+{
+	"description": "An EQ with a filter set and preamp per channel (format 1.4): each channel has the profile's band count, domains and rules.",
+	"spec": "§9",
+	"profile": { "schemaVersion": "1.4", "channels": "independent" },
+	"expect": []
+}

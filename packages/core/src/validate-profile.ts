@@ -429,6 +429,9 @@ function checkVersion(profile: Profile): Issue[] {
 	if (profile.protocol?.eqs !== undefined) {
 		needs.push({ minor: 3, field: 'protocol.eqs' });
 	}
+	if (profile.channels === 'independent') {
+		needs.push({ minor: 4, field: 'channels "independent"' });
+	}
 	return needs
 		.filter((n) => n.minor > declared)
 		.map((n) =>

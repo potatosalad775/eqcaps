@@ -33,8 +33,8 @@
 		"rules": { "type": "array", "items": { "$ref": "#/$defs/rule" } },
 		"preamp": { "$ref": "#/$defs/preamp" },
 		"channels": {
-			"description": "Only \"linked\" in v1; \"independent\" is reserved (SPEC §9).",
-			"const": "linked"
+			"description": "linked (the default): one filter set and preamp for both output channels. independent (format 1.4): one each for left and right (SPEC §9).",
+			"enum": ["linked", "independent"]
 		},
 		"protocol": { "$ref": "#/$defs/authoringProtocol" },
 		"meta": { "$ref": "#/$defs/authoringMeta" },
