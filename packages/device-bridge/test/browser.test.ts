@@ -115,6 +115,36 @@ describe('WebHID', () => {
 		expect(transport!.collections[0]!.usagePage).toBe(0xff00);
 	});
 
+	test('prefers the interface that takes reports when none is vendor-defined', async () => {
+		// A Topping DX5 II: media keys with input reports only, and the control interface.
+		const keys = () =>
+			fakeHid('DX5 II', 0x152a, 0x8750, [
+				{ usagePage: 0x0c, usage: 1, inputReports: [{ reportId: 0 }] }
+			]);
+		const control = () =>
+			fakeHid('DX5 II', 0x152a, 0x8750, [
+				{
+					usagePage: 1,
+					usage: 0,
+					inputReports: [{ reportId: 0 }],
+					outputReports: [{ reportId: 0 }]
+				}
+			]);
+		const [k, c] = [keys(), control()];
+		const chosen = await requestHidDevice({
+			hid: { requestDevice: async () => [k, c], getDevices: async () => [k, c] }
+		});
+		expect(chosen!.collections[0]!.usagePage).toBe(1);
+		expect(k.opened).toBe(false);
+
+		const identity = { vendorId: 0x152a, productId: 0x8750, productName: 'DX5 II' };
+		const again = await grantedHidDevice(identity, {
+			requestDevice: async () => [],
+			getDevices: async () => [keys(), control()]
+		});
+		expect(again!.collections[0]!.usagePage).toBe(1);
+	});
+
 	test('finds a granted device again without the chooser, by its exact identity', async () => {
 		const audio = fakeHid('Protocol Micro', 0x3302, 0xc20f, [{ usagePage: 0x0c }]);
 		const other = fakeHid('Protocol Micro ', 0x3302, 0xc20f, [{ usagePage: 0xff00 }]);

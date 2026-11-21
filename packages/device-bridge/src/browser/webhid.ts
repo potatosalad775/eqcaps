@@ -81,6 +81,31 @@ export async function hidTransport(
 const hasVendorCollection = (d: HidDeviceLike) =>
 	d.collections.some((c) => (c.usagePage ?? 0) >= 0xff00);
 
+const takesReports = (collections: readonly HidCollectionInfoLike[]): boolean =>
+	collections.some(
+		(c) =>
+			(c.outputReports?.length ?? 0) > 0 ||
+			(c.featureReports?.length ?? 0) > 0 ||
+			takesReports(c.children ?? [])
+	);
+
+/**
+ * How likely an interface is the one a handler drives: a vendor-defined one first, then one that
+ * takes output or feature reports. Every handler sends something, so an interface that takes none
+ * (the media keys of a Topping DX5 II, whose control interface is on the generic desktop page)
+ * can't be it.
+ */
+const rank = (d: HidDeviceLike) =>
+	hasVendorCollection(d) ? 2 : takesReports(d.collections) ? 1 : 0;
+
+/** The best-ranked of `devices`, the earliest among equals. */
+function preferred(devices: readonly HidDeviceLike[]): HidDeviceLike | undefined {
+	return devices.reduce<HidDeviceLike | undefined>(
+		(best, d) => (best && rank(best) >= rank(d) ? best : d),
+		undefined
+	);
+}
+
 export interface RequestHidOptions {
 	/** Database entries whose devices to offer, on top of the vendors `guessProtocol` knows. */
 	entries?: Iterable<ChooserEntry>;
@@ -94,7 +119,7 @@ export interface RequestHidOptions {
  * Shows the browser's HID chooser and returns the chosen device as a transport, or null if the
  * user cancelled. A device with several HID interfaces of the same name (Qudelix 5K) may be
  * chosen on its audio interface; the vendor-defined interface is preferred when it was granted
- * too.
+ * too, and failing that one that takes reports.
  */
 export async function requestHidDevice(
 	options: RequestHidOptions = {}
@@ -105,26 +130,20 @@ export async function requestHidDevice(
 		? []
 		: chooserFilters(options.entries).hidVendorIds.map((vendorId) => ({ vendorId }));
 	const chosen = await hid.requestDevice({ filters }).catch(transportError('requestDevice'));
-	let device = chosen[0];
-	if (!device) return null;
-	if (!hasVendorCollection(device)) {
-		const granted = await hid.getDevices().catch(() => []);
-		const sibling = granted.find(
-			(d) =>
-				d !== device &&
-				d.vendorId === device!.vendorId &&
-				d.productId === device!.productId &&
-				hasVendorCollection(d)
-		);
-		if (sibling) device = sibling;
-	}
-	return hidTransport(device, hid);
+	const first = chosen[0];
+	if (!first) return null;
+	const siblings = hasVendorCollection(first)
+		? []
+		: (await hid.getDevices().catch(() => [])).filter(
+				(d) => d !== first && d.vendorId === first.vendorId && d.productId === first.productId
+			);
+	return hidTransport(preferred([first, ...siblings])!, hid);
 }
 
 /**
  * A device this site was already granted, found again without the chooser: after it was unplugged
  * and plugged back in, say, or moved to a phone and back. Matches vendor id, product id and the
- * exact product name, preferring the vendor-defined interface; null if it isn't connected. Several
+ * exact product name, preferring the interface as `requestHidDevice` does; null if it isn't connected. Several
  * identities are for a device that can come back as any of them (the Fosi DS3 has one per USB
  * mode); a device granted under one of them is found.
  */
@@ -156,7 +175,7 @@ function pickGranted(
 	identity: HidIdentity | readonly HidIdentity[]
 ) {
 	const same = granted.filter((d) => isSame(d, identity));
-	return same.find(hasVendorCollection) ?? same[0];
+	return preferred(same);
 }
 
 export interface WaitForHidOptions {
