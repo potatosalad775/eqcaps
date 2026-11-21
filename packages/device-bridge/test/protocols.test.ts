@@ -388,6 +388,20 @@ test('a profile with a manual preamp has a protocol that writes it', () => {
 	expect(wrong.map(([id]) => id)).toEqual([]);
 });
 
+// SPEC §9: an app sends the right channel apart only where the profile says the channels are
+// independent, and the bridge refuses it where the handler can't drive them apart.
+test('a profile has independent channels exactly where its protocol drives them apart', () => {
+	const wrong = driven.filter(([id, p]) => {
+		const h = handlerOf(id);
+		const caps = h.capabilities(
+			{ kind: transportsOf(h)[0], collections: [] } as never,
+			p.options ?? {}
+		);
+		return (profile(id).channels === 'independent') !== (caps.perChannel === true);
+	});
+	expect(wrong.map(([id]) => id)).toEqual([]);
+});
+
 /** Where a profile domain isn't inside the codec's wire field. */
 function outside(d: Domain, w: WireField | { values: readonly number[] } | undefined): string[] {
 	if (!w) return [];

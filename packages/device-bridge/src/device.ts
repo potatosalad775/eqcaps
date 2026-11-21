@@ -52,6 +52,8 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	listsSlots: boolean;
 	/** `createSlot()`, `renameSlot()` and `deleteSlot()` send commands. */
 	editsSlots: boolean;
+	/** `push` takes the right channel as `right`, and `pull` returns it (SPEC §9). */
+	perChannel: boolean;
 	/**
 	 * The device's other EQs (SPEC §9.2), each with its own slots: `pull`, `push` and the EQ's
 	 * switch and preset take one's id as `eq`. Empty for a device with one EQ.
@@ -202,6 +204,7 @@ export function openDevice(
 			handler.renameSlot !== undefined &&
 			handler.deleteSlot !== undefined &&
 			own.editsSlots !== false,
+		perChannel: own.perChannel === true,
 		eqs: eqs.map(({ presets, ...e }) => ({ ...e, slots: presets ?? [] })),
 		disconnectOnSave: protocol.disconnectOnSave ?? false,
 		experimental: protocol.experimental ?? false,
@@ -288,6 +291,13 @@ export function openDevice(
 			return serial(async () => {
 				if (!capabilities.canWrite) {
 					throw new BridgeError('unsupported', `${handler.id} can't write to this device`);
+				}
+				// Sent without it, the right channel would look written (D33).
+				if (request.right !== undefined && !capabilities.perChannel) {
+					throw new BridgeError(
+						'invalid-request',
+						`${handler.id}: the write drives both channels alike; it carries no right channel`
+					);
 				}
 				const { eq, ...rest } = request;
 				const result = await handler.push(on(eq), rest);
