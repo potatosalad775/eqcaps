@@ -31,7 +31,14 @@
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { be16, grid, I16, readU16be, U16 } from '../bytes.ts';
 import { BridgeError } from '../errors.ts';
-import type { HandlerContext, HidFrame, PullResult, WireGrid } from '../handler.ts';
+import type {
+	HandlerContext,
+	HidFrame,
+	PullResult,
+	PushRequest,
+	WireGrid,
+	WriteState
+} from '../handler.ts';
 import { decimals, hidFrame, sendFrame, typeCodes } from '../io.ts';
 import { after } from '../platform.ts';
 import type { HidCollectionInfo, HidTransport } from '../transport.ts';
@@ -223,8 +230,10 @@ export interface QudelixGroup {
 	/** The channel counts the bridge drives. Where there are several, the stored preset says. */
 	channels: readonly number[];
 	/**
-	 * Left and right are written together, one frame with both bits, as the app sends them when its
-	 * channel selector is on both; else each channel gets its own frame.
+	 * Its channels are a left and right pair, which the bridge drives apart (SPEC §9): written
+	 * together, one frame with both bits, as the app sends them when its channel selector is on
+	 * both, or one frame each with `right`, as with the selector on one channel; a pull returns
+	 * both. Else each channel gets its own frame, all alike.
 	 */
 	stereo: boolean;
 	/** It may be a graphic EQ (the app's type selector), so a push makes it parametric. */
@@ -395,12 +404,98 @@ function checkChannels(group: QudelixGroup, channels: number) {
 	);
 }
 
-/** The channel masks a write goes out on: each channel alone, or left and right together. */
-export function channelMasks(group: QudelixGroup, channels: number): number[] {
+/** What a push writes to some of a group's channels: their mask, their bands and pre-gain. */
+export interface ChannelWrite {
+	/** 1 << channel; 3 for left and right together. */
+	mask: number;
+	filters: readonly Filter[];
+	/** Left out, the pre-gain isn't written. */
+	preamp: number | undefined;
+}
+
+const LEFT = 1;
+const RIGHT = 2;
+
+/**
+ * A push's writes, one per channel mask. A left and right pair gets one write for both, or with
+ * `right` one each (`right.preamp` left out is `preamp`); any other group one per channel, all
+ * alike. Refuses a channel count the bridge doesn't drive, more bands than the group has, and
+ * `right` on a group that isn't a pair.
+ */
+export function channelWrites(
+	group: QudelixGroup,
+	channels: number,
+	{ filters, preamp, right }: Pick<PushRequest, 'filters' | 'preamp' | 'right'>
+): ChannelWrite[] {
 	checkChannels(group, channels);
-	return group.stereo
-		? Array.from({ length: channels / 2 }, (_, i) => 3 << (2 * i))
-		: Array.from({ length: channels }, (_, i) => 1 << i);
+	if (right !== undefined && !group.stereo) {
+		throw new BridgeError(
+			'invalid-request',
+			`Qudelix: the ${group.name} has no left and right to write apart`
+		);
+	}
+	const writes: ChannelWrite[] = right
+		? [
+				{ mask: LEFT, filters, preamp },
+				{ mask: RIGHT, filters: right.filters, preamp: right.preamp ?? preamp }
+			]
+		: group.stereo
+			? [{ mask: LEFT | RIGHT, filters, preamp }]
+			: Array.from({ length: channels }, (_, i) => ({ mask: 1 << i, filters, preamp }));
+	for (const w of writes) {
+		if (w.filters.length > group.bands) {
+			throw new BridgeError(
+				'invalid-request',
+				`Qudelix: the ${group.name} has ${group.bands} bands, not ${w.filters.length}`
+			);
+		}
+	}
+	return writes;
+}
+
+/** The band writes of `writes`, in the order they are sent: band by band, each mask in turn. */
+export function bandWrites(writes: readonly ChannelWrite[]) {
+	const out: { mask: number; band: number; filter: Filter }[] = [];
+	const bands = Math.max(...writes.map((w) => w.filters.length));
+	for (let band = 0; band < bands; band++) {
+		for (const { mask, filters } of writes) {
+			const filter = filters[band];
+			if (filter) out.push({ mask, band, filter });
+		}
+	}
+	return out;
+}
+
+/** What a decode has read of each channel of a group, by channel. */
+export type Held = { filters: (Filter | null)[]; preamp?: number }[];
+
+/** The channels a write's mask names, as `held` keeps them. */
+export function maskedChannels(held: Held, mask: number) {
+	return [...Array(8).keys()]
+		.filter((ch) => mask & (1 << ch))
+		.map((ch) => (held[ch] ??= { filters: [] }));
+}
+
+const sameFilter = (a: Filter | null | undefined, b: Filter | null | undefined) =>
+	a === b ||
+	(!!a && !!b && a.type === b.type && a.freq === b.freq && a.gain === b.gain && a.q === b.q);
+
+/** The same pre-gain, and the same filter in every band, a band never written included. */
+const sameChannel = (a: Held[number], b: Held[number]) =>
+	a.preamp === b.preamp &&
+	a.filters.length === b.filters.length &&
+	[...a.filters.keys()].every((i) => sameFilter(a.filters[i], b.filters[i]));
+
+/**
+ * What a decode returns of `held`: the first channel's, and a pair's right channel where it
+ * differs from the left. A frame for left and right together (mask 3) writes them alike.
+ */
+export function writtenState(
+	group: QudelixGroup,
+	held: Held
+): Pick<WriteState, 'filters' | 'preamp' | 'right'> {
+	const [left = { filters: [] }, right] = held;
+	return group.stereo && right && !sameChannel(left, right) ? { ...left, right } : left;
 }
 
 // --- Presets and filters ----------------------------------------------------------------------------
@@ -499,8 +594,9 @@ const sameBand = (a: RawBand, b: RawBand) =>
 	a.filter === b.filter && a.freq === b.freq && a.gain === b.gain && a.q === b.q;
 
 /**
- * What a pull returns: the first channel (the left one of a speaker EQ). Another channel that
- * differs from it is reported through `log`, since a profile has one set of filters.
+ * What a pull returns: the first channel, and a left and right pair's right channel as `right`,
+ * equal or not. Another channel of a group that isn't a pair (the T71's five-channel user EQ) that
+ * differs from the first is reported through `log`, since a profile has one set of filters.
  */
 export function pullResult(
 	log: (message: string) => void,
@@ -509,20 +605,26 @@ export function pullResult(
 	preset: StoredPreset,
 	index: number
 ): PullResult {
-	const first = preset[0]!;
-	preset.slice(1).forEach((other, i) => {
-		if (
-			other.preGain !== first.preGain ||
-			other.bands.some((b, k) => !sameBand(b, first.bands[k]!))
-		) {
-			log(
-				`Qudelix ${model.name}: the ${group.name}'s channel ${i + 1} differs from channel 0, which is what the pull returns`
-			);
-		}
+	const channel = ({ preGain, bands }: StoredPreset[number]) => ({
+		filters: bands.map(filterOf),
+		preamp: decimals(preGain / 10, 1)
 	});
+	const [first, ...others] = preset;
+	if (!group.stereo) {
+		others.forEach((other, i) => {
+			if (
+				other.preGain !== first!.preGain ||
+				other.bands.some((b, k) => !sameBand(b, first!.bands[k]!))
+			) {
+				log(
+					`Qudelix ${model.name}: the ${group.name}'s channel ${i + 1} differs from channel 0, which is what the pull returns`
+				);
+			}
+		});
+	}
 	return {
-		filters: first.bands.map(filterOf),
-		preamp: decimals(first.preGain / 10, 1),
+		...channel(first!),
+		...(group.stereo ? { right: channel(others[0]!) } : {}),
 		...(index === EDITED ? {} : { slot: index })
 	};
 }

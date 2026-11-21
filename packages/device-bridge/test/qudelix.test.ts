@@ -5,6 +5,7 @@
 import type { Filter } from '@potatosalad775/eqcaps-core';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { qudelixUsbHidCodec } from '../src/handlers/qudelix-usb-hid.ts';
+import { qudelixV2UsbHidCodec } from '../src/handlers/qudelix-v2-usb-hid.ts';
 import { QUDELIX_MODELS, T71 } from '../src/handlers/qudelix.ts';
 import { openDevice, type BridgeDevice, type Protocol, type Transport } from '../src/index.ts';
 import { flatEq, FakeQudelix, FakeQudelixV2 } from './fake-qudelix.ts';
@@ -144,13 +145,113 @@ describe("Qudelix 5K as Qudelix's app drives it", () => {
 		expect(user.preamp).toBe(-6);
 	});
 
-	test('a speaker EQ whose channels differ pulls the left one and says so', async () => {
+	test('the speaker EQ pulls both channels, the right as `right`, equal or not', async () => {
 		const fake = new FakeQudelix('5k');
-		fake.eqs.get(1)!.bands[1]![3]!.gain = 25;
 		const log = vi.fn();
-		const back = await open(fake, first('spk'), log).pull();
-		expect(back.filters[3]!.gain).toBe(0);
-		expect(log).toHaveBeenCalledWith(expect.stringMatching(/channel 1 differs/));
+		const spk = open(fake, first('spk'), log);
+		expect((await spk.pull()).right).toEqual({ filters: flatFilters(10), preamp: 0 });
+		fake.eqs.get(1)!.bands[1]![3]!.gain = 25;
+		fake.eqs.get(1)!.preGain[1] = -15;
+		const back = await spk.pull();
+		expect(back.filters).toEqual(flatFilters(10));
+		expect(back.preamp).toBe(0);
+		expect(back.right!.filters[3]).toEqual({ ...flatFilters(10)[3], gain: 2.5 });
+		expect(back.right!.preamp).toBe(-1.5);
+		expect(log).not.toHaveBeenCalled();
+	});
+
+	describe('the speaker EQ with its channels apart', () => {
+		const L = [pk(1000, -3), pk(200, 2, 2)];
+		const R = [pk(3000, 4, 0.5)];
+
+		test('a push writes each channel its own frames, mask 1 the left and 2 the right, band by band', async () => {
+			const fake = new FakeQudelix('5k');
+			const spk = open(fake, first('spk'));
+			expect(spk.capabilities.eqs.map((e) => [e.id, e.perChannel])).toEqual([['spk', true]]);
+			await spk.push({ filters: L, preamp: -2, right: { filters: R, preamp: -1 } });
+			expect(eqWrites(fake)).toEqual(
+				[
+					[0x05, 0x80, 0x07, 0x00, 0x01, 0x01],
+					[0x08, 0x80, 0x07, 0x03, 0x01, 0x01, 0x00, 0xff, 0xec],
+					[0x08, 0x80, 0x07, 0x03, 0x01, 0x02, 0x00, 0xff, 0xf6],
+					[0x0d, 0x80, 0x07, 0x0f, 0x01, 0x01, 0x00, 0x05, 0x03, 0xe8, 0xff, 0xe2, 0x04, 0x00],
+					[0x0d, 0x80, 0x07, 0x0f, 0x01, 0x02, 0x00, 0x05, 0x0b, 0xb8, 0x00, 0x28, 0x02, 0x00],
+					[0x0d, 0x80, 0x07, 0x0f, 0x01, 0x01, 0x01, 0x05, 0x00, 0xc8, 0x00, 0x14, 0x08, 0x00]
+				].map((f) => padded(f))
+			);
+			expect(await spk.pull()).toEqual({
+				filters: [...L, ...flatFilters(10).slice(2)],
+				preamp: -2,
+				right: { filters: [...R, ...flatFilters(10).slice(1)], preamp: -1 }
+			});
+			expect(fake.eqs.get(0)).toEqual(flatEq(1, 10));
+			expect(fake.errors).toEqual([]);
+		});
+
+		test("the right channel's pre-gain left out is the left one's", async () => {
+			const fake = new FakeQudelix('5k');
+			const spk = open(fake, first('spk'));
+			await spk.push({ filters: L, preamp: -2, right: { filters: R } });
+			expect((await spk.pull()).right!.preamp).toBe(-2);
+			expect(fake.eqs.get(1)!.preGain).toEqual([-20, -20]);
+		});
+
+		test('each band frame waits for its own echo', async () => {
+			const fake = new FakeQudelix('5k');
+			const log = vi.fn();
+			await open(fake, first('spk'), log).push({ filters: L, right: { filters: R } });
+			expect(log).not.toHaveBeenCalled();
+			expect(fake.errors).toEqual([]);
+		});
+
+		test('a right channel the EQ cannot hold is refused, and nothing is written', async () => {
+			const fake = new FakeQudelix('5k');
+			const spk = open(fake, first('spk'));
+			await expect(
+				spk.push({ filters: L, right: { filters: new Array(11).fill(pk(100, 0)) } })
+			).rejects.toMatchObject({ code: 'invalid-request' });
+			await expect(
+				spk.push({ filters: L, right: { filters: [pk(70000, 1)] } })
+			).rejects.toMatchObject({ code: 'unrepresentable' });
+			expect(eqWrites(fake)).toEqual([]);
+		});
+
+		test('the user EQ, and the 20-band EQ of single-EQ mode, take no right channel', async () => {
+			const fake = new FakeQudelix('5k');
+			const usr = open(fake, first());
+			expect(usr.capabilities.perChannel).toBe(false);
+			const refused = {
+				code: 'invalid-request',
+				message: expect.stringMatching(/no right channel/)
+			};
+			await expect(usr.push({ filters: L, right: { filters: R } })).rejects.toMatchObject(refused);
+			fake.single = true;
+			await expect(usr.push({ filters: L, right: { filters: R } })).rejects.toMatchObject(refused);
+			expect(fake.sent).toEqual([]);
+			// Single-EQ mode has no speaker EQ at all.
+			await expect(
+				open(fake, first('spk')).push({ filters: L, right: { filters: R } })
+			).rejects.toMatchObject({ code: 'unsupported', message: expect.stringMatching(/single-EQ/) });
+			expect(eqWrites(fake)).toEqual([]);
+		});
+
+		test('the codec reads the right channel back where the frames write it apart, and only there', () => {
+			const spk = { group: 'spk' } as const;
+			const apart = { filters: L, preamp: -2, right: { filters: R, preamp: 1 }, slot: 22 };
+			expect(qudelixUsbHidCodec.decode(qudelixUsbHidCodec.encode(apart, spk), spk)).toEqual(apart);
+			const together = { filters: L, preamp: -2 };
+			const frames = qudelixUsbHidCodec.encode(together, spk);
+			expect(qudelixUsbHidCodec.decode(frames, spk)).toEqual(together);
+			// One frame for both channels per band: mask 3.
+			expect(frames.filter((f) => f.data[3] === 0x0f).map((f) => f.data[5])).toEqual([3, 3]);
+			const same = { filters: L, preamp: -2, right: { filters: L } };
+			expect(qudelixUsbHidCodec.decode(qudelixUsbHidCodec.encode(same, spk), spk)).toEqual(
+				together
+			);
+			expect(() =>
+				qudelixUsbHidCodec.encode({ filters: L, right: { filters: R } }, {})
+			).toThrowError(expect.objectContaining({ code: 'invalid-request' }));
+		});
 	});
 
 	test('in single-EQ mode the user EQ is the 20-band EQ, and there is no speaker EQ', async () => {
@@ -389,6 +490,32 @@ describe("Qudelix T71 as Qudelix's app drives it", () => {
 		expect(fake.errors).toEqual([]);
 	});
 
+	test('a five-channel user EQ whose channels differ pulls the first one and says so', async () => {
+		const fake = new FakeQudelix('t71', { usrChannels: 5 });
+		fake.eqs.get(0)!.bands[2]![3]!.gain = 25;
+		const log = vi.fn();
+		const back = await open(fake, first(), log).pull();
+		expect(back.filters[3]!.gain).toBe(0);
+		expect(back.right).toBeUndefined();
+		expect(log).toHaveBeenCalledWith(expect.stringMatching(/channel 2 differs/));
+		await expect(
+			open(fake, first()).push({ filters: [pk(100, 1)], right: { filters: [pk(100, 2)] } })
+		).rejects.toMatchObject({ code: 'invalid-request' });
+	});
+
+	test('the speaker EQ with its channels apart: mask 1 the left, mask 2 the right', async () => {
+		const fake = new FakeQudelix('t71');
+		const spk = open(fake, first('spk'));
+		await spk.push({ filters: [pk(1000, -3)], right: { filters: [pk(80, 2)] } });
+		expect(eqWrites(fake).slice(1)).toEqual([
+			nxp([0x07, 0x0f, 0x01, 0x01, 0x00, 0x05, 0x03, 0xe8, 0xff, 0xe2, 0x04, 0x00]),
+			nxp([0x07, 0x0f, 0x01, 0x02, 0x00, 0x05, 0x00, 0x50, 0x00, 0x14, 0x04, 0x00])
+		]);
+		const back = await spk.pull();
+		expect([back.filters[0], back.right!.filters[0]]).toEqual([pk(1000, -3), pk(80, 2)]);
+		expect(fake.errors).toEqual([]);
+	});
+
 	test('the speaker EQ: one left-and-right frame, and the user EQ left alone', async () => {
 		const fake = new FakeQudelix('t71');
 		const spk = open(fake, first('spk'));
@@ -427,8 +554,13 @@ describe("Qudelix 5K Plus as Qudelix's app drives it", () => {
 		fake.messages.map((m) => [m.command, ...m.elements.map((e) => e.id)]);
 	const SET = 0x9004;
 	const REQ = 0x9002;
+	/** What every operation asks first: the EQ mode, then the configuration of its EQ. */
+	const asks = (config: number) => [
+		[REQ, 0x80],
+		[REQ, config]
+	];
 
-	test('opens with the same request, and takes the mode, configuration and firmware from the answer', async () => {
+	test('opens with the same request and takes the firmware from the answer; each operation asks for the mode and configuration', async () => {
 		const fake = new FakeQudelixV2();
 		const device = open(fake, second());
 		expect(await device.firmware()).toBe('1.2.3');
@@ -438,7 +570,36 @@ describe("Qudelix 5K Plus as Qudelix's app drives it", () => {
 			reportId: 8,
 			data: padded([0x06, 0x80, 0x01, 0x00, 0x20, 0x00, 0x04])
 		});
-		expect(fake.messages).toEqual([]);
+		expect(ids(fake)).toEqual([...asks(0x90), ...asks(0x90)]);
+	});
+
+	test('every operation reads the device as it is now, which another program changes unannounced', async () => {
+		// A 5K Plus with firmware 1.0.3 (2026-11-21): another program's push took the headphone EQ
+		// off memory 22, no notification came, and a session that kept the opening answer's
+		// configuration still said 22, where an app would then save.
+		const fake = new FakeQudelixV2();
+		const eq = fake.eqs.get(1)!;
+		eq.preset = 22;
+		const spk = open(fake, second('spk'));
+		expect(await spk.currentSlot()).toBe(22);
+		expect((await spk.pull()).slot).toBe(22);
+		// Another program's push, with no notification (fake-qudelix.ts).
+		eq.bands[0]![0]!.gain = -30;
+		eq.preset = 255;
+		expect(await spk.currentSlot()).toBeNull();
+		const pulled = await spk.pull();
+		expect(pulled.slot).toBeUndefined();
+		expect(pulled.filters[0]!.gain).toBe(-3);
+		expect(await spk.eqEnabled()).toBe(true);
+		eq.enable = 0;
+		expect(await spk.eqEnabled()).toBe(false);
+		fake.single = true;
+		await expect(spk.currentSlot()).rejects.toMatchObject({
+			code: 'unsupported',
+			message: expect.stringMatching(/single-EQ mode/)
+		});
+		expect(await open(fake, second()).bandCount()).toBe(30);
+		expect(fake.errors).toEqual([]);
 	});
 
 	test("a push sends the app's elements in its order, and a pull gives back what was pushed", async () => {
@@ -447,6 +608,7 @@ describe("Qudelix 5K Plus as Qudelix's app drives it", () => {
 		const device = open(fake, second());
 		await device.push({ filters: five, preamp: -3.5, slot: 23 });
 		expect(ids(fake)).toEqual([
+			...asks(0x90),
 			[REQ, 0x93],
 			[SET, 0x90],
 			[SET, 0x92],
@@ -492,11 +654,7 @@ describe("Qudelix 5K Plus as Qudelix's app drives it", () => {
 		await open(spk, second('spk')).push({ filters: [pk(1000, -3, 0.7)] });
 		expect(spk.sent.map((f) => f.data)).toContainEqual(band(0xa5, 3));
 		// The speaker EQ is parametric only: no attributes are set.
-		expect(ids(spk)).toEqual([
-			[REQ, 0xa3],
-			[SET, 0xa0],
-			[SET, 0xa5]
-		]);
+		expect(ids(spk)).toEqual([...asks(0xa0), [REQ, 0xa3], [SET, 0xa0], [SET, 0xa5]]);
 		expect(spk.eqs.get(0)).toEqual(flatEq(1, 10));
 	});
 
@@ -531,11 +689,7 @@ describe("Qudelix 5K Plus as Qudelix's app drives it", () => {
 		await vi.advanceTimersByTimeAsync(1000);
 		await expect(push).rejects.toMatchObject({ code: 'timeout' });
 		// The preset, 78 bytes, waited on its first fragment's ack, and nothing went after it.
-		const before = [
-			[REQ, 0x93],
-			[SET, 0x90],
-			[SET, 0x92]
-		];
+		const before = [...asks(0x90), [REQ, 0x93], [SET, 0x90], [SET, 0x92]];
 		expect(ids(fake)).toEqual(before);
 		expect(fake.packets().at(-1)!.slice(0, 5)).toEqual([0x90, 0x04, 0x00, 0x93, 19]);
 		fake.ack = 'bad';
@@ -566,25 +720,86 @@ describe("Qudelix 5K Plus as Qudelix's app drives it", () => {
 		expect(fake.errors).toEqual([]);
 	});
 
-	test('a speaker EQ whose channels differ pulls the left one and says so', async () => {
+	test('the speaker EQ pulls both channels, the right as `right`', async () => {
 		const fake = new FakeQudelixV2();
 		fake.eqs.get(1)!.preGain = [0, -10];
 		const log = vi.fn();
-		expect((await open(fake, second('spk'), log).pull()).preamp).toBe(0);
-		expect(log).toHaveBeenCalledWith(expect.stringMatching(/channel 1 differs/));
+		const back = await open(fake, second('spk'), log).pull();
+		expect(back.preamp).toBe(0);
+		expect(back.right).toEqual({ filters: flatFilters(20), preamp: -1 });
+		expect(log).not.toHaveBeenCalled();
 	});
 
-	test('elements the opening answer lacks are requested', async () => {
+	test("with its channels apart the speaker EQ's band elements carry masks 1 and 2, and the preset each channel's pre-gain", async () => {
 		const fake = new FakeQudelixV2();
-		for (const id of [0x80, 0x90, 3]) fake.omit.add(id);
-		const device = open(fake, second());
-		expect(await device.eqEnabled()).toBe(true);
-		expect(await device.firmware()).toBe('1.2.3');
+		const spk = open(fake, second('spk'));
+		const L = [pk(1000, -3), pk(200, 2, 2)];
+		const R = [pk(3000, 4, 0.5)];
+		await spk.push({ filters: L, preamp: -2, right: { filters: R, preamp: -1 } });
 		expect(ids(fake)).toEqual([
-			[REQ, 0x80],
-			[REQ, 0x90],
-			[REQ, 3]
+			...asks(0xa0),
+			[REQ, 0xa3],
+			[SET, 0xa0],
+			[SET, 0xa3],
+			[SET, 0xa5],
+			[SET, 0xa5],
+			[SET, 0xa5]
 		]);
+		const bands = fake.messages.flatMap((m) => m.elements).filter((e) => e.id === 0xa5);
+		expect(bands.map((e) => [e.data[0]! & 15, e.data[1]])).toEqual([
+			[1, 0],
+			[2, 0],
+			[1, 1]
+		]);
+		expect(fake.eqs.get(1)!.preGain).toEqual([-20, -10]);
+		expect(await spk.pull()).toEqual({
+			filters: [...L, ...flatFilters(20).slice(2)],
+			preamp: -2,
+			right: { filters: [...R, ...flatFilters(20).slice(1)], preamp: -1 }
+		});
+		// The right pre-gain left out is the left one's.
+		await spk.push({ filters: L, preamp: -4, right: { filters: R } });
+		expect(fake.eqs.get(1)!.preGain).toEqual([-40, -40]);
+		expect(fake.eqs.get(0)).toEqual(flatEq(1, 10));
+		expect(fake.errors).toEqual([]);
+	});
+
+	test('a pull reads the answer, not a notification of the push that arrives before it', async () => {
+		const fake = new FakeQudelixV2();
+		fake.lateNotifications = true;
+		const spk = open(fake, second('spk'));
+		const L = [pk(1000, -3), pk(200, 2, 2)];
+		const R = [pk(3000, 4, 0.5)];
+		await spk.push({ filters: L, right: { filters: R } });
+		expect(await spk.pull()).toEqual({
+			filters: [...L, ...flatFilters(20).slice(2)],
+			preamp: 0,
+			right: { filters: [...R, ...flatFilters(20).slice(1)], preamp: 0 }
+		});
+		expect(fake.errors).toEqual([]);
+	});
+
+	test('the codec reads the right channel back where the elements write it apart, and only there', () => {
+		const spk = { group: 'spk' } as const;
+		const L = [pk(1000, -3)];
+		const apart = { filters: L, preamp: -2, right: { filters: [pk(80, 1)], preamp: 1 }, slot: 41 };
+		expect(qudelixV2UsbHidCodec.decode(qudelixV2UsbHidCodec.encode(apart, spk), spk)).toEqual(
+			apart
+		);
+		const together = { filters: L, preamp: -2 };
+		expect(qudelixV2UsbHidCodec.decode(qudelixV2UsbHidCodec.encode(together, spk), spk)).toEqual(
+			together
+		);
+		expect(() =>
+			qudelixV2UsbHidCodec.encode({ filters: L, right: { filters: L } }, {})
+		).toThrowError(expect.objectContaining({ code: 'invalid-request' }));
+	});
+
+	test('the firmware is requested where the opening answer lacks it', async () => {
+		const fake = new FakeQudelixV2();
+		fake.omit.add(3);
+		expect(await open(fake, second()).firmware()).toBe('1.2.3');
+		expect(ids(fake)).toEqual([[REQ, 3]]);
 	});
 
 	test('the switch and the preset are set as the whole configuration, the headroom kept', async () => {
@@ -697,6 +912,30 @@ describe.each([
 		expect(transport.unmatched).toEqual([]);
 	});
 
+	// The 5K Plus's recordings predate the requests for the mode and the configuration: the replay
+	// answers those from the elements the device sent, byte for byte, and makes up none (replay.ts).
+	test.runIf(plus)(
+		'the replay answers a request it has no record of from what the device sent, and only that',
+		async () => {
+			const { transport } = recorded('');
+			const heard: number[][] = [];
+			transport.onInputReport((_, data) => heard.push([...data]));
+			const send = (packet: number[]) =>
+				transport.sendReport(8, Uint8Array.from(padded([packet.length + 1, 0x80, ...packet], 127)));
+			await send([0x01, 0x00, 0x20, 0x00, 0x04]);
+			await send([0x90, 0x02, 0x80, 0x90, 0x00]);
+			// The user EQ's configuration as the opening answer holds it: off, on memory 41.
+			expect(heard.at(-1)).toEqual(
+				padded([0x09, 0x90, 0x03, 0x80, 0x90, 0x01, 0x01, 0x00, 0x00, 0x29], 127)
+			);
+			// The all-band EQ's: a layered device's opening answer has none.
+			await send([0x90, 0x02, 0x80, 0xb0, 0x00]);
+			expect(transport.unmatched.map((f) => [...f.data.subarray(0, 7)])).toEqual([
+				[0x06, 0x80, 0x90, 0x02, 0x80, 0xb0, 0x00]
+			]);
+		}
+	);
+
 	// The 5K's frames don't depend on what it holds, so the replay knows every one of them. The
 	// 5K Plus's preset element does (captures.test.ts checks its band frames).
 	test.skipIf(plus)('the same pushes send the frames the device was sent', async () => {
@@ -717,11 +956,12 @@ describe('the EQ of an operation (SPEC §9.2)', () => {
 		eqs: [{ id: 'spk', name: 'SPK EQ', bandCount: 20, presets: [flat] }]
 	};
 
-	test('capabilities list the other EQs with their own slots', () => {
+	test('capabilities list the other EQs with their own slots, and which take a right channel', () => {
 		const device = openDevice(new FakeQudelixV2(), protocol, { sleep: noSleep });
 		expect(device.capabilities.slots).toEqual(protocol.presets);
+		expect(device.capabilities.perChannel).toBe(false);
 		expect(device.capabilities.eqs).toEqual([
-			{ id: 'spk', name: 'SPK EQ', bandCount: 20, slots: [flat] }
+			{ id: 'spk', name: 'SPK EQ', bandCount: 20, slots: [flat], perChannel: true }
 		]);
 		const plain = openDevice(new FakeQudelixV2(), { handler: 'qudelix-v2-usb-hid' });
 		expect(plain.capabilities.eqs).toEqual([]);
@@ -740,6 +980,19 @@ describe('the EQ of an operation (SPEC §9.2)', () => {
 		expect(await device.eqEnabled('spk')).toBe(false);
 		expect(await device.eqEnabled()).toBe(true);
 		expect(await device.currentSlot('spk')).toBeNull();
+		expect(fake.errors).toEqual([]);
+	});
+
+	test('a right channel is refused on the EQ the push names unless that EQ takes one', async () => {
+		const fake = new FakeQudelixV2();
+		const device = openDevice(fake, protocol, { sleep: noSleep });
+		const right = { filters: [pk(80, 1)] };
+		await expect(device.push({ filters: [pk(100, 1)], right })).rejects.toMatchObject({
+			code: 'invalid-request'
+		});
+		expect(fake.sent).toEqual([]);
+		await device.push({ filters: [pk(100, 1)], right, eq: 'spk' });
+		expect((await device.pull({ eq: 'spk' })).right!.filters[0]).toEqual(pk(80, 1));
 		expect(fake.errors).toEqual([]);
 	});
 

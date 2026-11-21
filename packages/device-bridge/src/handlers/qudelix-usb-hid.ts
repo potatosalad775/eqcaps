@@ -4,20 +4,22 @@
 //
 // EQ commands name a group first (0 the user EQ, 1 the speaker EQ, 2 the 5K's all-band EQ in its
 // single-EQ mode) and a channel mask where they take one: 1 << channel, or 3 for left and right
-// together.
+// together. The app's Both, Left and Right selector on the speaker EQ is its own state, never sent
+// or read: it picks mask 3, 1 or 2 for the pre-gain and each band edit.
 //   0x0700 [group, on]                 0x0701 [group, 1] (parametric; 0 is graphic)
 //   0x0703 [group, mask, 0, pre-gain s16 ×10]
 //   0x070F [group, mask, band, type, freq u16, gain s16 ×10, q u16 ×1024]
 //   0x070A [group, custom n, length, UTF-8 name]   0x0708 [group, preset index] saves
 //   0x0709 [group, preset index] loads
 // A push is the switch on, the type (not on the speaker EQ, which is parametric only), the
-// pre-gain, one band frame per band and channel, each waiting for the device's echo of it (a
-// 0x2000 notification [0x89, group, mask, band, …]), then, for a slot, the name (empty: the
-// default "Custom #n") and the save. Reads: 0x0120 [mask] (0x80 on the 5K, 0x40 on the T71) is answered by
-// 0x0121 [mask, EQ block]: [0, user configuration (4), its preset configuration (4), 1, speaker
-// configuration (4), its preset configuration (4)], or on a 5K in single-EQ mode [2, all-band
-// configuration (4), its preset configuration (4)]. 0x0123 [1 << group] is answered by 0x0128
-// fragments of the stored preset [group, last << 4 | index, size u16, offset u16, bytes…].
+// pre-gain, one band frame per band and channel mask (on the speaker EQ 3, or with the right
+// channel apart 1 and 2), each waiting for the device's echo of it (a 0x2000 notification [0x89,
+// group, mask, band, …]), then, for a slot, the name (empty: the default "Custom #n") and the save.
+// Reads: 0x0120 [mask] (0x80 on the 5K, 0x40 on the T71) is answered by 0x0121 [mask, EQ block]:
+// [0, user configuration (4), its preset configuration (4), 1, speaker configuration (4), its
+// preset configuration (4)], or on a 5K in single-EQ mode [2, all-band configuration (4), its
+// preset configuration (4)]. 0x0123 [1 << group] is answered by 0x0128 fragments of the stored
+// preset [group, last << 4 | index, size u16, offset u16, bytes…], each channel's apart.
 // Firmware 2.x speaks another dialect, which this handler doesn't.
 
 import { field, I16, readI16be, readU16be, U16, U8, be16 } from '../bytes.ts';
@@ -26,13 +28,15 @@ import type { Codec, HandlerContext, HidFrame, HidHandler, WriteState } from '..
 import { decimals, sendFrame } from '../io.ts';
 import type { HidTransport } from '../transport.ts';
 import {
-	channelMasks,
+	bandWrites,
+	channelWrites,
 	customOf,
 	EDITED,
 	filterOf,
 	FIVE_K,
 	groupOf,
 	hidOut,
+	maskedChannels,
 	modelFor,
 	OFFLINE_LINK,
 	packet,
@@ -45,6 +49,8 @@ import {
 	readPreset,
 	sentPacket,
 	T71,
+	writtenState,
+	type Held,
 	type QudelixGroup,
 	type QudelixGroupName,
 	type QudelixLink,
@@ -100,7 +106,7 @@ function target(o: QudelixUsbHidOptions) {
 		channels: undefined
 	};
 	const group = groupOf(d.model, o.group ?? 'usr', d.single);
-	return { link: d.link, group, masks: channelMasks(group, d.channels ?? group.channels[0]!) };
+	return { link: d.link, group, channels: d.channels ?? group.channels[0]! };
 }
 
 const s16 = (value: number, what: string) => be16(field(value, 10, I16, what) & 0xffff);
@@ -108,31 +114,31 @@ const s16 = (value: number, what: string) => be16(field(value, 10, I16, what) & 
 export const qudelixUsbHidCodec: Codec<QudelixUsbHidOptions, HidFrame> = {
 	types: QUDELIX_TYPES.types,
 	wire: () => QUDELIX_WIRE,
-	encode({ filters, preamp, slot }, o) {
-		const { link, group, masks } = target(o);
+	encode(request, o) {
+		const { link, group, channels } = target(o);
 		const g = group.id;
-		if (filters.length > group.bands) {
-			throw new BridgeError(
-				'invalid-request',
-				`Qudelix: the ${group.name} has ${group.bands} bands, not ${filters.length}`
-			);
-		}
+		const writes = channelWrites(group, channels, request);
 		const packets = [packet(ENABLE, [g, 1])];
 		if (group.graphic) packets.push(packet(TYPE, [g, PARAMETRIC]));
-		if (preamp !== undefined) {
-			const value = s16(preamp, 'preamp');
-			for (const mask of masks) packets.push(packet(PRE_GAIN, [g, mask, 0, ...value]));
+		for (const { mask, preamp } of writes) {
+			if (preamp === undefined) continue;
+			packets.push(packet(PRE_GAIN, [g, mask, 0, ...s16(preamp, 'preamp')]));
 		}
 		// Bands past the request keep what the device holds (D33).
-		filters.forEach((f, band) => {
-			const values = [
-				QUDELIX_TYPES.encode(f.type),
-				...be16(field(f.freq, 1, U16, 'freq')),
-				...s16(f.gain, 'gain'),
-				...be16(field(f.q, 1024, U16, 'q'))
-			];
-			for (const mask of masks) packets.push(packet(BAND, [g, mask, band, ...values]));
-		});
+		for (const { mask, band, filter: f } of bandWrites(writes)) {
+			packets.push(
+				packet(BAND, [
+					g,
+					mask,
+					band,
+					QUDELIX_TYPES.encode(f.type),
+					...be16(field(f.freq, 1, U16, 'freq')),
+					...s16(f.gain, 'gain'),
+					...be16(field(f.q, 1024, U16, 'q'))
+				])
+			);
+		}
+		const { slot } = request;
 		if (slot !== undefined) {
 			packets.push(packet(NAME, [g, customOf(group, slot), 0]), packet(SAVE, [g, slot]));
 		}
@@ -140,23 +146,28 @@ export const qudelixUsbHidCodec: Codec<QudelixUsbHidOptions, HidFrame> = {
 	},
 	decode(frames, o) {
 		const { link, group } = target(o);
-		const state: WriteState = { filters: [] };
+		const held: Held = [];
+		let slot: number | undefined;
 		for (const frame of frames) {
 			const p = sentPacket(link, frame);
 			const command = readU16be(p, 0);
 			// Every EQ write names its group first: another EQ's frames are not this one's state.
 			if (p[2] !== group.id) continue;
 			if (command === BAND) {
-				state.filters[p[4]!] = filterOf({
+				const filter = filterOf({
 					filter: p[5]!,
 					freq: readU16be(p, 6),
 					gain: readI16be(p, 8),
 					q: readU16be(p, 10)
 				});
-			} else if (command === PRE_GAIN) state.preamp = decimals(readI16be(p, 5) / 10, 1);
-			else if (command === SAVE) state.slot = p[3]!;
+				for (const ch of maskedChannels(held, p[3]!)) ch.filters[p[4]!] = filter;
+			} else if (command === PRE_GAIN) {
+				const preamp = decimals(readI16be(p, 5) / 10, 1);
+				for (const ch of maskedChannels(held, p[3]!)) ch.preamp = preamp;
+			} else if (command === SAVE) slot = p[3]!;
 		}
-		return state;
+		const state: WriteState = writtenState(group, held);
+		return slot === undefined ? state : { ...state, slot };
 	}
 };
 
@@ -262,7 +273,9 @@ export const qudelixUsbHid: HidHandler<QudelixUsbHidOptions> = {
 		writesSlot: true,
 		needsBandCount: false,
 		readsCurrentSlot: true,
-		canEnable: true
+		canEnable: true,
+		// The speaker EQ's left and right, as the app's channel selector writes them.
+		perChannelEqs: ['spk']
 	}),
 
 	async pull(ctx) {
