@@ -6,7 +6,7 @@ and the decisions since superseded or removed (D23, D29, D31, D38), is archived 
 [history/decisions.md](history/decisions.md).
 
 To change a decision, edit its entry here with a dated note, and update [SPEC.md](SPEC.md) in the
-same change if the format is affected. A new decision takes the next free number (D53). The rules
+same change if the format is affected. A new decision takes the next free number (D55). The rules
 agents follow are in [AGENTS.md](../AGENTS.md); this file is the record of why.
 
 ---
@@ -177,6 +177,19 @@ reads it. It covers EQs that differ in band count and presets only: one with oth
 or domains still needs its own profile. The device's mode that swaps both EQs for one larger EQ
 (Qudelix's single-EQ mode) is not modelled: the handler drives that EQ as the profile's own and
 reports its band count.
+
+### D54. Independent left and right channels: format 1.4 (2026-11-21)
+`channels: "independent"`, the value v1 reserved for it, says an EQ holds a filter set and a
+preamp for each output channel, left and right, each with the profile's band count, domains and
+rules. The engine is unchanged: an app runs it once per channel. An app that knows only linked
+EQs still drives such an EQ by writing both channels alike, so older apps lose nothing: their
+client accepts any `1.x` and ignores the value. The bridge takes the right channel as `right` on
+a push and returns it on a pull, where the handler drives the channels apart (`perChannel`); a
+push with `right` to any other handler is refused rather than written to both channels. First
+data: Topping's DX5 II, whose app edits the channels apart and which stores them apart (seen on
+a maintainer's unit). Only a stereo pair is described; an EQ of more channels (the Qudelix T71's
+surround EQ, crossover drivers) stays out. Left for later: a `channels` of its own for an EQ in
+`protocol.eqs`, which Qudelix's headphone EQ needs (two channels under a one-channel user EQ).
 
 ---
 

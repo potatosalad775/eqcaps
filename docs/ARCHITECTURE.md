@@ -22,10 +22,11 @@ is four things:
 4. **Tools around it**: a device bridge that reads and writes EQ on hardware, and the
    [inspector](INSPECTOR.md) web app for browsing, checking devices and contributing.
 
-Out of scope: per-channel (L/R) EQ, how filters actually sound (D39), coefficient quantization,
-a submission backend, and devices with no EQ. A device's other settings (volume, DAC filter, mic
-gain…) are in scope as device controls (D49), because they change what it plays and whether its
-EQ applies.
+Out of scope: EQs of more channels than a stereo pair (a surround EQ such as the Qudelix T71's,
+a crossover's drivers), how filters actually sound (D39), coefficient quantization, a submission
+backend, and devices with no EQ. Left and right of one stereo EQ, set apart, are in scope (D54).
+A device's other settings (volume, DAC filter, mic gain…) are in scope as device controls (D49),
+because they change what it plays and whether its EQ applies.
 
 ## 2. Consumers
 
@@ -170,6 +171,12 @@ list and reads each write back.
 A device with several EQs (D53) lists the others in `protocol.eqs`. An app picks one, fits against
 its profile (`eqProfile`), and names it in the bridge operation (`eq`); without one, everything
 above is about the EQ the profile describes.
+
+An EQ whose profile says `channels: "independent"` (D54) holds left and right apart. An app fits
+and completes each channel against the same profile, and pushes the left as `filters` and
+`preamp` and the right as `right`, where the bridge's handler drives the channels apart
+(`perChannel`); a pull then returns the right channel as `right`. Without `right`, a push writes
+both channels alike, as on a linked EQ.
 
 ## 9. Device bridge
 

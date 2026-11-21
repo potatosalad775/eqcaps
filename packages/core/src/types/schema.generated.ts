@@ -18,8 +18,8 @@ export interface Profile {
 	bands?: BandOverride[];
 	rules?: Rule[];
 	preamp: Preamp;
-	/** Only "linked" in v1; "independent" is reserved (SPEC §9). */
-	channels?: 'linked';
+	/** linked (the default): one filter set and preamp for both output channels. independent (format 1.4): one each for left and right (SPEC §9). */
+	channels?: 'linked' | 'independent';
 	protocol?: Protocol;
 	meta: Meta;
 }
@@ -42,8 +42,8 @@ export interface AuthoringProfile {
 	bands?: BandOverride[];
 	rules?: Rule[];
 	preamp?: Preamp;
-	/** Only "linked" in v1; "independent" is reserved (SPEC §9). */
-	channels?: 'linked';
+	/** linked (the default): one filter set and preamp for both output channels. independent (format 1.4): one each for left and right (SPEC §9). */
+	channels?: 'linked' | 'independent';
 	protocol?: AuthoringProtocol;
 	meta: AuthoringMeta;
 	/** A base only: never published, needs no match or device (SPEC §11). */
