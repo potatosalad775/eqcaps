@@ -4,8 +4,8 @@
 
 import type { AuthoringProfile, Filter, Profile, Source } from '@potatosalad775/eqcaps-core';
 import {
-	analyzeCodec,
 	handlerCodeUrl,
+	wireConstraints,
 	type DeviceIdentity,
 	type Protocol
 } from '@potatosalad775/eqcaps-device-bridge';
@@ -106,31 +106,21 @@ export function codecDraft(
 	source: Source;
 	notes: string;
 } {
-	const analysis = analyzeCodec({
-		handler: protocol.handler,
-		options: protocol.options
-	} as Protocol);
+	const wire = wireConstraints(
+		{ handler: protocol.handler, options: protocol.options } as Protocol,
+		bandCount
+	);
 	const blank = blankProfile();
 	const placeholders: string[] = [];
 	const field = <K extends 'freq' | 'q' | 'gain'>(k: K) => {
-		const d = analysis[k];
+		const d = wire[k];
 		if (d) return d;
 		placeholders.push(k);
 		return blank.band![k]!;
 	};
-	const band = {
-		types: analysis.types.filter((t) => !t.startsWith('x-')),
-		freq: field('freq'),
-		q: field('q'),
-		gain: field('gain')
-	};
-	const count = Math.min(Math.max(bandCount, analysis.bands.min), analysis.bands.max);
+	const band = { types: wire.types, freq: field('freq'), q: field('q'), gain: field('gain') };
 	return {
-		constraints: {
-			bandCount: count,
-			band,
-			preamp: analysis.preamp ? { mode: 'manual', gain: analysis.preamp } : { mode: 'unknown' }
-		},
+		constraints: { bandCount: wire.bandCount, band, preamp: wire.preamp },
 		source: { kind: 'handler-code', ref: handlerCodeUrl(protocol.handler, protocol.commit), date },
 		notes: `Started from what the ${protocol.handler} protocol can write: wire limits, not what the device accepts.${placeholders.length ? ` ${placeholders.join(', ')}: placeholders (the wire carries any value).` : ''}`
 	};

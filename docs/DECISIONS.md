@@ -406,6 +406,14 @@ It calls the bridge's `pull` only. A probe that wrote test values was built and 
 device, writes past its band count corrupted its stored EQ, and every firmware quirk is a new risk
 to hardware and hearing. Writing is for apps, through `fit` + `complete`.
 
+*2026-11-22:* the bridge names the reading side. `openReader` gives a device with its reads only
+(`pull`, `currentSlot`, `eqEnabled`, `slots`, `bandCount`, `firmware`, `readControls`), on every
+EQ's view, and the inspector opens devices with nothing else: it no longer imports `openDevice`
+to strip the writes itself. **Why:** the inspector's own copy picked five members by hand, so it
+lacked `firmware` and `readControls`, which reading a device's firmware and controls needs, and a
+write added to the bridge was kept out only by that list. The bridge's test now fails when a new
+member of a device is placed on neither side.
+
 ### D41. Guided reads
 The user changes the EQ in the vendor's own app, step by step, and the inspector reads back after
 each step. The vendor app's limits become a `vendor-app` source whose `ref` is the evidence file,

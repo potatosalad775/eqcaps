@@ -3,9 +3,13 @@
 	// a time, and this component reads the device back after each step. It only ever calls the
 	// bridge's pull (invariant 9, D40); the planning and inference live in #lib/guided.
 	import type { Profile } from '@potatosalad775/eqcaps-core';
-	import { type PullResult, type WireGrid } from '@potatosalad775/eqcaps-device-bridge';
+	import {
+		openReader,
+		type DeviceReader,
+		type PullResult,
+		type WireGrid
+	} from '@potatosalad775/eqcaps-device-bridge';
 	import { grantedHidDevice } from '@potatosalad775/eqcaps-device-bridge/browser';
-	import { openReadOnly, type ReadOnlyDevice } from '#lib/device.ts';
 	import type { EvidenceReport } from '#lib/evidence.ts';
 	import type { Handoff } from '#lib/handoff.ts';
 	import { changeText } from '#lib/guided/changes.ts';
@@ -26,7 +30,7 @@
 		groupBase,
 		onreconnect
 	}: {
-		device: ReadOnlyDevice;
+		device: DeviceReader;
 		/** The read the guided read starts from, and compares the last read with. */
 		first: PullResult;
 		/** The evidence of that read, which the guided read's file extends. */
@@ -35,7 +39,7 @@
 		profile: Profile | null;
 		groupBase?: string | undefined;
 		/** Called with the device after it was reconnected, so the page reads from it too. */
-		onreconnect?: (device: ReadOnlyDevice) => void;
+		onreconnect?: (device: DeviceReader) => void;
 	} = $props();
 
 	function wireOf(w: WireGrid): GuidedContext['wire'] {
@@ -47,7 +51,7 @@
 		};
 	}
 
-	let dev = $state.raw<ReadOnlyDevice | null>(null);
+	let dev = $state.raw<DeviceReader | null>(null);
 	const active = $derived(dev ?? device);
 	const ctx: GuidedContext = $derived({
 		first: {
@@ -182,7 +186,7 @@
 				error = 'The device isn’t connected. Plug it back in, then try again.';
 				return;
 			}
-			dev = openReadOnly(t, active.protocol, { profile: { bandCount: bands } });
+			dev = openReader(t, active.protocol, { profile: { bandCount: bands } });
 			onreconnect?.(dev);
 			lost = false;
 		} catch (e) {

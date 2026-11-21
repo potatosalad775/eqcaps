@@ -39,8 +39,8 @@ copied (D25), and cited as a `vendor-app` source.
    devicePEQ's DS3 capture is gone from `test/captures/`: the 1.6.10 recording holds band writes.
 2. **Inspector support.** T2 read also reads the firmware and the controls, shows them, and
    records both in the evidence file: `device.firmware` comes from the device rather than the
-   user, and the read experiment gets a `controls` entry. `ReadOnlyDevice` gets `firmware` and
-   `readControls`, never `writeControl`, and `no-writes.test.ts` checks that. When matches
+   user, and the read experiment gets a `controls` entry. The bridge's `DeviceReader` has
+   `firmware` and `readControls`, never `writeControl` (D40, 2026-11-22). When matches
    differ only by firmware, the inspector reads the firmware and matches again. INSPECTOR.md §2
    and §6 change to match. Raw recordings stay with the userscript, which records the vendor's
    own traffic; the inspector would only record ours.

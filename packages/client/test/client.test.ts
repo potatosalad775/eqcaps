@@ -56,16 +56,55 @@ describe('matchDevice', () => {
 		]);
 	});
 
-	it('reports ties instead of picking', () => {
+	it('reports ties instead of picking, and says who tied', () => {
 		const r = matchDevice(entries, { usb: { vendorId: '0x0001', productId: '0x0002' } });
 		expect(r).toMatchObject({ best: null, ambiguous: true });
 		expect(ids(r)).toEqual(['fw1:3', 'fw2:3']);
+		expect(r.ties.map((m) => m.id)).toEqual(['fw1', 'fw2']);
+	});
+
+	it('gives the top matches as ties: the best alone, the tied ones, or none', () => {
+		const one = matchDevice(entries, {
+			usb: { vendorId: 0x2972, productId: 0x47, productName: 'X' }
+		});
+		expect(one.ties.map((m) => m.id)).toEqual(['by-both']);
+		expect(one.ties[0]).toBe(one.best);
+		expect(matchDevice(entries, { usb: { vendorId: '0xdead' } })).toMatchObject({
+			matches: [],
+			ties: [],
+			firmwareDecides: false
+		});
 	});
 
 	it('uses firmware ranges when the firmware is known', () => {
 		const usb = { vendorId: '0x0001', productId: '0x0002' };
 		expect(matchDevice(entries, { usb, firmware: '2.1' }).best?.id).toBe('fw2');
 		expect(matchDevice(entries, { usb, firmware: '1.9.9' }).best?.id).toBe('fw1');
+	});
+
+	it('says when a firmware version would decide: unknown, and a top match holds for a range', () => {
+		const usb = { vendorId: '0x0001', productId: '0x0002' };
+		expect(matchDevice(entries, { usb }).firmwareDecides).toBe(true);
+		// Known: it has decided.
+		expect(matchDevice(entries, { usb, firmware: '2.1' }).firmwareDecides).toBe(false);
+		// No top match has a range: asking the device would change nothing.
+		expect(
+			matchDevice(entries, { usb: { vendorId: 0x2972, productId: 0x47, productName: 'X' } })
+				.firmwareDecides
+		).toBe(false);
+		// A range below the top doesn't decide either: the top match stays the top.
+		const ranged = entry('ranged', {
+			usb: [{ vendorId: '0x2972', productId: '0x0047' }],
+			firmware: { min: '2.0' }
+		});
+		const below = matchDevice([...entries, ranged], {
+			usb: { vendorId: 0x2972, productId: 0x47, productName: 'X' }
+		});
+		expect(below.matches.map((m) => m.id)).toContain('ranged');
+		expect(below.firmwareDecides).toBe(false);
+		// A unique best that holds for a range: the version could still rule it out.
+		const alone = matchDevice([ranged], { usb: { vendorId: 0x2972, productId: 0x47 } });
+		expect(alone).toMatchObject({ best: { id: 'ranged' }, firmwareDecides: true });
 	});
 
 	it('matches bluetooth names, prefixes and service UUIDs', () => {

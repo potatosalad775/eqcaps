@@ -19,6 +19,9 @@ import {
 	handlerTransports,
 	HANDLERS,
 	KNOWN_HID_VENDORS,
+	openDevice,
+	openReader,
+	protocolFor,
 	protocolForMatches,
 	protocolOf,
 	protocolProblem,
@@ -370,6 +373,89 @@ test('protocolForMatches takes the first match with a protocol this bridge can d
 	).toBe('walkplay-schemeno16-devices');
 	expect(protocolForMatches([profile('fiio-ka17'), group])?.profileId).toBe('fiio-ka17');
 	expect(protocolForMatches([{ id: 'rme-adi-2-dac-fs' }])).toBeUndefined();
+});
+
+describe('protocolFor: the order every app takes', () => {
+	const group = profile('walkplay-schemeno16-devices');
+	const ka17 = profile('fiio-ka17');
+	const undriven = { id: 'rme-adi-2-dac-fs' };
+
+	test("the chosen profile's own protocol comes first", () => {
+		expect(protocolFor({ chosen: ka17, matches: [group], usbVendorId: 0x2972 })).toEqual({
+			protocol: protocolOf(ka17),
+			source: 'profile',
+			profileId: 'fiio-ka17'
+		});
+	});
+
+	test('else that of the most specific match that has one, which is named', () => {
+		expect(protocolFor({ chosen: undriven, matches: [undriven, group] })).toEqual({
+			protocol: protocolOf(group),
+			source: 'match',
+			profileId: 'walkplay-schemeno16-devices'
+		});
+		expect(protocolFor({ matches: [ka17, group] })?.profileId).toBe('fiio-ka17');
+	});
+
+	test('else a guess from the USB vendor, as a number or as the data writes it', () => {
+		const guess = { protocol: guessProtocol(0x2972), source: 'guess' };
+		expect(protocolFor({ chosen: undriven, matches: [undriven], usbVendorId: 0x2972 })).toEqual(
+			guess
+		);
+		expect(protocolFor({ usbVendorId: '0x2972' })).toEqual(guess);
+		expect(guess.protocol?.experimental).toBe(true);
+	});
+
+	test('else nothing: no vendor id (serial, Bluetooth), or a vendor no guess covers', () => {
+		expect(protocolFor({ chosen: undriven, matches: [undriven] })).toBeUndefined();
+		expect(protocolFor({ usbVendorId: null })).toBeUndefined();
+		expect(protocolFor({ usbVendorId: 0xffff })).toBeUndefined();
+		expect(protocolFor({})).toBeUndefined();
+	});
+});
+
+test('openReader gives a device with no way to write, on any view (D40)', () => {
+	const transport = {
+		kind: 'hid',
+		vendorId: 0x0a12,
+		productId: 0x4025,
+		productName: 'Qudelix-5K',
+		collections: []
+	} as never;
+	const protocol = protocolOf(profile('qudelix-5k'))!;
+	const reads = [
+		'bandCount',
+		'capabilities',
+		'close',
+		'currentSlot',
+		'eq',
+		'eqEnabled',
+		'firmware',
+		'identity',
+		'protocol',
+		'pull',
+		'readControls',
+		'slots',
+		'transport'
+	];
+	const reader = openReader(transport, protocol);
+	const spk = reader.eq('spk');
+	expect(Object.keys(reader).sort()).toEqual(reads);
+	expect(Object.keys(spk).sort()).toEqual(reads);
+	// Every other member of a device is a write: a new one lands here until it is placed.
+	const writes = Object.keys(openDevice(transport, protocol)).filter((k) => !reads.includes(k));
+	expect(writes.sort()).toEqual([
+		'createSlot',
+		'deleteSlot',
+		'push',
+		'renameSlot',
+		'setEnabled',
+		'writeControl'
+	]);
+	// The views are the device's own: its EQ's slots, the same view each time.
+	expect(spk.capabilities.slots).toEqual(reader.capabilities.eqs[0]!.slots);
+	expect(reader.eq('spk')).toBe(spk);
+	expect(spk.eq()).toBe(reader);
 });
 
 test("each handler runs over a transport the profile's identity implies", () => {

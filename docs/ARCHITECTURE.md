@@ -129,7 +129,7 @@ Changing one of these needs a DECISIONS entry.
    `complete` and `plan` are normative through their properties (D15, D56).
 8. **Apps must work without the CDN.** The database enhances an app and never blocks it.
 9. **The inspector never writes to a device** (D40): it calls `pull`, never `push`, `setEnabled`
-   or `writeControl`.
+   or `writeControl`. It opens devices with the bridge's `openReader`, which has no writes.
 
 ## 7. Data flow
 
@@ -197,6 +197,12 @@ right channel as `right`. Without `right`, a push writes both channels alike, as
   profile, marked experimental.
 - **Controls and firmware.** A handler can read the firmware and read and write the device
   controls the profile lists (`firmware`, `readControls`, `writeControl`).
+- **Connecting.** `protocolFor` gives the protocol in the order every app takes (the chosen
+  profile's, a matched profile's, a vendor guess) and says which it was. The client's match says
+  which profiles tied (`ties`) and whether the device's firmware version would decide
+  (`firmwareDecides`). `wireConstraints` gives a protocol's wire limits as profile constraints,
+  for a device driven without a profile. What an app does with them (a chooser, a reconnect, its
+  own state) stays the app's; the inspector's is `lib/read-session.ts`.
 - **A view per EQ.** A bridge device is always viewed as one EQ: the profile's own as opened, a
   listed one from `eq(id)` (D53). The views share the connection and one queue of operations; the
   session keeps "own or listed" to itself.

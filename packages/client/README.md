@@ -34,7 +34,10 @@ if (profile) {
   nor the cache can.
 - **Matching** follows the format's specificity rules: `best` is set only for a unique top match,
   and at equal specificity a device profile beats a group profile. On a tie (`ambiguous`), let the
-  user choose. Deprecated profiles never match. Match fields may list several values (SPEC §3).
+  user choose among `ties`. Where `firmwareDecides`, a top match holds only for a range of
+  firmware and the identity gave no version: an app that can read it (the bridge's `firmware()`)
+  matches again with `firmware` before asking the user. Deprecated profiles never match. Match
+  fields may list several values (SPEC §3).
 
 The default `baseUrl` is the format's channel `V1_URL`
 (`https://potatosalad775.github.io/eqcaps/v1/`). Versions before 0.2.0 defaulted to the pre-freeze
