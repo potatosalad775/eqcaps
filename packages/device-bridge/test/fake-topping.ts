@@ -20,6 +20,7 @@ const DOWNLOAD_CONFIG = 0x110b;
 const RENAME_INDEX = 0x110c;
 const RENAME_NAME = 0x110d;
 const SWITCH_CONFIG = 0x110e;
+const LR_MODE = 0x1112;
 const AGREEMENT = 0x1120;
 const SOFTWARE_VERSION = 0x1202;
 const EQ_ENABLE_STATE = 0x1204;
@@ -94,21 +95,21 @@ const nameWords = (name: string) =>
 /**
  * A stored config of 78 words: the name (words 0-3), the pre-gain of each channel (words 5 and 7,
  * linear with 0 dB at 2^25), 11 left bands from word 8 and 11 right ones from word 41, three words
- * each. Missing bands are switched off; the right channel defaults to the left's bands.
+ * each. Missing bands are switched off; the right channel defaults to the left's.
  */
 export function toppingConfig(
 	name: string,
 	preamp: number,
 	left: readonly (Filter | null)[],
-	right: readonly (Filter | null)[] = left
+	right: readonly (Filter | null)[] = left,
+	rightPreamp = preamp
 ): number[] {
 	const w = new Array<number>(78).fill(0);
 	w.splice(0, 4, ...nameWords(name));
-	const gain = toppingPreampWord(preamp);
 	w[4] = 1;
-	w[5] = gain;
+	w[5] = toppingPreampWord(preamp);
 	w[6] = 1;
-	w[7] = gain;
+	w[7] = toppingPreampWord(rightPreamp);
 	for (let i = 0; i < 11; i++) {
 		w.splice(8 + 3 * i, 3, ...bandWords(left[i] ?? null));
 		w.splice(41 + 3 * i, 3, ...bandWords(right[i] ?? null));
@@ -156,6 +157,12 @@ export class FakeTopping implements HidTransport {
 	prefixed = false;
 	/** Takes a new config's frames and stores nothing, as a device that refuses one would. */
 	refusesNew = false;
+	/**
+	 * The L/R-mode mask, one bit per config: set, Topping's app shows that config with the channels
+	 * apart. A DX5 II sends it in its connection notice and echoes a write of it; undefined, this
+	 * one sends none.
+	 */
+	lrMode: number | undefined = 0;
 	/** The words of a config or a name as they arrive, and the config a name is for. */
 	private incoming: number[] = [];
 	private renaming = 0;
@@ -288,10 +295,22 @@ export class FakeTopping implements HidTransport {
 		if (c === DELETE_CONFIG) {
 			if (v < this.configs.length && this.configs.length > 1) {
 				this.configs.splice(v, 1);
+				// The later configs' bits move down with them, as the app reckons the device does.
+				const m = this.lrMode;
+				if (m !== undefined) this.lrMode = (m & ((1 << v) - 1)) | ((m >>> (v + 1)) << v);
 				this.active = this.family === 'dx5' ? 0 : Math.min(this.active, this.configs.length - 1);
 			}
 			this.deliver([d]);
 			return this.answer(CURRENT_CONFIG, [this.active], frame);
+		}
+		if (this.family === 'dx5' && kind === WRITE && c === CONNECT_STATE) {
+			// The connection notice; the mask is the part of it the handler keeps.
+			if (this.lrMode !== undefined) this.deliver([toppingFrame(LR_MODE, this.lrMode)]);
+			return;
+		}
+		if (this.family === 'dx5' && kind === WRITE && c === LR_MODE) {
+			this.lrMode = v & 0xffff;
+			return this.deliver([d]);
 		}
 		const word = this.family === 'dx5' && kind === WRITE ? DX5_WORDS[c] : undefined;
 		if (word !== undefined) {

@@ -116,23 +116,45 @@ describe.each(
 		})
 		.map(({ filters, preamp }) => (preamp === undefined ? { filters } : { filters, preamp }));
 
+	const expectFilters = (got: readonly (Filter | null)[], want: readonly Filter[]) => {
+		expect(got).toHaveLength(want.length);
+		want.forEach((f, i) => {
+			const g = got[i]!;
+			expect(g.type).toBe(f.type);
+			expect(close(g.freq, f.freq), `freq ${g.freq} ≠ ${f.freq}`).toBe(true);
+			if (wire.q) expect(close(g.q, f.q), `q ${g.q} ≠ ${f.q}`).toBe(true);
+			expect(close(g.gain, f.gain), `gain ${g.gain} ≠ ${f.gain}`).toBe(true);
+		});
+	};
+
 	test('decode(encode(request)) gives the request back', () => {
 		fc.assert(
 			fc.property(request, (r) => {
 				const state = codec.decode(codec.encode(r, options), options);
-				expect(state.filters).toHaveLength(r.filters.length);
-				r.filters.forEach((f, i) => {
-					const g = state.filters[i]!;
-					expect(g.type).toBe(f.type);
-					expect(close(g.freq, f.freq), `freq ${g.freq} ≠ ${f.freq}`).toBe(true);
-					if (wire.q) expect(close(g.q, f.q), `q ${g.q} ≠ ${f.q}`).toBe(true);
-					expect(close(g.gain, f.gain), `gain ${g.gain} ≠ ${f.gain}`).toBe(true);
-				});
+				expectFilters(state.filters, r.filters);
 				if (r.preamp !== undefined) expect(close(state.preamp, r.preamp)).toBe(true);
 			}),
 			{ numRuns: 50 }
 		);
 	});
+
+	// Where the handler drives the channels apart, `decode` gives the right channel where it
+	// differs from the left; left out, it is the left's.
+	if (caps.perChannel) {
+		test('decode(encode(request)) gives both channels back', () => {
+			fc.assert(
+				fc.property(request, request, (r, right) => {
+					const state = codec.decode(codec.encode({ ...r, right }, options), options);
+					expectFilters(state.filters, r.filters);
+					const back = state.right ?? state;
+					expectFilters(back.filters, right.filters);
+					const preamp = right.preamp ?? r.preamp;
+					if (preamp !== undefined) expect(close(back.preamp, preamp)).toBe(true);
+				}),
+				{ numRuns: 50 }
+			);
+		});
+	}
 
 	const base = (): Filter => ({
 		type: types[0]!,

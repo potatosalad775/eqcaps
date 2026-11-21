@@ -28,10 +28,18 @@ export interface PullRequest {
 
 /** What the device holds, in canonical units: written values (D39). */
 export interface PullResult {
-	/** One entry per band in band order; null for a band the device reports as off or unset. */
+	/**
+	 * One entry per band in band order; null for a band the device reports as off or unset. The
+	 * left channel's when `right` is given.
+	 */
 	filters: (Filter | null)[];
-	/** The device's preamp in dB, when the protocol reads one. */
+	/** The device's preamp in dB, when the protocol reads one. The left channel's when `right` is given. */
 	preamp?: number;
+	/**
+	 * The right channel, on every pull from a handler that drives the channels apart
+	 * (`perChannel`), equal to the left or not (SPEC §9, `channels: "independent"`).
+	 */
+	right?: { filters: (Filter | null)[]; preamp?: number };
 	/** The slot that was read, when known. */
 	slot?: number;
 }
@@ -49,6 +57,13 @@ export interface PushRequest {
 	 * is refused rather than sent without it.
 	 */
 	preamp?: number;
+	/**
+	 * The right channel (SPEC §9, `channels: "independent"`). Given, `filters` and `preamp` are the
+	 * left channel's, and `right.preamp` left out is `preamp`. Left out, `filters` and `preamp` go
+	 * to both channels. Refused, like `preamp`, where the handler doesn't drive the channels apart
+	 * (`perChannel`).
+	 */
+	right?: { filters: readonly Filter[]; preamp?: number };
 	/** Preset slot to write to. Refused, like `preamp`, where the write names none (`writesSlot`). */
 	slot?: number;
 	/** Which of the device's EQs to write (SPEC §9.2): an id of `capabilities.eqs`. Default: the profile's own. */
@@ -103,6 +118,11 @@ export interface HidFrame {
 export interface WriteState {
 	filters: (Filter | null)[];
 	preamp?: number;
+	/**
+	 * The right channel, where the frames write it apart from the left; left out, `filters` and
+	 * `preamp` are both channels'.
+	 */
+	right?: { filters: (Filter | null)[]; preamp?: number };
 	slot?: number;
 }
 
@@ -115,7 +135,11 @@ export interface Codec<O, F> {
 	/** Filter types the protocol has wire codes for. */
 	readonly types: readonly FilterType[];
 	wire(options: O): WireGrid;
-	/** The frames that write `request`, in order. Throws `BridgeError` for what the wire can't carry. */
+	/**
+	 * The frames that write `request`, in order. Throws `BridgeError` for what the wire can't carry.
+	 * A codec may ignore `right`: `openDevice` refuses it where the handler lacks `perChannel`,
+	 * before any codec sees it.
+	 */
 	encode(request: PushRequest, options: O): F[];
 	/** What frames from `encode` write. */
 	decode(frames: readonly F[], options: O): WriteState;
@@ -151,6 +175,11 @@ export interface HandlerCapabilities {
 	 * that depends on the options. Default: it has the three methods.
 	 */
 	editsSlots?: boolean;
+	/**
+	 * Push takes the right channel (`right`) and pull returns it (SPEC §9, `channels:
+	 * "independent"`). Default false: a push with `right` is refused, and a pull returns one channel.
+	 */
+	perChannel?: boolean;
 }
 
 export interface HandlerContext<T extends Transport, O> {

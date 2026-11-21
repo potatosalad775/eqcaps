@@ -13,8 +13,17 @@
 // shows 10 bands and writes all 11. The app writes a config by selecting it (0x110E) and sending
 // every parameter as its own command: 0x9C01–0x9C04 for the pre-gain and its switch, left and
 // right, and 0x9000 | band << 8 | field for the bands (fields 1–5 left type, frequency, gain, Q
-// and switch; 6–10 right). It sends no save command after them. Both channels get the same
-// filters here (`channels: linked`); a pull returns the left channel's.
+// and switch; 6–10 right). It sends no save command after them.
+//
+// A config holds both channels on every family, and the app's editor edits them apart. The DX5 II,
+// which was seen to keep them apart (firmware 2.58), is driven so (`perChannel`): a push takes the
+// right channel as `right` and a pull returns it. The other families get the same filters on both
+// channels, and a pull returns the left channel's. The app keeps one bit per config in the
+// L/R-mode mask (0x1112): set, its editor opens that config with the channels apart. The device
+// sends the mask after a connect and echoes a write of it. After a push that names `right` the
+// handler sets the config's bit where the channels differ and clears it where they are equal, as
+// the app does after a save, when the device has sent the mask and the bit has to change; after a
+// delete it moves the later configs' bits down, as the app does.
 //
 // Type codes are the editor's: 1 peak, 2 low pass, 3 high pass, 4 low shelf, 5 high shelf.
 // Gain is in tenths of a dB, Q in ten-thousandths, frequency in Hz. The pre-gain word is a linear
@@ -34,8 +43,7 @@
 // unchecked). The D900 stores a config in another layout, and the other two can't add or delete.
 //
 // Left out, though the app does them: the heartbeat it sends every 1 or 5 s, the shutdown notice on
-// disconnect, the L/R-mode mask (0x1112) after a save, the preview state, and most settings besides
-// the EQ.
+// disconnect, the preview state, and most settings besides the EQ.
 //
 // The DX5 II's settings are controls: one read (0x710C) answers a block of words, one per setting,
 // and each setting is written with its own command, which the device takes at once. Tried on the
@@ -50,6 +58,7 @@ import type {
 	HandlerControl,
 	HidFrame,
 	HidHandler,
+	PushRequest,
 	Slot,
 	WriteState
 } from '../handler.ts';
@@ -74,6 +83,7 @@ const DOWNLOAD_CONFIG = 0x110b;
 const RENAME_INDEX = 0x110c;
 const RENAME_NAME = 0x110d;
 const SWITCH_CONFIG = 0x110e;
+const LR_MODE = 0x1112;
 const AGREEMENT = 0x1120;
 const SOFTWARE_VERSION = 0x1202;
 const EQ_ENABLE_STATE = 0x1204;
@@ -83,6 +93,7 @@ const PEQ_STATE = 0x7132;
 const D900_CAPABILITIES = 0x7144;
 const D900_RESULT = 0x7145;
 const PREAMP_LEFT = 0x9c01;
+const PREAMP_RIGHT = 0x9c03;
 const BAND = 0x9000;
 
 /** `SWITCH_CONFIG` with this turns the EQ off on the DX1 II and E50 II. */
@@ -117,6 +128,8 @@ interface Family {
 	configs: number;
 	/** Configs are created, renamed and deleted here. */
 	edits?: boolean;
+	/** Left and right are written and read apart, and the L/R-mode mask kept. */
+	perChannel?: boolean;
 }
 
 const FAMILIES: Record<ToppingFamily, Family> = {
@@ -137,7 +150,8 @@ const FAMILIES: Record<ToppingFamily, Family> = {
 		switchPause: 120,
 		burst: 10,
 		configs: 10,
-		edits: true
+		edits: true,
+		perChannel: true
 	},
 	dx9d: {
 		connect: 2,
@@ -292,38 +306,38 @@ export function toppingNewConfigWords(name: string): number[] {
 }
 
 /**
- * The frames that select `slot` and write the request to both channels: the pre-gain, then the 11
- * bands, unused ones switched off at the app's defaults. The D900 gets all left bands before the
- * right ones, as the app sends them, and its 11th band as `reserved` (the app writes back what it
- * read there).
+ * The frames that select `slot` and write the request: the pre-gains, then the 11 bands of each
+ * channel, unused ones switched off at the app's defaults. Without `right` both channels get
+ * `filters` and `preamp`. The D900 gets all left bands before the right ones, as the app sends
+ * them, and its 11th band as `reserved` (the app writes back what it read there).
  */
 export function toppingWriteFrames(
-	request: { filters: readonly Filter[]; preamp?: number; slot?: number },
+	request: Pick<PushRequest, 'filters' | 'preamp' | 'right' | 'slot'>,
 	o: ToppingHidOptions,
 	reserved: { left: typeof OFF; right: typeof OFF } = { left: OFF, right: OFF }
 ): HidFrame[] {
 	const family = familyOf(o);
 	const d900 = o.family === 'd900';
-	const { filters, preamp = 0, slot } = request;
-	if (filters.length > BANDS - (d900 ? 1 : 0)) {
-		throw new BridgeError(
-			'invalid-request',
-			`Topping: ${filters.length} filters, a config holds ${BANDS - (d900 ? 1 : 0)}`
-		);
-	}
-	const bands = filters.map((f) => ({
-		type: TYPES.encode(f.type),
-		freq: field(f.freq, 1, U32, 'freq'),
-		gain: field(f.gain, 10, I32, 'gain'),
-		q: field(f.q, 10000, U32, 'q'),
-		on: 1
-	}));
-	const left = Array.from({ length: BANDS }, (_, i) => bands[i] ?? OFF);
-	const right = [...left];
-	if (d900) {
-		left[BANDS - 1] = reserved.left;
-		right[BANDS - 1] = reserved.right;
-	}
+	const { filters, preamp = 0, right: r, slot } = request;
+	const most = BANDS - (d900 ? 1 : 0);
+	const channel = (filters: readonly Filter[], kept: typeof OFF, side: string) => {
+		if (filters.length > most) {
+			throw new BridgeError(
+				'invalid-request',
+				`Topping: ${filters.length} filters${side}, a config holds ${most}`
+			);
+		}
+		const bands = filters.map((f) => ({
+			type: TYPES.encode(f.type),
+			freq: field(f.freq, 1, U32, 'freq'),
+			gain: field(f.gain, 10, I32, 'gain'),
+			q: field(f.q, 10000, U32, 'q'),
+			on: 1
+		}));
+		return Array.from({ length: BANDS }, (_, i) => (d900 && i === most ? kept : (bands[i] ?? OFF)));
+	};
+	const left = channel(filters, reserved.left, '');
+	const right = channel(r?.filters ?? filters, reserved.right, ' on the right');
 	const out: Uint8Array[] = [];
 	const write = (command: number, data: number) =>
 		out.push(toppingFrame(command, data, WRITE, 1, family.frame));
@@ -331,7 +345,8 @@ export function toppingWriteFrames(
 		out.push(toppingFrame(SWITCH_CONFIG, field(slot, 1, [0, 0xff], 'slot')));
 	}
 	const gain = toppingPreampWord(preamp, o.family);
-	[gain, 1, gain, 1].forEach((v, i) => write(PREAMP_LEFT + i, v));
+	const gainRight = toppingPreampWord(r?.preamp ?? preamp, o.family);
+	[gain, 1, gainRight, 1].forEach((v, i) => write(PREAMP_LEFT + i, v));
 	const side = (band: number, b: typeof OFF, first: number) =>
 		[b.type, b.freq, b.gain, b.q, b.on].forEach((v, i) =>
 			write(BAND | ((band + 1) << 8) | (first + i), v)
@@ -359,24 +374,39 @@ export const toppingCodec: Codec<ToppingHidOptions, HidFrame> = {
 	encode: (request, o) => toppingWriteFrames(request, o),
 	decode(frames, o) {
 		const state: WriteState = { filters: [] };
+		/** Each band's fields by number: 1–5 the left channel's, 6–10 the right's. */
 		const bands: Record<number, number>[] = [];
+		const gains: Record<number, number> = {};
 		for (const { data } of frames) {
 			const f = parseToppingFrame(data);
 			if (!f) continue;
 			if (f.command === SWITCH_CONFIG) state.slot = f.data;
-			else if (f.command === PREAMP_LEFT) state.preamp = preampDb(f.data, o.family);
-			else if (f.command >> 12 === 9 && (f.command & 0xff) <= 5 && f.command >> 8 < 0x9c) {
+			else if (f.command === PREAMP_LEFT || f.command === PREAMP_RIGHT) gains[f.command] = f.data;
+			else if (f.command >> 12 === 9 && (f.command & 0xff) <= 10 && f.command >> 8 < 0x9c) {
 				(bands[((f.command >> 8) & 0xf) - 1] ??= {})[f.command & 0xff] = f.data;
 			}
 		}
-		for (const b of bands) {
-			if (!b || b[5] !== 1) continue;
-			state.filters.push({
-				type: TYPES.decode(b[1]!),
-				freq: b[2]!,
-				gain: (b[3]! | 0) / 10,
-				q: b[4]! / 10000
-			});
+		const channel = (first: number) =>
+			bands.flatMap((b): Filter[] =>
+				b[first + 4] === 1
+					? [
+							{
+								type: TYPES.decode(b[first]!),
+								freq: b[first + 1]!,
+								gain: (b[first + 2]! | 0) / 10,
+								q: b[first + 3]! / 10000
+							}
+						]
+					: []
+			);
+		const [gainLeft, gainRight] = [gains[PREAMP_LEFT], gains[PREAMP_RIGHT]];
+		state.filters = channel(1);
+		if (gainLeft !== undefined) state.preamp = preampDb(gainLeft, o.family);
+		const apart =
+			gainLeft !== gainRight || bands.some((b) => [1, 2, 3, 4, 5].some((i) => b[i] !== b[i + 5]));
+		if (apart) {
+			state.right = { filters: channel(6) };
+			if (gainRight !== undefined) state.right.preamp = preampDb(gainRight, o.family);
 		}
 		return state;
 	}
@@ -396,6 +426,11 @@ interface Session {
 	reserved: { left: typeof OFF; right: typeof OFF }[];
 	/** The firmware word the session's start read, where it reads one. */
 	firmware?: number;
+	/**
+	 * The L/R-mode mask as the device last sent it, where the family drives the channels apart:
+	 * bit n set, the app's editor opens config n with the channels apart.
+	 */
+	lrMode?: number;
 }
 
 /**
@@ -498,10 +533,9 @@ function d900Capable(c: readonly number[]) {
 	);
 }
 
-async function openSession(ctx: Ctx): Promise<Session> {
+async function openSession(ctx: Ctx, session: Session): Promise<Session> {
 	const o = ctx.options;
 	const family = familyOf(o);
-	const session: Session = { reserved: [] };
 	if (o.family === 'd900') {
 		const c = await ask(ctx, D900_CAPABILITIES, WRITE, 'the capabilities request');
 		if (!d900Capable(c)) {
@@ -549,16 +583,59 @@ async function openSession(ctx: Ctx): Promise<Session> {
 
 const sessions = new WeakMap<HidTransport, Promise<Session>>();
 
+/** Keeps the L/R-mode mask the device sends: after a connect, and echoing a write. */
+function watchLrMode(transport: HidTransport, session: Session) {
+	return transport.onInputReport((_id, data) => {
+		const f = parseToppingFrame(data);
+		if (f?.command === LR_MODE) session.lrMode = f.data & 0xffff;
+	});
+}
+
 /** The transport's session, started on first use; one that fails to start is forgotten. */
 function sessionOf(ctx: Ctx) {
 	const known = sessions.get(ctx.transport);
 	if (known) return known;
-	const opening = openSession(ctx);
+	const session: Session = { reserved: [] };
+	// Listening from before the connection request, after which the device sends the mask.
+	const unwatch = familyOf(ctx.options).perChannel
+		? watchLrMode(ctx.transport, session)
+		: undefined;
+	const opening = openSession(ctx, session);
 	sessions.set(ctx.transport, opening);
 	opening.catch(() => {
+		unwatch?.();
 		if (sessions.get(ctx.transport) === opening) sessions.delete(ctx.transport);
 	});
 	return opening;
+}
+
+/**
+ * The mask once config `slot` is deleted, as the app reckons it until the device sends one: the
+ * later configs' bits move down with them.
+ */
+function dropLrModeBit(session: Session, slot: number) {
+	const m = session.lrMode;
+	if (m !== undefined)
+		session.lrMode = ((m & ((1 << slot) - 1)) | ((m >>> (slot + 1)) << slot)) & 0xffff;
+}
+
+/**
+ * Makes `slot`'s bit in the L/R-mode mask say whether its channels differ, as the app does after
+ * a save, so that its editor opens the config that way. Only a mask the device sent is written
+ * (the app starts from 0 without one, which would clear the other configs' bits), and only when
+ * the bit changes.
+ */
+async function markChannels(ctx: Ctx, session: Session, slot: number, apart: boolean) {
+	const mask = session.lrMode;
+	if (mask === undefined) {
+		ctx.log(`Topping: the L/R-mode mask is unknown; config ${slot}'s bit is left as it is`);
+		return;
+	}
+	const next = (apart ? mask | (1 << slot) : mask & ~(1 << slot)) >>> 0;
+	if (next === mask) return;
+	session.lrMode = next;
+	await send(ctx, LR_MODE, session.lrMode);
+	await ctx.sleep(35);
 }
 
 const band = (w: readonly number[], at: number) => ({
@@ -569,14 +646,20 @@ const band = (w: readonly number[], at: number) => ({
 	q: w[at + 2]!
 });
 
-/** A stored config: words 5 the left pre-gain, 8… the left bands and 41… the right, 3 words each. */
+/**
+ * A stored config: words 5 and 7 the left and right pre-gains, 8… the left bands and 41… the
+ * right, 3 words each.
+ */
 function decodeConfig(w: readonly number[], family?: ToppingFamily) {
-	const filters = Array.from({ length: BANDS }, (_, i): Filter | null => {
-		const b = band(w, 8 + 3 * i);
-		if (!b.on) return null;
-		return { type: TYPES.decode(b.type), freq: b.freq, gain: b.gain / 10, q: b.q / 10000 };
+	const channel = (gain: number, first: number) => ({
+		filters: Array.from({ length: BANDS }, (_, i): Filter | null => {
+			const b = band(w, first + 3 * i);
+			if (!b.on) return null;
+			return { type: TYPES.decode(b.type), freq: b.freq, gain: b.gain / 10, q: b.q / 10000 };
+		}),
+		preamp: preampDb(w[gain]!, family)
 	});
-	return { filters, preamp: preampDb(w[5]!, family) };
+	return { left: channel(5, 8), right: channel(7, 41) };
 }
 
 /**
@@ -803,7 +886,8 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 		needsBandCount: false,
 		readsCurrentSlot: true,
 		canEnable: true,
-		editsSlots: familyOf(o).edits === true
+		editsSlots: familyOf(o).edits === true,
+		perChannel: familyOf(o).perChannel === true
 	}),
 
 	async pull(ctx, { slot, bands = BANDS - 1 }) {
@@ -816,8 +900,13 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 				`Topping: no config ${index}, the device holds ${list.configs.length}`
 			);
 		}
-		const { filters, preamp } = decodeConfig(config, ctx.options.family);
-		return { filters: filters.slice(0, bands), preamp, slot: index };
+		const { left, right } = decodeConfig(config, ctx.options.family);
+		const cut = (c: typeof left) => ({ filters: c.filters.slice(0, bands), preamp: c.preamp });
+		return {
+			...cut(left),
+			...(familyOf(ctx.options).perChannel ? { right: cut(right) } : {}),
+			slot: index
+		};
 	},
 
 	async push(ctx, request) {
@@ -844,6 +933,11 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 			}
 		}
 		await ctx.sleep(85);
+		// A push without `right` leaves the mask alone, as before the channels were driven apart.
+		if (request.right) {
+			const apart = toppingCodec.decode(frames, ctx.options).right !== undefined;
+			await markChannels(ctx, session, slot, apart);
+		}
 		return { reconnect: false };
 	},
 
@@ -923,6 +1017,8 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 			// The app refuses this too.
 			throw new BridgeError('invalid-request', "Topping: the device's last config stays");
 		}
+		// Before the delete: a mask the device sends after it replaces this.
+		dropLrModeBit(session, slot);
 		await send(ctx, DELETE_CONFIG, slot);
 		await ctx.sleep(140);
 		// A DX5 II falls back to its first config; the app selects that one to match.

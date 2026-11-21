@@ -2,12 +2,13 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "topping-home",
 	"id": "topping-dx5-ii",
-	"schemaVersion": "1.2",
+	"schemaVersion": "1.4",
 	"device": { "brand": "Topping", "model": "DX5 II" },
 	"match": {
 		"usb": [{ "vendorId": "0x152a", "productId": "0x8750", "productName": "DX5 II" }],
 		"firmware": { "min": "2.37" }
 	},
+	"channels": "independent",
 	"protocol": {
 		"options": { "family": "dx5" },
 		"presets": [
@@ -150,8 +151,20 @@
 			},
 			{
 				"kind": "vendor-app",
+				"ref": "https://home.toppingaudio.com/, connected on the owner's device with a band's gain set apart on each channel and the editor switched from L+R to L/R and back, the traffic logged in the page (no file kept), and the stored config read back through the bridge",
+				"firmware": "2.58",
+				"date": "2026-11-21",
+				"by": "potatosalad775"
+			},
+			{
+				"kind": "vendor-app",
 				"ref": "Topping Home web app v1.17.0 (https://home.toppingaudio.com/): the DX5 II's session, its 10 configs, the firmware it refuses, and its settings with their values",
 				"date": "2026-11-20"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "Topping Home web app v1.17.0 (https://home.toppingaudio.com/): the editor's L+R and L/R modes, and the mask of configs it shows with the channels apart, as it reads, saves and switches it",
+				"date": "2026-11-21"
 			},
 			{
 				"kind": "vendor-docs",
@@ -160,6 +173,6 @@
 			}
 		],
 		"contributors": ["potatosalad775"],
-		"notes": "As topping-home. Up to 10 stored configs. The app refuses to control firmware below 2.37, and so does the handler; Topping's page asks for 2.39 or later. Recorded with Topping's app on a DX5 II with firmware 2.58 on 2026-11-20: the handler reads the stored config as the app does and sends the app's writes frame for frame. Also tried through the bridge the same day: it reports the product name \"DX5 II\" and manufacturer \"Topping\"; the session starts and the configs read without the app's heartbeat; a config written unchanged read back the same, a changed band read back as written, and the original was restored. The device answers reads the app never sends, of the active config and of the EQ state, which the handler uses; a read of the EQ switch command itself turns the EQ off, so the handler never sends one (found on 2026-11-21). It held five configs named Bass 1, Bass 2, Airy, Warm and Dynamic, their shelves on the type codes the app's editor uses. Not tried: turning the EQ on and off, whether a write survives a power cycle, and how the result sounds. Tried through the bridge on 2026-11-21, and recorded from the app the same day: a config created (it comes after the last, empty), renamed with a 15-character name, written, read back and deleted, the five original configs unchanged afterwards. In the recording the device went over to a new config by itself and back to its first config after the delete. Not tried: whether a created config survives a power cycle. Controls are the app's settings for the DX5 II, each tried on the device the same day: written, read back, restored. Volume and balance are in dB; the device holds the volume in 0.5 dB steps, or 1 dB steps when its volume step setting says so (then a half-dB value does not take). Balance is negative towards the left. The app greys out the gain on a line-only output, and sends no volume while a line-only output is in DAC line mode; the handler refuses that write. Crossfeed is the type only; the app also offers a room per type, and no crossfeed in UAC 1.0. Left out: power, Bluetooth, USB mode, display pages and themes, key assignments, scenes, memories, language and factory reset."
+		"notes": "As topping-home. Up to 10 stored configs. The app refuses to control firmware below 2.37, and so does the handler; Topping's page asks for 2.39 or later. Recorded with Topping's app on a DX5 II with firmware 2.58 on 2026-11-20: the handler reads the stored config as the app does and sends the app's writes frame for frame. Also tried through the bridge the same day: it reports the product name \"DX5 II\" and manufacturer \"Topping\"; the session starts and the configs read without the app's heartbeat; a config written unchanged read back the same, a changed band read back as written, and the original was restored. The device answers reads the app never sends, of the active config and of the EQ state, which the handler uses; a read of the EQ switch command itself turns the EQ off, so the handler never sends one (found on 2026-11-21). It held five configs named Bass 1, Bass 2, Airy, Warm and Dynamic, their shelves on the type codes the app's editor uses. Not tried: turning the EQ on and off, whether a write survives a power cycle, and how the result sounds. Tried through the bridge on 2026-11-21, and recorded from the app the same day: a config created (it comes after the last, empty), renamed with a 15-character name, written, read back and deleted, the five original configs unchanged afterwards. In the recording the device went over to a new config by itself and back to its first config after the delete. Not tried: whether a created config survives a power cycle. Left and right: the app's editor edits them alike (L+R) or apart (L/R), and on 2026-11-21 a config the app wrote with band 1 at 3.0 dB on the left and 5.0 dB on the right held those in the device's stored config, read back through the bridge; the five original configs hold equal channels. So the channels are independent here, and the handler writes and reads them apart; a push without the right channel writes both alike. The app keeps one bit per config in a mask of the configs its editor shows with the channels apart, which the device sends after a connect; after saving a config whose channels differ the app sets its bit, and after saving one whose channels are equal it clears it. The handler does the same after a push that names the right channel, when the device has sent the mask. Whether the mask changes what the device plays was not tested; nothing in the app suggests it does. Tried through the bridge on the same unit (2026-11-21): a push of the channels apart, with a pre-gain each, read back as written, as did one of equal channels after it, and the mask bit followed. Controls are the app's settings for the DX5 II, each tried on the device the same day: written, read back, restored. Volume and balance are in dB; the device holds the volume in 0.5 dB steps, or 1 dB steps when its volume step setting says so (then a half-dB value does not take). Balance is negative towards the left. The app greys out the gain on a line-only output, and sends no volume while a line-only output is in DAC line mode; the handler refuses that write. Crossfeed is the type only; the app also offers a room per type, and no crossfeed in UAC 1.0. Left out: power, Bluetooth, USB mode, display pages and themes, key assignments, scenes, memories, language and factory reset."
 	}
 }

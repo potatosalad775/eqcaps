@@ -94,6 +94,23 @@ the other four are unchecked and `draft`.**
   one. The app doesn't delete the last remaining config.
 - The D900 stores a config in another layout. The app has two more save commands, for the device
   to keep a config, which were not followed up: some family other than the DX5 II uses them.
+- **Left and right.** The editor has two modes, `L+R` (one set of values for both channels) and
+  `L/R` (each channel edited on its own), on every family. Which mode it opens a config in is the
+  **L/R-mode mask** (`0x1112`): one bit per config index, set for `L/R`, read as 16 bits. The
+  device sends it after a connect and echoes a write of it; bits of configs that don't exist are
+  left as they are. The app writes it:
+  - switching `L+R` to `L/R`: only the mask, with the config's bit set;
+  - switching `L/R` to `L+R`: it asks first (the right channel's filters are replaced by the
+    left's), then selects the config, sends the full write with the right equal to the left, and
+    then the mask with the bit cleared;
+  - after saving a config: the bit set when the channels differ (pre-gain, or any band's switch,
+    type, frequency, gain or Q) and, on the DX1 II, E50 II, DX5 II and D900, cleared when they
+    are equal; on the DX9 Discrete it only sets it, and only with a mask it has read. The others
+    send the mask only when it changes, from 0 when they have none;
+  - after deleting a config it moves the later configs' bits down, unless the device sends a mask.
+
+  Editing one band of the right channel sends that band's right fields alone, as for the left
+  (`0x9108` = 50 for band 1's right gain of 5.0 dB, then its switch `0x910A` = 1).
 
 ## Where the app is plainly wrong or inconsistent
 
@@ -127,14 +144,31 @@ the other four are unchecked and `draft`.**
 - Base `topping-home` (the editor's limits) and five profiles, `topping-dx1-ii`, `topping-dx5-ii`,
   `topping-e50-ii`, `topping-dx9-discrete` and `topping-d900`, each citing the app; `draft` but
   for the DX5 II's.
+- Left and right apart on the DX5 II (2026-11-21; format 1.4, D54): its profile says
+  `channels: "independent"`, and the handler is `perChannel` for the `dx5` family. A push takes
+  the right channel as `right`, in the app's frame order; a pull returns it (word 7 and words 41
+  on of the stored config); after a push that names `right` the handler sets or clears the
+  config's bit in the L/R-mode mask, as above. The simulated device keeps both channels and the mask. The other
+  four families stay linked: the app's editor is the same for them, but the device keeping the
+  channels apart was seen on the DX5 II only, and the app keeps the mask differently on the DX9
+  Discrete (a save never clears a bit) and the E50 II (for a moment after writing one, it ignores
+  a mask from the device that doesn't match).
 
 ## Deliberate deviations from the app
 
 - **Pre-gain** is the app's own word for every family but the D900, which computes it as the app
   does. The three steps the table repeats (-4.9, -10.4 and +7.8 dB) get a word halfway to the
   next step, which the app reads as the step meant.
-- **Both channels** are written the same, and the L/R-mode mask the app updates after a save is
-  not. A pull returns the left channel.
+- **The L/R-mode mask is written only when the device has sent it.** After a push that names
+  `right` the handler sets the config's bit where the channels differ and clears it where they
+  are equal, as the app does after a save on the DX5 II. Without a mask from the device the app
+  starts from 0, which clears the other configs' bits; the handler leaves the mask alone then. A
+  clear bit is the one that matters: the app shows such a config as `L+R`, where its edits go to
+  both channels alike. A push without `right` leaves the mask alone too, as it did before the
+  channels were driven apart. After a delete the handler moves the later bits down, as the app
+  does.
+- **Left and right on the other four families** are written the same, and a pull returns the left
+  channel (see Done).
 - **No heartbeat** (the app sends one every 1 or 5 s, by family), **no shutdown notice** on
   disconnect, and **no preview state** (the app's live preview of a config being edited).
 - The active config of the DX1 II and DX5 II is **asked for** (`0x1206`), although the app only
@@ -267,6 +301,41 @@ after a write of 0, and the EQ is off from then on. A read of `0x1204` answers `
 on and `0xC0` with it off, as often as asked, and the connection notice says the same afterwards:
 the handler now reads that. The settings read (`0x710C`) holds no word for the switch.
 
+## Left and right on a DX5 II (2026-11-21)
+
+The same DX5 II (firmware 2.58) with the app, its traffic logged in the page (no file kept), and
+the stored config read back through the bridge afterwards:
+
+- Switching a config's editor from `L+R` to `L/R` sent only the mask, `0x1112` = `0x21` for
+  config 5 (bit 0 was set already), which the device echoed.
+- Band 1's right gain set to 5.0 dB sent `0x9108` = 50, then its switch `0x910A` = 1. The app's
+  full write carried 3.0 dB on the left and 5.0 dB on the right, in the usual frame order.
+- Switching back to `L+R` asked first, then selected the config, sent the full write with the
+  right equal to the left, and then the mask with the bit cleared.
+- The stored config read back with word 8 `0x001e0401` (left band 1: 3.0 dB, low shelf, on) and
+  word 41 `0x00320401` (right band 1: 5.0 dB). The five original configs hold equal channels. So
+  the device keeps the channels apart whatever the mask says; whether the mask changes what it
+  plays was not tested (no measurement), and nothing in the app suggests it does.
+- The mask at connect was `0x7ff9` before the session and `0x21` after it: bits of configs that
+  don't exist are normal.
+
+A push of the channels apart through the bridge has not been tried on the device yet.
+
+## The channels apart through the bridge (2026-11-21)
+
+The owner's DX5 II (firmware 2.58), driven by the handler on a config created for the trial and
+deleted after it:
+
+- A push with a peak at 100 Hz of +3 dB on the left and -2 dB on the right, a high shelf on the
+  right only, and pre-gains of -3 and -1.5 dB read back as written, each channel its own.
+- A push with `right` equal to the left read back equal on both, the right pre-gain following the
+  left's.
+- A push without `right`, after one with the channels apart, read back the same on both.
+- The device sent the mask after the connect without being asked. Its bit for the config was
+  cleared after the equal push and set after the next one with the channels apart; the push that
+  found it set already wrote nothing.
+- The five configs it held before were left as they were, the first one playing, the EQ on.
+
 ## What only a device can settle
 
 - The exact USB product name strings of the other four: their names are guesses from how the app
@@ -282,6 +351,12 @@ the handler now reads that. The settings read (`0x710C`) holds no word for the s
 - The E50 II's config numbering, from 0 or from 1 (the app has both).
 - The 11th band, and the D900's reserved band.
 - Whether firmware below the page's minimums but above the app's works.
+- Whether a DX5 II sends the L/R-mode mask to the bridge. With the app it came about 300 ms after
+  the connection request, in a second notice that followed two requests the bridge doesn't send
+  (`0x710F` and `0x7137`). Without it the handler never writes the mask (`log` says so).
+- A push of left and right apart through the bridge, read back, and the app opening the config
+  as `L/R` afterwards.
+- Whether the other four keep the channels apart, which would make them `perChannel` too.
 
 ## Next
 
