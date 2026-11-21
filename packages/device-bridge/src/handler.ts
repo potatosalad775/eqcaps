@@ -36,7 +36,7 @@ export interface PullResult {
 	/** The device's preamp in dB, when the protocol reads one. The left channel's when `right` is given. */
 	preamp?: number;
 	/**
-	 * The right channel, on every pull from a handler that drives the channels apart
+	 * The right channel, on every pull of an EQ whose channels the handler drives apart
 	 * (`perChannel`), equal to the left or not (SPEC §9, `channels: "independent"`).
 	 */
 	right?: { filters: (Filter | null)[]; preamp?: number };
@@ -60,8 +60,8 @@ export interface PushRequest {
 	/**
 	 * The right channel (SPEC §9, `channels: "independent"`). Given, `filters` and `preamp` are the
 	 * left channel's, and `right.preamp` left out is `preamp`. Left out, `filters` and `preamp` go
-	 * to both channels. Refused, like `preamp`, where the handler doesn't drive the channels apart
-	 * (`perChannel`).
+	 * to both channels. Refused, like `preamp`, where the handler doesn't drive the channels of the
+	 * EQ the push names apart (`perChannel`).
 	 */
 	right?: { filters: readonly Filter[]; preamp?: number };
 	/** Preset slot to write to. Refused, like `preamp`, where the write names none (`writesSlot`). */
@@ -79,6 +79,11 @@ export interface EqInfo {
 	bandCount?: number;
 	/** Its own preset slots. */
 	slots: readonly Slot[];
+	/**
+	 * Push takes its right channel as `right`, and pull returns it (SPEC §9.2, its `channels`):
+	 * the handler drives its channels apart (`HandlerCapabilities.perChannelEqs`).
+	 */
+	perChannel: boolean;
 }
 
 export interface PushResult {
@@ -137,8 +142,8 @@ export interface Codec<O, F> {
 	wire(options: O): WireGrid;
 	/**
 	 * The frames that write `request`, in order. Throws `BridgeError` for what the wire can't carry.
-	 * A codec may ignore `right`: `openDevice` refuses it where the handler lacks `perChannel`,
-	 * before any codec sees it.
+	 * A codec may ignore `right`: `openDevice` refuses it where the handler doesn't drive the EQ's
+	 * channels apart, before any codec sees it.
 	 */
 	encode(request: PushRequest, options: O): F[];
 	/** What frames from `encode` write. */
@@ -177,9 +182,12 @@ export interface HandlerCapabilities {
 	editsSlots?: boolean;
 	/**
 	 * Push takes the right channel (`right`) and pull returns it (SPEC §9, `channels:
-	 * "independent"`). Default false: a push with `right` is refused, and a pull returns one channel.
+	 * "independent"`), on the EQ the handler drives by default. Default false: a push with `right`
+	 * is refused, and a pull returns one channel.
 	 */
 	perChannel?: boolean;
+	/** The same for the handler's other EQs (`eqs`), by id: those whose channels it drives apart. */
+	perChannelEqs?: readonly string[];
 }
 
 export interface HandlerContext<T extends Transport, O> {

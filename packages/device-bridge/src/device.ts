@@ -52,7 +52,10 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	listsSlots: boolean;
 	/** `createSlot()`, `renameSlot()` and `deleteSlot()` send commands. */
 	editsSlots: boolean;
-	/** `push` takes the right channel as `right`, and `pull` returns it (SPEC §9). */
+	/**
+	 * `push` takes the right channel as `right`, and `pull` returns it (SPEC §9), on the profile's
+	 * own EQ. Each of `eqs` says it for itself.
+	 */
 	perChannel: boolean;
 	/**
 	 * The device's other EQs (SPEC §9.2), each with its own slots: `pull`, `push` and the EQ's
@@ -205,7 +208,11 @@ export function openDevice(
 			handler.deleteSlot !== undefined &&
 			own.editsSlots !== false,
 		perChannel: own.perChannel === true,
-		eqs: eqs.map(({ presets, ...e }) => ({ ...e, slots: presets ?? [] })),
+		eqs: eqs.map(({ presets, ...e }) => ({
+			...e,
+			slots: presets ?? [],
+			perChannel: own.perChannelEqs?.includes(e.id) === true
+		})),
 		disconnectOnSave: protocol.disconnectOnSave ?? false,
 		experimental: protocol.experimental ?? false,
 		readsFirmware: handler.firmware !== undefined,
@@ -292,15 +299,20 @@ export function openDevice(
 				if (!capabilities.canWrite) {
 					throw new BridgeError('unsupported', `${handler.id} can't write to this device`);
 				}
+				const { eq, ...rest } = request;
+				const target = on(eq);
+				const apart =
+					eq === undefined
+						? capabilities.perChannel
+						: capabilities.eqs.find((e) => e.id === eq)!.perChannel;
 				// Sent without it, the right channel would look written (D33).
-				if (request.right !== undefined && !capabilities.perChannel) {
+				if (rest.right !== undefined && !apart) {
 					throw new BridgeError(
 						'invalid-request',
 						`${handler.id}: the write drives both channels alike; it carries no right channel`
 					);
 				}
-				const { eq, ...rest } = request;
-				const result = await handler.push(on(eq), rest);
+				const result = await handler.push(target, rest);
 				return { reconnect: result.reconnect || capabilities.disconnectOnSave };
 			});
 		},

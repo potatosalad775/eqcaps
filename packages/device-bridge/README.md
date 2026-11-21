@@ -107,8 +107,8 @@ why a block can't be driven: an unknown handler (data newer than this bridge) or
 | `conexant-usb-hid` | HID | – |
 | `ktmicro-usb-hid` | HID | `baseRegister` (default `0x26`), `bandRegisters` (`[{ "freq", "q" }]` per band, for models that skip or reorder registers), `customSlot` (default 3), `freqUnit` (Hz per unit of the frequency field, default 1; 2 where the firmware stores half the frequency), `slotRegister` and `preampRegister` (default true; false leaves the slot register 0x24, which also switches the EQ, or the preamp register 0x66 alone), `frameDelay` (ms between the frames of a push, default 0), `enableRegister` (the register of an EQ switch, 1 on and 0 off, on firmware without slots: a push turns it on first, and the slot register is left alone), `enableLast` (with `enableRegister`, a push writes the 1 after the bands and preamp, just before the commit; Walkplay's app), `writeAck` (byte 6 of the answer to a good write; each write then waits for its answer, and another flag is `rejected`), `writeWait` (ms each write waits for the device's answer to its register, going on whether or not one comes and without reading it; only a timeout is let go, and `writeAck` takes over when set; default none), `bandDelay` (ms after each band's two frames, default 0), `typeFlag` (bits OR-ed into every band's type byte on write and cleared from it on read, default 0; Walkplay's app sets bit 3, so 8), `gainRegister` (the register `globalGain` and `globalGainDb` use, default `0x3b`) |
 | `fosi-audio-usb-hid` | HID | `reportId` (default 1), `bandwidth` (default 0), `defaultSlot` (default 7) |
-| `qudelix-usb-hid` | HID | –. EQs: the user EQ by default, and `spk`, the speaker (headphone) EQ. For the 5K (firmware 3.0.0 and later; older is `unsupported`) and the T71, as Qudelix's app for Chrome drives them, reading and writing. The framing comes from the vendor id (`0x0a12` or `0x1fc9`) and the descriptor, the model from the device's answer to the opening request (sent once the device has been quiet for 20 ms, answered within 5 s), and the EQ mode from the device: in the 5K's single-EQ mode the default EQ is its 20-band EQ and `spk` is `unsupported`. The speaker EQ is written left and right alike, in the one frame the app sends for both channels, and read from the left channel (`log` says when the right differs); a speaker EQ of 4 or 8 channels (the T71's crossover drivers) is `unsupported`. The T71's 5-channel user EQ is written on every channel. A push waits for the device's echo of each band before the next (a 5K can stop answering after 20 back to back); a device that sends none gets them at once. Slots are the app's preset indexes (0–21 built in, then the EQ's custom presets from 22); a push to a slot saves it with an empty name, the app's default. `bandCount()`, `eqEnabled()`, `currentSlot()` and `firmware()` ask the device. |
-| `qudelix-v2-usb-hid` | HID | –. EQs as for `qudelix-usb-hid`. For the 5K Plus, as Qudelix's app for Chrome drives it: messages of elements in fragments, each but the last acknowledged within 1 s; a missing or bad acknowledgement fails the operation and closes the session, which the next operation opens again. In single-EQ mode the default EQ is the 30-band EQ. As in the app, a push requests the stored preset and sets the whole configuration (to switch the EQ on), the attributes (to make it parametric) and, for a pre-gain, the whole preset with only the pre-gain and type changed. |
+| `qudelix-usb-hid` | HID | –. EQs: the user EQ by default, and `spk`, the speaker (headphone) EQ. For the 5K (firmware 3.0.0 and later; older is `unsupported`) and the T71, as Qudelix's app for Chrome drives them, reading and writing. The framing comes from the vendor id (`0x0a12` or `0x1fc9`) and the descriptor, the model from the device's answer to the opening request (sent once the device has been quiet for 20 ms, answered within 5 s), and the EQ mode from the device: in the 5K's single-EQ mode the default EQ is its 20-band EQ and `spk` is `unsupported`. The speaker EQ is `perChannel`: a push without `right` writes left and right alike, in the one frame the app sends for both channels (mask 3); with `right`, each channel its own frames (mask 1 the left, 2 the right), as the app does with its channel selector on one channel, the pre-gain per channel; a pull returns the right channel as `right`. A speaker EQ of 4 or 8 channels (the T71's crossover drivers) is `unsupported`. The user EQ and the all-band EQ take no `right`. The T71's 5-channel user EQ is written on every channel alike and read from the first (`log` says when another differs). A push waits for the device's echo of each band before the next (a 5K can stop answering after 20 back to back); a device that sends none gets them at once. Slots are the app's preset indexes (0–21 built in, then the EQ's custom presets from 22); a push to a slot saves it with an empty name, the app's default. `bandCount()`, `eqEnabled()`, `currentSlot()` and `firmware()` ask the device. |
+| `qudelix-v2-usb-hid` | HID | –. EQs as for `qudelix-usb-hid`. For the 5K Plus, as Qudelix's app for Chrome drives it: messages of elements in fragments, each but the last acknowledged within 1 s; a missing or bad acknowledgement fails the operation and closes the session, which the next operation opens again. In single-EQ mode the default EQ is the 30-band EQ. As in the app, a push requests the stored preset and sets the whole configuration (to switch the EQ on), the attributes (to make it parametric) and, for a pre-gain, the whole preset with only the pre-gain and type changed, each channel's own with `right`. Every operation asks the device for its EQ mode and the EQ's switch and preset, since another program's change (the vendor's app open beside the bridge) can go unannounced; `firmware()` comes from the answer to the opening request. |
 | `topping-usb-hid` | HID | `family` (`dx1`, the default, `dx5`, `e50`, `dx9d` or `d900`: the DX1 II, DX5 II, E50 II, DX9 Discrete and D900, which share USB id `0x152a:0x8750` and differ in how a session starts, how the config list is asked for and where the firmware, the active config and the EQ switch are read). As Topping's web app drives them, reading and writing. A slot is one of the device's stored configs, a list (3 on the DX1 II and E50 II, up to 10 on the others) with names of up to 15 printable ASCII characters: `slots()` reads it on every family. `createSlot`, `renameSlot` and `deleteSlot` drive the DX5 II and the DX9 Discrete, as the app does: a new config is empty (0 dB, every band off) under the given name or the first free `Config N`, and the handler reads the list back and fails with `rejected` if it isn't there; a DX5 II plays it at once, and after a delete falls back to config 0; the app copies the active config instead of making an empty one. The D900 (another layout) and the DX1 II and E50 II (the app can't add or delete there) don't edit. A push to a config that doesn't exist is refused. The DX5 II is `perChannel`: a push writes `right` to the right channel and a pull returns it; after a push that names `right` the handler sets the config's bit in the mask the app keeps of the configs its editor shows with the channels apart where the channels differ, and clears it where they are equal, as the app does after a save, when the device has sent that mask (a push without `right` leaves the mask alone). The other families write both channels alike and read the left. The pre-gain is computed for every family. The DX5 II and E50 II refuse firmware older than the app's minimum (2.37 and 1.52) as `unsupported`; the D900 does when its capabilities answer is not the one the app requires. Tried on a DX5 II, creating, renaming and deleting included; the other four are unchecked. |
 | `jds-labs-usb-serial` | serial | – |
 | `nothing-usb-serial` | serial | `customSlot` (default 5) |
@@ -167,9 +167,11 @@ each operation says which EQ it is for.
 ```ts
 import { eqProfile } from '@potatosalad775/eqcaps-core';
 
-for (const eq of device.capabilities.eqs) console.log(eq.id, eq.name, eq.bandCount, eq.slots);
+for (const eq of device.capabilities.eqs) {
+	console.log(eq.id, eq.name, eq.bandCount, eq.slots, eq.perChannel);
+}
 const held = await device.pull({ eq: 'spk' });
-const spk = eqProfile(profile, 'spk')!; // the profile of that EQ: its band count and presets
+const spk = eqProfile(profile, 'spk')!; // the profile of that EQ: band count, presets, channels
 const result = fit(spk, wantedFilters, wantedPreamp);
 const filters = complete(spk, result.slots, { hints: held.filters }).filters;
 await device.push({ filters, eq: 'spk' });
@@ -178,16 +180,18 @@ await device.eqEnabled('spk'); // also currentSlot(eq), bandCount(eq), setEnable
 
 Without `eq`, every operation is about the profile's own EQ, as on a device with one.
 `capabilities.eqs` holds the listed EQs this bridge's handler drives, each with its own preset
-`slots`; one the handler doesn't know is left out, and naming an EQ that isn't there is an
-`invalid-request`. The EQs are independent: a push to one leaves the others as they are. A
-handler names its EQs in `eqs` and reads the operation's from `ctx.eq`; a new one goes there and
-in the table above.
+`slots` and `perChannel` (below); one the handler doesn't know is left out, and naming an EQ that
+isn't there is an `invalid-request`. The EQs are independent: a push to one leaves the others as
+they are. A handler names its EQs in `eqs` and reads the operation's from `ctx.eq`; a new one goes
+there and in the table above.
 
 ## Left and right channels
 
 A profile with `channels: "independent"` (format 1.4, SPEC §9) describes an EQ that holds a
-filter set and a preamp for each output channel. Where the handler drives them apart
-(`capabilities.perChannel`), a push takes the right channel as `right`, and a pull returns it.
+filter set and a preamp for each output channel; a listed EQ may say it for itself (format 1.5,
+SPEC §9.2), and `eqProfile` carries it. Where the handler drives that EQ's channels apart, a push
+takes the right channel as `right`, and a pull returns it: `capabilities.perChannel` says so for
+the profile's own EQ, and `perChannel` of each of `capabilities.eqs` for that one.
 
 ```ts
 const left = fit(profile, wantedLeft, wantedLeftPreamp);
@@ -205,11 +209,13 @@ await device.push({
 
 With `right`, `filters` and `preamp` are the left channel's, and `right.preamp` left out is
 `preamp`. Without it a push writes both channels alike, as on a linked EQ, and every handler takes
-it. `right` given to a handler without `perChannel` is an `invalid-request`, never written to both
-channels. A pull from a `perChannel` handler always has `right`, also when the channels are equal,
-and its top-level `filters` and `preamp` are the left channel's; other handlers' pulls have none.
-A handler says `perChannel` in its capabilities (it may depend on the options), takes `right` in
-its push and codec, and returns it from its pull.
+it. `right` for an EQ that isn't `perChannel` (the push's `eq`, or the profile's own without one)
+is an `invalid-request`, never written to both channels. A pull of a `perChannel` EQ always has
+`right`, also when the channels are equal, and its top-level `filters` and `preamp` are the left
+channel's; other pulls have none. A handler says `perChannel` in its capabilities for the EQ it
+drives by default (it may depend on the options) and `perChannelEqs` for its other EQs, by id,
+takes `right` in its push and codec, and returns it from its pull. The bridge never reads a
+profile's `channels`; the protocol tests check the data against the handlers.
 
 ## Device controls
 

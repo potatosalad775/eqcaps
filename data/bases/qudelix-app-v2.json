@@ -11,6 +11,7 @@
 				"id": "spk",
 				"name": "SPK EQ",
 				"bandCount": 20,
+				"channels": "independent",
 				"presets": [
 					{ "id": 0, "name": "Flat" },
 					{ "id": 22, "name": "Custom #1", "writable": true },
