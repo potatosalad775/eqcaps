@@ -185,6 +185,11 @@ above is about the EQ the profile describes.
   profile, marked experimental.
 - **Controls and firmware.** A handler can read the firmware and read and write the device
   controls the profile lists (`firmware`, `readControls`, `writeControl`).
+- **Presets as a list.** Where a device keeps its presets as a list with names of its own
+  (Topping's stored configs), the profile's `protocol.presets` is the room it has, and `slots()`
+  asks the device which exist now. A handler may also create, rename and delete them
+  (`createSlot`, `renameSlot`, `deleteSlot`); like controls, these are opt-in and never part of
+  `pull` or `push`. No format change.
 - **Tests** decode recorded device answers (`test/captures/`), round-trip every codec on its wire
   grid, and run the write recipe for every profile. Recordings of a vendor's web app driving a
   device (`test/recordings/`, made with the WebHID recorder in `tools/userscripts/`) check that

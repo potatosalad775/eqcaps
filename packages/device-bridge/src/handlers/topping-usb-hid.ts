@@ -24,9 +24,18 @@
 // gain than the number says, as it does from Topping's app. A recording of the app with a DX5 II
 // showed why the table is kept: the app reads any other word as a neighbouring step.
 //
+// The stored configs are a list, not fixed memories: 3 on the DX1 II and E50 II, up to 10 on the
+// others, each with a name of up to 15 ASCII bytes. The app adds one to the end by sending a whole
+// config (0x110B, 74 words: the name, the pre-gains and both channels' bands) and then its name
+// again (0x110C the index, 0x110D the name's four words); it deletes one by index (0x110A), after
+// which the later ones move down. A DX5 II makes a new config the active one by itself and falls
+// back to config 0 after a delete. Creating, renaming and deleting are driven for the DX5 II (tried
+// on firmware 2.58, and recorded from the app) and the DX9 Discrete (as the app does it,
+// unchecked). The D900 stores a config in another layout, and the other two can't add or delete.
+//
 // Left out, though the app does them: the heartbeat it sends every 1 or 5 s, the shutdown notice on
-// disconnect, the L/R-mode mask (0x1112) after a save, the preview state, creating, renaming and
-// deleting configs, and most settings besides the EQ.
+// disconnect, the L/R-mode mask (0x1112) after a save, the preview state, and most settings besides
+// the EQ.
 //
 // The DX5 II's settings are controls: one read (0x710C) answers a block of words, one per setting,
 // and each setting is written with its own command, which the device takes at once. Tried on the
@@ -41,6 +50,7 @@ import type {
 	HandlerControl,
 	HidFrame,
 	HidHandler,
+	Slot,
 	WriteState
 } from '../handler.ts';
 import { hidFrame, sendFrame, typeCodes } from '../io.ts';
@@ -59,6 +69,10 @@ const WRITE = 0x20;
 
 const CONNECT_STATE = 0x1101;
 const UPLOAD = 0x1106;
+const DELETE_CONFIG = 0x110a;
+const DOWNLOAD_CONFIG = 0x110b;
+const RENAME_INDEX = 0x110c;
+const RENAME_NAME = 0x110d;
 const SWITCH_CONFIG = 0x110e;
 const AGREEMENT = 0x1120;
 const SOFTWARE_VERSION = 0x1202;
@@ -77,6 +91,10 @@ const UNITY = 0x2000000;
 const BANDS = 11;
 /** Words of a config as the device sends it; the app accepts 70 or more. */
 const CONFIG_WORDS = 70;
+/** Words of a config as the app sends a new one: the 78 the device answers, less four spare. */
+const NEW_CONFIG_WORDS = 74;
+/** A name's bytes; the 16th byte of its four words is the config's band count. */
+const NAME_BYTES = 15;
 const LIST_TIMEOUT = 10000;
 const ANSWER_TIMEOUT = 2000;
 
@@ -95,26 +113,41 @@ interface Family {
 	switchPause: number;
 	/** Band commands between 10 ms pauses. */
 	burst: number;
+	/** The most configs the device stores. */
+	configs: number;
+	/** Configs are created, renamed and deleted here. */
+	edits?: boolean;
 }
 
 const FAMILIES: Record<ToppingFamily, Family> = {
-	dx1: { connect: 1, list: [UPLOAD, 0, READ], frame: 1, switchPause: 60, burst: 20 },
+	dx1: { connect: 1, list: [UPLOAD, 0, READ], frame: 1, switchPause: 60, burst: 20, configs: 3 },
 	e50: {
 		connect: 1,
 		list: [UPLOAD, 0, READ],
 		frame: 1,
 		settings: { kind: READ, firmware: 31, slot: 14 },
 		switchPause: 60,
-		burst: 20
+		burst: 20,
+		configs: 3
 	},
-	dx5: { connect: 2, list: [AGREEMENT, 1, WRITE], frame: 1, switchPause: 120, burst: 10 },
+	dx5: {
+		connect: 2,
+		list: [AGREEMENT, 1, WRITE],
+		frame: 1,
+		switchPause: 120,
+		burst: 10,
+		configs: 10,
+		edits: true
+	},
 	dx9d: {
 		connect: 2,
 		list: [AGREEMENT, 1, WRITE],
 		frame: 1,
 		settings: { kind: READ, firmware: 46, slot: 55, enabled: 54 },
 		switchPause: 60,
-		burst: 20
+		burst: 20,
+		configs: 10,
+		edits: true
 	},
 	d900: {
 		connect: 2,
@@ -122,7 +155,8 @@ const FAMILIES: Record<ToppingFamily, Family> = {
 		frame: 0,
 		settings: { kind: WRITE, firmware: 49, slot: 48, enabled: 47 },
 		switchPause: 60,
-		burst: 10
+		burst: 10,
+		configs: 10
 	}
 };
 
@@ -220,6 +254,42 @@ function preampDb(word: number, family?: ToppingFamily) {
 }
 
 const OFF = { type: 1, freq: 632, gain: 0, q: 7070, on: 0 };
+
+/**
+ * A config's name as its four words: up to 15 bytes of printable ASCII, four to a word with the
+ * first in the low byte. The app drops anything else from a name; this refuses it.
+ */
+export function toppingNameWords(name: string): number[] {
+	if (!/^[\x20-\x7e]+$/.test(name) || name !== name.trim() || name.length > NAME_BYTES) {
+		throw new BridgeError(
+			'invalid-request',
+			`Topping: a config's name is 1 to ${NAME_BYTES} ASCII characters, not ${JSON.stringify(name)}`
+		);
+	}
+	return [0, 4, 8, 12].map((at) =>
+		[3, 2, 1, 0].reduce((w, i) => ((w << 8) | (name.charCodeAt(at + i) || 0)) >>> 0, 0)
+	);
+}
+
+/** The name in a stored config's first four words. */
+export function toppingConfigName(w: readonly number[]): string {
+	const bytes = [0, 1, 2, 3].flatMap((i) => [0, 8, 16, 24].map((s) => ((w[i] ?? 0) >>> s) & 0xff));
+	const end = bytes.indexOf(0);
+	return String.fromCharCode(...bytes.slice(0, end < 0 ? NAME_BYTES : Math.min(end, NAME_BYTES)));
+}
+
+/**
+ * The words of a new config as the app sends one: the name with the band count in its 16th byte,
+ * each channel's switch and pre-gain, then 11 bands a channel of three words (switch, type and
+ * gain; frequency; Q). This one is empty: 0 dB and every band off at the app's defaults.
+ */
+export function toppingNewConfigWords(name: string): number[] {
+	const words = toppingNameWords(name);
+	words[3] = (words[3]! | (BANDS << 24)) >>> 0;
+	words.push(1, UNITY, 1, UNITY);
+	for (let i = 0; i < 2 * BANDS; i++) words.push(OFF.on | (OFF.type << 8), OFF.freq, OFF.q);
+	return words;
+}
 
 /**
  * The frames that select `slot` and write the request to both channels: the pre-gain, then the 11
@@ -549,6 +619,34 @@ async function readList(ctx: Ctx, session: Session): Promise<ConfigList> {
 	return list;
 }
 
+/** Sends the index and then the name's words, as the app renames a config. */
+async function sendName(ctx: Ctx, slot: number, name: string) {
+	const words = toppingNameWords(name);
+	await send(ctx, RENAME_INDEX, slot);
+	await ctx.sleep(50);
+	for (const [i, w] of words.entries()) {
+		await ctx.transport.sendReport(0, toppingFrame(RENAME_NAME, w, WRITE, words.length, i));
+	}
+	await ctx.sleep(80);
+}
+
+/** The session, for a family whose configs are created, renamed and deleted. */
+async function editing(ctx: Ctx) {
+	if (!familyOf(ctx.options).edits) {
+		throw new BridgeError(
+			'unsupported',
+			'Topping: configs are created, renamed and deleted on the DX5 II and DX9 Discrete only'
+		);
+	}
+	return sessionOf(ctx);
+}
+
+const slotOf = (w: readonly number[], id: number): Slot => ({
+	id,
+	name: toppingConfigName(w) || `Config ${id + 1}`,
+	writable: true
+});
+
 /** The active config, from the settings where they hold it. */
 async function activeSlot(ctx: Ctx): Promise<number | null> {
 	const o = ctx.options;
@@ -584,7 +682,13 @@ async function setEnabled(ctx: Ctx, enabled: boolean, slot?: number) {
 		await send(ctx, SWITCH_CONFIG, slot);
 		await ctx.sleep(o.family === 'd900' ? 100 : family.switchPause);
 	}
-	if (o.family !== 'd900') return send(ctx, PEQ_STATE, enabled ? 1 : 0);
+	if (o.family !== 'd900') {
+		await send(ctx, PEQ_STATE, enabled ? 1 : 0);
+		// A DX5 II takes up to 45 ms to switch, and answers a read of its EQ state with the old one
+		// until then.
+		await ctx.sleep(100);
+		return;
+	}
 	// The D900 reports each setting's outcome: the command, a status (0 for done) and the value.
 	const [, status] = await gather(
 		ctx,
@@ -689,7 +793,7 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 	transport: 'hid',
 	codec: toppingCodec,
 
-	capabilities: () => ({
+	capabilities: (_transport, o) => ({
 		canRead: true,
 		canWrite: true,
 		readsPreamp: true,
@@ -698,7 +802,8 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 		writesSlot: true,
 		needsBandCount: false,
 		readsCurrentSlot: true,
-		canEnable: true
+		canEnable: true,
+		editsSlots: familyOf(o).edits === true
 	}),
 
 	async pull(ctx, { slot, bands = BANDS - 1 }) {
@@ -723,7 +828,7 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 		if (slot >= count) {
 			throw new BridgeError(
 				'invalid-request',
-				`Topping: no config ${slot}, the device holds ${count}; Topping's app creates them`
+				`Topping: no config ${slot}, the device holds ${count}; create it first`
 			);
 		}
 		const frames = toppingWriteFrames({ ...request, slot }, ctx.options, session.reserved[slot]);
@@ -747,20 +852,104 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 		return activeSlot(ctx);
 	},
 
+	async slots(ctx) {
+		const list = await readList(ctx, await sessionOf(ctx));
+		return list.configs.map(slotOf);
+	},
+
+	async createSlot(ctx, { name }) {
+		const session = await editing(ctx);
+		const family = familyOf(ctx.options);
+		// The app reads the list again first: the new config goes after the last one.
+		const held = (await readList(ctx, session)).configs.map(toppingConfigName);
+		const slot = held.length;
+		if (slot >= family.configs) {
+			throw new BridgeError(
+				'invalid-request',
+				`Topping: the device holds ${slot} configs, the most it stores`
+			);
+		}
+		let named = name;
+		for (let n = slot + 1; named === undefined; n++) {
+			if (!held.includes(`Config ${n}`)) named = `Config ${n}`;
+		}
+		const words = toppingNewConfigWords(named);
+		for (const [i, w] of words.entries()) {
+			await ctx.transport.sendReport(
+				0,
+				toppingFrame(DOWNLOAD_CONFIG, w, WRITE, NEW_CONFIG_WORDS, i)
+			);
+			if (i % 10 === 9) await ctx.sleep(20);
+		}
+		await ctx.sleep(120);
+		// A DX5 II plays the new config by itself; the app selects it on the others.
+		if (ctx.options.family !== 'dx5') {
+			await send(ctx, SWITCH_CONFIG, slot);
+			await ctx.sleep(120);
+		}
+		await sendName(ctx, slot, named);
+		const now = (await readList(ctx, session)).configs;
+		if (now.length !== slot + 1 || toppingConfigName(now[slot]!) !== named) {
+			throw new BridgeError(
+				'rejected',
+				`Topping: the device holds ${now.length} configs after creating one, not ${slot + 1} ending in "${named}"`
+			);
+		}
+		return slotOf(now[slot]!, slot);
+	},
+
+	async renameSlot(ctx, slot, name) {
+		const session = await editing(ctx);
+		const count = session.count ?? (await readList(ctx, session)).configs.length;
+		if (!Number.isInteger(slot) || slot < 0 || slot >= count) {
+			throw new BridgeError(
+				'invalid-request',
+				`Topping: no config ${slot}, the device holds ${count}`
+			);
+		}
+		await sendName(ctx, slot, name);
+	},
+
+	async deleteSlot(ctx, slot) {
+		const session = await editing(ctx);
+		const count = (await readList(ctx, session)).configs.length;
+		if (!Number.isInteger(slot) || slot < 0 || slot >= count) {
+			throw new BridgeError(
+				'invalid-request',
+				`Topping: no config ${slot}, the device holds ${count}`
+			);
+		}
+		if (count <= 1) {
+			// The app refuses this too.
+			throw new BridgeError('invalid-request', "Topping: the device's last config stays");
+		}
+		await send(ctx, DELETE_CONFIG, slot);
+		await ctx.sleep(140);
+		// A DX5 II falls back to its first config; the app selects that one to match.
+		if (ctx.options.family === 'dx5') {
+			await send(ctx, SWITCH_CONFIG, 0);
+			await ctx.sleep(120);
+		}
+		const now = (await readList(ctx, session)).configs.length;
+		if (now !== count - 1) {
+			throw new BridgeError(
+				'rejected',
+				`Topping: the device holds ${now} configs after deleting one of ${count}`
+			);
+		}
+	},
+
 	async eqEnabled(ctx) {
 		await sessionOf(ctx);
 		const o = ctx.options;
-		if (o.family === 'dx5') {
-			// The app waits for the DX5 II to announce its switch; the device answers a read of it
-			// (firmware 2.58).
-			const [on] = await ask(ctx, PEQ_STATE, READ, 'the EQ switch request');
-			return on !== 0;
-		}
 		const at = familyOf(o).settings?.enabled;
 		if (at !== undefined) {
 			const s = await settings(ctx);
 			return s?.[at] === undefined ? null : s[at] !== 0;
 		}
+		// The DX5 II too, whose app only waits for the device to announce its switch (0x7132). That
+		// command can't be asked: a DX5 II (firmware 2.58) takes a read of it as switching the EQ
+		// off. This one it answers and leaves the switch alone.
 		const [state] = await ask(ctx, EQ_ENABLE_STATE, READ, 'the EQ state request');
 		return (state! & 1) === 1;
 	},

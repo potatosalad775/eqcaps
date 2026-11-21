@@ -146,6 +146,11 @@ export interface HandlerCapabilities {
 	canEnable: boolean;
 	/** `eqEnabled()` asks the device, where that depends on the options. Default: it has the method. */
 	readsEnabled?: boolean;
+	/**
+	 * Presets are created, renamed and deleted (`createSlot`, `renameSlot`, `deleteSlot`), where
+	 * that depends on the options. Default: it has the three methods.
+	 */
+	editsSlots?: boolean;
 }
 
 export interface HandlerContext<T extends Transport, O> {
@@ -201,6 +206,17 @@ export interface Handler<T extends Transport, O, F> {
 	 */
 	eqEnabled?(ctx: HandlerContext<T, O>): Promise<boolean | null>;
 	setEnabled?(ctx: HandlerContext<T, O>, enabled: boolean, slot?: number): Promise<void>;
+	/**
+	 * The presets the device holds now, with the names it stores, for a device whose presets are a
+	 * list that grows and shrinks rather than fixed memories. Ids count from 0 in the device's
+	 * order.
+	 */
+	slots?(ctx: HandlerContext<T, O>): Promise<Slot[]>;
+	/** Adds an empty preset after the last one; without a `name` the handler picks one. */
+	createSlot?(ctx: HandlerContext<T, O>, request: { name?: string }): Promise<Slot>;
+	renameSlot?(ctx: HandlerContext<T, O>, slot: number, name: string): Promise<void>;
+	/** Deletes a preset; the ones after it move down by one. */
+	deleteSlot?(ctx: HandlerContext<T, O>, slot: number): Promise<void>;
 	/** The device's firmware version, dotted ("1.5.8"); null when the device doesn't say. */
 	firmware?(ctx: HandlerContext<T, O>): Promise<string | null>;
 	/** The band count the device itself reports; null when it reports none. */
