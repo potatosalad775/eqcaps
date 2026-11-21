@@ -18,6 +18,7 @@ import type {
 } from '@potatosalad775/eqcaps-device-bridge';
 import { formatNumber } from './format.ts';
 import { REPO_URL } from './repo.ts';
+import { violationText } from './violations.ts';
 
 const hex = (n: number, digits = 4) => `0x${n.toString(16).padStart(digits, '0')}`;
 
@@ -120,6 +121,60 @@ export function readFindings(
 		bandCount,
 		violations: validate(profile, slots, pull.preamp).filter((v) => v.code !== 'too-many-bands')
 	};
+}
+
+/** The findings as sentences, as the read shows them and an issue or evidence file carries them. */
+export function findingLines(
+	findings: ReadFindings,
+	filters: readonly (Filter | null)[]
+): string[] {
+	const lines: string[] = [];
+	if (findings.bandCount) {
+		lines.push(
+			`The device returned ${findings.bandCount.read} bands; the profile has ${findings.bandCount.profile}.`
+		);
+	}
+	for (const v of findings.violations) lines.push(violationText(v, filters));
+	return lines;
+}
+
+/** One channel of a read (INSPECTOR §2 T2): what it holds, and what that says about the profile. */
+export interface ChannelRead {
+	/** Where the pull returned the channels apart (`right`); left out for one set for both. */
+	channel?: 'Left' | 'Right';
+	filters: (Filter | null)[];
+	preamp?: number;
+	/** Against the EQ's profile; null without one. */
+	findings: ReadFindings | null;
+}
+
+/**
+ * A pull as channels: the one set it returned, or the left and the right where it returned them
+ * apart (SPEC §9), each checked against the EQ's profile on its own.
+ */
+export function readChannels(
+	pull: PullResult,
+	profile: Profile | null,
+	capabilities: Pick<DeviceCapabilities, 'needsBandCount'>
+): ChannelRead[] {
+	const read = (channel: ChannelRead['channel'], c: Pick<PullResult, 'filters' | 'preamp'>) => ({
+		...(channel ? { channel } : {}),
+		filters: c.filters,
+		...(c.preamp !== undefined ? { preamp: c.preamp } : {}),
+		findings: profile ? readFindings(profile, c, capabilities) : null
+	});
+	if (!pull.right) return [read(undefined, pull)];
+	return [read('Left', pull), read('Right', pull.right)];
+}
+
+/** Whether the EQ's channels are linked or independent, as its profile says (SPEC §9). */
+export function channelsText(profile: Profile, readApart: boolean): string {
+	if ((profile.channels ?? 'linked') === 'linked') {
+		return 'Channels linked: one EQ drives left and right.';
+	}
+	return readApart
+		? 'Channels independent: left and right each hold their own EQ, read and checked apart.'
+		: 'Channels independent, but this protocol reads them as one.';
 }
 
 const describeWire = (
