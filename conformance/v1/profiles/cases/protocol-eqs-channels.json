@@ -1,0 +1,14 @@
+{
+	"description": "A listed EQ with channels of its own (format 1.5): a headphone EQ holding left and right apart under a one-channel user EQ.",
+	"spec": "§9.2",
+	"profile": {
+		"schemaVersion": "1.5",
+		"engine": "User EQ",
+		"channels": "linked",
+		"protocol": {
+			"handler": "chip-hid",
+			"eqs": [{ "id": "spk", "name": "Headphone EQ", "channels": "independent" }]
+		}
+	},
+	"expect": []
+}
