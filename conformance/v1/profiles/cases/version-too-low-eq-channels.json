@@ -1,0 +1,14 @@
+{
+	"description": "A profile whose listed EQ has channels of its own (format 1.5) must declare schemaVersion 1.5 or later, even where 1.4 knew the value.",
+	"spec": "§15",
+	"profile": {
+		"schemaVersion": "1.4",
+		"engine": "User EQ",
+		"channels": "linked",
+		"protocol": {
+			"handler": "chip-hid",
+			"eqs": [{ "id": "spk", "name": "Headphone EQ", "channels": "independent" }]
+		}
+	},
+	"expect": [{ "code": "version-too-low", "path": "/schemaVersion" }]
+}

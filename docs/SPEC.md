@@ -3,9 +3,10 @@
 > **Status: frozen as v1 (format 1.0) on 2026-10-03** ([DECISIONS D36](DECISIONS.md)); **format
 > 1.1** (2026-10-10, D48) adds `writable` presets (§9); **format 1.2** (2026-10-28, D49) adds
 > device controls (§9.1); **format 1.3** (2026-11-20, D53) adds a device's other EQs (§9.2);
-> **format 1.4** (2026-11-21, D54) adds independent left and right channels (§9). This file is the
-> single place the format is defined. From here on it changes only by minors that add (§15);
-> anything else needs v2. Published under `/v1/`.
+> **format 1.4** (2026-11-21, D54) adds independent left and right channels (§9); **format 1.5**
+> (2026-11-21, D55) gives a listed EQ channels of its own (§9.2). This file is the single place
+> the format is defined. From here on it changes only by minors that add (§15); anything else
+> needs v2. Published under `/v1/`.
 > MUST / SHOULD / MAY are used as in RFC 2119. Rationale for each choice is in
 > [DECISIONS.md](DECISIONS.md), and the evidence is in [research/prior-art.md](research/prior-art.md).
 
@@ -64,7 +65,7 @@ never folded in, even a constant one (DECISIONS D39).
 | `bands` | – | §5.2 |
 | `rules` | – | default `[]` |
 | `preamp` | ✔ | §9; `{ "mode": "unknown" }` is allowed and honest. |
-| `channels` | – | §9; default `"linked"`; `"independent"` is format 1.4 |
+| `channels` | – | §9; default `"linked"`; `"independent"` is format 1.4. A listed EQ may have its own (§9.2, format 1.5). |
 | `protocol` | – | §9; hardware only. How the device bridge drives the device. |
 | `meta` | ✔ | §10 |
 
@@ -293,7 +294,8 @@ and the device bridge applies it (§9); the domain stays in the app's units.
 output channels. `"independent"` (format 1.4): the EQ holds a filter set and a preamp for each of
 two output channels, left and right, set apart. Each channel is the profile on its own:
 `bandCount`, `band`, `bands`, `rules` and `preamp` hold for each, and no rule spans the two. An EQ
-of more channels than a stereo pair (a surround EQ, a crossover's drivers) is not described.
+of more channels than a stereo pair (a surround EQ, a crossover's drivers) is not described. An EQ
+listed in `protocol.eqs` may say its own `channels` (§9.2, format 1.5).
 
 Rules for consumers:
 
@@ -416,6 +418,7 @@ is matched once and an app offers its EQs side by side.
               { "id": 22, "name": "Custom #1", "writable": true }],
   "eqs": [
     { "id": "spk", "name": "SPK EQ", "bandCount": 20,
+      "channels": "independent",                 // format 1.5: left and right apart
       "presets": [{ "id": 0, "name": "Flat" }, { "id": 22, "name": "Custom #1", "writable": true }] }
   ]
 }
@@ -425,11 +428,13 @@ is matched once and an app offers its EQs side by side.
   EQ's label. `eqs` lists the others.
 - `id` is the handler's name for the EQ, from the bridge's vocabulary like a control's, and
   unique within the list. `name` is the device's or vendor app's label.
-- A listed EQ is the profile with that EQ's `bandCount` (the profile's when left out) and
-  `presets` in place of the profile's: `band`, `bands`, `rules`, `preamp` and `channels` hold for
-  it unchanged. `bands` overrides apply by slot index; those of slots the EQ lacks don't apply,
-  and its slots past the profile's `bandCount` have the template alone, which MUST complete them
-  (`slot-incomplete`).
+- A listed EQ is the profile with that EQ's `bandCount` (the profile's when left out), `presets`
+  in place of the profile's, and `channels` (format 1.5, §9) in place of the profile's when given:
+  `band`, `bands`, `rules` and `preamp` hold for it unchanged. `bands` overrides apply by slot
+  index; those of slots the EQ lacks don't apply, and its slots past the profile's `bandCount`
+  have the template alone, which MUST complete them (`slot-incomplete`). An EQ without `channels`
+  has the profile's, so a profile of independent channels lists its EQs as independent unless one
+  says `"linked"`.
 - `presets` follows the rules of `protocol.presets` (§9), and its ids are that EQ's own preset
   numbers. An EQ without `presets` has none: the profile's presets are never a listed EQ's.
 - `controls`, `options` and the rest of `protocol` are the device's, not one EQ's.
@@ -443,7 +448,9 @@ Rules for consumers:
 - To fit or validate filters for a listed EQ, a consumer runs the engine (§13) on that EQ's
   profile as defined above; `packages/core` builds it (`eqProfile`, §13.9).
 - A consumer that doesn't know `eqs` drives the EQ the profile describes, as before. One that
-  doesn't know an EQ's `id` ignores that EQ and keeps the rest.
+  doesn't know an EQ's `id` ignores that EQ and keeps the rest. One that doesn't know an EQ's
+  `channels` (before 1.5) takes the profile's for it; for an independent EQ under a linked
+  profile it writes both channels alike, as §9 allows.
 
 ## 10. Provenance (`meta`)
 
@@ -891,8 +898,9 @@ case format. The issue codes are listed in `ISSUE_CODES` of `packages/core`.
 `packages/core` also exports `isGraphic(profile)` (§5.4), `describe(profile)` (English summaries
 of slots, preamp and rules for UIs) and `unsupported(profile)`, which lists the rule types and
 filter types this engine version doesn't know, so a consumer can meet §7 and §15. For a device
-with other EQs (§9.2), `profileEqs(profile)` lists them, the profile's own first, and
-`eqProfile(profile, id)` gives the profile of one, which the engine functions take as any other.
+with other EQs (§9.2), `profileEqs(profile)` lists them, the profile's own first, each with its
+band count, presets and channels, and `eqProfile(profile, id)` gives the profile of one, which the
+engine functions take as any other.
 
 ## 14. Published artifacts
 
@@ -934,3 +942,4 @@ the host app: the database enhances an app and never blocks it. The reference cl
 | 1.2 | 2026-10-28 | `protocol.controls` (§9.1, D49) |
 | 1.3 | 2026-11-20 | `protocol.eqs` (§9.2, D53) |
 | 1.4 | 2026-11-21 | `channels: "independent"` (§9, D54) |
+| 1.5 | 2026-11-21 | `protocol.eqs[].channels` (§9.2, D55) |

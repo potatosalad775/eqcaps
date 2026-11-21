@@ -6,7 +6,7 @@ and the decisions since superseded or removed (D23, D29, D31, D38), is archived 
 [history/decisions.md](history/decisions.md).
 
 To change a decision, edit its entry here with a dated note, and update [SPEC.md](SPEC.md) in the
-same change if the format is affected. A new decision takes the next free number (D55). The rules
+same change if the format is affected. A new decision takes the next free number (D56). The rules
 agents follow are in [AGENTS.md](../AGENTS.md); this file is the record of why.
 
 ---
@@ -190,6 +190,22 @@ data: Topping's DX5 II, whose app edits the channels apart and which stores them
 a maintainer's unit). Only a stereo pair is described; an EQ of more channels (the Qudelix T71's
 surround EQ, crossover drivers) stays out. Left for later: a `channels` of its own for an EQ in
 `protocol.eqs`, which Qudelix's headphone EQ needs (two channels under a one-channel user EQ).
+
+*2026-11-21:* done the same day, as format 1.5 (D55).
+
+### D55. A listed EQ has channels of its own: format 1.5 (2026-11-21)
+An EQ in `protocol.eqs` may say `channels`, which replaces the profile's for that EQ; left out, it
+has the profile's, as before. Qudelix's devices need it: the user EQ the profile describes has one
+channel, and the headphone EQ listed beside it holds left and right apart (Qudelix's app edits
+them alike or apart, and a maintainer's 5K kept a band written to one channel off the other).
+"Channels apart" is a property of one EQ, not of the device. An app that knows only 1.4 or
+earlier takes the profile's `channels` for the listed EQ and writes both of its channels alike,
+which SPEC §9 allows, so older apps lose nothing; their client accepts any `1.x` and ignores the
+key. The bridge says for each listed EQ whether its handler drives the channels apart
+(`perChannel` in `capabilities.eqs`) and refuses `right` for an EQ where it doesn't, as D54 does
+for the profile's own. Rejected: marking the whole profile independent, which is wrong for the
+one-channel user EQ, and a profile of its own for the headphone EQ, which D53 rejected for the
+same device.
 
 ---
 
