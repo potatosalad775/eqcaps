@@ -449,10 +449,10 @@ describe('the NICEHCK checks, on a synthetic recording', () => {
 
 const recordings = loadRecordings();
 
-describe.runIf(recordings.some((r) => r.snapshots[0]?.adapter === 'topping-home'))(
+describe.runIf(recordings.some((r) => r.file === '2026-11-20-topping-dx5-ii.json'))(
 	'the Topping checks, on an altered recording',
 	() => {
-		const original = recordings.find((r) => r.snapshots[0]?.adapter === 'topping-home')!;
+		const original = recordings.find((r) => r.file === '2026-11-20-topping-dx5-ii.json')!;
 
 		test('a write the handler would send differently is reported', async () => {
 			const recording = structuredClone(original);
@@ -474,6 +474,36 @@ describe.runIf(recordings.some((r) => r.snapshots[0]?.adapter === 'topping-home'
 			};
 			expect(topping.checkData(original.snapshots[0]!, short, original)).toEqual([
 				'the device holds 5 configs, topping-dx5-ii lists 3'
+			]);
+		});
+	}
+);
+
+describe.runIf(recordings.some((r) => r.file === '2026-11-21-topping-dx5-ii-configs.json'))(
+	'the Topping config checks, on an altered recording',
+	() => {
+		const original = recordings.find((r) => r.file === '2026-11-21-topping-dx5-ii-configs.json')!;
+		const outputs = (command: string) =>
+			original.events.filter((e) => e.op === 'output' && e.data?.slice(10, 14) === command);
+
+		test('the recording as it is agrees', async () => {
+			expect(await topping.checkConfigs(original)).toEqual([]);
+		});
+
+		test('a rename to another name, and a delete without the select, are reported', async () => {
+			const recording = structuredClone(original);
+			const word = recording.events.find((e) => e.t === outputs('110d')[4]!.t)!;
+			word.data = `${word.data!.slice(0, 14)}00000041${word.data!.slice(22)}`;
+			const select = outputs('110e')[0]!;
+			recording.events.splice(
+				recording.events.findIndex((e) => e.t === select.t),
+				1
+			);
+			expect(await topping.checkConfigs(recording)).toEqual([
+				'the rename is not the four 0x110d frames of "eqcaps test 1"',
+				'the delete is not 0x110a = 5, 0x110e = 0 and the list request 0x1120 = 1, in that order',
+				"the handler's rename is not the app's words, with the index 4",
+				"the handler's delete: 3 frames, the app sent 0"
 			]);
 		});
 	}

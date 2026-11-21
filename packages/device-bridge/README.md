@@ -81,9 +81,9 @@ device, and whether an old handle went or was reused, for telling these cases ap
 `device.capabilities` says what the protocol can do (`canRead`, `canWrite`, `readsPreamp`,
 `readsSlot`, `writesPreamp`, `writesSlot`, `needsBandCount`, the filter `types` it has wire codes for, the
 `wire` grid it can carry, preset `slots`, `disconnectOnSave`, `experimental`, `readsFirmware`,
-`readsEnabled`, and the device `controls` it drives). Where the EQ switch is separate from the
-preset (`readsEnabled`), `eqEnabled()` reads it, and `currentSlot()` gives the preset whether the
-EQ is on or off. A push with a
+`readsEnabled`, `listsSlots`, `editsSlots` and the device `controls` it drives). Where the EQ
+switch is separate from the preset (`readsEnabled`), `eqEnabled()` reads it, and `currentSlot()`
+gives the preset whether the EQ is on or off. A push with a
 `preamp` or `slot` the protocol can't write is refused, not sent without it, and so is a pull of
 a `slot` the protocol can't read. Each handler's `codec`
 turns a push request into frames and back without a device, for checking what a value becomes on
@@ -106,11 +106,10 @@ why a block can't be driven: an unknown handler (data newer than this bridge) or
 | `moondrop-old-fashioned-hid` | HID | – (a packet, read requests included, is zero-padded to the descriptor's size for report 75 when that is larger than its 10 bytes) |
 | `conexant-usb-hid` | HID | – |
 | `ktmicro-usb-hid` | HID | `baseRegister` (default `0x26`), `bandRegisters` (`[{ "freq", "q" }]` per band, for models that skip or reorder registers), `customSlot` (default 3), `freqUnit` (Hz per unit of the frequency field, default 1; 2 where the firmware stores half the frequency), `slotRegister` and `preampRegister` (default true; false leaves the slot register 0x24, which also switches the EQ, or the preamp register 0x66 alone), `frameDelay` (ms between the frames of a push, default 0), `enableRegister` (the register of an EQ switch, 1 on and 0 off, on firmware without slots: a push turns it on first, and the slot register is left alone), `enableLast` (with `enableRegister`, a push writes the 1 after the bands and preamp, just before the commit; Walkplay's app), `writeAck` (byte 6 of the answer to a good write; each write then waits for its answer, and another flag is `rejected`), `writeWait` (ms each write waits for the device's answer to its register, going on whether or not one comes and without reading it; only a timeout is let go, and `writeAck` takes over when set; default none), `bandDelay` (ms after each band's two frames, default 0), `typeFlag` (bits OR-ed into every band's type byte on write and cleared from it on read, default 0; Walkplay's app sets bit 3, so 8), `gainRegister` (the register `globalGain` and `globalGainDb` use, default `0x3b`) |
-| `topping-usb-hid` | `volume` and `balance` (dB; the device holds the volume as attenuation in 0.5 dB steps, or 1 dB in its 1 dB step mode, and the balance as signed tenths); `mute`, `input`, `output`, `gain`, `lineMode`, `dacFilter`, `polarity`, `crossfeed`, `brightness` (the device's own numbers). DX5 II only; the other families' settings are not driven. A volume write is refused (`rejected`) while a line output is in DAC mode, as the app sends nothing then. From Topping's web app; tried on a DX5 II |
 | `fosi-audio-usb-hid` | HID | `reportId` (default 1), `bandwidth` (default 0), `defaultSlot` (default 7) |
 | `qudelix-usb-hid` | HID | –. EQs: the user EQ by default, and `spk`, the speaker (headphone) EQ. For the 5K (firmware 3.0.0 and later; older is `unsupported`) and the T71, as Qudelix's app for Chrome drives them, reading and writing. The framing comes from the vendor id (`0x0a12` or `0x1fc9`) and the descriptor, the model from the device's answer to the opening request (sent once the device has been quiet for 20 ms, answered within 5 s), and the EQ mode from the device: in the 5K's single-EQ mode the default EQ is its 20-band EQ and `spk` is `unsupported`. The speaker EQ is written left and right alike, in the one frame the app sends for both channels, and read from the left channel (`log` says when the right differs); a speaker EQ of 4 or 8 channels (the T71's crossover drivers) is `unsupported`. The T71's 5-channel user EQ is written on every channel. A push waits for the device's echo of each band before the next (a 5K can stop answering after 20 back to back); a device that sends none gets them at once. Slots are the app's preset indexes (0–21 built in, then the EQ's custom presets from 22); a push to a slot saves it with an empty name, the app's default. `bandCount()`, `eqEnabled()`, `currentSlot()` and `firmware()` ask the device. |
 | `qudelix-v2-usb-hid` | HID | –. EQs as for `qudelix-usb-hid`. For the 5K Plus, as Qudelix's app for Chrome drives it: messages of elements in fragments, each but the last acknowledged within 1 s; a missing or bad acknowledgement fails the operation and closes the session, which the next operation opens again. In single-EQ mode the default EQ is the 30-band EQ. As in the app, a push requests the stored preset and sets the whole configuration (to switch the EQ on), the attributes (to make it parametric) and, for a pre-gain, the whole preset with only the pre-gain and type changed. |
-| `topping-usb-hid` | HID | `family` (`dx1`, the default, `dx5`, `e50`, `dx9d` or `d900`: the DX1 II, DX5 II, E50 II, DX9 Discrete and D900, which share USB id `0x152a:0x8750` and differ in how a session starts, how the config list is asked for and where the firmware, the active config and the EQ switch are read). As Topping's web app drives them, reading and writing. A slot is one of the device's stored configs (3 on the DX1 II and E50 II, 10 on the others), which a push needs to exist already. The pre-gain is computed for every family. The DX5 II and E50 II refuse firmware older than the app's minimum (2.37 and 1.52) as `unsupported`; the D900 does when its capabilities answer is not the one the app requires. Tried on a DX5 II; the other four are unchecked. |
+| `topping-usb-hid` | HID | `family` (`dx1`, the default, `dx5`, `e50`, `dx9d` or `d900`: the DX1 II, DX5 II, E50 II, DX9 Discrete and D900, which share USB id `0x152a:0x8750` and differ in how a session starts, how the config list is asked for and where the firmware, the active config and the EQ switch are read). As Topping's web app drives them, reading and writing. A slot is one of the device's stored configs, a list (3 on the DX1 II and E50 II, up to 10 on the others) with names of up to 15 printable ASCII characters: `slots()` reads it on every family. `createSlot`, `renameSlot` and `deleteSlot` drive the DX5 II and the DX9 Discrete, as the app does: a new config is empty (0 dB, every band off) under the given name or the first free `Config N`, and the handler reads the list back and fails with `rejected` if it isn't there; a DX5 II plays it at once, and after a delete falls back to config 0; the app copies the active config instead of making an empty one. The D900 (another layout) and the DX1 II and E50 II (the app can't add or delete there) don't edit. A push to a config that doesn't exist is refused. The pre-gain is computed for every family. The DX5 II and E50 II refuse firmware older than the app's minimum (2.37 and 1.52) as `unsupported`; the D900 does when its capabilities answer is not the one the app requires. Tried on a DX5 II, creating, renaming and deleting included; the other four are unchecked. |
 | `jds-labs-usb-serial` | serial | – |
 | `nothing-usb-serial` | serial | `customSlot` (default 5) |
 | `fiio-usb-serial` | serial | `saveCommand` (default `0x19`) |
@@ -128,6 +127,36 @@ and `ktmicro-usb-hid` turn the EQ off with a preset (KT Micro's default is slot 
 `enableRegister` is set); the others refuse a `bypass` preset. Presets marked `"writable": true` (format 1.1) are the user memories a
 write may target; once any preset is marked, the unmarked ones are built-in curves (SPEC §9). The
 bridge passes the mark on in `capabilities.slots` and doesn't enforce it. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
+
+## Presets a device keeps as a list
+
+Most devices have fixed memories, and the profile's `protocol.presets` lists them. Some keep a
+list of presets instead, which grows and shrinks and has names of its own (Topping's stored
+configs). There `capabilities.slots` is the room the device has, under the data's names, and
+`listsSlots` is true: `slots()` asks the device which presets exist now and what they are called.
+Ids count from 0 in the device's order; the profile's `bypass` preset, if it has one, follows. On a
+device with fixed memories `slots()` gives `capabilities.slots` and sends nothing.
+
+```ts
+// [{ id: 0, name: "Bass 1" }, { id: 1, name: "Airy" }, …]
+const now = await device.slots();
+if (device.capabilities.editsSlots) {
+	// Empty, after the last one; refused when the device is full.
+	const made = await device.createSlot({ name: 'Movies' });
+	// Refused, never shortened, if the device can't store the name.
+	await device.renameSlot(made.id, 'Movies 2');
+	// The ones after it move down by one.
+	await device.deleteSlot(made.id);
+	// A create or a delete may have changed the active preset.
+	await device.currentSlot();
+}
+```
+
+Editing is opt-in per handler (`editsSlots`, which can also depend on the options): without it the
+three calls are `unsupported`. A new preset is empty, and may become the active one at once, so ask
+`currentSlot()` after a create or a delete. A push to a preset the device doesn't hold is still
+refused (`invalid-request`): create it first. Like controls, these are never called by `pull` or
+`push`, and the inspector doesn't call them (invariant 9, D40).
 
 ## Other EQs
 
@@ -188,6 +217,7 @@ its role), so data newer than the bridge still drives the rest.
 | `walkplay-hid` | `dacFilter`, `gainLevel`, `workMode`, `volume` (one byte each); `dre` (toggle, held as 0 on, 1 off; Tanchjim's app); `micGain`, `leftGain`, `rightGain` (dB, on a 1/256 grid). From NICEHCK's and Walkplay's web apps; `firmware()` too |
 | `moondrop-usb-hid` | `globalGain` (dB on a 1/256 grid: read with `[0x80,3,0]`, written with `[1,3,2,s16 LE]` and the offset save `[1,4,0]`); then features that are read with `[0x80,cmd,0]` (the value at byte 3) and written with `[1,cmd,1,value]`, 50 ms, and no save: `dacFilter` (`0x11`), `dacMode` (`0x1D`), `led` (`0x28`, or `ledCommand`; 0 or 1), `gainLevel` (`0x26`), `ancMode` (`0x25`), `dualMicEnc` (`0x34`; 0 or 1); `promptTone` (on or off, 0 or 1) and `promptToneVolume`, which are bytes 0 and 1 of the three-byte `0x2B` (on, volume, tone): a write reads the three, changes its own and writes all three back, so the tone is never changed. A value that is not a whole number from 0 to 255 (0 or 1 for the toggles) is `unrepresentable`; the ones a device takes are the profile's. With `linkCheck`, the link is asked about before each read and write. From Moondrop's web app; `firmware()` too |
 | `ktmicro-usb-hid` | `globalGain` (the KT0211L's DAC gain register 0x3b as a step), `globalGainDb` (the same register in dB on models that hold it so, minus ten times the dB); both use `gainRegister` in place of 0x3b when it is set (Walkplay's SchemeNo19 holds the dB in 0x57). From Kiwi Ears' web app and Walkplay's Android app |
+| `topping-usb-hid` | `volume` and `balance` (dB; the device holds the volume as attenuation in 0.5 dB steps, or 1 dB in its 1 dB step mode, and the balance as signed tenths); `mute`, `input`, `output`, `gain`, `lineMode`, `dacFilter`, `polarity`, `crossfeed`, `brightness` (the device's own numbers). DX5 II only; the other families' settings are not driven. A volume write is refused (`rejected`) while a line output is in DAC mode, as the app sends nothing then. From Topping's web app; tried on a DX5 II |
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,
 `timeout`, `bad-response`, `rejected`, `transport` or `invalid-request`.
