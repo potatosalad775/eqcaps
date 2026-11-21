@@ -51,7 +51,7 @@ npm install @potatosalad775/eqcaps-client @potatosalad775/eqcaps-core
 
 ```ts
 import { createClient } from '@potatosalad775/eqcaps-client';
-import { complete, fit, validateList } from '@potatosalad775/eqcaps-core';
+import { plan, validateList } from '@potatosalad775/eqcaps-core';
 
 const client = createClient();
 const { best } = await client.matchDevice({ usb: { vendorId, productId, productName } });
@@ -59,8 +59,8 @@ const profile = best && (await client.loadProfile(best.id));
 
 if (profile) {
 	validateList(profile, filters); // while editing: flag what the device won't take
-	const { slots } = fit(profile, filters, preamp); // before writing: the closest valid preset
-	const written = complete(profile, slots).filters; // every band filled, ready to send
+	// Before writing: the closest valid preset, every band filled, ready to send.
+	const { write } = plan(profile, { filters, preamp });
 }
 ```
 
@@ -70,7 +70,7 @@ carries on without constraints. You can embed `bundle.json` from a
 
 | Package | What it does |
 | --- | --- |
-| [`@potatosalad775/eqcaps-core`](packages/core/) | Types, profile validator and the engine (`validate`, `fit`, `complete`, …). Zero dependencies. |
+| [`@potatosalad775/eqcaps-core`](packages/core/) | Types, profile validator and the engine (`validate`, `fit`, `plan`, …). Zero dependencies. |
 | [`@potatosalad775/eqcaps-client`](packages/client/) | Fetching, caching and matching a connected device to its profile. |
 | [`@potatosalad775/eqcaps-device-bridge`](packages/device-bridge/) | Reads and writes EQ on the database's hardware over USB HID, serial and Bluetooth. Driven by the profiles, with no browser types in its handlers. |
 

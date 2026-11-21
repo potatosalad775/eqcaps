@@ -7,8 +7,8 @@ Each step is one commit; none changes the format.
 | Step | What | Where | Decisions | Status |
 | --- | --- | --- | --- | --- |
 | 1 | The device viewed as one EQ, in place of `eq` on every operation | `device-bridge` | D53 (note) | done 2026-11-21 |
-| 2 | The write recipe as one engine operation, `plan` | `core`, SPEC §9 and §13 | D12 (note), D56 | next |
-| 3 | The inspector's read session; the bridge's reading side; shared connect rules to their owners | inspector, `device-bridge`, `client` | D40 (note) | after 2 |
+| 2 | The write recipe as one engine operation, `plan` | `core`, SPEC §9 and §13 | D12 (note), D56 | done 2026-11-21 |
+| 3 | The inspector's read session; the bridge's reading side; shared connect rules to their owners | inspector, `device-bridge`, `client` | D40 (note) | next |
 | 4 | The editor's edit rules and its starting file, out of the route | inspector | none | after 3 |
 
 ## 1. The device viewed as one EQ (done)
@@ -35,18 +35,23 @@ follow. For uniPEQ (not edited from here):
   ten methods and the swap of `slots` and `perChannel` go.
 - `capabilities.perChannelEqs` is gone; nothing in uniPEQ read it.
 
-## 2. The write recipe as `plan` (next)
+## 2. The write recipe as `plan` (done)
 
-`fit` and `complete` per channel, the hints, when a right channel is carried and when the preamp
-is sent, as one operation in `core` (SPEC §13.10, vectors in `conformance/v1/plan.json`). It takes
-the profile of the EQ being written, the wanted filters and preamp per channel, what the device
-holds, and two facts about the write: it carries a preamp, it drives the channels apart. It
-returns the push request and each channel's `fit` result. The preamp is sent when the write
-carries one and the mode is `manual` or `unknown` (SPEC §9, rules for consumers): what uniPEQ
-does, where the bridge's README and `recipe.test.ts` sent it for `manual` only. `recipe.test.ts`
-then runs it for every EQ and channel of every profile, with hints.
+`plan(profile, wanted, { writesPreamp, perChannel, held })` in `core` (SPEC §13.10, D56, vectors
+in `conformance/v1/plan.json`): `fit`, then `complete` with what the device holds as hints, for
+each channel that is written. It returns the write (`filters`, `preamp`, `right`: what the
+bridge's `push` takes) and each channel's `fit` result and warnings. The right channel goes out
+apart only where the profile says `independent`, the write is `perChannel` and one is wanted; the
+preamp only where the write carries one and the mode is `manual` or `unknown` (SPEC §9, rules for
+consumers), which is what uniPEQ did and the bridge's README and recipe test didn't.
+`recipe.test.ts` now plans and pushes every EQ and channel of every profile, with hints.
 
-## 3. Connecting (after 2)
+For uniPEQ (not edited from here): `planChannel` in `push-plan.ts` becomes a mapping of
+`plan(...).channels[i].fit` to its `PlanChange`s; `sendsPreamp`, `drivesChannelsApart` and the
+`right` assembly are `plan`'s. Where the EQ on screen is linked and the device drives its channels
+apart, `plan` leaves `right` out (the bridge writes both alike) where uniPEQ sent the left twice.
+
+## 3. Connecting (next)
 
 - The connect route's state (the chosen device, the matches, the profile and protocol in use, the
   open device, the EQ and the read) becomes a read session in `apps/inspector/src/lib/`, tested

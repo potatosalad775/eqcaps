@@ -6,16 +6,19 @@ import {
 	isActive,
 	near,
 	normalizeFilter,
+	plan,
 	validate,
 	validateList,
 	type Filter,
+	type PlanOptions,
+	type PlanWanted,
 	type Profile
 } from '../src/index.ts';
 import { fitsSlot } from '../src/assign.ts';
 import { engineProfile, type EngineSlot } from '../src/resolve.ts';
 
-// The normative properties of the property ops (SPEC §13.5–§13.7), as assertions. Shared by the
-// random property tests and the conformance vectors for assign, fit and complete.
+// The normative properties of the property ops (SPEC §13.5–§13.7 and §13.10), as assertions. Shared
+// by the random property tests and the conformance vectors for assign, fit, complete and plan.
 
 export const same = (a: Filter | null | undefined, b: Filter | null | undefined): boolean =>
 	(!a && !b) ||
@@ -169,4 +172,50 @@ export function checkComplete(
 		expect(asc(after)).toEqual([]);
 		expect(r.warnings.filter((w) => w.code === 'no-room')).toEqual([]);
 	}
+}
+
+/**
+ * plan's properties (SPEC §13.10): the right channel is written apart exactly where the profile's
+ * channels are independent, the write drives them apart and one is wanted; a preamp is sent
+ * exactly where the write carries one and the mode is manual or unknown; and each written channel
+ * is `fit` then `complete` with that channel's hints (whose own properties are checked on their
+ * own).
+ */
+export function checkPlan(profile: Profile, wanted: PlanWanted, options: PlanOptions = {}): void {
+	const r = plan(profile, wanted, options);
+	const apart =
+		profile.channels === 'independent' && options.perChannel === true && wanted.right !== undefined;
+	expect(r.channels).toHaveLength(apart ? 2 : 1);
+	expect(r.write.right !== undefined).toBe(apart);
+
+	const mode = profile.preamp.mode;
+	const sends = options.writesPreamp === true && (mode === 'manual' || mode === 'unknown');
+	expect(r.sendsPreamp).toBe(sends);
+
+	const preamp = wanted.preamp ?? 0;
+	const held = options.held ?? undefined;
+	const sides = [
+		{ filters: wanted.filters, preamp, hints: held?.filters, write: r.write },
+		...(apart
+			? [
+					{
+						filters: wanted.right!.filters,
+						preamp: wanted.right!.preamp ?? preamp,
+						hints: held?.right?.filters ?? held?.filters,
+						write: r.write.right!
+					}
+				]
+			: [])
+	];
+	sides.forEach((side, i) => {
+		const filters = [...side.filters];
+		const hints = side.hints?.map((h) => h ?? null);
+		const fitted = fit(profile, filters, side.preamp);
+		expect(r.channels[i]!.fit).toEqual(fitted);
+		const completed = complete(profile, fitted.slots, hints ? { hints } : {});
+		expect(side.write.filters).toEqual(completed.filters);
+		expect(r.channels[i]!.warnings).toEqual(completed.warnings);
+		expect('preamp' in side.write).toBe(sends);
+		if (sends) expect(side.write.preamp).toBe(fitted.preamp);
+	});
 }

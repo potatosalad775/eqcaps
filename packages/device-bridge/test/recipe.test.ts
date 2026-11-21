@@ -1,8 +1,15 @@
-// The consumer recipe end to end, for every device with a protocol: fit what the user wants to
-// the profile, complete the bands, push. Whatever fit produces, the codec must be able to write;
-// a failure is a mismatch between the data and the protocol.
+// The consumer recipe end to end, for every EQ of every device with a protocol: plan what the
+// user wants against the EQ's profile (core's `plan`: fit, then complete with what the device
+// holds, for each channel it is written by), and push the plan. Whatever plan produces, the codec
+// must be able to write; a failure is a mismatch between the data and the protocol.
 
-import { complete, fit, type Filter, type Profile } from '@potatosalad775/eqcaps-core';
+import {
+	eqProfile,
+	plan,
+	profileEqs,
+	type Filter,
+	type Profile
+} from '@potatosalad775/eqcaps-core';
 import { describe, expect, test } from 'vitest';
 import {
 	HANDLERS,
@@ -23,6 +30,19 @@ const WANTED: Filter[] = [
 	{ type: 'PK', freq: 3150, q: 4, gain: 1.75 },
 	{ type: 'HSC', freq: 9000, q: 0.7, gain: -4 }
 ];
+/** The right channel, where the EQ holds one apart: other bands, another preamp. */
+const WANTED_RIGHT: Filter[] = [
+	{ type: 'PK', freq: 60, q: 0.9, gain: 2 },
+	{ type: 'PK', freq: 5000, q: 2, gain: -3.25 }
+];
+/** What the device held before, as a read would return it: the bands a write leaves keep these. */
+const held = (bands: number, shift: number): Filter[] =>
+	Array.from({ length: bands }, (_, i) => ({
+		type: 'PK',
+		freq: Math.round(40 * shift * 1.7 ** i),
+		q: 1.2,
+		gain: i % 2 ? -1 : 1
+	}));
 
 /**
  * A HID device that echoes every report back as an input report, with KT Micro's write flag in
@@ -108,10 +128,8 @@ function toppingFake(handler: string, options: unknown) {
 }
 
 describe.each(Object.entries(PROTOCOLS))('%s', (profileId, protocol) => {
-	test('fit → complete → push writes without a codec error', async () => {
+	test('plan → push writes every EQ without a codec error', async () => {
 		const profile = profiles.get(profileId) as Profile;
-		const result = fit(profile, WANTED, -4);
-		const { filters } = complete(profile, result.slots);
 		const kind = transportsOf(HANDLERS[protocol.handler])[0]!;
 		const { writeAck } = (protocol.options ?? {}) as { writeAck?: number };
 		const transport =
@@ -119,8 +137,29 @@ describe.each(Object.entries(PROTOCOLS))('%s', (profileId, protocol) => {
 			toppingFake(protocol.handler, protocol.options ?? {}) ??
 			(kind === 'hid' ? hidSink(writeAck) : streamSink(kind));
 		const device = openDevice(transport, protocol, { sleep: noSleep });
-		const preamp = profile.preamp.mode === 'manual' ? result.preamp : undefined;
-		await device.push({ filters, ...(preamp === undefined ? {} : { preamp }) });
-		expect(transport.count).toBeGreaterThan(0);
+		const driven = [undefined, ...device.capabilities.eqs.map((e) => e.id)];
+		// Every EQ the data lists is one the handler drives (protocols.test.ts): none is skipped.
+		expect(driven).toHaveLength(profileEqs(profile).length);
+
+		for (const id of driven) {
+			const view = device.eq(id);
+			const eq = eqProfile(profile, id)!;
+			const bands = eq.bandCount ?? 10;
+			const planned = plan(
+				eq,
+				{ filters: WANTED, preamp: -4, right: { filters: WANTED_RIGHT, preamp: -2 } },
+				{
+					...view.capabilities,
+					held: { filters: held(bands, 1), right: { filters: held(bands, 1.3) } }
+				}
+			);
+			// The right channel goes out exactly where the data says the EQ holds one apart.
+			expect(planned.write.right !== undefined, `${id ?? 'own'}: right`).toBe(
+				eq.channels === 'independent'
+			);
+			const before = transport.count;
+			await view.push(planned.write);
+			expect(transport.count, `${id ?? 'own'}: frames`).toBeGreaterThan(before);
+		}
 	});
 });

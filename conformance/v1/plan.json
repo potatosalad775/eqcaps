@@ -1,0 +1,215 @@
+{
+	"description": "plan(profile, wanted, { writesPreamp?, perChannel?, held? }) (SPEC §13.10): fit then complete for each written channel. The input holds the wanted filters, preamp and right channel beside the options; a runner checks the properties and the facts in expect.",
+	"vectors": [
+		{
+			"description": "a manual preamp is fitted and sent where the write carries one",
+			"profile": { "preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } } },
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"preamp": -3.14,
+				"writesPreamp": true
+			},
+			"expect": { "channels": 1, "preamp": true }
+		},
+		{
+			"description": "a manual preamp is not sent where the write carries none",
+			"profile": { "preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } } },
+			"op": "plan",
+			"input": { "filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }], "preamp": -3 },
+			"expect": { "channels": 1, "preamp": false }
+		},
+		{
+			"description": "an unknown preamp is sent as wanted where the write carries one",
+			"profile": { "preamp": { "mode": "unknown" } },
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"preamp": -3.14,
+				"writesPreamp": true
+			},
+			"expect": { "channels": 1, "preamp": true }
+		},
+		{
+			"description": "an auto preamp is never sent",
+			"profile": { "preamp": { "mode": "auto" } },
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"preamp": -3,
+				"writesPreamp": true
+			},
+			"expect": { "channels": 1, "preamp": false }
+		},
+		{
+			"description": "no preamp control: none is sent",
+			"profile": {},
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"preamp": -3,
+				"writesPreamp": true
+			},
+			"expect": { "channels": 1, "preamp": false }
+		},
+		{
+			"description": "independent channels written apart, each fitted on its own",
+			"profile": {
+				"preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } },
+				"channels": "independent"
+			},
+			"op": "plan",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 },
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 20 }
+				],
+				"preamp": -3,
+				"right": {
+					"filters": [{ "type": "PK", "freq": 4000, "q": 1, "gain": -2.04 }],
+					"preamp": -1
+				},
+				"writesPreamp": true,
+				"perChannel": true
+			},
+			"expect": { "channels": 2, "preamp": true }
+		},
+		{
+			"description": "the right channel's preamp left out is the left's",
+			"profile": {
+				"preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } },
+				"channels": "independent"
+			},
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"preamp": -3,
+				"right": { "filters": [{ "type": "PK", "freq": 4000, "q": 1, "gain": -2 }] },
+				"writesPreamp": true,
+				"perChannel": true
+			},
+			"expect": { "channels": 2, "preamp": true }
+		},
+		{
+			"description": "independent channels wanted alike: one write for both",
+			"profile": {
+				"preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } },
+				"channels": "independent"
+			},
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"writesPreamp": true,
+				"perChannel": true
+			},
+			"expect": { "channels": 1, "preamp": true }
+		},
+		{
+			"description": "a write that drives both channels alike sends the left for both",
+			"profile": {
+				"preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } },
+				"channels": "independent"
+			},
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"right": { "filters": [{ "type": "PK", "freq": 4000, "q": 1, "gain": -2 }] },
+				"writesPreamp": true
+			},
+			"expect": { "channels": 1, "preamp": true }
+		},
+		{
+			"description": "a linked profile has no right channel to write",
+			"profile": { "preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } } },
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"right": { "filters": [{ "type": "PK", "freq": 4000, "q": 1, "gain": -2 }] },
+				"perChannel": true
+			},
+			"expect": { "channels": 1, "preamp": false }
+		},
+		{
+			"description": "what each channel holds is its hints",
+			"profile": {
+				"preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } },
+				"channels": "independent"
+			},
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"right": { "filters": [{ "type": "PK", "freq": 4000, "q": 1, "gain": -2 }] },
+				"perChannel": true,
+				"held": {
+					"filters": [
+						{ "type": "PK", "freq": 31, "q": 0.7, "gain": 6 },
+						{ "type": "PK", "freq": 62, "q": 0.7, "gain": -2 },
+						{ "type": "PK", "freq": 125, "q": 0.7, "gain": 1 },
+						{ "type": "PK", "freq": 250, "q": 0.7, "gain": 0 }
+					],
+					"right": {
+						"filters": [
+							{ "type": "PK", "freq": 40, "q": 2, "gain": 1 },
+							{ "type": "PK", "freq": 80, "q": 2, "gain": 1 },
+							{ "type": "PK", "freq": 160, "q": 2, "gain": 1 },
+							{ "type": "PK", "freq": 320, "q": 2, "gain": 1 }
+						]
+					}
+				}
+			},
+			"expect": { "channels": 2, "preamp": false }
+		},
+		{
+			"description": "a right channel not read apart takes what was read as its hints",
+			"profile": {
+				"preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } },
+				"channels": "independent"
+			},
+			"op": "plan",
+			"input": {
+				"filters": [{ "type": "PK", "freq": 1000, "q": 1, "gain": 3 }],
+				"right": { "filters": [{ "type": "PK", "freq": 4000, "q": 1, "gain": -2 }] },
+				"perChannel": true,
+				"held": {
+					"filters": [
+						{ "type": "PK", "freq": 31, "q": 0.7, "gain": 6 },
+						{ "type": "PK", "freq": 62, "q": 0.7, "gain": -2 },
+						{ "type": "PK", "freq": 125, "q": 0.7, "gain": 1 },
+						{ "type": "PK", "freq": 250, "q": 0.7, "gain": 0 }
+					]
+				}
+			},
+			"expect": { "channels": 2, "preamp": false }
+		},
+		{
+			"description": "more filters than slots: the fit says which got none",
+			"profile": { "preamp": { "mode": "manual", "gain": { "min": -12, "max": 0, "step": 0.1 } } },
+			"op": "plan",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 400, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 800, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 1600, "q": 1, "gain": 1 }
+				],
+				"writesPreamp": true
+			},
+			"expect": { "channels": 1, "preamp": true }
+		},
+		{
+			"description": "unbounded: only the filters, the preamp sent",
+			"profile": "examples/g-equalizer-apo",
+			"op": "plan",
+			"input": {
+				"filters": [
+					{ "type": "PK", "freq": 100, "q": 1, "gain": 1 },
+					{ "type": "PK", "freq": 200, "q": 1, "gain": 1 }
+				],
+				"preamp": -2,
+				"writesPreamp": true
+			},
+			"expect": { "channels": 1, "preamp": true }
+		}
+	]
+}

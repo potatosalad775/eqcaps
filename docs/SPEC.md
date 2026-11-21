@@ -303,6 +303,11 @@ Rules for consumers:
   consumer runs it once per channel, on that channel's filters and preamp.
 - A consumer that knows only linked EQs MAY drive an independent one as linked, writing both
   channels alike.
+- A consumer writing to an engine sends a preamp only where its write path carries one and the
+  mode is `manual` (the value `fit` gives, §13.6) or `unknown` (the value wanted, which nothing
+  checks). In `auto` and `none` mode it sends none. Where none is sent and the filters boost, the
+  engine can't be told to make room: the consumer SHOULD say so. `plan` (§13.10) applies this
+  rule.
 
 **Protocol (`protocol`).** Which handler of the device bridge (`packages/device-bridge`) drives the
 device, and the settings that differ between the devices one handler drives. Hardware only. The
@@ -652,8 +657,8 @@ languages implement this section and pass the conformance vectors (§13.8).
 
 Apps hold filters that describe the response the user wants. The operations fit together like this:
 
-- **Writing to an engine:** `fit` (§13.6) → `complete` (§13.7) → the bridge encodes the written
-  values.
+- **Writing to an engine:** `plan` (§13.10), which is `fit` (§13.6) → `complete` (§13.7) for each
+  channel that is written → the bridge encodes the written values.
 - **Reading from an engine:** the bridge decodes written values.
 - **Editing:** `validateList` (§13.4) flags problems without changing anything.
 
@@ -888,8 +893,9 @@ under `conformance/v1/profiles/` without `.json`, or an RFC 7386 merge patch ove
 
 - **Exact ops:** `resolveSlot`, `project`, `validate`. Output must match
   within ε, the order of violations included.
-- **Property ops:** `assign`, `fit`, `complete`. The vector gives the input and a few facts about
-  it (`expect`); the check is the properties above plus those facts, not a fixed output.
+- **Property ops:** `assign`, `fit`, `complete`, `plan` (§13.10). The vector gives the input and a
+  few facts about it (`expect`); the check is the operation's properties plus those facts, not a
+  fixed output.
 
 An implementation is conformant for a schema minor version if it passes every vector for it.
 
@@ -906,6 +912,59 @@ filter types this engine version doesn't know, so a consumer can meet §7 and §
 with other EQs (§9.2), `profileEqs(profile)` lists them, the profile's own first, each with its
 band count, presets and channels, and `eqProfile(profile, id)` gives the profile of one, which the
 engine functions take as any other.
+
+### 13.10 `plan(profile, wanted, { writesPreamp?, perChannel?, held? }) → Plan` (hardware write path)
+
+What a write of the EQ the user wants sends to the engine: `fit`, then `complete`, once for each
+channel that is written. It is the hard path of D12, and the one place the rules of §9 for the
+preamp and the channels are applied (D56).
+
+```ts
+type Wanted = {
+  filters: Filter[]; preamp?: number;              // preamp left out: 0
+  right?: { filters: Filter[]; preamp?: number };  // the right channel, wanted apart
+};
+type Options = {
+  writesPreamp?: boolean;   // the write path carries a preamp; default false
+  perChannel?: boolean;     // the write path drives left and right apart; default false
+  held?: {                  // what the engine holds now, by slot: complete's hints
+    filters: (Filter | null)[];
+    right?: { filters: (Filter | null)[] };
+  };
+};
+type Plan = {
+  write: {                  // what to send
+    filters: Filter[]; preamp?: number;
+    right?: { filters: Filter[]; preamp?: number };
+  };
+  channels: { fit: FitResult; warnings: CompleteWarning[] }[];  // one, or the left then the right
+  sendsPreamp: boolean;
+};
+```
+
+- **A written channel.** For wanted filters `x` and preamp `p`, with hints `h`: `f = fit(profile,
+  x, p)`, and the channel's filters are `complete(profile, f.slots, { hints: h }).filters`.
+  `channels` holds `f` and `complete`'s warnings, so a consumer can show what moved (`changes`),
+  what got no slot (`slotOf`, `unassigned`) and whether the result breaks a rule (`feasible`).
+- **Channels.** The right channel is written apart exactly when the profile's `channels` is
+  `"independent"` (§9), `perChannel` is true and `wanted.right` is given. `write.right` then holds
+  its channel, `write.filters` and `write.preamp` are the left's, and `channels` has two entries.
+  Otherwise `write` has no `right`, `channels` has one entry, and the left's write is both
+  channels' (§9: an independent EQ MAY be driven as linked). A `wanted.right.preamp` left out is
+  `wanted.preamp`.
+- **Hints.** The left channel takes `held.filters`; the right takes `held.right.filters`, or
+  `held.filters` where the right wasn't read apart. Without `held`, empty slots get neutral
+  fillers (§13.7).
+- **Preamp.** `sendsPreamp` is true exactly when `writesPreamp` is true and the profile's preamp
+  mode is `manual` or `unknown` (§9). Each written channel then carries its `f.preamp`: fitted to
+  the domain in `manual` mode, as wanted in `unknown` mode. Otherwise no `preamp` is in `write`.
+- For a device's listed EQ (§9.2), `profile` is that EQ's profile (`eqProfile`, §13.9). The engine
+  never reads `protocol`: `writesPreamp` and `perChannel` are plain facts about the write path,
+  which the device bridge's `capabilities` state under the same names, and `held` is what a read
+  returned.
+
+**Properties:** the three rules above (a written channel, channels, preamp) hold exactly, so
+`plan` is as sound as the `fit` and `complete` it is made of.
 
 ## 14. Published artifacts
 

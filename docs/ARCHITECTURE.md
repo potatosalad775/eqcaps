@@ -17,7 +17,7 @@ is four things:
 
 1. **A format**: [SPEC.md](SPEC.md), JSON Schema, conformance vectors.
 2. **A database**: community-maintained profiles, validated in CI, published as static JSON.
-3. **A reference engine**: `resolveSlot`, `validate`, `assign`, `fit` and `complete` in
+3. **A reference engine**: `resolveSlot`, `validate`, `assign`, `fit`, `complete` and `plan` in
    TypeScript, portable by spec.
 4. **Tools around it**: a device bridge that reads and writes EQ on hardware, and the
    [inspector](INSPECTOR.md) web app for browsing, checking devices and contributing.
@@ -125,8 +125,8 @@ Changing one of these needs a DECISIONS entry.
 4. **Profile ids are permanent public API.** A rename is `deprecated` + `replacedBy`.
 5. **Published files are flat.** `extends` and `abstract` exist only in authoring files (D14).
 6. **JSON Schema is the structural source of truth.** TS types are generated from it (D13).
-7. **`project`, `resolveSlot` and `validate` are exact** across languages; `assign`, `fit` and
-   `complete` are normative through their properties (D15).
+7. **`project`, `resolveSlot` and `validate` are exact** across languages; `assign`, `fit`,
+   `complete` and `plan` are normative through their properties (D15, D56).
 8. **Apps must work without the CDN.** The database enhances an app and never blocks it.
 9. **The inspector never writes to a device** (D40): it calls `pull`, never `push`, `setEnabled`
    or `writeControl`.
@@ -149,13 +149,16 @@ Changing one of these needs a DECISIONS entry.
 
 ## 8. Writing EQ to a device
 
-The recipe every app follows (D12, D33):
+The recipe every app follows (D12, D33), whose second line is one operation, `plan` (D56):
 
 ```
 identity ──client.matchDevice──▶ profile ──protocolForMatches──▶ bridge session
-filters ──fit──▶ slots ──complete(hints: what the device holds)──▶ written values ──push──▶ device
+filters ──plan(what the device holds, what the write carries)──▶ written values ──push──▶ device
 ```
 
+- `plan` is `fit`, then `complete`, for each channel that is written. It decides whether the right
+  channel goes out apart and whether a preamp is sent (SPEC §9, §13.10), and returns each
+  channel's `fit` result for the app to show.
 - `fit` projects the user's filters onto what the profile accepts. It is sound (every value it
   writes is in its domain) and idempotent.
 - `complete` fills every remaining slot, keeping the device's own layout when given `hints`.
@@ -174,12 +177,11 @@ its profile (`eqProfile`), and drives it through the bridge device viewed as tha
 about that one.
 
 An EQ whose profile says `channels: "independent"` (D54) holds left and right apart; a listed EQ
-says it in its own entry (D55), and `eqProfile` carries it. An app fits and completes each channel
-against the same profile, and pushes the left as `filters` and `preamp` and the right as `right`,
-where the bridge's handler drives that EQ's channels apart (`perChannel` in the capabilities of
-its view, and per listed EQ in `capabilities.eqs`); a pull of it then returns the right channel
-as `right`. Without `right`, a
-push writes both channels alike, as on a linked EQ.
+says it in its own entry (D55), and `eqProfile` carries it. `plan` fits and completes each channel
+against the same profile. Its write has the left as `filters` and `preamp` and the right as
+`right` where the bridge's handler drives that EQ's channels apart (`perChannel` in the
+capabilities of its view, and per listed EQ in `capabilities.eqs`); a pull of it then returns the
+right channel as `right`. Without `right`, a push writes both channels alike, as on a linked EQ.
 
 ## 9. Device bridge
 

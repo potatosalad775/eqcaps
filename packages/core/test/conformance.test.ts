@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
 	near,
+	plan,
 	project,
 	projectType,
 	resolveSlot,
@@ -9,10 +10,12 @@ import {
 	type Domain,
 	type Filter,
 	type FilterType,
+	type PlanOptions,
+	type PlanWanted,
 	type Profile,
 	type ViolationCode
 } from '../src/index.ts';
-import { checkAssign, checkComplete, checkFit } from './checks.ts';
+import { checkAssign, checkComplete, checkFit, checkPlan } from './checks.ts';
 import { complete } from '../src/complete.ts';
 import { fit } from '../src/fit.ts';
 import { mergePatch } from './fixtures.ts';
@@ -60,7 +63,7 @@ function matches(actual: unknown, expected: unknown): boolean {
 }
 
 const EXACT = ['project', 'resolveSlot', 'validate'] as const;
-const PROPERTY = ['assign', 'fit', 'complete'] as const;
+const PROPERTY = ['assign', 'fit', 'complete', 'plan'] as const;
 
 function runExact(v: Vector): unknown {
 	const i = v.input;
@@ -89,6 +92,16 @@ function runProperty(v: Vector): void {
 		const preamp = (i['preamp'] as number | undefined) ?? 0;
 		checkFit(p, filters, preamp);
 		expect(fit(p, filters, preamp).feasible).toBe((v.expect as { feasible: boolean }).feasible);
+	} else if (v.op === 'plan') {
+		const { filters, preamp, right, ...options } = i as unknown as PlanWanted & PlanOptions;
+		const wanted: PlanWanted = {
+			filters,
+			...(preamp !== undefined ? { preamp } : {}),
+			...(right ? { right } : {})
+		};
+		checkPlan(p, wanted, options);
+		const r = plan(p, wanted, options);
+		expect({ channels: r.channels.length, preamp: r.sendsPreamp }).toEqual(v.expect);
 	} else {
 		const slots = i['slots'] as (Filter | null)[];
 		const hints = i['hints'] as (Filter | null)[] | undefined;

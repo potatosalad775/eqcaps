@@ -237,11 +237,15 @@ never silently rewrite user filters, and keep "unlimited" one click away.
 ### D12. Enforcement is consumer policy
 Soft path: `validateList` while editing. Hard path: `fit` + `complete` before every device write.
 
+*2026-11-21:* the hard path is one operation, `plan` (D56), which is `fit` + `complete` for each
+channel a write carries. Enforcement is still the consumer's: an app decides when to write and
+whether to show the plan first, and the bridge's `push` takes any written values.
+
 ### D15. Normative vs informative engine behaviour; conformance vectors
 `project`, `resolveSlot` and `validate` are exact across languages. `assign`, `fit` and `complete`
 are normative only through their properties (sound, faithful on valid input, idempotent, safe).
 Ports prove themselves against `conformance/v1/`. No port is scheduled: every known consumer runs
-TypeScript.
+TypeScript. *2026-11-21:* `plan` (D56) is normative through its properties too.
 
 ### D30. Engine semantics pinned down by the reference implementation
 Where SPEC left room, the reference engine settled it, and SPEC §6–§8 and §13 now say so: exact,
@@ -261,6 +265,26 @@ flat, instead of neutral fillers.
 ### D47. Fillers spread out and sit on nominal frequencies
 Without a hint, `complete` spreads fillers over the gaps between filled slots and snaps them to
 ISO 266 one-third-octave frequencies, so a read-back shows a sensible layout.
+
+### D56. The write recipe is an engine operation: `plan` (2026-11-21)
+`plan(profile, wanted, { writesPreamp, perChannel, held })` in `core` gives what a write sends:
+`fit`, then `complete` with what the device holds as hints, for each channel that is written
+(SPEC §13.10, vectors in `conformance/v1/plan.json`). It writes the right channel apart only where
+the profile's channels are independent, the write drives them apart and one is wanted, and it
+sends a preamp only where the write carries one and the mode is `manual` or `unknown` (SPEC §9).
+**Why:** "the recipe every app follows" existed only as prose and README snippets, so the
+bridge's README and recipe test, uniPEQ and modernGraphTool had each assembled it, and they had
+come apart: the README and the test sent the preamp for `manual` only, which refuses a push on a
+handler that writes none and leaves an `unknown` device on its old preamp while the bands boost;
+the apps sent it for `manual` and `unknown` where the handler writes one, which is the rule kept,
+as the one that has run on hardware. Formats 1.3, 1.4 and 1.5 each had to be learned by every
+copy, and the bridge's recipe test never pushed a listed EQ or a right channel. It lives in
+`core` because it is pure and made only of `fit` and `complete`; what it needs from the write
+path is two yes-or-no facts, which the bridge's `capabilities` state under the same names, so no
+bridge type enters `core` and the engine still never reads `protocol` (D2). An app's change
+report (what moved, clip risk, whether to ask first) stays the app's, built from each channel's
+`fit` result. Rejected: a package above `core`, `client` and the bridge for it, which about
+thirty lines don't need; and a `push` that takes only a plan, which D12 leaves to the consumer.
 
 ---
 

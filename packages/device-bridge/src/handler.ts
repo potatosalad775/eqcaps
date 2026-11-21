@@ -47,7 +47,7 @@ export interface PullResult {
 
 export interface PushRequest {
 	/**
-	 * Written values, one per band, in band order: normally core's `fit` followed by `complete`.
+	 * Written values, one per band, in band order: normally the `write` of core's `plan`.
 	 * The bridge sends them as given. It does no clamping, type conversion or padding of its own;
 	 * a value the wire can't carry is a `BridgeError` (D33).
 	 */

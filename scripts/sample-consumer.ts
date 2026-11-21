@@ -5,7 +5,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { createClient, type ClientOptions } from '@potatosalad775/eqcaps-client';
-import { complete, fit, validateList, type Filter } from '@potatosalad775/eqcaps-core';
+import { plan, validateList, type Filter } from '@potatosalad775/eqcaps-core';
 
 export async function sampleConsumer(options: ClientOptions = {}) {
 	const client = createClient(options);
@@ -20,8 +20,13 @@ export async function sampleConsumer(options: ClientOptions = {}) {
 		{ type: 'PK', freq: 3150.55, q: 2, gain: -14 }
 	];
 	const problems = validateList(profile, wanted); // soft path: flag while editing
-	const written = fit(profile, wanted, 0); // hard path: what to send
-	return { id: profile.id, problems, written, slots: complete(profile, written.slots).filters };
+	const planned = plan(profile, { filters: wanted }); // hard path: what to send
+	return {
+		id: profile.id,
+		problems,
+		written: planned.channels[0]!.fit,
+		slots: planned.write.filters
+	};
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

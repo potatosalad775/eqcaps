@@ -14,6 +14,7 @@ import {
 	assign,
 	complete,
 	fit,
+	plan,
 	project,
 	projectType,
 	resolveSlot,
@@ -21,6 +22,8 @@ import {
 	type Domain,
 	type Filter,
 	type FilterType,
+	type PlanOptions,
+	type PlanWanted,
 	type Profile
 } from '../packages/core/src/index.ts';
 
@@ -65,6 +68,7 @@ const BASE = {};
 
 const MANUAL_PREAMP = { preamp: { mode: 'manual', gain: { min: -12, max: 0, step: 0.1 } } };
 const ASCENDING = { rules: [{ type: 'ascendingFrequency' }] };
+const INDEPENDENT = { ...MANUAL_PREAMP, channels: 'independent' };
 const LOCKED_MIDDLE = {
 	bandCount: 3,
 	bands: [{ index: 1, freq: { value: 1000 } }],
@@ -531,6 +535,90 @@ const files: Record<string, { description: string; vectors: Vector[] }> = {
 				[null, pk(500, 2), null, pk(8000, 2)]
 			)
 		]
+	},
+
+	plan: {
+		description:
+			'plan(profile, wanted, { writesPreamp?, perChannel?, held? }) (SPEC §13.10): fit then complete for each written channel. The input holds the wanted filters, preamp and right channel beside the options; a runner checks the properties and the facts in expect.',
+		vectors: [
+			planVector('a manual preamp is fitted and sent where the write carries one', MANUAL_PREAMP, {
+				filters: [pk(1000, 3)],
+				preamp: -3.14,
+				writesPreamp: true
+			}),
+			planVector('a manual preamp is not sent where the write carries none', MANUAL_PREAMP, {
+				filters: [pk(1000, 3)],
+				preamp: -3
+			}),
+			planVector(
+				'an unknown preamp is sent as wanted where the write carries one',
+				{ preamp: { mode: 'unknown' } },
+				{ filters: [pk(1000, 3)], preamp: -3.14, writesPreamp: true }
+			),
+			planVector(
+				'an auto preamp is never sent',
+				{ preamp: { mode: 'auto' } },
+				{ filters: [pk(1000, 3)], preamp: -3, writesPreamp: true }
+			),
+			planVector('no preamp control: none is sent', BASE, {
+				filters: [pk(1000, 3)],
+				preamp: -3,
+				writesPreamp: true
+			}),
+			planVector('independent channels written apart, each fitted on its own', INDEPENDENT, {
+				filters: [pk(1000, 3), pk(100, 20)],
+				preamp: -3,
+				right: { filters: [pk(4000, -2.04)], preamp: -1 },
+				writesPreamp: true,
+				perChannel: true
+			}),
+			planVector("the right channel's preamp left out is the left's", INDEPENDENT, {
+				filters: [pk(1000, 3)],
+				preamp: -3,
+				right: { filters: [pk(4000, -2)] },
+				writesPreamp: true,
+				perChannel: true
+			}),
+			planVector('independent channels wanted alike: one write for both', INDEPENDENT, {
+				filters: [pk(1000, 3)],
+				writesPreamp: true,
+				perChannel: true
+			}),
+			planVector('a write that drives both channels alike sends the left for both', INDEPENDENT, {
+				filters: [pk(1000, 3)],
+				right: { filters: [pk(4000, -2)] },
+				writesPreamp: true
+			}),
+			planVector('a linked profile has no right channel to write', MANUAL_PREAMP, {
+				filters: [pk(1000, 3)],
+				right: { filters: [pk(4000, -2)] },
+				perChannel: true
+			}),
+			planVector('what each channel holds is its hints', INDEPENDENT, {
+				filters: [pk(1000, 3)],
+				right: { filters: [pk(4000, -2)] },
+				perChannel: true,
+				held: {
+					filters: [pk(31, 6, 0.7), pk(62, -2, 0.7), pk(125, 1, 0.7), pk(250, 0, 0.7)],
+					right: { filters: [pk(40, 1, 2), pk(80, 1, 2), pk(160, 1, 2), pk(320, 1, 2)] }
+				}
+			}),
+			planVector('a right channel not read apart takes what was read as its hints', INDEPENDENT, {
+				filters: [pk(1000, 3)],
+				right: { filters: [pk(4000, -2)] },
+				perChannel: true,
+				held: { filters: [pk(31, 6, 0.7), pk(62, -2, 0.7), pk(125, 1, 0.7), pk(250, 0, 0.7)] }
+			}),
+			planVector('more filters than slots: the fit says which got none', MANUAL_PREAMP, {
+				filters: [pk(100, 1), pk(200, 1), pk(400, 1), pk(800, 1), pk(1600, 1)],
+				writesPreamp: true
+			}),
+			planVector('unbounded: only the filters, the preamp sent', APO, {
+				filters: [pk(100, 1), pk(200, 1)],
+				preamp: -2,
+				writesPreamp: true
+			})
+		]
 	}
 };
 
@@ -573,6 +661,26 @@ function completeVector(
 		op: 'complete',
 		input: hints ? { slots, hints } : { slots },
 		expect: { warnings: r.warnings }
+	};
+}
+
+function planVector(
+	description: string,
+	profile: ProfileRef,
+	input: PlanWanted & PlanOptions
+): Vector {
+	const { filters, preamp, right, ...options } = input;
+	const r = plan(
+		resolveProfile(profile),
+		{ filters, ...(preamp !== undefined ? { preamp } : {}), ...(right ? { right } : {}) },
+		options
+	);
+	return {
+		description,
+		profile,
+		op: 'plan',
+		input: { ...input },
+		expect: { channels: r.channels.length, preamp: r.sendsPreamp }
 	};
 }
 

@@ -23,7 +23,7 @@ vendor's own app does where one is known.
 
 ```ts
 import { createClient } from '@potatosalad775/eqcaps-client';
-import { complete, fit } from '@potatosalad775/eqcaps-core';
+import { plan } from '@potatosalad775/eqcaps-core';
 import {
 	guessProtocol,
 	identityOf,
@@ -45,15 +45,19 @@ if (transport) {
 		const device = openDevice(transport, protocol, profile ? { profile } : {});
 
 		// Read: written values, as the device holds them.
-		const state = await device.pull();
+		const held = await device.pull();
 
-		// Write: what the user wants, fitted to the device, every band filled. With the read-back
-		// as hints, bands the user left empty keep what the device holds, written flat.
+		// Write: what the user wants, fitted to the device, every band filled (core's `plan`).
+		// Given what the device holds, bands the user left empty keep it, written flat; given the
+		// capabilities, the preamp and the right channel go out only where the device takes them.
 		if (profile) {
-			const result = fit(profile, wantedFilters, wantedPreamp);
-			const filters = complete(profile, result.slots, { hints: state.filters }).filters;
-			const preamp = profile.preamp.mode === 'manual' ? result.preamp : undefined;
-			await device.push({ filters, ...(preamp === undefined ? {} : { preamp }) });
+			const planned = plan(
+				profile,
+				{ filters: wantedFilters, preamp: wantedPreamp },
+				{ ...device.capabilities, held }
+			);
+			planned.channels[0].fit.changes; // what had to move to fit, to show before writing
+			await device.push(planned.write);
 		}
 	}
 }
@@ -166,7 +170,7 @@ profile describes: Qudelix's speaker EQ under its user EQ. One connection drives
 viewed as another.
 
 ```ts
-import { eqProfile } from '@potatosalad775/eqcaps-core';
+import { eqProfile, plan } from '@potatosalad775/eqcaps-core';
 
 for (const eq of device.capabilities.eqs) {
 	console.log(eq.id, eq.name, eq.bandCount, eq.slots, eq.perChannel);
@@ -174,9 +178,8 @@ for (const eq of device.capabilities.eqs) {
 const speaker = device.eq('spk'); // the same connection, viewed as the speaker EQ
 const held = await speaker.pull();
 const spk = eqProfile(profile, 'spk')!; // the profile of that EQ: band count, presets, channels
-const result = fit(spk, wantedFilters, wantedPreamp);
-const filters = complete(spk, result.slots, { hints: held.filters }).filters;
-await speaker.push({ filters });
+const planned = plan(spk, { filters: wantedFilters }, { ...speaker.capabilities, held });
+await speaker.push(planned.write);
 await speaker.eqEnabled(); // also currentSlot(), bandCount(), setEnabled(on, slot), slots()
 speaker.capabilities.slots; // the speaker EQ's presets; speaker.capabilities.perChannel likewise
 ```
@@ -202,18 +205,22 @@ the EQ the device is viewed as, and `perChannel` of each of `capabilities.eqs` f
 before its view is opened.
 
 ```ts
-const left = fit(profile, wantedLeft, wantedLeftPreamp);
-const right = fit(profile, wantedRight, wantedRightPreamp);
 const held = await device.pull(); // held.right: the right channel, equal to the left or not
-await device.push({
-	filters: complete(profile, left.slots, { hints: held.filters }).filters,
-	preamp: left.preamp,
-	right: {
-		filters: complete(profile, right.slots, { hints: held.right?.filters ?? held.filters }).filters,
-		preamp: right.preamp
-	}
-});
+const planned = plan(
+	profile,
+	{
+		filters: wantedLeft,
+		preamp: wantedLeftPreamp,
+		right: { filters: wantedRight, preamp: wantedRightPreamp }
+	},
+	{ ...device.capabilities, held }
+);
+await device.push(planned.write); // write.right: the right channel, where it goes out apart
+planned.channels; // each channel's fit: the left's, then the right's
 ```
+
+`plan` fits and completes each channel on its own and carries `right` only where the profile
+says `independent` and the view is `perChannel`; elsewhere its write is the left for both.
 
 With `right`, `filters` and `preamp` are the left channel's, and `right.preamp` left out is
 `preamp`. Without it a push writes both channels alike, as on a linked EQ, and every handler takes
