@@ -42,8 +42,16 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	types: readonly FilterType[];
 	/** What the write frames can carry. A profile domain outside it can't be written. */
 	wire: WireGrid;
-	/** The preset slots of the EQ the profile describes. */
+	/**
+	 * The preset slots of the EQ the profile describes. Where the device keeps a list of presets
+	 * (`listsSlots`), these are the ones it has room for, under the data's names: `slots()` says
+	 * which exist now.
+	 */
 	slots: readonly Slot[];
+	/** `slots()` asks the device, which keeps a list of presets with names of its own. */
+	listsSlots: boolean;
+	/** `createSlot()`, `renameSlot()` and `deleteSlot()` send commands. */
+	editsSlots: boolean;
 	/**
 	 * The device's other EQs (SPEC §9.2), each with its own slots: `pull`, `push` and the EQ's
 	 * switch and preset take one's id as `eq`. Empty for a device with one EQ.
@@ -88,6 +96,25 @@ export interface BridgeDevice {
 	/** Whether the EQ is on (`readsEnabled`); null when the protocol or device doesn't say. */
 	eqEnabled(eq?: string): Promise<boolean | null>;
 	setEnabled(enabled: boolean, slot?: number, eq?: string): Promise<void>;
+	/**
+	 * The preset slots as they are now. Where the device keeps a list (`listsSlots`) it is asked:
+	 * the presets it holds, under the names it stores, ids counting from 0, followed by the data's
+	 * `bypass` preset if there is one. Elsewhere this is `capabilities.slots`.
+	 */
+	slots(eq?: string): Promise<readonly Slot[]>;
+	/**
+	 * The next three need `editsSlots`. This one adds an empty preset after the last and returns
+	 * it; without a `name` the device or handler picks one. Refused when the device is full. The
+	 * device may start playing the new preset: ask `currentSlot()` afterwards.
+	 */
+	createSlot(request?: { name?: string; eq?: string }): Promise<Slot>;
+	/** Renames a preset. A name the device can't store is refused, never shortened. */
+	renameSlot(slot: number, name: string, eq?: string): Promise<void>;
+	/**
+	 * Deletes a preset. The ones after it move down by one and the device may switch to another:
+	 * ask `slots()` and `currentSlot()` afterwards.
+	 */
+	deleteSlot(slot: number, eq?: string): Promise<void>;
 	/** The device's firmware version, read once; null when the protocol or device doesn't say. */
 	firmware(): Promise<string | null>;
 	/**
@@ -169,6 +196,12 @@ export function openDevice(
 		types: handler.codec.types,
 		wire: handler.codec.wire(handlerOptions),
 		slots: protocol.presets ?? [],
+		listsSlots: handler.slots !== undefined,
+		editsSlots:
+			handler.createSlot !== undefined &&
+			handler.renameSlot !== undefined &&
+			handler.deleteSlot !== undefined &&
+			own.editsSlots !== false,
 		eqs: eqs.map(({ presets, ...e }) => ({ ...e, slots: presets ?? [] })),
 		disconnectOnSave: protocol.disconnectOnSave ?? false,
 		experimental: protocol.experimental ?? false,
@@ -185,6 +218,9 @@ export function openDevice(
 		queue = run.catch(() => {});
 		return run;
 	};
+
+	const noEditing = () =>
+		new BridgeError('unsupported', `${handler.id} can't create, rename or delete presets here`);
 
 	let firmware: Promise<string | null> | undefined;
 	/** Read once. A failed read counts as unknown firmware, which leaves out controls that need one. */
@@ -273,6 +309,40 @@ export function openDevice(
 					throw new BridgeError('unsupported', `${handler.id} has no EQ switch`);
 				}
 				await handler.setEnabled(on(eq), enabled, slot);
+			});
+		},
+
+		slots(eq) {
+			return serial(async () => {
+				const target = on(eq);
+				const listed =
+					eq === undefined ? capabilities.slots : capabilities.eqs.find((e) => e.id === eq)!.slots;
+				if (!handler.slots) return listed;
+				return [...(await handler.slots(target)), ...listed.filter((s) => s.bypass)];
+			});
+		},
+
+		createSlot({ name, eq } = {}) {
+			return serial(async () => {
+				const target = on(eq);
+				if (!capabilities.editsSlots) throw noEditing();
+				return handler.createSlot!(target, name === undefined ? {} : { name });
+			});
+		},
+
+		renameSlot(slot, name, eq) {
+			return serial(async () => {
+				const target = on(eq);
+				if (!capabilities.editsSlots) throw noEditing();
+				await handler.renameSlot!(target, slot, name);
+			});
+		},
+
+		deleteSlot(slot, eq) {
+			return serial(async () => {
+				const target = on(eq);
+				if (!capabilities.editsSlots) throw noEditing();
+				await handler.deleteSlot!(target, slot);
 			});
 		},
 

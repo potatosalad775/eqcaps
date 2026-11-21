@@ -15,6 +15,10 @@ const READ = 0x10;
 const WRITE = 0x20;
 
 const UPLOAD = 0x1106;
+const DELETE_CONFIG = 0x110a;
+const DOWNLOAD_CONFIG = 0x110b;
+const RENAME_INDEX = 0x110c;
+const RENAME_NAME = 0x110d;
 const SWITCH_CONFIG = 0x110e;
 const AGREEMENT = 0x1120;
 const SOFTWARE_VERSION = 0x1202;
@@ -78,6 +82,15 @@ function bandWords(f: Filter | null): number[] {
 	];
 }
 
+/** The most configs each family stores. */
+const MOST: Record<ToppingFamily, number> = { dx1: 3, e50: 3, dx5: 10, dx9d: 10, d900: 10 };
+
+/** A name as its four words: four bytes to a word, the first in the low byte. */
+const nameWords = (name: string) =>
+	[0, 4, 8, 12].map((at) =>
+		[3, 2, 1, 0].reduce((w, i) => ((w << 8) | (name.charCodeAt(at + i) || 0)) >>> 0, 0)
+	);
+
 /**
  * A stored config of 78 words: the name (words 0-3), the pre-gain of each channel (words 5 and 7,
  * linear with 0 dB at 2^25), 11 left bands from word 8 and 11 right ones from word 41, three words
@@ -90,12 +103,7 @@ export function toppingConfig(
 	right: readonly (Filter | null)[] = left
 ): number[] {
 	const w = new Array<number>(78).fill(0);
-	for (let i = 0; i < 4; i++) {
-		w[i] = [...name.padEnd(16, '\0').slice(i * 4, i * 4 + 4)].reduce(
-			(a, c) => (a << 8) | c.charCodeAt(0),
-			0
-		);
-	}
+	w.splice(0, 4, ...nameWords(name));
 	const gain = toppingPreampWord(preamp);
 	w[4] = 1;
 	w[5] = gain;
@@ -146,6 +154,11 @@ export class FakeTopping implements HidTransport {
 	connectDenials = 0;
 	/** Delivers answers with one byte in front of the frame, as some platforms do. */
 	prefixed = false;
+	/** Takes a new config's frames and stores nothing, as a device that refuses one would. */
+	refusesNew = false;
+	/** The words of a config or a name as they arrive, and the config a name is for. */
+	private incoming: number[] = [];
+	private renaming = 0;
 	/** Requests so far. */
 	get count() {
 		return this.sent.length;
@@ -250,6 +263,36 @@ export class FakeTopping implements HidTransport {
 			}
 			return;
 		}
+		if (c === DOWNLOAD_CONFIG || c === RENAME_NAME) {
+			// The device repeats each frame, and tells the config it plays once the last has come.
+			this.deliver([d]);
+			if (f.frame === 0) this.incoming = [];
+			this.incoming[f.frame] = v;
+			if (f.frame !== f.frames - 1) return;
+			if (c === RENAME_NAME) {
+				const config = this.configs[this.renaming];
+				if (!config) return;
+				const count = config[3]! & 0xff000000;
+				config.splice(0, 4, ...this.incoming.slice(0, 4));
+				config[3] = ((config[3]! & 0xffffff) | count) >>> 0;
+			} else if (this.configs.length < MOST[this.family] && !this.refusesNew) {
+				this.configs.push([...this.incoming, 0, 0, 0, 0].slice(0, 78));
+				if (this.family === 'dx5') this.active = this.configs.length - 1;
+			}
+			return this.answer(CURRENT_CONFIG, [this.active], frame);
+		}
+		if (c === RENAME_INDEX) {
+			this.renaming = v;
+			return this.deliver([d]);
+		}
+		if (c === DELETE_CONFIG) {
+			if (v < this.configs.length && this.configs.length > 1) {
+				this.configs.splice(v, 1);
+				this.active = this.family === 'dx5' ? 0 : Math.min(this.active, this.configs.length - 1);
+			}
+			this.deliver([d]);
+			return this.answer(CURRENT_CONFIG, [this.active], frame);
+		}
 		const word = this.family === 'dx5' && kind === WRITE ? DX5_WORDS[c] : undefined;
 		if (word !== undefined) {
 			this.dx5Settings[word] = v;
@@ -257,12 +300,17 @@ export class FakeTopping implements HidTransport {
 		}
 		if (c >> 12 === 9 && kind === WRITE) return this.param(c, v);
 		if (c === SOFTWARE_VERSION && kind === READ) return this.answer(c, [this.firmware], frame);
-		if (c === EQ_ENABLE_STATE && kind === READ) return this.answer(c, [this.eqOn ? 1 : 0], frame);
+		if (c === EQ_ENABLE_STATE && kind === READ) {
+			// A DX5 II (firmware 2.58) answers 0xc0 with the switch in bit 0.
+			return this.answer(c, [(this.family === 'dx5' ? 0xc0 : 0) | (this.eqOn ? 1 : 0)], frame);
+		}
 		if (c === CURRENT_CONFIG && kind === READ) return this.answer(c, [this.active], frame);
 		if (c === GET_SETTINGS) return this.settings();
-		// A DX5 II (firmware 2.58) answers a read of its switch as a write, numbered 0 of 1.
+		// A DX5 II (firmware 2.58) takes a read of its switch as a write of the 0 it carries: the EQ
+		// goes off, and it says so as after a write, numbered 0 of 1.
 		if (c === PEQ_STATE && kind === READ && this.family === 'dx5') {
-			return this.deliver([toppingFrame(c, this.eqOn ? 1 : 0, WRITE, 1, 0)]);
+			this.eqOn = false;
+			return this.deliver([toppingFrame(c, 0, WRITE, 1, 0)]);
 		}
 		if (c === PEQ_STATE && kind === WRITE) {
 			this.eqOn = v !== 0;

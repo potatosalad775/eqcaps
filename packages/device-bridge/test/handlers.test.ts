@@ -27,8 +27,11 @@ import {
 import {
 	parseToppingFrame,
 	toppingCodec,
+	toppingConfigName,
 	toppingFirmware,
 	toppingFrame,
+	toppingNameWords,
+	toppingNewConfigWords,
 	toppingPreampWord,
 	type ToppingFamily
 } from '../src/handlers/topping-usb-hid.ts';
@@ -1942,6 +1945,162 @@ describe('Topping', () => {
 		});
 	});
 
+	describe('the configs as a list', () => {
+		test('names are four bytes to a word, the first in the low byte, as a DX5 II sent them', () => {
+			expect(toppingNameWords('devconfig6')).toEqual([0x63766564, 0x69666e6f, 0x3667, 0]);
+			expect(toppingNameWords('eqcaps test 1')).toEqual([0x61637165, 0x74207370, 0x20747365, 0x31]);
+			expect(toppingConfigName([0x73736142, 0x3120, 0, 0])).toBe('Bass 1');
+			expect(toppingConfigName([0x616e7944, 0x63696d, 0, 0])).toBe('Dynamic');
+			// The 16th byte is the config's band count, not part of the name.
+			expect(toppingConfigName(toppingNewConfigWords('123456789012345'))).toBe('123456789012345');
+			for (const bad of ['', ' padded', 'padded ', '1234567890123456', 'café', 'tab\there']) {
+				expect(() => toppingNameWords(bad)).toThrowError(BridgeError);
+			}
+		});
+
+		test("an empty config's words are the ones the app sent for one, bands off", () => {
+			const words = toppingNewConfigWords('devconfig6');
+			expect(words).toHaveLength(74);
+			expect(words.slice(0, 8)).toEqual([
+				0x63766564, 0x69666e6f, 0x3667, 0x0b000000, 1, 0x2000000, 1, 0x2000000
+			]);
+			for (let at = 8; at < 74; at += 3)
+				expect(words.slice(at, at + 3)).toEqual([0x100, 632, 7070]);
+		});
+
+		test.each(FAMILIES)(
+			'%s: slots() lists what the device holds, under its names',
+			async (family) => {
+				const { t, device } = topping(family);
+				t.configs = ['Bass 1', 'Airy'].map((n) => toppingConfig(n, 0, []));
+				expect(device.capabilities.listsSlots).toBe(true);
+				expect(await device.slots()).toEqual([
+					{ id: 0, name: 'Bass 1', writable: true },
+					{ id: 1, name: 'Airy', writable: true }
+				]);
+			}
+		);
+
+		test.each(['dx5', 'dx9d'] as const)(
+			'%s creates an empty config after the last',
+			async (family) => {
+				const { t, device } = topping(family);
+				expect(device.capabilities.editsSlots).toBe(true);
+				t.active = 1;
+				const before = t.count;
+				expect(await device.createSlot({ name: 'Mine' })).toEqual({
+					id: 3,
+					name: 'Mine',
+					writable: true
+				});
+				expect(t.configs).toHaveLength(4);
+				expect(t.configs[3]!.slice(0, 74)).toEqual(toppingNewConfigWords('Mine'));
+				const sent = t.sent.slice(before).filter((s) => s.command >= 0x110b && s.command <= 0x110e);
+				const config = sent.filter((s) => s.command === 0x110b);
+				expect(config.map((s) => [s.kind, s.frames, s.frame])).toEqual(
+					Array.from({ length: 74 }, (_, i) => [0x20, 74, i])
+				);
+				expect(config.map((s) => s.data)).toEqual(toppingNewConfigWords('Mine'));
+				// Then the select, where the device doesn't make it by itself, and the name once more.
+				expect(sent.slice(74).map((s) => [s.command, s.data, s.frames, s.frame])).toEqual([
+					...(family === 'dx5' ? [] : [[0x110e, 3, 1, 1]]),
+					[0x110c, 3, 1, 1],
+					...toppingNameWords('Mine').map((w, i) => [0x110d, w, 4, i])
+				]);
+				expect(await device.currentSlot()).toBe(3);
+				expect((await device.pull({ slot: 3 })).filters).toEqual(Array(10).fill(null));
+				// And it takes a write like any other.
+				await device.push({ filters: [filter('PK', 1000, 2, 1)], slot: 3 });
+				expect((await device.pull({ slot: 3 })).filters[0]).toEqual(filter('PK', 1000, 2, 1));
+			}
+		);
+
+		test('a config created without a name gets the first free "Config N"', async () => {
+			const { t, device } = topping('dx5');
+			t.configs = ['Bass 1', 'Config 3'].map((n) => toppingConfig(n, 0, []));
+			expect((await device.createSlot()).name).toBe('Config 4');
+			expect((await device.slots()).map((s) => s.name)).toEqual(['Bass 1', 'Config 3', 'Config 4']);
+		});
+
+		test('a full device, a bad name and a config the device drops are refused', async () => {
+			const { t, device } = topping('dx5');
+			await expect(device.createSlot({ name: 'café' })).rejects.toMatchObject({
+				code: 'invalid-request'
+			});
+			expect(t.sent.some((s) => s.command === 0x110b)).toBe(false);
+			t.refusesNew = true;
+			await expect(device.createSlot()).rejects.toMatchObject({ code: 'rejected' });
+			t.refusesNew = false;
+			t.configs = Array.from({ length: 10 }, (_, i) => toppingConfig(`Config ${i + 1}`, 0, []));
+			const before = t.count;
+			await expect(device.createSlot()).rejects.toMatchObject({ code: 'invalid-request' });
+			expect(t.sent.slice(before).some((s) => s.command === 0x110b)).toBe(false);
+		});
+
+		test('renames a config by its index', async () => {
+			const { t, device } = topping('dx5');
+			await device.renameSlot(1, 'eqcaps test 1');
+			expect((await device.slots()).map((s) => s.name)).toEqual([
+				'Config 1',
+				'eqcaps test 1',
+				'Config 3'
+			]);
+			const sent = t.sent.filter((s) => s.command === 0x110c || s.command === 0x110d);
+			expect(sent.map((s) => [s.command, s.data])).toEqual([
+				[0x110c, 1],
+				...toppingNameWords('eqcaps test 1').map((w) => [0x110d, w])
+			]);
+			await expect(device.renameSlot(3, 'x')).rejects.toMatchObject({ code: 'invalid-request' });
+			await expect(device.renameSlot(0, '')).rejects.toMatchObject({ code: 'invalid-request' });
+		});
+
+		test.each(['dx5', 'dx9d'] as const)(
+			'%s deletes a config; the later ones move down',
+			async (family) => {
+				const { t, device } = topping(family);
+				t.configs = ['A', 'B', 'C'].map((n) => toppingConfig(n, 0, []));
+				t.active = 2;
+				const before = t.count;
+				await device.deleteSlot(1);
+				expect((await device.slots()).map((s) => [s.id, s.name])).toEqual([
+					[0, 'A'],
+					[1, 'C']
+				]);
+				const sent = t.sent
+					.slice(before)
+					.filter((s) => s.command === 0x110a || s.command === 0x110e)
+					.map((s) => [s.command, s.data]);
+				// A DX5 II falls back to its first config, and the app selects that one after it.
+				expect(sent).toEqual(
+					family === 'dx5'
+						? [
+								[0x110a, 1],
+								[0x110e, 0]
+							]
+						: [[0x110a, 1]]
+				);
+				expect(await device.currentSlot()).toBe(family === 'dx5' ? 0 : 1);
+				await expect(device.deleteSlot(2)).rejects.toMatchObject({ code: 'invalid-request' });
+				await device.deleteSlot(0);
+				await expect(device.deleteSlot(0)).rejects.toMatchObject({ code: 'invalid-request' });
+				expect(t.configs).toHaveLength(1);
+			}
+		);
+
+		test.each(['dx1', 'e50', 'd900'] as const)(
+			'%s lists its configs but edits none',
+			async (family) => {
+				const { t, device } = topping(family);
+				expect(device.capabilities.editsSlots).toBe(false);
+				const before = t.count;
+				await expect(device.createSlot()).rejects.toMatchObject({ code: 'unsupported' });
+				await expect(device.renameSlot(0, 'x')).rejects.toMatchObject({ code: 'unsupported' });
+				await expect(device.deleteSlot(0)).rejects.toMatchObject({ code: 'unsupported' });
+				expect(t.count).toBe(before);
+			}
+		);
+	});
+
 	describe.each(FAMILIES)('%s pull and push', (family, id) => {
 		test('pulls the active config: left bands, switched-off ones as null, and the pre-gain', async () => {
 			const { t, device } = topping(family);
@@ -2237,6 +2396,15 @@ describe('Topping', () => {
 			expect(await device.eqEnabled()).toBe(true);
 			t.eqOn = false;
 			expect(await device.eqEnabled()).toBe(false);
+		});
+
+		test('the DX5 II is asked for its EQ state, never its switch: that read turns the EQ off', async () => {
+			const { t, device } = topping('dx5');
+			expect(await device.eqEnabled()).toBe(true);
+			expect(await device.eqEnabled()).toBe(true);
+			expect(t.eqOn).toBe(true);
+			expect(t.sent.some((s) => s.command === 0x7132)).toBe(false);
+			expect(t.sent.filter((s) => s.command === 0x1204).map((s) => s.kind)).toEqual([0x10, 0x10]);
 		});
 
 		test.each([['dx1'], ['e50']] as [ToppingFamily][])(

@@ -73,8 +73,27 @@ the other four are unchecked and `draft`.**
   the D900), gain -12 to +12 dB in steps of 0.1, Q 0.1 to 15 in steps of 0.0001, pre-gain -12 to
   +12 dB in steps of 0.1. Types, as the editor sends them: 1 peak, 2 low pass, 3 high pass, 4 low
   shelf, 5 high shelf (the editor hides the gain of the passes).
-- **Stored configs.** 3 on the DX1 II and E50 II (the app cannot delete one there), 10 on the
-  others. The app creates, renames and deletes configs; a config's name is the user's.
+- **Stored configs.** A list, not fixed memories: 3 on the DX1 II and E50 II (the app cannot add
+  or delete one there), up to 10 on the others. A config's name is the user's: up to 15 printable
+  ASCII bytes. The app creates, renames and deletes configs, as below.
+- **Creating a config** (the DX5 II; the DX9 Discrete the same, as the app does it). The app reads
+  the config list again, then sends a whole config as 74 words on command `0x110B` (frames 0 to 73
+  of 74): the name in words 0 to 3 with the band count, 11, in the 16th byte, each channel's
+  pre-gain switch and pre-gain, then 11 bands per channel of three words. It pauses 20 ms after
+  every 10th frame and 120 ms at the end. The device repeats each frame back, appends the config
+  after the last one and, on a DX5 II, makes it the active config by itself (it announces
+  `0x1206` with the new index). The app then sends the name again, as a rename (below). On the
+  other families it selects the new config (`0x110E`, 120 ms) before the name. The app's new
+  config is a copy of the active one, named `devconfigN`.
+- **Renaming:** `0x110C` with the index, 50 ms, then `0x110D` with the name as four words (frames
+  0 to 3 of 4), 80 ms. The app silently drops characters that aren't printable ASCII and
+  truncates the name.
+- **Deleting:** `0x110A` with the index, 140 ms. A DX5 II falls back to config 0 (it announces
+  `0x1206` = 0) and the app then selects config 0 (`0x110E` = 0, 120 ms) and reads the list
+  again; on the other families the app just reads the list again. Later configs move down by
+  one. The app doesn't delete the last remaining config.
+- The D900 stores a config in another layout. The app has two more save commands, for the device
+  to keep a config, which were not followed up: some family other than the DX5 II uses them.
 
 ## Where the app is plainly wrong or inconsistent
 
@@ -101,6 +120,10 @@ the other four are unchecked and `draft`.**
   frame codec, the five session flows, config list, firmware, active config, EQ switch, pull and
   push. Tests with a simulated device.
 - The DX5 II's settings as controls (below), tried on the device.
+- Configs as a list (`slots()`, `createSlot`, `renameSlot`, `deleteSlot`; the bridge README,
+  "Presets a device keeps as a list"): `slots()` for all five families, creating, renaming and
+  deleting for the DX5 II (tried on the device, and recorded from the app) and the DX9 Discrete
+  (as the app does it, unchecked). The simulated device takes the same commands.
 - Base `topping-home` (the editor's limits) and five profiles, `topping-dx1-ii`, `topping-dx5-ii`,
   `topping-e50-ii`, `topping-dx9-discrete` and `topping-d900`, each citing the app; `draft` but
   for the DX5 II's.
@@ -114,9 +137,20 @@ the other four are unchecked and `draft`.**
   not. A pull returns the left channel.
 - **No heartbeat** (the app sends one every 1 or 5 s, by family), **no shutdown notice** on
   disconnect, and **no preview state** (the app's live preview of a config being edited).
-- The active config of the DX1 II and DX5 II is **asked for** (`0x1206`), and so is the DX5 II's
-  EQ switch (`0x7132`), although the app only listens for them. The DX5 II answers both.
-- A **push refuses** a config the device does not hold, instead of creating it as the app does.
+- The active config of the DX1 II and DX5 II is **asked for** (`0x1206`), although the app only
+  listens for it, and so is the DX5 II's EQ state, with the DX1 II's read (`0x1204`, bit 0). The
+  DX5 II answers both. Its switch command (`0x7132`) is never sent as a read: the device takes
+  that as switching the EQ off (found on 2026-11-21; until then the handler read the switch that
+  way, and so turned the EQ off whenever it asked).
+- A **push still refuses** a config the device does not hold (`invalid-request`), where the app
+  creates one: create it first with `createSlot`.
+- A **created config is empty** (0 dB, every band off) under the caller's name, or the first free
+  `Config N`, where the app copies the active config under `devconfigN`. The handler then reads
+  the list back and fails with `rejected` if the new config isn't there.
+- **Names are checked, not repaired.** A name that isn't 1 to 15 printable ASCII characters, or
+  that has a space at either end, is refused; the app drops such characters and truncates.
+- **Not driven:** creating and deleting on the D900 (another layout) and on the DX1 II and E50 II
+  (the app can't), and the app's save commands.
 
 ## The DX5 II's settings
 
@@ -168,8 +202,8 @@ into. The app's own traffic was recorded afterwards (below), which made the prof
   shelves on type 5, the editor's codes. Left and right were equal, the 11th band switched off.
 - The second word of the list's header was 1414546522, not the active config. The handler read
   it as that at first; it now asks for the active config, which the device answers although the
-  app only listens for it. The device also answers a read of its EQ switch, so the bridge reads
-  whether the EQ is on.
+  app only listens for it. The device also seemed to answer a read of its EQ switch (`0x7132`);
+  that read in fact switches the EQ off, so the answer was always "off" (see 2026-11-21).
 - A config written back unchanged read back the same; one band changed (frequency and Q, at 0 dB
   with the EQ off) read back as written; the original was restored.
 
@@ -208,11 +242,39 @@ What it showed:
 - **The heartbeat** (`0x7134` = 1) is sent every 5 s, 27 times in the recording. The handler
   sends none and works without it.
 
+## Tried on a DX5 II, and recorded (2026-11-21)
+
+The same DX5 II (firmware 2.58). The handler, from a script on the Mac. The EQ was off
+throughout, because the handler's own read of the switch had turned it off (below); with it off
+the device kept answering active config 0:
+
+- Created a config, "eqcaps test": it became config 5, and read back empty at 0 dB.
+- Renamed it to a 15-character name, which read back whole.
+- Wrote a pre-gain and two bands to it and read them back.
+- Created a second one without a name: the device holds it as "Config 7".
+- Deleted config 5, so the other moved down to 5, and deleted that one too.
+- The five original configs and their contents were unchanged afterwards.
+
+The app was recorded creating, renaming and deleting a config:
+`packages/device-bridge/test/recordings/2026-11-21-topping-dx5-ii-configs.json`, checked by
+`test/recording-topping.ts`. It was captured with a page logger, not the userscript recorder
+(the userscript manager wasn't loaded in the browser used). What it settled is the sequences
+under "Creating a config", "Renaming" and "Deleting" above.
+
+The same day showed that **a read of the EQ switch command turns the EQ off**. Sent as a read
+(`0x7132`, kind `0x10`, data 0), the device answers `0x1204` = `0xC0` and `0x7132` = 0 as it does
+after a write of 0, and the EQ is off from then on. A read of `0x1204` answers `0xC1` with the EQ
+on and `0xC0` with it off, as often as asked, and the connection notice says the same afterwards:
+the handler now reads that. The settings read (`0x710C`) holds no word for the switch.
+
 ## What only a device can settle
 
 - The exact USB product name strings of the other four: their names are guesses from how the app
   matches.
-- Whether writes survive a power cycle with no save command.
+- Whether writes survive a power cycle with no save command, and whether a created, renamed or
+  deleted config does: nobody power-cycled the DX5 II after the trial.
+- Creating and deleting on the DX9 Discrete (as the app does it), and on the D900, which stores a
+  config in another layout.
 - How long a session survives without the heartbeat, and what the device shows after the bridge
   leaves without the app's shutdown notice.
 - Turning the EQ on and off, and the sound of a written config, on the DX5 II.
@@ -227,4 +289,6 @@ What it showed:
    is recorded and checked (below).
 2. **Device settings as controls for the other four families**, which differ per family (the
    DX1 II's are not even known). The DX5 II's are done (above).
-3. **Creating, renaming and deleting configs**, so a push to a config the device lacks can work.
+3. ~~Creating, renaming and deleting configs~~ Done for the DX5 II (2026-11-21). What remains: the
+   D900's config layout, and trying the DX9 Discrete (and the other families' paths, including the
+   app's save commands) on a device.
