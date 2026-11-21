@@ -179,7 +179,14 @@ const ROLES: ReadonlySet<string> = new Set([
 	'noise-control',
 	'mic-noise-reduction',
 	'prompt-tone',
-	'prompt-tone-volume'
+	'prompt-tone-volume',
+	'mute',
+	'input',
+	'output',
+	'balance',
+	'polarity',
+	'crossfeed',
+	'display-brightness'
 ]);
 
 const numbers = (v: unknown, what: string): number[] =>

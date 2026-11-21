@@ -18,6 +18,29 @@ describe('data/', () => {
 		const abstract = repo.files.filter((f) => f.path.startsWith('data/bases/')).length;
 		expect(repo.profiles.size).toBe(repo.files.length - abstract);
 	});
+
+	// An app translates a control by its role, so one left without shows the vendor's English
+	// label in every language. A new control takes a role (a new one in SPEC §9.1 if none fits),
+	// or a line here when the setting is one only its vendor has.
+	const VENDOR_SETTINGS: Record<string, string> = {
+		'walkplay-hid:dre': "Tanchjim's name for its own processing",
+		'topping-usb-hid:lineMode': "whether the DX5 II's line outputs follow the volume"
+	};
+
+	it('gives every control a role, or lists it as a vendor setting', () => {
+		const seen = new Set<string>();
+		const missing = new Set<string>();
+		for (const profile of repo.profiles.values()) {
+			for (const control of profile.protocol?.controls ?? []) {
+				const key = `${profile.protocol!.handler}:${control.id}`;
+				if (control.role) seen.add(key);
+				else if (!(key in VENDOR_SETTINGS)) missing.add(`${profile.id} ${key}`);
+			}
+		}
+		expect([...missing]).toEqual([]);
+		// A control that took a role leaves the list.
+		expect(Object.keys(VENDOR_SETTINGS).filter((key) => seen.has(key))).toEqual([]);
+	});
 });
 
 describe('published data', () => {

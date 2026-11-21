@@ -32,11 +32,12 @@
 				"range": { "min": -99, "max": 0, "step": 0.5 },
 				"unit": "dB"
 			},
-			{ "id": "mute", "name": "Mute", "kind": "toggle" },
+			{ "id": "mute", "name": "Mute", "kind": "toggle", "role": "mute" },
 			{
 				"id": "input",
 				"name": "Input",
 				"kind": "choice",
+				"role": "input",
 				"values": [
 					{ "value": 0, "name": "USB" },
 					{ "value": 1, "name": "OPT" },
@@ -48,6 +49,7 @@
 				"id": "output",
 				"name": "Output",
 				"kind": "choice",
+				"role": "output",
 				"values": [
 					{ "value": 0, "name": "ALL" },
 					{ "value": 1, "name": "HP ALL" },
@@ -98,6 +100,7 @@
 				"id": "balance",
 				"name": "Balance",
 				"kind": "range",
+				"role": "balance",
 				"range": { "min": -9.5, "max": 9.5, "step": 0.5 },
 				"unit": "dB"
 			},
@@ -105,6 +108,7 @@
 				"id": "polarity",
 				"name": "Polarity",
 				"kind": "choice",
+				"role": "polarity",
 				"values": [
 					{ "value": 0, "name": "Normal" },
 					{ "value": 1, "name": "Reverse" }
@@ -114,6 +118,7 @@
 				"id": "crossfeed",
 				"name": "Crossfeed",
 				"kind": "choice",
+				"role": "crossfeed",
 				"values": [
 					{ "value": 0, "name": "Convolution" },
 					{ "value": 1, "name": "Simple" },
@@ -124,6 +129,7 @@
 				"id": "brightness",
 				"name": "Brightness",
 				"kind": "choice",
+				"role": "display-brightness",
 				"values": [
 					{ "value": 0, "name": "Low" },
 					{ "value": 1, "name": "Medium" },
