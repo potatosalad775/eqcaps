@@ -53,6 +53,11 @@ D40).
   read-back rounding.
 - Where the profile lists other EQs (SPEC §9.2), choose which to read; it is checked against that
   EQ's profile. Evidence reports and guided reads stay with the EQ the profile describes.
+- Say whether the EQ read has its channels linked or independent (SPEC §9, its `channels`). Where
+  the pull returns the right channel apart (`right`, from a handler that drives that EQ's channels
+  apart), show the left and the right each with its own pre-gain and bands, each checked against
+  the EQ's profile on its own, with its own "wrong constraint" report. The evidence file, the
+  guided read and "open in the playground" take the left channel only.
 
 ### T3: Guided read (read-only)
 

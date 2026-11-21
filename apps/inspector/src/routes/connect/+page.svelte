@@ -32,11 +32,13 @@
 		type SerialPortChoice
 	} from '@potatosalad775/eqcaps-device-bridge/browser';
 	import {
+		channelsText,
 		descriptorText,
 		filterText,
+		findingLines,
 		identityText,
 		newDeviceIssueUrl,
-		readFindings,
+		readChannels,
 		wireRows,
 		wrongConstraintIssueUrl
 	} from '#lib/connect.ts';
@@ -49,7 +51,6 @@
 	import GuidedRead from '#lib/components/GuidedRead.svelte';
 	import { formatApo } from '#lib/filters-text.ts';
 	import { formatField } from '#lib/format.ts';
-	import { violationText } from '#lib/violations.ts';
 	import GroupBadge from '#lib/components/GroupBadge.svelte';
 	import StatusBadge from '#lib/components/StatusBadge.svelte';
 
@@ -240,27 +241,17 @@
 		pulled = null;
 	});
 
-	const findings = $derived(
-		eqShown && pulled && device ? readFindings(eqShown, pulled, device.capabilities) : null
+	/** The read as channels: one, or the left and the right where the pull returned them apart. */
+	const channels = $derived(
+		pulled && device ? readChannels(pulled, eqShown, device.capabilities) : null
 	);
 	const present = (xs: (Filter | null)[]) => xs.filter((x): x is Filter => x !== null);
-
-	function findingsText(): string {
-		if (!findings || !profile || !pulled) return '';
-		const lines: string[] = [];
-		if (findings.bandCount) {
-			lines.push(
-				`The device returned ${findings.bandCount.read} bands; the profile has ${findings.bandCount.profile}.`
-			);
-		}
-		for (const v of findings.violations) lines.push(violationText(v, pulled.filters));
-		return lines.join('\n');
-	}
 
 	const evidence = $derived.by(() => {
 		if (!pulled || !chosen || !protocol) return null;
 		const date = today();
-		const lines = findingsText();
+		// The evidence file records one channel, the left where the pull returned two.
+		const first = channels?.[0];
 		const report = readEvidence({
 			transport: chosen.kind,
 			identity: chosen.identity,
@@ -268,7 +259,7 @@
 			experimental: protocol.experimental === true,
 			...(profileId && profile ? { profile: profileId } : {}),
 			pull: pulled,
-			findings: lines ? lines.split('\n') : [],
+			findings: first?.findings ? findingLines(first.findings, first.filters) : [],
 			commit: APP_COMMIT,
 			userAgent: navigator.userAgent,
 			date
@@ -291,9 +282,8 @@
 		return { report, handoff };
 	});
 
-	function readBackText(): string {
-		if (!pulled) return '';
-		return pulled.filters.map((f, i) => `${i + 1}. ${f ? filterText(f) : 'off'}`).join('\n');
+	function readBackText(filters: readonly (Filter | null)[]): string {
+		return filters.map((f, i) => `${i + 1}. ${f ? filterText(f) : 'off'}`).join('\n');
 	}
 
 	async function openInPlayground() {
@@ -567,83 +557,95 @@
 				{/if}
 			{/if}
 
-			{#if pulled}
+			{#if pulled && channels}
+				{@const apart = channels.length > 1}
 				<div>
 					<h3 class="font-medium">
-						Current EQ{pulled.slot !== undefined ? `, preset ${pulled.slot}` : ''}{pulled.preamp !==
-						undefined
+						Current EQ{pulled.slot !== undefined ? `, preset ${pulled.slot}` : ''}{!apart &&
+						pulled.preamp !== undefined
 							? `, preamp ${formatField('preamp', pulled.preamp)} dB`
 							: ''}
 					</h3>
-					<table class="mt-1 text-sm">
-						<thead class="text-xs text-zinc-500">
-							<tr>
-								<th class="px-2 text-left font-normal">Band</th>
-								<th class="px-2 text-left font-normal">Type</th>
-								<th class="px-2 text-right font-normal">Hz</th>
-								<th class="px-2 text-right font-normal">dB</th>
-								<th class="px-2 text-right font-normal">Q</th>
-							</tr>
-						</thead>
-						<tbody class="font-mono tabular-nums">
-							{#each pulled.filters as f, i (i)}
-								<tr class="border-b border-zinc-100 dark:border-zinc-900">
-									<td class="px-2 py-0.5">{i + 1}</td>
-									{#if f}
-										<td class="px-2">{f.type}</td>
-										<td class="px-2 text-right">{formatField('freq', f.freq)}</td>
-										<td class="px-2 text-right">{formatField('gain', f.gain)}</td>
-										<td class="px-2 text-right">{formatField('q', f.q)}</td>
-									{:else}
-										<td class="px-2 text-zinc-400" colspan="4">off</td>
-									{/if}
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-					<p class="mt-1 text-xs text-zinc-500">Values as the device stores them.</p>
+					{#if eqShown}
+						<p class="mt-1 text-sm">{channelsText(eqShown, apart)}</p>
+					{/if}
 				</div>
 
-				{#if findings}
+				{#each channels as ch (ch.channel ?? '')}
 					<div>
-						<h3 class="font-medium">
-							Check against {profile?.id}{listedEq ? ` (${listedEq.name})` : ''}
-						</h3>
-						{#if !findings.bandCount && findings.violations.length === 0}
-							<p class="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
-								Everything the device holds fits the profile.
-							</p>
-						{:else}
-							<p class="mt-1 text-sm">
-								The device holds values the profile says it can't. Either the profile is too strict,
-								or the device was set by an app that ignores it:
-							</p>
-							<ul class="mt-1 list-disc pl-5 text-sm">
-								{#if findings.bandCount}
-									<li>
-										The device returned {findings.bandCount.read} bands; the profile has {findings
-											.bandCount.profile}.
-									</li>
-								{/if}
-								{#each findings.violations as v, i (i)}<li>
-										{violationText(v, pulled.filters)}
-									</li>{/each}
-							</ul>
-							<!-- eslint-disable svelte/no-navigation-without-resolve -- GitHub, not a route -->
-							<a
-								class="mt-2 inline-block text-sm"
-								target="_blank"
-								rel="noopener"
-								href={wrongConstraintIssueUrl({
-									profile: profile?.id ?? '',
-									wrong: findingsText(),
-									evidence: `Read back from the device with the eqcaps inspector:\n${readBackText()}`
-								})}>Report it as a wrong constraint</a
-							>
-							<!-- eslint-enable svelte/no-navigation-without-resolve -->
+						{#if ch.channel}
+							<h4 class="font-medium">
+								{ch.channel} channel{ch.preamp !== undefined
+									? `, preamp ${formatField('preamp', ch.preamp)} dB`
+									: ''}
+							</h4>
 						{/if}
+						<table class="mt-1 text-sm">
+							<thead class="text-xs text-zinc-500">
+								<tr>
+									<th class="px-2 text-left font-normal">Band</th>
+									<th class="px-2 text-left font-normal">Type</th>
+									<th class="px-2 text-right font-normal">Hz</th>
+									<th class="px-2 text-right font-normal">dB</th>
+									<th class="px-2 text-right font-normal">Q</th>
+								</tr>
+							</thead>
+							<tbody class="font-mono tabular-nums">
+								{#each ch.filters as f, i (i)}
+									<tr class="border-b border-zinc-100 dark:border-zinc-900">
+										<td class="px-2 py-0.5">{i + 1}</td>
+										{#if f}
+											<td class="px-2">{f.type}</td>
+											<td class="px-2 text-right">{formatField('freq', f.freq)}</td>
+											<td class="px-2 text-right">{formatField('gain', f.gain)}</td>
+											<td class="px-2 text-right">{formatField('q', f.q)}</td>
+										{:else}
+											<td class="px-2 text-zinc-400" colspan="4">off</td>
+										{/if}
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+						<p class="mt-1 text-xs text-zinc-500">Values as the device stores them.</p>
 					</div>
-				{/if}
+
+					{#if ch.findings}
+						{@const lines = findingLines(ch.findings, ch.filters)}
+						{@const which = ch.channel ? `the ${ch.channel.toLowerCase()} channel` : ''}
+						<div>
+							<h3 class="font-medium">
+								Check {which ? `${which} ` : ''}against {profile?.id}{listedEq
+									? ` (${listedEq.name})`
+									: ''}
+							</h3>
+							{#if lines.length === 0}
+								<p class="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
+									Everything {which || 'the device'} holds fits the profile.
+								</p>
+							{:else}
+								<p class="mt-1 text-sm">
+									The device holds values the profile says it can't. Either the profile is too
+									strict, or the device was set by an app that ignores it:
+								</p>
+								<ul class="mt-1 list-disc pl-5 text-sm">
+									{#each lines as line, i (i)}<li>{line}</li>{/each}
+								</ul>
+								<!-- eslint-disable svelte/no-navigation-without-resolve -- GitHub, not a route -->
+								<a
+									class="mt-2 inline-block text-sm"
+									target="_blank"
+									rel="noopener"
+									href={wrongConstraintIssueUrl({
+										profile: profile?.id ?? '',
+										wrong: lines.join('\n'),
+										evidence: `Read back from ${which || 'the device'} with the eqcaps inspector:\n${readBackText(ch.filters)}`
+									})}>Report it as a wrong constraint</a
+								>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
+							{/if}
+						</div>
+					{/if}
+				{/each}
 
 				{#if profileId}
 					<button type="button" class="text-sm underline" onclick={openInPlayground}
