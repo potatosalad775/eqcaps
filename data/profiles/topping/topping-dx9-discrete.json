@@ -38,6 +38,6 @@
 				"date": "2026-11-20"
 			}
 		],
-		"notes": "As topping-home. Up to 10 stored configs. The firmware minimum is the one on Topping's page; the app itself checks no version for this device. The product name is a guess: the app tells its devices apart by a product name it strips of spaces and case, so the exact string a device reports is not known until one is read."
+		"notes": "As topping-home. Up to 10 stored configs, which the bridge creates, renames and deletes as the app does, untried on a device. The firmware minimum is the one on Topping's page; the app itself checks no version for this device. The product name is a guess: the app tells its devices apart by a product name it strips of spaces and case, so the exact string a device reports is not known until one is read."
 	}
 }
