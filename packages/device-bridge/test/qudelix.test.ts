@@ -27,20 +27,8 @@ const protocolFor = (
 	return protocol;
 };
 const first = (group?: 'usr' | 'spk') => protocolFor('qudelix-usb-hid', group);
-const open = (t: Transport, protocol: Protocol, log?: (m: string) => void): BridgeDevice => {
-	const device = openDevice(t, protocol, { sleep: noSleep, ...(log ? { log } : {}) });
-	const eq = chosen.get(protocol);
-	if (eq === undefined) return device;
-	return {
-		...device,
-		pull: (request = {}) => device.pull({ ...request, eq }),
-		push: (request) => device.push({ ...request, eq }),
-		currentSlot: () => device.currentSlot(eq),
-		eqEnabled: () => device.eqEnabled(eq),
-		setEnabled: (enabled, slot) => device.setEnabled(enabled, slot, eq),
-		bandCount: () => device.bandCount(eq)
-	};
-};
+const open = (t: Transport, protocol: Protocol, log?: (m: string) => void): BridgeDevice =>
+	openDevice(t, protocol, { sleep: noSleep, ...(log ? { log } : {}) }).eq(chosen.get(protocol));
 
 /** The EQ writes, 0x07xx, as sent. */
 const eqWrites = (fake: FakeQudelix) =>
@@ -948,7 +936,7 @@ describe.each([
 	});
 });
 
-describe('the EQ of an operation (SPEC §9.2)', () => {
+describe('the device viewed as one of its EQs (SPEC §9.2)', () => {
 	const flat = { id: 0, name: 'Flat' };
 	const protocol: Protocol = {
 		handler: 'qudelix-v2-usb-hid',
@@ -967,23 +955,49 @@ describe('the EQ of an operation (SPEC §9.2)', () => {
 		expect(plain.capabilities.eqs).toEqual([]);
 	});
 
-	test('one device drives both EQs, each operation naming its own', async () => {
+	test("a view has its EQ's slots and channels, and the device's list of EQs", () => {
+		const device = openDevice(new FakeQudelixV2(), protocol, { sleep: noSleep });
+		const spk = device.eq('spk');
+		expect(spk.capabilities.slots).toEqual([flat]);
+		expect(spk.capabilities.perChannel).toBe(true);
+		expect(spk.capabilities.eqs).toBe(device.capabilities.eqs);
+		expect(spk.capabilities).not.toHaveProperty('perChannelEqs');
+		// The same view each time, and the way back to the profile's own.
+		expect(device.eq('spk')).toBe(spk);
+		expect(device.eq()).toBe(device);
+		expect(spk.eq()).toBe(device);
+	});
+
+	test("the firmware, the controls and closing are the device's from every view", async () => {
+		const fake = new FakeQudelixV2();
+		const close = vi.spyOn(fake, 'close');
+		const device = openDevice(fake, protocol, { sleep: noSleep });
+		const spk = device.eq('spk');
+		expect(spk.capabilities.controls).toBe(device.capabilities.controls);
+		expect(await spk.firmware()).toBe(await device.firmware());
+		expect(await spk.readControls()).toEqual(await device.readControls());
+		await spk.close();
+		expect(close).toHaveBeenCalledTimes(1);
+	});
+
+	test('one device drives both EQs, each through its view', async () => {
 		const fake = new FakeQudelixV2();
 		const device = openDevice(fake, protocol, { sleep: noSleep });
-		await device.push({ filters: [pk(200, 2)], preamp: -1, eq: 'spk' });
+		const spk = device.eq('spk');
+		await spk.push({ filters: [pk(200, 2)], preamp: -1 });
 		await device.push({ filters: [pk(1000, -3)] });
-		expect((await device.pull({ eq: 'spk' })).filters[0]).toEqual(pk(200, 2));
+		expect((await spk.pull()).filters[0]).toEqual(pk(200, 2));
 		expect((await device.pull()).filters[0]).toEqual(pk(1000, -3));
-		expect(await device.bandCount('spk')).toBe(20);
+		expect(await spk.bandCount()).toBe(20);
 		expect(await device.bandCount()).toBe(10);
-		await device.setEnabled(false, undefined, 'spk');
-		expect(await device.eqEnabled('spk')).toBe(false);
+		await spk.setEnabled(false);
+		expect(await spk.eqEnabled()).toBe(false);
 		expect(await device.eqEnabled()).toBe(true);
-		expect(await device.currentSlot('spk')).toBeNull();
+		expect(await spk.currentSlot()).toBeNull();
 		expect(fake.errors).toEqual([]);
 	});
 
-	test('a right channel is refused on the EQ the push names unless that EQ takes one', async () => {
+	test('a right channel is refused on a view unless its EQ takes one', async () => {
 		const fake = new FakeQudelixV2();
 		const device = openDevice(fake, protocol, { sleep: noSleep });
 		const right = { filters: [pk(80, 1)] };
@@ -991,21 +1005,33 @@ describe('the EQ of an operation (SPEC §9.2)', () => {
 			code: 'invalid-request'
 		});
 		expect(fake.sent).toEqual([]);
-		await device.push({ filters: [pk(100, 1)], right, eq: 'spk' });
-		expect((await device.pull({ eq: 'spk' })).right!.filters[0]).toEqual(pk(80, 1));
+		await device.eq('spk').push({ filters: [pk(100, 1)], right });
+		expect((await device.eq('spk').pull()).right!.filters[0]).toEqual(pk(80, 1));
 		expect(fake.errors).toEqual([]);
 	});
 
-	test('an EQ the profile does not list is refused, and nothing is sent', async () => {
+	test('an EQ the profile does not list is refused when it is asked for, and nothing is sent', () => {
 		const fake = new FakeQudelixV2();
 		const device = openDevice(fake, { handler: 'qudelix-v2-usb-hid' }, { sleep: noSleep });
-		const refused = { code: 'invalid-request', message: 'qudelix-v2-usb-hid: no EQ "spk" here' };
-		await expect(device.pull({ eq: 'spk' })).rejects.toMatchObject(refused);
-		await expect(device.push({ filters: [pk(100, 1)], eq: 'spk' })).rejects.toMatchObject(refused);
-		await expect(device.setEnabled(true, undefined, 'spk')).rejects.toMatchObject(refused);
-		await expect(device.eqEnabled('spk')).rejects.toMatchObject(refused);
-		await expect(device.currentSlot('spk')).rejects.toMatchObject(refused);
-		await expect(device.bandCount('spk')).rejects.toMatchObject(refused);
+		let thrown: unknown;
+		try {
+			device.eq('spk');
+		} catch (e) {
+			thrown = e;
+		}
+		expect(thrown).toMatchObject({
+			code: 'invalid-request',
+			message: 'qudelix-v2-usb-hid: no EQ "spk" here'
+		});
 		expect(fake.sent).toEqual([]);
+	});
+
+	test('the views share one queue: operations on two EQs never interleave', async () => {
+		const fake = new FakeQudelixV2();
+		const device = openDevice(fake, protocol, { sleep: noSleep });
+		const [usr, spk] = await Promise.all([device.pull(), device.eq('spk').pull()]);
+		expect(usr.filters).toHaveLength(10);
+		expect(spk.filters).toHaveLength(20);
+		expect(fake.errors).toEqual([]);
 	});
 });

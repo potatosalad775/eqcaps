@@ -86,12 +86,9 @@ describe('the inspector never writes to a device', () => {
 			close: async () => {}
 		};
 		const device = openReadOnly(transport, { handler: 'walkplay-hid' } as never);
-		expect(Object.keys(device).sort()).toEqual([
-			'capabilities',
-			'identity',
-			'protocol',
-			'pull',
-			'transport'
-		]);
+		const members = ['capabilities', 'eq', 'identity', 'protocol', 'pull', 'transport'];
+		expect(Object.keys(device).sort()).toEqual(members);
+		// The device viewed as one of its EQs (SPEC §9.2) is read-only too.
+		expect(Object.keys(device.eq()).sort()).toEqual(members);
 	});
 });

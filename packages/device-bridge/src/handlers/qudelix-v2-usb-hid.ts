@@ -321,7 +321,7 @@ export const qudelixV2UsbHid: HidHandler<QudelixV2UsbHidOptions> = {
 	eqs: ['spk'],
 	codec: qudelixV2UsbHidCodec,
 
-	capabilities: () => ({
+	capabilities: (_transport, _options, eq) => ({
 		canRead: true,
 		canWrite: true,
 		readsPreamp: true,
@@ -332,7 +332,7 @@ export const qudelixV2UsbHid: HidHandler<QudelixV2UsbHidOptions> = {
 		readsCurrentSlot: true,
 		canEnable: true,
 		// The speaker EQ's left and right, as the app's channel selector writes them.
-		perChannelEqs: ['spk']
+		perChannel: eq === 'spk'
 	}),
 
 	async pull(ctx) {

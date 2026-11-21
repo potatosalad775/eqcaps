@@ -169,14 +169,16 @@ Device controls (D49) are separate and opt-in: `pull` and `push` never touch the
 list and reads each write back.
 
 A device with several EQs (D53) lists the others in `protocol.eqs`. An app picks one, fits against
-its profile (`eqProfile`), and names it in the bridge operation (`eq`); without one, everything
-above is about the EQ the profile describes.
+its profile (`eqProfile`), and drives it through the bridge device viewed as that EQ
+(`device.eq(id)`); the device as opened is the EQ the profile describes, and everything above is
+about that one.
 
 An EQ whose profile says `channels: "independent"` (D54) holds left and right apart; a listed EQ
 says it in its own entry (D55), and `eqProfile` carries it. An app fits and completes each channel
 against the same profile, and pushes the left as `filters` and `preamp` and the right as `right`,
-where the bridge's handler drives that EQ's channels apart (`perChannel`, and per listed EQ in
-`capabilities.eqs`); a pull of it then returns the right channel as `right`. Without `right`, a
+where the bridge's handler drives that EQ's channels apart (`perChannel` in the capabilities of
+its view, and per listed EQ in `capabilities.eqs`); a pull of it then returns the right channel
+as `right`. Without `right`, a
 push writes both channels alike, as on a linked EQ.
 
 ## 9. Device bridge
@@ -193,6 +195,9 @@ push writes both channels alike, as on a linked EQ.
   profile, marked experimental.
 - **Controls and firmware.** A handler can read the firmware and read and write the device
   controls the profile lists (`firmware`, `readControls`, `writeControl`).
+- **A view per EQ.** A bridge device is always viewed as one EQ: the profile's own as opened, a
+  listed one from `eq(id)` (D53). The views share the connection and one queue of operations; the
+  session keeps "own or listed" to itself.
 - **Presets as a list.** Where a device keeps its presets as a list with names of its own
   (Topping's stored configs), the profile's `protocol.presets` is the room it has, and `slots()`
   asks the device which exist now. A handler may also create, rename and delete them
