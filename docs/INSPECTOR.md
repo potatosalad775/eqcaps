@@ -207,6 +207,7 @@ apps/inspector (SvelteKit + Svelte 5, adapter-static SPA)
   ├── uses packages/device-bridge  connectors + handlers (+ codecs), pull only
   ├── src/lib/read-session.ts    T1 and T2: the device chosen, its matches, the profile and
   │                              protocol in use, the open device and what was read
+  ├── src/lib/editor-*.ts        T4: checking as CI does, the form's edits, how an edit begins
   └── src/lib/guided/            guided reads: step planner, inference, evidence writer
 ```
 
