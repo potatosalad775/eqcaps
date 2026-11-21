@@ -441,6 +441,45 @@ export function protocolForMatches(
 	return undefined;
 }
 
+/** How a device is driven, and where that came from. */
+export interface ProtocolChoice {
+	protocol: Protocol;
+	/**
+	 * `profile`: the chosen profile's own. `match`: that of a profile the device also matches,
+	 * named in `profileId` (a device profile under a group profile is driven by the group's).
+	 * `guess`: the USB vendor's usual one, marked experimental.
+	 */
+	source: 'profile' | 'match' | 'guess';
+	/** The profile the protocol came from; left out for a guess. */
+	profileId?: string;
+}
+
+/**
+ * How to drive a device, in the order every app takes (D42): the protocol of the profile chosen
+ * for it; else that of the most specific profile it matches that has one this bridge can drive;
+ * else, for a USB HID device, a guess from its vendor. Undefined when none of them gives one.
+ *
+ * `chosen` is a profile or its index entry; `matches` are the client's `matchDevice` matches,
+ * most specific first; `usbVendorId` (a number or "0x2972") is given for a HID device only, since
+ * the guesses are HID protocols.
+ */
+export function protocolFor(device: {
+	chosen?: { id: string; protocol?: unknown } | null | undefined;
+	matches?:
+		Iterable<{ id: string; protocol?: unknown; entry?: { protocol?: unknown } }> | undefined;
+	usbVendorId?: number | string | null | undefined;
+}): ProtocolChoice | undefined {
+	const own = protocolOf(device.chosen);
+	if (own && device.chosen)
+		return { protocol: own, source: 'profile', profileId: device.chosen.id };
+	const matched = protocolForMatches(device.matches ?? []);
+	if (matched) return { ...matched, source: 'match' };
+	const vendor = device.usbVendorId;
+	if (vendor === undefined || vendor === null) return undefined;
+	const guess = guessProtocol(typeof vendor === 'string' ? parseInt(vendor, 16) : vendor);
+	return guess && { protocol: guess, source: 'guess' };
+}
+
 // --- Devices without a profile --------------------------------------------------------------------
 
 const presets = (...list: [number, string][]): Slot[] => list.map(([id, name]) => ({ id, name }));

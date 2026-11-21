@@ -12,11 +12,13 @@ vendor's own app does where one is known.
   implements the interfaces over its own USB stack.
 - **Driven by the database.** The bridge knows how to talk to a device, not what it accepts or
   which device it is. The client matches a connected device to its eqcaps profile; the profile
-  says what the device accepts (fit and complete with `@potatosalad775/eqcaps-core` before
-  writing) and, in its `protocol`, which handler drives it with which settings.
-  `protocolForMatches(matches)` gives the protocol of the most specific match that has one this
-  bridge can drive; `protocolOf(profile)` reads one profile's or index entry's. A device added to
-  the database on a protocol the bridge already speaks needs no new bridge release.
+  says what the device accepts (`plan` with `@potatosalad775/eqcaps-core` before writing) and, in
+  its `protocol`, which handler drives it with which settings. `protocolFor({ chosen, matches,
+  usbVendorId })` gives the protocol in the order every app takes: the chosen profile's own, else
+  that of the most specific match that has one this bridge can drive, else a guess from a HID
+  device's USB vendor, and says which it was (`source`). `protocolForMatches(matches)` and
+  `protocolOf(profile)` are its first two steps on their own. A device added to the database on a
+  protocol the bridge already speaks needs no new bridge release.
 - **Writes exactly what it is given.** No clamping, padding, type conversion or compensation. A
   value the wire can't carry or a type the protocol has no code for is a `BridgeError`, before
   anything is sent.
@@ -24,12 +26,7 @@ vendor's own app does where one is known.
 ```ts
 import { createClient } from '@potatosalad775/eqcaps-client';
 import { plan } from '@potatosalad775/eqcaps-core';
-import {
-	guessProtocol,
-	identityOf,
-	openDevice,
-	protocolForMatches
-} from '@potatosalad775/eqcaps-device-bridge';
+import { identityOf, openDevice, protocolFor } from '@potatosalad775/eqcaps-device-bridge';
 import { requestHidDevice } from '@potatosalad775/eqcaps-device-bridge/browser';
 
 const client = createClient();
@@ -39,8 +36,12 @@ const transport = await requestHidDevice({ entries: index?.profiles ?? [] });
 if (transport) {
 	const { best, matches } = await client.matchDevice(identityOf(transport));
 	const profile = best ? await client.loadProfile(best.id) : null;
-	const protocol =
-		protocolForMatches(matches)?.protocol ?? guessProtocol(transport.vendorId);
+	// The profile's protocol, a matched profile's, or a guess from the vendor (experimental).
+	const protocol = protocolFor({
+		chosen: best?.entry,
+		matches,
+		usbVendorId: transport.vendorId
+	})?.protocol;
 	if (protocol) {
 		const device = openDevice(transport, protocol, profile ? { profile } : {});
 
@@ -95,6 +96,16 @@ request into frames and back without a device, for checking what a value becomes
 write takes, the filter types with wire codes, and each field's wire range and resolution as an
 eqcaps domain. That is `handler-code` knowledge (SPEC §10): what a device can be sent, not what it
 accepts. `handlerCodeUrl(handler, commit)` is the source `ref` for it.
+`wireConstraints(protocol, bandCount)` gives the same as the constraints of a profile (a band
+count one write carries, the types, each field's domain or null where the wire bounds none, and
+the preamp as `manual` over its wire grid or `unknown`), for an app that drives a device without
+a profile on a guessed protocol, or a profile being started. The caller fills the null fields
+with placeholders of its own.
+
+A program that must never write (the inspector, D40) opens a device with
+`openReader(transport, protocol, options)` in place of `openDevice`: the same device with `pull`,
+`currentSlot`, `eqEnabled`, `slots`, `bandCount`, `firmware`, `readControls`, `eq` and `close`
+only, on every view.
 
 ## Handlers and their options
 

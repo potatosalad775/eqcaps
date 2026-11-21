@@ -8,6 +8,7 @@ import fc from 'fast-check';
 import { describe, expect, test } from 'vitest';
 import {
 	analyzeCodec,
+	wireConstraints,
 	guessProtocol,
 	HANDLERS,
 	isBridgeError,
@@ -213,6 +214,24 @@ describe.each(
 	const missing = (FILTER_TYPES as readonly FilterType[]).filter((t) => !codec.types.includes(t));
 	test.skipIf(missing.length === 0)('a type without a wire code is refused', () => {
 		expect(refused({ ...base(), type: missing[0]! }, 'unsupported-type')).toBe(true);
+	});
+
+	test('the wire limits as constraints: a band count one write carries, the analysis otherwise', () => {
+		const protocol = { handler: id, options } as Protocol;
+		const analysis = analyzeCodec(protocol);
+		const c = wireConstraints(protocol);
+		expect(c.bandCount).toBeGreaterThanOrEqual(analysis.bands.min);
+		expect(c.bandCount).toBeLessThanOrEqual(analysis.bands.max);
+		expect(wireConstraints(protocol, 1000).bandCount).toBe(analysis.bands.max);
+		expect(wireConstraints(protocol, 0).bandCount).toBe(analysis.bands.min);
+		expect(() =>
+			codec.encode({ filters: Array.from({ length: c.bandCount }, base) }, options)
+		).not.toThrow();
+		expect(c.types).toEqual(codec.types.filter((t) => !t.startsWith('x-')));
+		expect([c.freq, c.q, c.gain]).toEqual([analysis.freq, analysis.q, analysis.gain]);
+		expect(c.preamp).toEqual(
+			analysis.preamp ? { mode: 'manual', gain: analysis.preamp } : { mode: 'unknown' }
+		);
 	});
 
 	test('the offline analysis agrees with the codec', () => {

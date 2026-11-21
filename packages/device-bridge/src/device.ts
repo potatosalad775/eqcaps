@@ -460,3 +460,60 @@ export function openDevice(
 
 	return view(undefined);
 }
+
+/**
+ * The reading side of a connected device (D40): what `BridgeDevice` has that sends no write.
+ * `pull` and the other reads do send their requests; nothing here changes what the device holds.
+ */
+export type DeviceReader = Pick<
+	BridgeDevice,
+	| 'transport'
+	| 'protocol'
+	| 'identity'
+	| 'capabilities'
+	| 'pull'
+	| 'currentSlot'
+	| 'eqEnabled'
+	| 'slots'
+	| 'bandCount'
+	| 'firmware'
+	| 'readControls'
+	| 'close'
+> & {
+	/** This device viewed as another of its EQs (SPEC §9.2), for reading too. */
+	eq(id?: string): DeviceReader;
+};
+
+/**
+ * `openDevice` for a program that must never write (the inspector, D40): the object it gives has
+ * no `push`, `setEnabled`, `writeControl` or preset editing, on any view.
+ */
+export function openReader(
+	transport: Transport,
+	protocol: Protocol,
+	options: OpenOptions = {}
+): DeviceReader {
+	const readers = new Map<BridgeDevice, DeviceReader>();
+	const reader = (d: BridgeDevice): DeviceReader => {
+		const known = readers.get(d);
+		if (known) return known;
+		const r: DeviceReader = {
+			transport: d.transport,
+			protocol: d.protocol,
+			identity: d.identity,
+			capabilities: d.capabilities,
+			pull: (request) => d.pull(request),
+			currentSlot: () => d.currentSlot(),
+			eqEnabled: () => d.eqEnabled(),
+			slots: () => d.slots(),
+			bandCount: () => d.bandCount(),
+			firmware: () => d.firmware(),
+			readControls: () => d.readControls(),
+			eq: (id) => reader(d.eq(id)),
+			close: () => d.close()
+		};
+		readers.set(d, r);
+		return r;
+	};
+	return reader(openDevice(transport, protocol, options));
+}

@@ -47,6 +47,17 @@ export interface MatchResult<E extends Candidate = Candidate> {
 	best: DeviceMatch<E> | null;
 	/** True when two or more profiles tie for the best match. */
 	ambiguous: boolean;
+	/**
+	 * The matches at the top: `best` alone, or the ones that tie (`ambiguous`), which the consumer
+	 * offers as the choice. Empty when nothing matched.
+	 */
+	ties: DeviceMatch<E>[];
+	/**
+	 * The device's firmware version could change this result: the identity gave none, and one of
+	 * `ties` holds only for a range of firmware (SPEC §3), which an unknown version is taken to be
+	 * in. A consumer that can read the version asks the device and matches again with `firmware`.
+	 */
+	firmwareDecides: boolean;
 }
 
 /** Anything with an id and a match: an index entry, or a profile (status read from meta). */
@@ -137,11 +148,17 @@ export function matchDevice<E extends Candidate>(
 		(a, b) =>
 			b.specificity - a.specificity || Number(a.group) - Number(b.group) || a.id.localeCompare(b.id)
 	);
-	const [top, next] = matches;
-	const ambiguous =
-		top !== undefined &&
-		next !== undefined &&
-		next.specificity === top.specificity &&
-		next.group === top.group;
-	return { matches, best: top && !ambiguous ? top : null, ambiguous };
+	const top = matches[0];
+	const ties = top
+		? matches.filter((m) => m.specificity === top.specificity && m.group === top.group)
+		: [];
+	const ambiguous = ties.length > 1;
+	return {
+		matches,
+		best: top && !ambiguous ? top : null,
+		ambiguous,
+		ties,
+		firmwareDecides:
+			identity.firmware === undefined && ties.some((m) => m.entry.match?.firmware !== undefined)
+	};
 }

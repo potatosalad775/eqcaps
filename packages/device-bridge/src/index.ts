@@ -39,21 +39,23 @@ export type { HandlerId, HandlerOptions } from './handlers/index.ts';
 export {
 	guessProtocol,
 	KNOWN_HID_VENDORS,
+	protocolFor,
 	protocolForMatches,
 	protocolOf,
 	protocolProblem
 } from './protocols.ts';
-export type { Protocol, ProtocolEq } from './protocols.ts';
+export type { Protocol, ProtocolChoice, ProtocolEq } from './protocols.ts';
 export { chooserFilters } from './chooser.ts';
 export type { ChooserEntry, ChooserFilters } from './chooser.ts';
 export { identityOf, usbHex } from './identity.ts';
 export type { DeviceIdentity } from './identity.ts';
-export { analyzeCodec, handlerCodeUrl, MAX_ANALYSED_BANDS } from './analysis.ts';
-export type { CodecAnalysis } from './analysis.ts';
-export { handlerTransports, openDevice, transportsOf } from './device.ts';
+export { analyzeCodec, handlerCodeUrl, MAX_ANALYSED_BANDS, wireConstraints } from './analysis.ts';
+export type { CodecAnalysis, WireConstraints } from './analysis.ts';
+export { handlerTransports, openDevice, openReader, transportsOf } from './device.ts';
 export type {
 	BridgeDevice,
 	ControlWriteResult,
 	DeviceCapabilities,
+	DeviceReader,
 	OpenOptions
 } from './device.ts';

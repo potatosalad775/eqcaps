@@ -195,7 +195,8 @@ The inspector drives devices through `packages/device-bridge` (DECISIONS D33), a
 | Capability flags | whether a protocol reads, how many bands it needs told, whether it reports the preamp and the current preset |
 
 The bridge also has `push`, `setEnabled` and `writeControl` for apps. The inspector calls none of
-them, and a test (`no-writes.test.ts`) checks that.
+them: it opens a device with the bridge's `openReader`, which has only the reads (D40), and a
+test (`no-writes.test.ts`) checks that nothing else is imported.
 
 ## 5. Architecture
 
@@ -204,6 +205,8 @@ apps/inspector (SvelteKit + Svelte 5, adapter-static SPA)
   ├── uses packages/client       fetch index/profiles, cache, match identity → profiles
   ├── uses packages/core         resolveSlot / validate / fit / assign / complete
   ├── uses packages/device-bridge  connectors + handlers (+ codecs), pull only
+  ├── src/lib/read-session.ts    T1 and T2: the device chosen, its matches, the profile and
+  │                              protocol in use, the open device and what was read
   └── src/lib/guided/            guided reads: step planner, inference, evidence writer
 ```
 

@@ -1,12 +1,13 @@
 // Invariant 9 (D40): no code path in the inspector writes to a device. Devices are opened only
-// through lib/device.ts, which hands out no `push` or `setEnabled`, and nothing else imports
-// a way to write: the bridge's openDevice, its handlers (codecs encode writes) or raw transports.
+// with the bridge's openReader, which hands out no `push`, `setEnabled` or `writeControl`, and
+// nothing imports a way to write: the bridge's openDevice, its handlers (codecs encode writes) or
+// raw transports.
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { openReadOnly } from './device.ts';
+import { openReader } from '@potatosalad775/eqcaps-device-bridge';
 
 const SRC = fileURLToPath(new URL('..', import.meta.url));
 
@@ -55,14 +56,21 @@ describe('the inspector never writes to a device', () => {
 		expect(sources.map((s) => s.path)).toContain('lib/components/GuidedRead.svelte');
 	});
 
-	it('imports nothing that writes, except lib/device.ts, which wraps openDevice', () => {
+	it('imports nothing that writes', () => {
 		for (const { path, text } of sources) {
-			const allowed = path === 'lib/device.ts' ? ['openDevice'] : [];
-			const writers = bridgeImports(text).filter(
-				(n) => WRITERS.includes(n) && !allowed.includes(n)
-			);
-			expect(writers, path).toEqual([]);
+			expect(
+				bridgeImports(text).filter((n) => WRITERS.includes(n)),
+				path
+			).toEqual([]);
 		}
+	});
+
+	it('opens devices with openReader, in the session and the guided read', () => {
+		const opens = sources.filter((s) => bridgeImports(s.text).includes('openReader'));
+		expect(opens.map((s) => s.path).sort()).toEqual([
+			'lib/components/GuidedRead.svelte',
+			'routes/connect/+page.svelte'
+		]);
 	});
 
 	it('calls no write method of a device or transport', () => {
@@ -85,10 +93,10 @@ describe('the inspector never writes to a device', () => {
 			onInputReport: () => () => {},
 			close: async () => {}
 		};
-		const device = openReadOnly(transport, { handler: 'walkplay-hid' } as never);
-		const members = ['capabilities', 'eq', 'identity', 'protocol', 'pull', 'transport'];
-		expect(Object.keys(device).sort()).toEqual(members);
+		const device = openReader(transport, { handler: 'walkplay-hid' } as never);
+		const writes = ['push', 'setEnabled', 'writeControl', 'createSlot', 'renameSlot', 'deleteSlot'];
+		expect(Object.keys(device).filter((k) => writes.includes(k))).toEqual([]);
 		// The device viewed as one of its EQs (SPEC §9.2) is read-only too.
-		expect(Object.keys(device.eq()).sort()).toEqual(members);
+		expect(Object.keys(device.eq()).filter((k) => writes.includes(k))).toEqual([]);
 	});
 });

@@ -4,7 +4,7 @@
 // the `handler-code` knowledge of a device (SPEC §10). Wire limits bound what a device can be
 // sent; they say nothing about what its firmware accepts, which only the vendor shows.
 
-import type { Domain, Filter, FilterType } from '@potatosalad775/eqcaps-core';
+import type { Domain, Filter, FilterType, Preamp } from '@potatosalad775/eqcaps-core';
 import { isBridgeError } from './errors.ts';
 import type { WireField, WireGrid } from './handler.ts';
 import { HANDLERS } from './handlers/index.ts';
@@ -112,6 +112,40 @@ export function analyzeCodec(protocol: Protocol): CodecAnalysis {
 		gain: fieldDomain(wire.gain, false),
 		preamp: wire.preamp ? fieldDomain(wire.preamp, false) : null,
 		wire
+	};
+}
+
+/**
+ * A protocol's wire limits as the constraints of a profile: where a device has no profile (an app
+ * drives it on a guessed protocol), or a profile is being started for it (the inspector's draft).
+ * Wire limits only (SPEC §10, `handler-code`): what a write can carry, not what the device takes.
+ */
+export interface WireConstraints {
+	/** `bandCount` as asked, held within what one write carries. */
+	bandCount: number;
+	/** Types with wire codes, in the codec's order; a vendor's own (`x-`) are left out. */
+	types: FilterType[];
+	/**
+	 * Each band field over its wire grid; null where the wire is a float with no limit of its own,
+	 * or carries no Q. The caller fills those with a placeholder of its own.
+	 */
+	freq: Domain | null;
+	q: Domain | null;
+	gain: Domain | null;
+	/** `manual` over the preamp's wire grid; `unknown` where the wire bounds none or carries none. */
+	preamp: Preamp;
+}
+
+/** `protocol`'s wire limits as profile constraints, for `bandCount` bands (default 10). */
+export function wireConstraints(protocol: Protocol, bandCount = 10): WireConstraints {
+	const a = analyzeCodec(protocol);
+	return {
+		bandCount: Math.min(Math.max(bandCount, a.bands.min), a.bands.max),
+		types: a.types.filter((t) => !t.startsWith('x-')),
+		freq: a.freq,
+		q: a.q,
+		gain: a.gain,
+		preamp: a.preamp ? { mode: 'manual', gain: a.preamp } : { mode: 'unknown' }
 	};
 }
 

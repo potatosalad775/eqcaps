@@ -319,7 +319,7 @@ export function createClient(options: ClientOptions = {}): EqcapsClient {
 				return matchDevice(index?.profiles ?? [], identity);
 			} catch (e) {
 				report(e, 'matchDevice');
-				return { matches: [], best: null, ambiguous: false };
+				return { matches: [], best: null, ambiguous: false, ties: [], firmwareDecides: false };
 			}
 		}
 	};

@@ -1,35 +1,18 @@
 <script lang="ts">
 	// T1 identify, T2 read and T3 guided read (INSPECTOR §2): connect a device, show what it says
 	// about itself, match it against the database, and read its EQ back to check the profile. The
-	// inspector never writes to a device: this page and GuidedRead call the bridge's pull, never
-	// push or setEnabled (D40).
+	// state and its rules are the read session's (lib/read-session.ts); this page shows it, and
+	// asks the browser for a device. The inspector never writes to one: the session and GuidedRead
+	// open it for reading only (D40).
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import {
-		eqProfile,
-		type Filter,
-		type IndexEntry,
-		type Profile
-	} from '@potatosalad775/eqcaps-core';
-	import type { DeviceMatch } from '@potatosalad775/eqcaps-client';
-	import {
-		guessProtocol,
-		identityOf,
-		protocolForMatches,
-		protocolOf,
-		type DeviceIdentity,
-		type HidCollectionInfo,
-		type Protocol,
-		type PullResult,
-		type Transport
-	} from '@potatosalad775/eqcaps-device-bridge';
+	import type { Filter } from '@potatosalad775/eqcaps-core';
+	import { identityOf, openReader } from '@potatosalad775/eqcaps-device-bridge';
 	import {
 		deviceApis,
 		requestBleDevice,
 		requestHidDevice,
-		requestSerialPort,
-		type BleChoice,
-		type SerialPortChoice
+		requestSerialPort
 	} from '@potatosalad775/eqcaps-device-bridge/browser';
 	import {
 		channelsText,
@@ -38,15 +21,14 @@
 		findingLines,
 		identityText,
 		newDeviceIssueUrl,
-		readChannels,
 		wireRows,
 		wrongConstraintIssueUrl
 	} from '#lib/connect.ts';
 	import { catalog } from '#lib/data.svelte.ts';
-	import { openReadOnly, type ReadOnlyDevice } from '#lib/device.ts';
 	import { APP_COMMIT } from '#lib/channel.ts';
-	import { readEvidence, today } from '#lib/evidence.ts';
+	import { today } from '#lib/evidence.ts';
 	import { memberBase } from '#lib/handoff.ts';
+	import { readFilters, readHandoff, ReadSession, type Chosen } from '#lib/read-session.ts';
 	import EvidenceReview from '#lib/components/EvidenceReview.svelte';
 	import GuidedRead from '#lib/components/GuidedRead.svelte';
 	import { formatApo } from '#lib/filters-text.ts';
@@ -63,27 +45,19 @@
 	})();
 	const secure = typeof window !== 'undefined' && window.isSecureContext;
 
-	/** A chosen device. HID is open at once; serial and BLE open once the protocol is known. */
-	type Chosen =
-		| {
-				kind: 'hid';
-				identity: DeviceIdentity;
-				transport: Transport;
-				collections: readonly HidCollectionInfo[];
-		  }
-		| { kind: 'serial'; identity: DeviceIdentity; choice: SerialPortChoice }
-		| { kind: 'ble'; identity: DeviceIdentity; choice: BleChoice };
+	const session = new ReadSession({
+		entries: () => catalog.index?.profiles ?? [],
+		match: (identity) => catalog.client.matchDevice(identity),
+		loadProfile: (id) => catalog.profile(id),
+		open: openReader,
+		onChange: (next) => (s = next)
+	});
+	let s = $state.raw(session.state);
+	const { chosen, matches, ambiguous, profileId, profile, driver, eqId, listedEq, eqShown } =
+		$derived(s);
+	const { bandsWanted, writeOnly, device, pulled, channels } = $derived(s);
+	const protocol = $derived(driver?.protocol);
 
-	let chosen = $state.raw<Chosen | null>(null);
-	let matches = $state.raw<DeviceMatch<IndexEntry>[]>([]);
-	let ambiguous = $state(false);
-	let profileId = $state('');
-	let profile = $state.raw<Profile | null>(null);
-	let device = $state.raw<ReadOnlyDevice | null>(null);
-	let pulled = $state.raw<PullResult | null>(null);
-	let bandsWanted = $state(10);
-	/** The id of the device's other EQ to read (SPEC §9.2); empty for the profile's own. */
-	let eqId = $state('');
 	let busy = $state('');
 	let error = $state('');
 	let reportText = $state('');
@@ -94,190 +68,60 @@
 			.sort((a, b) => `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`))
 	);
 
-	/**
-	 * The protocol: the chosen profile's; else that of the most specific matched profile that has
-	 * one this bridge can drive (D42); else a vendor guess for HID, marked experimental. `via`
-	 * names the profile it came from when that isn't the chosen one.
-	 */
-	const driver: { protocol: Protocol; via?: string } | undefined = $derived.by(() => {
-		if (profileId) {
-			const p = protocolOf(catalog.index?.profiles.find((e) => e.id === profileId));
-			if (p) return { protocol: p };
-		}
-		const matched = protocolForMatches(matches);
-		if (matched) return { protocol: matched.protocol, via: matched.profileId };
-		if (chosen?.kind === 'hid' && chosen.identity.usb) {
-			const guess = guessProtocol(parseInt(chosen.identity.usb.vendorId, 16));
-			if (guess) return { protocol: guess };
-		}
-		return undefined;
-	});
-	const protocol = $derived(driver?.protocol);
 	/** Set when the device was checked against a group profile: what a profile for it extends. */
 	const groupBase = $derived(profile?.device.group ? memberBase(profile) : undefined);
 
-	/**
-	 * A HID protocol's capabilities are known without any I/O: say up front when it can't read,
-	 * rather than failing on "Read the EQ". (Serial and BLE ports are opened first.)
-	 */
-	const writeOnly = $derived.by(() => {
-		if (chosen?.kind !== 'hid' || !protocol) return false;
+	/** Runs one of the session's steps, showing what it is doing and what went wrong. */
+	async function run(doing: string, step: () => Promise<void>) {
+		error = '';
+		busy = doing;
 		try {
-			return !openReadOnly(chosen.transport, protocol).capabilities.canRead;
-		} catch {
-			return false;
+			await step();
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+		} finally {
+			busy = '';
 		}
-	});
-
-	$effect(() => {
-		const id = profileId;
-		profile = null;
-		if (!id) return;
-		catalog.profile(id).then((p) => {
-			if (profileId === id) profile = p;
-		});
-	});
-
-	function fail(e: unknown) {
-		error = e instanceof Error ? e.message : String(e);
 	}
 
-	async function choose(kind: 'hid' | 'hid-any' | 'serial' | 'ble') {
-		error = '';
-		await disconnect();
-		await catalog.load();
+	/** The device the user picks in the browser's chooser; null if they cancel. */
+	async function request(kind: 'hid' | 'hid-any' | 'serial' | 'ble'): Promise<Chosen | null> {
 		const entries = catalog.index?.profiles ?? [];
-		busy = 'Waiting for the browser’s device chooser…';
-		try {
-			if (kind === 'hid' || kind === 'hid-any') {
-				const transport = await requestHidDevice({ entries, anyDevice: kind === 'hid-any' });
-				if (!transport || transport.kind !== 'hid') return;
-				chosen = {
-					kind: 'hid',
-					identity: identityOf(transport),
-					transport,
-					collections: transport.collections
-				};
-			} else if (kind === 'serial') {
-				const choice = await requestSerialPort({ entries });
-				if (choice) chosen = { kind: 'serial', identity: choice.identity, choice };
-			} else {
-				const choice = await requestBleDevice({ entries });
-				if (choice) chosen = { kind: 'ble', identity: choice.identity, choice };
-			}
-			if (chosen) await identify(chosen.identity);
-		} catch (e) {
-			fail(e);
-		} finally {
-			busy = '';
+		if (kind === 'hid' || kind === 'hid-any') {
+			const transport = await requestHidDevice({ entries, anyDevice: kind === 'hid-any' });
+			if (!transport || transport.kind !== 'hid') return null;
+			return {
+				kind: 'hid',
+				identity: identityOf(transport),
+				transport,
+				collections: transport.collections
+			};
 		}
+		const choice =
+			kind === 'serial'
+				? await requestSerialPort({ entries })
+				: await requestBleDevice({ entries });
+		return choice && { kind, identity: choice.identity, choice };
 	}
 
-	async function identify(identity: DeviceIdentity) {
-		const result = await catalog.client.matchDevice(identity);
-		matches = result.matches;
-		ambiguous = result.ambiguous;
-		profileId = result.best?.id ?? '';
-		reportText = identityText(identity);
-	}
-
-	async function read() {
-		if (!chosen || !protocol) return;
-		error = '';
-		pulled = null;
-		busy = 'Reading the EQ…';
-		try {
-			if (!device) {
-				const transport =
-					chosen.kind === 'hid' ? chosen.transport : await chosen.choice.open(protocol);
-				const bandCount = profile?.bandCount ?? bandsWanted;
-				device = openReadOnly(transport, protocol, { profile: { bandCount } });
-			}
-			pulled = await device.eq(listedEq?.id).pull(profile ? {} : { bands: bandsWanted });
-		} catch (e) {
-			fail(e);
-		} finally {
-			busy = '';
-		}
-	}
-
-	async function disconnect() {
-		const open = device?.transport ?? (chosen?.kind === 'hid' ? chosen.transport : null);
-		device = null;
-		chosen = null;
-		pulled = null;
-		matches = [];
-		profileId = '';
-		try {
-			await open?.close();
-		} catch {
-			// Already gone.
-		}
-	}
-
-	// A different profile may mean a different protocol: reopen on the next read.
-	$effect(() => {
-		void protocol;
-		if (device && device.protocol !== protocol) {
-			const transport = device.transport;
-			device = null;
-			pulled = null;
-			if (chosen?.kind !== 'hid') transport.close().catch(() => {});
-		}
-	});
-
-	/** The other EQ chosen, when the protocol in use lists it. */
-	const listedEq = $derived(protocol?.eqs?.find((e) => e.id === eqId));
-	/** The profile of the EQ being read: the chosen profile, or that of its listed EQ. */
-	const eqShown = $derived(
-		profile && listedEq ? (eqProfile(profile, listedEq.id) ?? profile) : profile
-	);
-	// Another EQ holds other values: what was read is the previous one's.
-	$effect(() => {
-		void listedEq;
-		pulled = null;
-	});
-
-	/** The read as channels: one, or the left and the right where the pull returned them apart. */
-	const channels = $derived(
-		pulled && device ? readChannels(pulled, eqShown, device.capabilities) : null
-	);
-	const present = (xs: (Filter | null)[]) => xs.filter((x): x is Filter => x !== null);
-
-	const evidence = $derived.by(() => {
-		if (!pulled || !chosen || !protocol) return null;
-		const date = today();
-		// The evidence file records one channel, the left where the pull returned two.
-		const first = channels?.[0];
-		const report = readEvidence({
-			transport: chosen.kind,
-			identity: chosen.identity,
-			handler: protocol.handler,
-			experimental: protocol.experimental === true,
-			...(profileId && profile ? { profile: profileId } : {}),
-			pull: pulled,
-			findings: first?.findings ? findingLines(first.findings, first.filters) : [],
-			commit: APP_COMMIT,
-			userAgent: navigator.userAgent,
-			date
+	const choose = (kind: 'hid' | 'hid-any' | 'serial' | 'ble') =>
+		run('Waiting for the browser’s device chooser…', async () => {
+			await session.disconnect();
+			await catalog.load();
+			const picked = await request(kind);
+			if (!picked) return;
+			await session.connect(picked);
+			reportText = identityText(picked.identity);
 		});
-		const handoff = {
-			...(profileId && profile ? { profileId } : {}),
-			date,
-			identity: chosen.identity,
-			readBack: {
-				filters: pulled.filters,
-				...(pulled.preamp !== undefined ? { preamp: pulled.preamp } : {})
-			},
-			needsBandCount: device?.capabilities.needsBandCount ?? true,
-			protocol: {
-				handler: protocol.handler,
-				...(protocol.options ? { options: protocol.options } : {}),
-				commit: APP_COMMIT
-			}
-		};
-		return { report, handoff };
-	});
+
+	const read = () => run('Reading the EQ…', () => session.read());
+	const disconnect = () => session.disconnect();
+
+	const evidence = $derived(
+		s.pulled
+			? readHandoff(s, { date: today(), commit: APP_COMMIT, userAgent: navigator.userAgent })
+			: null
+	);
 
 	function readBackText(filters: readonly (Filter | null)[]): string {
 		return filters.map((f, i) => `${i + 1}. ${f ? filterText(f) : 'off'}`).join('\n');
@@ -288,7 +132,7 @@
 		try {
 			localStorage.setItem(
 				'eqcaps-inspector:playground',
-				formatApo(present(pulled.filters), pulled.preamp ?? 0)
+				formatApo(readFilters(pulled), pulled.preamp ?? 0)
 			);
 		} catch {
 			// The playground then shows its sample.
@@ -389,7 +233,8 @@
 									type="radio"
 									name="match"
 									value={m.id}
-									bind:group={profileId}
+									checked={profileId === m.id}
+									onchange={() => session.pickProfile(m.id)}
 									id="match-{m.id}"
 								/>
 								<label for="match-{m.id}">{m.entry.brand} {m.entry.model}</label>
@@ -417,7 +262,7 @@
 				<label class="mt-2 block text-xs text-zinc-500" for="other">Or choose a profile</label>
 				<select
 					id="other"
-					bind:value={profileId}
+					bind:value={() => profileId, (id) => session.pickProfile(id)}
 					class="mt-1 w-full rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
 				>
 					<option value="">None</option>
@@ -461,8 +306,10 @@
 				{#if protocol}
 					<p class="mt-1 text-sm">
 						<span class="font-mono">{protocol.handler}</span>
-						{#if driver?.via}
-							<span class="text-zinc-500">· from {driver.via}, which this device also matches</span>
+						{#if driver?.source === 'match'}
+							<span class="text-zinc-500"
+								>· from {driver.profileId}, which this device also matches</span
+							>
 						{/if}
 						{#if protocol.experimental}
 							<span class="text-amber-700 dark:text-amber-400"
@@ -487,7 +334,7 @@
 							type="number"
 							min="1"
 							max="64"
-							bind:value={bandsWanted}
+							bind:value={() => bandsWanted, (n) => session.setBands(n)}
 							class="w-20 rounded border border-zinc-300 bg-white px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
 						/>
 					</label>
@@ -496,7 +343,7 @@
 					<label class="flex items-center gap-2 text-sm">
 						EQ
 						<select
-							bind:value={eqId}
+							bind:value={() => eqId, (id) => session.pickEq(id)}
 							class="rounded border border-zinc-300 bg-white px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
 						>
 							<option value="">{profile?.engine ?? 'The profile’s own'}</option>
@@ -671,7 +518,7 @@
 							handoff={evidence.handoff}
 							{profile}
 							{groupBase}
-							onreconnect={(d) => (device = d)}
+							onreconnect={(d) => session.adopt(d)}
 						/>
 					{/key}
 				{/if}
