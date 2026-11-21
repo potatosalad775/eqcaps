@@ -25,18 +25,25 @@ import { readI32le, tidyF32 } from '../src/bytes.ts';
 import { moondropUsbHidCodec } from '../src/handlers/moondrop-usb-hid.ts';
 import { PROTOCOLS } from './data.ts';
 
-/** Each distinct handler and options pair, from the profiles and the vendor guesses. */
-const variants = new Map<string, { handler: string; options: object }>();
-const add = (handler: string, options: object = {}) =>
-	variants.set(`${handler} ${JSON.stringify(options)}`, { handler, options });
+/**
+ * Each distinct handler and options pair, from the profiles and the vendor guesses, and the EQ of
+ * the handler's (SPEC §9.2) that the options select, where they select another than its own.
+ */
+const variants = new Map<string, { handler: string; options: object; eq?: string }>();
+const add = (handler: string, options: object = {}, eq?: string) =>
+	variants.set(`${handler} ${JSON.stringify(options)}`, {
+		handler,
+		options,
+		...(eq !== undefined ? { eq } : {})
+	});
 for (const p of Object.values(PROTOCOLS)) add(p.handler, p.options);
 for (const v of KNOWN_HID_VENDORS) add(guessProtocol(v)!.handler, guessProtocol(v)!.options);
 add('airoha', { ble: true });
 // Qudelix: the speaker EQ, which an operation selects (SPEC §9.2), not a profile's options.
 add('qudelix-usb-hid');
-add('qudelix-usb-hid', { group: 'spk' });
+add('qudelix-usb-hid', { group: 'spk' }, 'spk');
 add('qudelix-v2-usb-hid');
-add('qudelix-v2-usb-hid', { group: 'spk' });
+add('qudelix-v2-usb-hid', { group: 'spk' }, 'spk');
 
 function transportFor(kind: Transport['kind']): Transport {
 	if (kind !== 'hid')
@@ -91,7 +98,7 @@ const close = (a: number | undefined, b: number | undefined) =>
 
 describe.each(
 	[...variants.values()].map((v) => [`${v.handler} ${JSON.stringify(v.options)}`, v] as const)
-)('%s', (_name, { handler: id, options }) => {
+)('%s', (_name, { handler: id, options, eq }) => {
 	const handler = HANDLERS[id as keyof typeof HANDLERS] as AnyHandler;
 	const { codec } = handler;
 	const wire = codec.wire(options);
@@ -138,9 +145,10 @@ describe.each(
 		);
 	});
 
-	// Where the handler drives the channels apart, `decode` gives the right channel where it
+	// Where the handler drives the EQ's channels apart, `decode` gives the right channel where it
 	// differs from the left; left out, it is the left's.
-	if (caps.perChannel) {
+	const apart = eq === undefined ? caps.perChannel : caps.perChannelEqs?.includes(eq);
+	if (apart) {
 		test('decode(encode(request)) gives both channels back', () => {
 			fc.assert(
 				fc.property(request, request, (r, right) => {

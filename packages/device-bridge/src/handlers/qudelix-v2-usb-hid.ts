@@ -13,16 +13,21 @@
 // 0x80 is the EQ mode [version:4, mode:4 (0 layered, 1 single-EQ)]; 3 the firmware version
 // [major, minor, revision, …]. A change is a set (0x9004) of one element; the action (0x9006)
 // element 0x30 [group, custom n, 0, 0] saves the working EQ to a custom preset. A request (0x9002)
-// [id, 0]… is answered (0x9003) by those elements. The opening answer and the notifications
-// (0x9005) carry the configurations; a request asks for one only where the session has none.
+// [id, 0]… is answered (0x9003) by those elements. The app takes the mode and the configurations
+// from the opening answer (a layered device's holds 0x90 and 0xA0, no 0xB0) and the notifications
+// (0x9005), and never asks. A change another program makes can go unannounced (a 5K Plus with
+// firmware 1.0.3, 2026-11-21), so every operation here requests the mode, then its EQ's
+// configuration: two requests, since the EQ's element depends on the mode. Only the firmware is
+// taken from the opening answer.
 //
 // The app turns an EQ on by setting its whole configuration, makes it parametric by setting the
-// attributes, and changes its pre-gain by setting the whole stored preset. So a push takes the
-// configuration, requests the preset, and sends: the configuration with the switch on; the
+// attributes, and changes its pre-gain by setting the whole stored preset. So a push, with the
+// configuration in hand, requests the preset and sends: the configuration with the switch on; the
 // attributes with the type parametric (not on the speaker EQ, which is parametric only); for a
-// pre-gain, the preset with it on every channel; one band element per band; for a slot, the name
-// (empty: the default "Custom #n") and the save. The codec takes the configuration and the preset
-// as options, so the frames it gives are the frames a push sends.
+// pre-gain, the preset with each channel's; one band element per band and channel mask (on the
+// speaker EQ 3, or with the right channel apart 1 and 2, as the app's channel selector picks
+// them); for a slot, the name (empty: the default "Custom #n") and the save. The codec takes the
+// configuration and the preset as options, so the frames it gives are the frames a push sends.
 
 import { field, I16, readU16be, U16, U8 } from '../bytes.ts';
 import { BridgeError } from '../errors.ts';
@@ -32,7 +37,8 @@ import type { HidTransport } from '../transport.ts';
 import {
 	ACK,
 	ACTION,
-	channelMasks,
+	bandWrites,
+	channelWrites,
 	CUSTOM,
 	customOf,
 	EDITED,
@@ -42,6 +48,7 @@ import {
 	FIVE_K_PLUS,
 	groupOf,
 	hidOut,
+	maskedChannels,
 	modelFor,
 	packet,
 	PARAMETRIC,
@@ -54,12 +61,15 @@ import {
 	readPreset,
 	Reassembly,
 	REQ,
+	RSP,
 	sentPacket,
 	SET,
 	struct,
 	withFields,
 	writeBits,
+	writtenState,
 	dropSession,
+	type Held,
 	type QudelixGroup,
 	type QudelixGroupName,
 	type QudelixLink,
@@ -148,15 +158,9 @@ function target(o: QudelixV2UsbHidOptions) {
 export const qudelixV2UsbHidCodec: Codec<QudelixV2UsbHidOptions, HidFrame> = {
 	types: QUDELIX_TYPES.types,
 	wire: () => QUDELIX_WIRE,
-	encode({ filters, preamp, slot }, o) {
+	encode(request, o) {
 		const { device, group, base } = target(o);
-		if (filters.length > group.bands) {
-			throw new BridgeError(
-				'invalid-request',
-				`Qudelix: the ${group.name} has ${group.bands} bands, not ${filters.length}`
-			);
-		}
-		const channels = group.channels[0]!;
+		const writes = channelWrites(group, group.channels[0]!, request);
 		const messages: [number, number[]][] = [];
 		const set = (id: number, data: ArrayLike<number>) =>
 			messages.push([SET, elementBytes(id, data)]);
@@ -164,28 +168,30 @@ export const qudelixV2UsbHidCodec: Codec<QudelixV2UsbHidOptions, HidFrame> = {
 		// The app's copy of the preset has the parametric type once it sets it.
 		const preset = withFields(device.preset, MODEL.preset.head, { type: PARAMETRIC });
 		if (group.graphic) set(base + ATTRIBUTES, preset.subarray(0, MODEL.preset.head.bits / 8));
-		if (preamp !== undefined) {
-			const value = field(preamp, 10, I16, 'preamp');
-			for (let ch = 0; ch < channels; ch++) {
-				writeBits(preset, MODEL.preset.head.bits + 16 * ch, 16, value);
+		if (writes.some((w) => w.preamp !== undefined)) {
+			for (const { mask, preamp } of writes) {
+				if (preamp === undefined) continue;
+				const value = field(preamp, 10, I16, 'preamp');
+				for (let ch = 0; ch < MODEL.preset.preGains; ch++) {
+					if (mask & (1 << ch)) writeBits(preset, MODEL.preset.head.bits + 16 * ch, 16, value);
+				}
 			}
 			set(base + PRESET, preset);
 		}
 		// Bands past the request keep what the device holds (D33).
-		filters.forEach((f, band) => {
-			const values = {
+		for (const { mask, band, filter: f } of bandWrites(writes)) {
+			const bytes = new Uint8Array(BAND_ELEMENT.bits / 8);
+			BAND_ELEMENT.write(bytes, {
+				mask,
 				filter: QUDELIX_TYPES.encode(f.type),
 				band,
 				freq: field(f.freq, 1, U16, 'freq'),
 				gain: field(f.gain, 10, I16, 'gain'),
 				q: field(f.q, 1024, U16, 'q')
-			};
-			for (const mask of channelMasks(group, channels)) {
-				const bytes = new Uint8Array(BAND_ELEMENT.bits / 8);
-				BAND_ELEMENT.write(bytes, { ...values, mask });
-				set(base + BAND, bytes);
-			}
-		});
+			});
+			set(base + BAND, bytes);
+		}
+		const { slot } = request;
 		if (slot !== undefined) {
 			const n = customOf(group, slot);
 			set(base + NAME, [group.id, n, 0, 0]);
@@ -197,24 +203,28 @@ export const qudelixV2UsbHidCodec: Codec<QudelixV2UsbHidOptions, HidFrame> = {
 	},
 	decode(frames, o) {
 		const { device, group, base } = target(o);
-		const state: WriteState = { filters: [] };
+		const held: Held = [];
+		let slot: number | undefined;
 		const reassembly = new Reassembly();
 		for (const frame of frames) {
 			const p = sentPacket(device.link, frame);
 			const command = readU16be(p, 0);
 			const message = reassembly.push(command, p.subarray(2));
 			for (const e of (message && elementsOf(message)) ?? []) {
-				if (command === ACTION && e.id === SAVE) state.slot = CUSTOM + e.data[1]!;
+				if (command === ACTION && e.id === SAVE) slot = CUSTOM + e.data[1]!;
 				if (command !== SET) continue;
 				if (e.id === base + BAND) {
 					const b = BAND_ELEMENT.read(e.data);
-					state.filters[b.band] = filterOf(b);
+					for (const ch of maskedChannels(held, b.mask)) ch.filters[b.band] = filterOf(b);
 				} else if (e.id === base + PRESET) {
-					state.preamp = decimals(readPreset(MODEL, group, e.data)[0]!.preGain / 10, 1);
+					readPreset(MODEL, group, e.data).forEach(({ preGain }, ch) => {
+						maskedChannels(held, 1 << ch)[0]!.preamp = decimals(preGain / 10, 1);
+					});
 				}
 			}
 		}
-		return state;
+		const state: WriteState = writtenState(group, held);
+		return slot === undefined ? state : { ...state, slot };
 	}
 };
 
@@ -263,11 +273,14 @@ const send = (s: QudelixSession, command: number, message: readonly number[]) =>
 		fragmentsOf(command, message, s.device.packetSize).map((p) => hidOut(s.link, p))
 	);
 
-/** Requests elements afresh: [id, 0] each, answered by the elements. */
-async function request(s: QudelixSession, ids: number[]) {
+/** Elements as the device holds them now: requested, [id, 0] each, and answered. */
+async function fresh(s: QudelixSession, ids: number[]) {
 	for (const id of ids) s.elements.delete(id);
+	// Only the answer counts. A notification can arrive between the request and its answer,
+	// holding the element as an earlier write left it partway: a 5K Plus notifies the whole
+	// preset, late, when an edit takes the EQ off a stored preset (seen 2026-11-21).
 	const answered = s.expect(
-		() => ids.every((id) => s.elements.has(id)),
+		(m) => m.command === RSP && ids.every((id) => s.elements.has(id)),
 		TIMEOUT,
 		`the request for elements ${ids.map((id) => `0x${id.toString(16)}`).join(', ')}`
 	);
@@ -278,31 +291,27 @@ async function request(s: QudelixSession, ids: number[]) {
 		ids.flatMap((id) => [id, 0])
 	);
 	await answered;
-}
-
-/** Elements as the session holds them, requested where it has none. */
-async function elements(s: QudelixSession, ids: number[]) {
-	const missing = ids.filter((id) => !s.elements.has(id));
-	if (missing.length) await request(s, missing);
 	return ids.map((id) => s.elements.get(id)!);
 }
 
-/** The 5K Plus's session, the EQ the options name in its mode, and that EQ's configuration. */
+/**
+ * The 5K Plus's session, the EQ the options name in the device's mode, and that EQ's
+ * configuration, both asked for now: another program may have changed them unannounced.
+ */
 async function drive(ctx: Ctx) {
 	const s = await qudelixSession(ctx);
 	modelFor(s, 2);
-	const [mode] = await elements(s, [EQ_MODE]);
+	const [mode] = await fresh(s, [EQ_MODE]);
 	const single = MODE.read(mode!).mode === SINGLE;
 	const group: QudelixGroup = groupOf(MODEL, groupName(ctx), single);
 	const base = BASE[group.id];
-	const [config] = await elements(s, [base + CONFIG]);
+	const [config] = await fresh(s, [base + CONFIG]);
 	return { s, group, single, base, config: config! };
 }
 
 /** The group's stored preset, requested afresh. */
 async function storedPreset(s: QudelixSession, group: QudelixGroup, base: number) {
-	await request(s, [base + PRESET]);
-	const bytes = s.elements.get(base + PRESET)!;
+	const bytes = (await fresh(s, [base + PRESET]))[0]!;
 	return { bytes, preset: readPreset(MODEL, group, bytes) };
 }
 
@@ -321,7 +330,9 @@ export const qudelixV2UsbHid: HidHandler<QudelixV2UsbHidOptions> = {
 		writesSlot: true,
 		needsBandCount: false,
 		readsCurrentSlot: true,
-		canEnable: true
+		canEnable: true,
+		// The speaker EQ's left and right, as the app's channel selector writes them.
+		perChannelEqs: ['spk']
 	}),
 
 	async pull(ctx) {
@@ -338,11 +349,6 @@ export const qudelixV2UsbHid: HidHandler<QudelixV2UsbHidOptions> = {
 			device: { link: s.link, packetSize: s.device.packetSize, single, config, preset: bytes }
 		});
 		await sendFragments(s, frames);
-		// The app's copy after a push: on, and on the saved preset or an edited EQ.
-		s.elements.set(
-			base + CONFIG,
-			withFields(config, MODEL.groupConfig, { enable: 1, preset: request.slot ?? EDITED })
-		);
 		return { reconnect: false };
 	},
 
@@ -353,7 +359,6 @@ export const qudelixV2UsbHid: HidHandler<QudelixV2UsbHidOptions> = {
 			...(enabled && slot !== undefined ? { preset: field(slot, 1, U8, 'slot') } : {})
 		});
 		await send(s, SET, elementBytes(base + CONFIG, next));
-		s.elements.set(base + CONFIG, next);
 	},
 
 	async eqEnabled(ctx) {
@@ -369,8 +374,9 @@ export const qudelixV2UsbHid: HidHandler<QudelixV2UsbHidOptions> = {
 	async firmware(ctx) {
 		const s = await qudelixSession(ctx);
 		modelFor(s, 2);
-		const [version] = await elements(s, [FIRMWARE]);
-		return Array.from(version!.subarray(0, 3)).join('.');
+		// The opening answer carries it, and it doesn't change while the device is open.
+		const version = s.elements.get(FIRMWARE) ?? (await fresh(s, [FIRMWARE]))[0]!;
+		return Array.from(version.subarray(0, 3)).join('.');
 	},
 
 	async bandCount(ctx) {

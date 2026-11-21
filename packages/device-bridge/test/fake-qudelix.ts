@@ -214,7 +214,9 @@ const firmwareBytes = ([major, minor, revision]: [number, number, number]) => [
 
 /**
  * A 5K (firmware 3.x) or T71 speaking the first protocol. The 5K answers on report 9 over
- * 0x0a12's framing, with 56-byte packets; the T71 on report 1 over 0x1fc9's, with 122.
+ * 0x0a12's framing, with 56-byte packets; the T71 on report 1 over 0x1fc9's, with 122. A band or
+ * pre-gain write changes the channels its mask names and no other, as a 5K with firmware 3.2.9
+ * did for masks 1 and 2 (2026-11-21).
  */
 export class FakeQudelix extends FakeHid {
 	readonly model: '5k' | 't71';
@@ -462,7 +464,10 @@ const element = (id: number, data: number[]) => {
 /**
  * A 5K Plus speaking the second protocol on 0x0a12's framing (report 8 out, 9 in, 63 bytes), in
  * packets of `packetSize` (40 by default, so long messages split). It acks every fragment but
- * the last of a message, reassembles, and answers requests in fragments of its own.
+ * the last of a message, reassembles, and answers requests in fragments of its own. It sends no
+ * notification but `lateNotifications`'s, so a test that sets its state (`single`, `eqs`) changes
+ * the device as another program would, unannounced: an open session on a 5K Plus with firmware
+ * 1.0.3 was told nothing of another program's push (2026-11-21).
  */
 export class FakeQudelixV2 extends FakeHid {
 	packetSize = 40;
@@ -479,6 +484,13 @@ export class FakeQudelixV2 extends FakeHid {
 	readonly messages: { command: number; elements: { id: number; data: number[] }[] }[] = [];
 	/** The fragments of each message received: [header, slice size]. */
 	readonly fragments: [number, number][][] = [];
+	/**
+	 * Notifies (0x9005) an EQ's whole stored preset when an edit takes the EQ off a stored preset,
+	 * holding the EQ as that edit left it, and sends the notification late: after the next request,
+	 * a moment before its answer. A 5K Plus with firmware 1.0.3 was seen to (2026-11-21).
+	 */
+	lateNotifications = false;
+	#notifications: number[] = [];
 	readonly eqs = new Map<number, FakeEq>([
 		[0, flatEq(1, 10)],
 		[1, flatEq(2, 20)],
@@ -587,10 +599,11 @@ export class FakeQudelixV2 extends FakeHid {
 		}
 		this.messages.push({ command, elements });
 		if (command === 0x9002) {
-			return this.#send(
-				0x9003,
-				elements.flatMap((e) => element(e.id, this.#element(e.id) ?? []))
-			);
+			const answer = elements.flatMap((e) => element(e.id, this.#element(e.id) ?? []));
+			if (!this.#notifications.length) return this.#send(0x9003, answer);
+			// The answer comes a moment after the notifications, once the bridge could act on them.
+			this.#send(0x9005, this.#notifications.splice(0));
+			return void setTimeout(() => this.#send(0x9003, answer));
 		}
 		for (const e of elements) this.#apply(command, e.id, e.data);
 	}
@@ -615,6 +628,14 @@ export class FakeQudelixV2 extends FakeHid {
 		const eq = command === 0x9004 ? this.#eq(group) : undefined;
 		if (!eq) return void this.errors.push(`element 0x${id.toString(16)} in ${command}`);
 		const b = new Bits(Uint8Array.from(d));
+		const stored = eq.preset !== 255;
+		this.#change(eq, id, b, d, group);
+		if (this.lateNotifications && stored && eq.preset === 255) {
+			this.#notifications.push(...element((id & 0xf0) + 3, [...this.presetBytes(group)]));
+		}
+	}
+
+	#change(eq: FakeEq, id: number, b: Bits, d: number[], group: number) {
 		switch (id & 15) {
 			case 0: {
 				b.get(4);

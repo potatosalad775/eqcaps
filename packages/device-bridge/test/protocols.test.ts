@@ -4,6 +4,7 @@
 
 import {
 	domainBounds,
+	eqProfile,
 	indexFields,
 	resolveSlot,
 	type Domain,
@@ -126,6 +127,12 @@ describe('other EQs (SPEC §9.2)', () => {
 			{ id: 'spk', name: 'SPK EQ' }
 		]);
 		expect(protocolProblem(raw([spk]))).toBeUndefined();
+	});
+
+	test("an EQ's channels are the app's: the EQ is kept and the bridge doesn't read them", () => {
+		const apart = { ...spk, channels: 'independent' };
+		expect(protocolProblem(raw([apart]))).toBeUndefined();
+		expect(protocolOf({ protocol: raw([apart]) })?.eqs).toEqual([spk]);
 	});
 
 	test('an EQ the handler lacks: CI refuses it, an app leaves it out', () => {
@@ -388,18 +395,26 @@ test('a profile with a manual preamp has a protocol that writes it', () => {
 	expect(wrong.map(([id]) => id)).toEqual([]);
 });
 
-// SPEC §9: an app sends the right channel apart only where the profile says the channels are
-// independent, and the bridge refuses it where the handler can't drive them apart.
-test('a profile has independent channels exactly where its protocol drives them apart', () => {
-	const wrong = driven.filter(([id, p]) => {
+// SPEC §9 and §9.2: an app sends the right channel apart only where the profile says an EQ's
+// channels are independent, and the bridge refuses it where the handler can't drive them apart.
+test('an EQ has independent channels exactly where its protocol drives them apart', () => {
+	const wrong = driven.flatMap(([id, p]) => {
 		const h = handlerOf(id);
 		const caps = h.capabilities(
 			{ kind: transportsOf(h)[0], collections: [] } as never,
 			p.options ?? {}
 		);
-		return (profile(id).channels === 'independent') !== (caps.perChannel === true);
+		return [
+			{ eq: undefined, apart: caps.perChannel === true },
+			...(p.eqs ?? []).map((e) => ({
+				eq: e.id,
+				apart: caps.perChannelEqs?.includes(e.id) === true
+			}))
+		]
+			.filter(({ eq, apart }) => (eqProfile(profile(id), eq)!.channels === 'independent') !== apart)
+			.map(({ eq }) => (eq === undefined ? id : `${id} ${eq}`));
 	});
-	expect(wrong.map(([id]) => id)).toEqual([]);
+	expect(wrong).toEqual([]);
 });
 
 /** Where a profile domain isn't inside the codec's wire field. */
