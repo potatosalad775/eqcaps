@@ -172,11 +172,12 @@ A device with several EQs (D53) lists the others in `protocol.eqs`. An app picks
 its profile (`eqProfile`), and names it in the bridge operation (`eq`); without one, everything
 above is about the EQ the profile describes.
 
-An EQ whose profile says `channels: "independent"` (D54) holds left and right apart. An app fits
-and completes each channel against the same profile, and pushes the left as `filters` and
-`preamp` and the right as `right`, where the bridge's handler drives the channels apart
-(`perChannel`); a pull then returns the right channel as `right`. Without `right`, a push writes
-both channels alike, as on a linked EQ.
+An EQ whose profile says `channels: "independent"` (D54) holds left and right apart; a listed EQ
+says it in its own entry (D55), and `eqProfile` carries it. An app fits and completes each channel
+against the same profile, and pushes the left as `filters` and `preamp` and the right as `right`,
+where the bridge's handler drives that EQ's channels apart (`perChannel`, and per listed EQ in
+`capabilities.eqs`); a pull of it then returns the right channel as `right`. Without `right`, a
+push writes both channels alike, as on a linked EQ.
 
 ## 9. Device bridge
 

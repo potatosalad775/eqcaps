@@ -1,0 +1,12 @@
+{
+	"description": "A listed EQ's channels is \"linked\" or \"independent\"; nothing else.",
+	"spec": "§9.2",
+	"profile": {
+		"schemaVersion": "1.5",
+		"protocol": {
+			"handler": "chip-hid",
+			"eqs": [{ "id": "spk", "name": "Headphone EQ", "channels": "stereo" }]
+		}
+	},
+	"expect": [{ "code": "schema", "path": "/protocol/eqs/0/channels" }]
+}

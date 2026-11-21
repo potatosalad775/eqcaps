@@ -37,18 +37,45 @@ const profile: Profile = {
 	meta: { status: 'draft', sources: [{ kind: 'community', ref: 'test', date: '2026-11-20' }] }
 };
 
+/** The headphone EQ holds left and right apart under a one-channel user EQ (format 1.5). */
+const withChannels: Profile = {
+	...profile,
+	schemaVersion: '1.5',
+	protocol: {
+		...profile.protocol!,
+		eqs: [{ ...profile.protocol!.eqs![0]!, channels: 'independent' }, profile.protocol!.eqs![1]!]
+	}
+};
+
 describe('profileEqs', () => {
 	test("lists the profile's own EQ first, then the others with their band count and presets", () => {
 		expect(profileEqs(profile)).toEqual([
-			{ name: 'User EQ', bandCount: 10, presets: profile.protocol!.presets },
-			{ id: 'spk', name: 'Headphone EQ', bandCount: 20, presets: [{ id: 0, name: 'Flat' }] },
-			{ id: 'mic', name: 'Microphone EQ', bandCount: 5, presets: [] }
+			{ name: 'User EQ', bandCount: 10, presets: profile.protocol!.presets, channels: 'linked' },
+			{
+				id: 'spk',
+				name: 'Headphone EQ',
+				bandCount: 20,
+				presets: [{ id: 0, name: 'Flat' }],
+				channels: 'linked'
+			},
+			{ id: 'mic', name: 'Microphone EQ', bandCount: 5, presets: [], channels: 'linked' }
 		]);
 	});
 
 	test('a profile without a list has its one EQ, unnamed without an engine label', () => {
 		const { engine: _engine, protocol: _protocol, ...plain } = profile;
-		expect(profileEqs(plain)).toEqual([{ bandCount: 10, presets: [] }]);
+		expect(profileEqs(plain)).toEqual([{ bandCount: 10, presets: [], channels: 'linked' }]);
+	});
+
+	test("an EQ's own channels, else the profile's (format 1.5)", () => {
+		expect(profileEqs(withChannels).map((eq) => eq.channels)).toEqual([
+			'linked',
+			'independent',
+			'linked'
+		]);
+		expect(
+			profileEqs({ ...withChannels, channels: 'independent' }).map((eq) => eq.channels)
+		).toEqual(['independent', 'independent', 'independent']);
 	});
 });
 
@@ -69,6 +96,17 @@ describe('eqProfile', () => {
 			presets: [{ id: 0, name: 'Flat' }]
 		});
 		expect(validateProfile(spk)).toEqual([]);
+	});
+
+	test("a listed EQ's channels replace the profile's; left out, it has the profile's", () => {
+		const spk = eqProfile(withChannels, 'spk')!;
+		expect(spk.channels).toBe('independent');
+		expect(validateProfile(spk)).toEqual([]);
+		expect(eqProfile(withChannels, 'mic')!.channels).toBeUndefined();
+		expect(eqProfile({ ...withChannels, channels: 'independent' }, 'mic')!.channels).toBe(
+			'independent'
+		);
+		expect(eqProfile(withChannels)!.channels).toBeUndefined();
 	});
 
 	test('an EQ without presets has none, and loses the overrides of slots it lacks', () => {

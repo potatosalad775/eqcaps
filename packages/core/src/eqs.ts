@@ -13,13 +13,17 @@ export interface ProfileEq {
 	name?: string;
 	bandCount: number | null;
 	presets: readonly Preset[];
+	/** Its channels (SPEC §9): its own, else the profile's, else `linked`. */
+	channels: NonNullable<Profile['channels']>;
 }
 
 /** The device's EQs: the one the profile describes first, then those `protocol.eqs` lists. */
 export function profileEqs(profile: Profile): ProfileEq[] {
+	const channels = profile.channels ?? 'linked';
 	const own: ProfileEq = {
 		bandCount: profile.bandCount,
-		presets: profile.protocol?.presets ?? []
+		presets: profile.protocol?.presets ?? [],
+		channels
 	};
 	if (profile.engine !== undefined) own.name = profile.engine;
 	return [
@@ -28,15 +32,17 @@ export function profileEqs(profile: Profile): ProfileEq[] {
 			id: eq.id,
 			name: eq.name,
 			bandCount: eq.bandCount ?? profile.bandCount,
-			presets: eq.presets ?? []
+			presets: eq.presets ?? [],
+			channels: eq.channels ?? channels
 		}))
 	];
 }
 
 /**
  * The profile of one of the device's EQs: `profile` itself for no id, and for an id in
- * `protocol.eqs` the profile with that EQ's label, band count and presets, without the list and
- * without the overrides of slots the EQ lacks. Undefined for an id the profile doesn't list.
+ * `protocol.eqs` the profile with that EQ's label, band count, presets and channels, without the
+ * list and without the overrides of slots the EQ lacks. Undefined for an id the profile doesn't
+ * list.
  */
 export function eqProfile(profile: Profile, id?: string): Profile | undefined {
 	if (id === undefined) return profile;
@@ -55,6 +61,7 @@ export function eqProfile(profile: Profile, id?: string): Profile | undefined {
 		engine: eq.name,
 		bandCount,
 		...(bands !== undefined && kept.length > 0 ? { bands: kept } : {}),
+		...(eq.channels !== undefined ? { channels: eq.channels } : {}),
 		protocol: { ...protocol, ...(eq.presets ? { presets: eq.presets } : {}) }
 	};
 }

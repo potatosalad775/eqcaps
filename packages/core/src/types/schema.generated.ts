@@ -229,7 +229,7 @@ export interface Protocol {
 	eqs?: Eq[];
 }
 
-/** Another EQ of the device: this profile with its own band count and presets (SPEC §9.2). Format 1.3. */
+/** Another EQ of the device: this profile with its own band count, presets and channels (SPEC §9.2). Format 1.3. */
 export interface Eq {
 	/** The handler's name for the EQ. */
 	id: string;
@@ -239,6 +239,8 @@ export interface Eq {
 	bandCount?: number;
 	/** The EQ's own presets, as protocol.presets lists the profile's. Left out, the EQ has none. */
 	presets?: Preset[];
+	/** The EQ's channels in place of the profile's: linked or independent (SPEC §9). Left out, the EQ has the profile's. Format 1.5. */
+	channels?: 'linked' | 'independent';
 }
 
 export interface Preset {

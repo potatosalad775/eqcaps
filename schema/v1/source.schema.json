@@ -446,7 +446,7 @@
 			"required": ["handler"]
 		},
 		"eq": {
-			"description": "Another EQ of the device: this profile with its own band count and presets (SPEC §9.2). Format 1.3.",
+			"description": "Another EQ of the device: this profile with its own band count, presets and channels (SPEC §9.2). Format 1.3.",
 			"type": "object",
 			"properties": {
 				"id": {
@@ -476,6 +476,10 @@
 					},
 					"minContains": 0,
 					"maxContains": 1
+				},
+				"channels": {
+					"description": "The EQ's channels in place of the profile's: linked or independent (SPEC §9). Left out, the EQ has the profile's. Format 1.5.",
+					"enum": ["linked", "independent"]
 				}
 			},
 			"patternProperties": { "^x-": true },
