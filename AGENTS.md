@@ -52,6 +52,9 @@ folder exists (D52).
 - Per-vendor behaviour of a shared handler goes in an option, so other brands keep theirs. A new
   option goes in `src/protocols.ts` `OPTIONS` and the bridge README; a new control in the
   handler's `controls` and the README.
+- Give every control in `data/` a `role` (a new one in SPEC §9.1 and `ROLES` if none fits): apps
+  translate a control by its role. A setting only its vendor has goes without one, listed in
+  `VENDOR_SETTINGS` in `packages/build/test/data.test.ts`.
 - Release the bridge before publishing data that uses a new option or control: `main` deploys
   `/v1/` on every push, and an older bridge drops a protocol it can't read.
 - Test the bridge against device answers and codec round trips, never devicePEQ's bytes.
