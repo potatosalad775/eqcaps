@@ -9,7 +9,7 @@ Each step is one commit; none changes the format.
 | 1 | The device viewed as one EQ, in place of `eq` on every operation | `device-bridge` | D53 (note) | done 2026-11-21 |
 | 2 | The write recipe as one engine operation, `plan` | `core`, SPEC §9 and §13 | D12 (note), D56 | done 2026-11-21 |
 | 3 | The inspector's read session; the bridge's reading side; shared connect rules to their owners | inspector, `device-bridge`, `client` | D40 (note) | done 2026-11-22 |
-| 4 | The editor's edit rules and its starting file, out of the route | inspector | none | next |
+| 4 | The editor's edit rules and its starting file, out of the route | inspector | none | done 2026-11-22 |
 
 ## 1. The device viewed as one EQ (done)
 
@@ -75,9 +75,29 @@ For uniPEQ (not edited from here): `resolve` in `connect.ts` can take `protocolF
 is `ties`; `readFirmware`'s "is it worth asking" is `firmwareDecides` (tighter: only the top
 matches count); `guessedProfile` can start from `wireConstraints`.
 
-## 4. The editor's rules (next)
+## 4. The editor's rules (done)
 
-The six form edits that carry a rule (the id and its evidence ref, the band count, the type
-order, the preamp mode, the status, a new source), the choice of the file an edit starts from and
-which evidence refs count as present move from the edit route into `lib/`, each with a table
-test. The plain setters stay in the route.
+- **Edits that carry a rule** (`lib/editor-form.ts`, the file in and the file out): the id and
+  the evidence that moves with it, the band count (inherited, unbounded or a number), the types
+  in the format's order, the preamp mode, the status and its `replacedBy`, and the sources, notes
+  and contributors. The eight plain setters (brand, model, group, aliases, engine, extends, a band
+  field's domain, the preamp's) stay in the route.
+- **How an edit begins** (`lib/editor-start.ts`): which file it starts from (an existing file as
+  it is, or citing a handoff; a copy as a draft; a profile for the device read; a blank file),
+  where the handoff's evidence is cited, and which evidence the check takes as present. The route
+  fetches; the choice is tested.
+
+Two behaviours changed on the way, both in the tests: ticking a type no longer drops a vendor's
+own type (`x-…`) the form has no box for, and an edit of the notes, the contributors, the status
+or a source on a file whose `meta` was deleted in the JSON puts `meta` back as a draft's, where
+it threw. A copy may now be made of a base too.
+
+## What is left
+
+- A bridge release (breaking: step 1), then `core` and `client` (additive), before apps take
+  them; the owner's, run locally. uniPEQ's follow-up is listed under each step above.
+- The inspector reading the firmware and matching again where `firmwareDecides`
+  (`fosi-audio.md`).
+- The other candidates of the review, none started: one statement of what a handler can do; the
+  codec saying what each frame is; a handler's options and the schema's value lists in one place;
+  a handler's per-device state owned by the session.

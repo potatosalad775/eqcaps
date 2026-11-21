@@ -10,8 +10,7 @@
 		FILTER_TYPES,
 		type AuthoringProfile,
 		type AuthoringSource,
-		type Domain,
-		type FilterType
+		type Domain
 	} from '@potatosalad775/eqcaps-core';
 	import type { DataFile } from '@potatosalad775/eqcaps-build';
 	import { authoringPath, baseIds, httpReader, loadChain } from '#lib/authoring.ts';
@@ -19,7 +18,6 @@
 	import { identityText, readFindings } from '#lib/connect.ts';
 	import { catalog } from '#lib/data.svelte.ts';
 	import {
-		blankProfile,
 		checkEdited,
 		diffHunks,
 		formatAuthoring,
@@ -28,9 +26,28 @@
 		pullRequestUrl,
 		withSchemaRef
 	} from '#lib/editor.ts';
-	import { edited, listOf, setOptional } from '#lib/editor-form.ts';
+	import {
+		edited,
+		listOf,
+		setOptional,
+		withBandCount,
+		withId,
+		withMetaText,
+		withNewSource,
+		withoutSource,
+		withPreampMode,
+		withSourceField,
+		withStatus,
+		withType
+	} from '#lib/editor-form.ts';
+	import {
+		evidenceName as evidenceNameOf,
+		evidenceRef as evidenceRefOf,
+		presentEvidence,
+		startingProfile
+	} from '#lib/editor-start.ts';
 	import { today } from '#lib/evidence.ts';
-	import { citeEvidence, loadHandoff, profileForDevice, type Handoff } from '#lib/handoff.ts';
+	import { loadHandoff, type Handoff } from '#lib/handoff.ts';
 	import { REPO_URL } from '#lib/repo.ts';
 	import { schemaValidator } from '#lib/schemas.ts';
 	import { violationText } from '#lib/violations.ts';
@@ -49,6 +66,7 @@
 		'handler-code'
 	];
 	const STATUSES = ['draft', 'community-verified', 'maintainer-verified', 'deprecated'] as const;
+	type PreampMode = 'manual' | 'auto' | 'none' | 'unknown';
 
 	/** The text the editor started from, and where it lives; null for a new file. */
 	let original = $state<string | null>(null);
@@ -84,43 +102,36 @@
 		const entries = catalog.index?.profiles ?? [];
 		handoff = query.has('device') ? loadHandoff() : null;
 		try {
-			let start: AuthoringProfile;
-			if (id) {
-				const entry = entries.find((e) => e.id === id);
+			/** The authoring file of a profile or base, parsed; throws where there is none. */
+			const file = async (of: string) => {
+				const entry = entries.find((e) => e.id === of);
 				const path = entry
-					? authoringPath({ id, device: { brand: entry.brand } })
-					: `data/bases/${id}.json`;
+					? authoringPath({ id: of, device: { brand: entry.brand } })
+					: `data/bases/${of}.json`;
 				const t = await read(path);
-				if (t === null) throw new Error(`there is no authoring file for "${id}" (${path})`);
-				original = t;
-				originalPath = path;
-				start = parse(t) ?? blankProfile();
-				if (!handoff) {
-					text = initial = t;
-					restoreDraft();
-					return;
-				}
-				start = citeEvidence(start, handoff);
-			} else if (query.get('copy')) {
-				const copyId = query.get('copy') as string;
-				const entry = entries.find((e) => e.id === copyId);
-				const t = entry
-					? await read(authoringPath({ id: copyId, device: { brand: entry.brand } }))
-					: null;
-				const from = t ? parse(t) : null;
-				if (!from) throw new Error(`there is no authoring file for "${copyId}"`);
-				start = { ...from, id: '', meta: { status: 'draft', sources: [] } };
-				delete start.match;
-				if (start.kind === 'hardware') start.match = { usb: [] };
-			} else if (handoff) {
-				start = profileForDevice(handoff);
-			} else {
-				start = blankProfile({
-					...(query.get('extends') ? { extends: query.get('extends') as string } : {}),
-					kind: query.get('kind') === 'software' ? 'software' : 'hardware'
-				});
+				if (t === null) throw new Error(`there is no authoring file for "${of}" (${path})`);
+				return { path, text: t, data: parse(t) };
+			};
+			const copyId = id ? null : query.get('copy');
+			const existing = id ? await file(id) : null;
+			const copy = copyId ? await file(copyId) : null;
+			if (copy && !copy.data) throw new Error(`"${copyId}" isn't a JSON object (${copy.path})`);
+			if (existing) {
+				original = existing.text;
+				originalPath = existing.path;
 			}
-			text = initial = await formatAuthoring(withSchemaRef(start, authoringPath(start)));
+			// Which file the edit starts from is the editor's rule (lib/editor-start.ts).
+			const start = startingProfile({
+				...(existing ? { existing: existing.data } : {}),
+				...(copy?.data ? { copy: copy.data } : {}),
+				handoff,
+				extends: query.get('extends'),
+				kind: query.get('kind') === 'software' ? 'software' : 'hardware'
+			});
+			text = initial =
+				start === null
+					? existing!.text
+					: await formatAuthoring(withSchemaRef(start, authoringPath(start)));
 			restoreDraft();
 		} catch (e) {
 			loadError = e instanceof Error ? e.message : String(e);
@@ -192,30 +203,11 @@
 		return () => clearTimeout(timer);
 	});
 
-	// The handoff's evidence file, wherever the file cites it: a new device's evidence moves to
-	// evidence/<id>/ once the profile has an id.
-	const evidenceName = $derived(
-		handoff ? handoff.evidence.path.slice(handoff.evidence.path.lastIndexOf('/') + 1) : ''
-	);
-	const evidenceRef = $derived.by(() => {
-		if (!handoff) return '';
-		const cited = (parsed?.meta?.sources ?? []).find(
-			(s) => s.ref.startsWith('evidence/') && s.ref.endsWith(`/${evidenceName}`)
-		);
-		return cited?.ref ?? handoff.evidence.path;
-	});
-
-	const evidence = $derived.by(() => {
-		// A plain Set: built once per derivation and never mutated after.
-		// eslint-disable-next-line svelte/prefer-svelte-reactivity
-		const refs = new Set<string>();
-		const from = original ? parse(original) : null;
-		for (const s of from?.meta?.sources ?? []) {
-			if (s.ref.startsWith('evidence/')) refs.add(s.ref);
-		}
-		if (evidenceRef) refs.add(evidenceRef);
-		return refs;
-	});
+	// The handoff's evidence file, wherever the file cites it, and the evidence the check takes as
+	// present (lib/editor-start.ts).
+	const evidenceName = $derived(evidenceNameOf(handoff));
+	const evidenceRef = $derived(evidenceRefOf(parsed, handoff));
+	const evidence = $derived(presentEvidence(original ? parse(original) : null, evidenceRef));
 
 	const result = $derived.by(() => {
 		if (loading || !checkedText || !path) return null;
@@ -240,12 +232,18 @@
 	const changed = $derived(text !== (original ?? ''));
 	const bases = $derived(baseIds(catalog.bundle?.profiles ?? []));
 
-	/** Applies a form edit: the JSON is rewritten and reformatted, keeping the file's location. */
-	async function apply(edit: (d: AuthoringProfile) => void) {
+	/**
+	 * Applies a form edit that carries a rule (lib/editor-form.ts): the JSON is rewritten and
+	 * reformatted, keeping the file's location.
+	 */
+	async function put(rule: (d: AuthoringProfile) => AuthoringProfile) {
 		if (!parsed) return;
-		const next = edited(parsed, edit);
+		const next = rule(parsed);
 		text = await formatAuthoring(withSchemaRef(next, authoringPath(next)));
 	}
+
+	/** Applies a plain form edit: one field set on a copy of the file. */
+	const apply = (edit: (d: AuthoringProfile) => void) => put((d) => edited(d, edit));
 
 	async function reformat() {
 		if (parsed) text = await formatAuthoring(withSchemaRef(parsed, authoringPath(parsed)));
@@ -411,16 +409,13 @@
 							value={parsed.id}
 							placeholder="brand-model"
 							onchange={(e) =>
-								apply((d) => {
-									const id = e.currentTarget.value.trim();
-									d.id = id;
-									// A new device's evidence file lives under the profile's id.
-									for (const src of d.meta?.sources ?? []) {
-										if (handoff?.action === 'new' && src.ref === evidenceRef) {
-											src.ref = `evidence/${id || 'new-device'}/${evidenceName}`;
-										}
-									}
-								})}
+								put((d) =>
+									withId(
+										d,
+										e.currentTarget.value,
+										handoff?.action === 'new' ? { ref: evidenceRef, name: evidenceName } : undefined
+									)
+								)}
 						/>
 						<label for="f-brand">Brand</label>
 						<input
@@ -497,14 +492,7 @@
 							min="1"
 							value={parsed.bandCount ?? ''}
 							placeholder={inherited ? 'inherited' : parsed.kind === 'software' ? 'unbounded' : ''}
-							onchange={(e) =>
-								apply((d) => {
-									const v = e.currentTarget.value;
-									if (v === '') {
-										if (inherited) delete d.bandCount;
-										else d.bandCount = null;
-									} else d.bandCount = Math.round(Number(v));
-								})}
+							onchange={(e) => put((d) => withBandCount(d, e.currentTarget.value, inherited))}
 						/>
 					</div>
 
@@ -520,15 +508,7 @@
 									<input
 										type="checkbox"
 										checked={band?.types?.includes(t) ?? false}
-										onchange={(e) =>
-											apply((d) => {
-												const types = new Set<FilterType>(d.band?.types ?? []);
-												if (e.currentTarget.checked) types.add(t);
-												else types.delete(t);
-												const order = FILTER_TYPES.filter((x) => types.has(x));
-												d.band = { ...d.band };
-												setOptional(d.band, 'types', order);
-											})}
+										onchange={(e) => put((d) => withType(d, t, e.currentTarget.checked))}
 									/>
 									<span class="font-mono">{t}</span>
 								</label>
@@ -551,13 +531,7 @@
 							class={input}
 							value={parsed.preamp?.mode ?? ''}
 							onchange={(e) =>
-								apply((d) => {
-									const mode = e.currentTarget.value;
-									if (mode === '') delete d.preamp;
-									else if (mode === 'manual')
-										d.preamp = { mode, gain: { min: -12, max: 0, step: 0.1 } };
-									else d.preamp = { mode: mode as 'auto' | 'none' | 'unknown' };
-								})}
+								put((d) => withPreampMode(d, e.currentTarget.value as PreampMode | ''))}
 						>
 							{#if inherited}<option value="">inherited</option>{/if}
 							<option value="manual">manual</option>
@@ -585,13 +559,7 @@
 								class={input}
 								value={parsed.meta?.status ?? 'draft'}
 								onchange={(e) =>
-									apply((d) => {
-										d.meta = {
-											...d.meta,
-											status: e.currentTarget.value as (typeof STATUSES)[number]
-										};
-										if (d.meta.status !== 'deprecated') delete d.meta.replacedBy;
-									})}
+									put((d) => withStatus(d, e.currentTarget.value as (typeof STATUSES)[number]))}
 							>
 								{#each STATUSES as s (s)}<option value={s}>{s}</option>{/each}
 							</select>
@@ -610,9 +578,14 @@
 										value={s.kind}
 										aria-label="Source {i + 1} kind"
 										onchange={(e) =>
-											apply((d) => {
-												d.meta.sources[i]!.kind = e.currentTarget.value as AuthoringSource['kind'];
-											})}
+											put((d) =>
+												withSourceField(
+													d,
+													i,
+													'kind',
+													e.currentTarget.value as AuthoringSource['kind']
+												)
+											)}
 									>
 										{#each SOURCE_KINDS as k (k)}<option value={k}>{k}</option>{/each}
 									</select>
@@ -622,7 +595,7 @@
 										aria-label="Source {i + 1} date"
 										placeholder="YYYY-MM-DD"
 										onchange={(e) =>
-											apply((d) => (d.meta.sources[i]!.date = e.currentTarget.value.trim()))}
+											put((d) => withSourceField(d, i, 'date', e.currentTarget.value))}
 									/>
 									<input
 										class="{input} w-28"
@@ -630,24 +603,19 @@
 										aria-label="Source {i + 1} firmware"
 										placeholder="firmware"
 										onchange={(e) =>
-											apply((d) =>
-												setOptional(d.meta.sources[i]!, 'firmware', e.currentTarget.value.trim())
-											)}
+											put((d) => withSourceField(d, i, 'firmware', e.currentTarget.value))}
 									/>
 									<input
 										class="{input} w-32"
 										value={s.by ?? ''}
 										aria-label="Source {i + 1} GitHub handle"
 										placeholder="GitHub handle"
-										onchange={(e) =>
-											apply((d) =>
-												setOptional(d.meta.sources[i]!, 'by', e.currentTarget.value.trim())
-											)}
+										onchange={(e) => put((d) => withSourceField(d, i, 'by', e.currentTarget.value))}
 									/>
 									<button
 										type="button"
 										class="ml-auto text-xs underline"
-										onclick={() => apply((d) => d.meta.sources.splice(i, 1))}>Remove</button
+										onclick={() => put((d) => withoutSource(d, i))}>Remove</button
 									>
 								</div>
 								<input
@@ -655,22 +623,14 @@
 									value={s.ref}
 									aria-label="Source {i + 1} reference"
 									placeholder="URL, citation, or evidence/<id>/<file>.json"
-									onchange={(e) =>
-										apply((d) => (d.meta.sources[i]!.ref = e.currentTarget.value.trim()))}
+									onchange={(e) => put((d) => withSourceField(d, i, 'ref', e.currentTarget.value))}
 								/>
 							</div>
 						{/each}
 						<button
 							type="button"
 							class="text-sm underline"
-							onclick={() =>
-								apply((d) => {
-									d.meta = d.meta ?? { status: 'draft', sources: [] };
-									d.meta.sources = [
-										...(d.meta.sources ?? []),
-										{ kind: 'vendor-docs', ref: '', date: today_ }
-									];
-								})}>Add a source</button
+							onclick={() => put((d) => withNewSource(d, today_))}>Add a source</button
 						>
 						<label class="block text-sm" for="f-contributors">Contributors</label>
 						<input
@@ -678,8 +638,7 @@
 							class="{input} w-full"
 							value={parsed.meta?.contributors?.join(', ') ?? ''}
 							placeholder="GitHub handles, comma-separated"
-							onchange={(e) =>
-								apply((d) => setOptional(d.meta, 'contributors', listOf(e.currentTarget.value)))}
+							onchange={(e) => put((d) => withMetaText(d, 'contributors', e.currentTarget.value))}
 						/>
 						<label class="block text-sm" for="f-notes">Notes</label>
 						<textarea
@@ -687,8 +646,7 @@
 							class="{input} w-full"
 							rows="3"
 							value={parsed.meta?.notes ?? ''}
-							onchange={(e) =>
-								apply((d) => setOptional(d.meta, 'notes', e.currentTarget.value.trim()))}
+							onchange={(e) => put((d) => withMetaText(d, 'notes', e.currentTarget.value))}
 						></textarea>
 					</div>
 				</details>
