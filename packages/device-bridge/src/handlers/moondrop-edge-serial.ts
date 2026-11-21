@@ -44,7 +44,7 @@ export const edgeCodec: Codec<object, Uint8Array> = {
 	types: TYPES.types,
 	wire: () => ({ freq: grid(1, U16), q: grid(4096, U16), gain: grid(60, I16) }),
 	encode(request) {
-		refuseUncarried('moondrop-edge-serial', request, {});
+		refuseUncarried('moondrop-edge-serial', request, edgeCodec.wire({}));
 		const { filters } = request;
 		if (filters.length !== BANDS) {
 			throw new BridgeError(
@@ -88,12 +88,9 @@ export const moondropEdgeSerial: StreamHandler = {
 		canWrite: true,
 		readsPreamp: false,
 		readsSlot: false,
-		writesPreamp: false,
 		writesSlot: false,
 		bands: BANDS,
-		needsBandCount: false,
-		readsCurrentSlot: false,
-		canEnable: true
+		needsBandCount: false
 	}),
 
 	async pull(ctx) {

@@ -86,8 +86,13 @@ device, and whether an old handle went or was reused, for telling these cases ap
 `device.capabilities` says what the protocol can do (`canRead`, `canWrite`, `readsPreamp`,
 `readsSlot`, `writesPreamp`, `writesSlot`, `needsBandCount`, the filter `types` it has wire codes
 for, the `wire` grid it can carry, preset `slots`, `disconnectOnSave`, `experimental`,
-`readsFirmware`, `readsEnabled`, `listsSlots`, `editsSlots`, `perChannel` and the device
-`controls` it drives). Where the EQ switch is separate from the preset (`readsEnabled`),
+`readsCurrentSlot`, `canEnable`, `readsFirmware`, `readsEnabled`, `listsSlots`, `editsSlots`,
+`perChannel` and the device `controls` it drives). They are the device's word: where one says no,
+the device answers for the handler without asking it (`currentSlot()` and `eqEnabled()` give
+null, `setEnabled()` and the preset edits are `unsupported`). A handler states one only where it
+depends on its options; otherwise `readsCurrentSlot`, `canEnable`, `readsEnabled` and
+`editsSlots` are the handler having the method, and `writesPreamp` is its wire grid carrying a
+preamp. Where the EQ switch is separate from the preset (`readsEnabled`),
 `eqEnabled()` reads it, and `currentSlot()` gives the preset whether the EQ is on or off. A push
 with a `preamp`, `slot` or `right` channel the protocol can't write is refused, not sent without
 it, and so is a pull of a `slot` the protocol can't read. Each handler's `codec` turns a push

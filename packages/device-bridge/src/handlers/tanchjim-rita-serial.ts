@@ -33,7 +33,7 @@ export const ritaCodec: Codec<object, Uint8Array> = {
 	types: RITA_TYPES.types,
 	wire: () => ({ freq: grid(1, U16), q: grid(100, U16), gain: grid(100, I16) }),
 	encode(request) {
-		refuseUncarried('tanchjim-rita-serial', request, {});
+		refuseUncarried('tanchjim-rita-serial', request, ritaCodec.wire({}));
 		const { filters } = request;
 		if (filters.length !== BANDS) {
 			throw new BridgeError('invalid-request', `Rita: the write carries exactly ${BANDS} bands`);
@@ -73,12 +73,9 @@ export const tanchjimRitaSerial: StreamHandler = {
 		canWrite: true,
 		readsPreamp: false,
 		readsSlot: false,
-		writesPreamp: false,
 		writesSlot: false,
 		bands: BANDS,
-		needsBandCount: false,
-		readsCurrentSlot: false,
-		canEnable: false
+		needsBandCount: false
 	}),
 
 	async pull(ctx) {

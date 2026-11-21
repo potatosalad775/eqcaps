@@ -54,7 +54,7 @@ export const airohaCodec: Codec<AirohaCodecOptions, Uint8Array> = {
 	types: AIROHA_TYPES.types,
 	wire: () => ({ freq: grid(100, U32), q: grid(100, U32), gain: grid(100, I32) }),
 	encode(request, o) {
-		refuseUncarried('airoha', request, { slot: !o.ble });
+		refuseUncarried('airoha', request, airohaCodec.wire(o), !o.ble);
 		const { filters, slot } = request;
 		if (filters.length !== BANDS) {
 			throw new BridgeError('invalid-request', `Airoha: the write carries exactly ${BANDS} bands`);
@@ -120,12 +120,9 @@ export const airoha: StreamHandler = {
 		canWrite: true,
 		readsPreamp: false,
 		readsSlot: true,
-		writesPreamp: false,
 		writesSlot: t.kind !== 'ble',
 		bands: BANDS,
-		needsBandCount: false,
-		readsCurrentSlot: false,
-		canEnable: false
+		needsBandCount: false
 	}),
 
 	async pull(ctx, { slot }) {

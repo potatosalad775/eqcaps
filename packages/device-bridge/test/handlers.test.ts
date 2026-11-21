@@ -1693,7 +1693,7 @@ describe("Moondrop USB HID as Moondrop's web app drives it", () => {
 	});
 
 	test('it has no EQ switch, and a push always goes to the custom slot', () => {
-		const caps = moondropUsbHid.capabilities(scriptedHid().t, {});
+		const caps = openDevice(scriptedHid().t, { handler: 'moondrop-usb-hid' }).capabilities;
 		expect(caps).toMatchObject({ canEnable: false, writesSlot: false, readsPreamp: true });
 		expect(() => moondropUsbHidCodec.encode({ ...two, slot: 2 }, {})).toThrow(
 			expect.objectContaining({ code: 'invalid-request' })

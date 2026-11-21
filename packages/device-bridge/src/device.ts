@@ -42,6 +42,12 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	types: readonly FilterType[];
 	/** What the write frames can carry. A profile domain outside it can't be written. */
 	wire: WireGrid;
+	/** Push writes `preamp` when given: the wire carries one (`wire.preamp`). */
+	writesPreamp: boolean;
+	/** `currentSlot()` asks the device rather than answering null. */
+	readsCurrentSlot: boolean;
+	/** `setEnabled()` sends a command. */
+	canEnable: boolean;
 	/**
 	 * The preset slots of the EQ this device is viewed as (`eq()`). Where the device keeps a list of
 	 * presets (`listsSlots`), these are the ones it has room for, under the data's names: `slots()`
@@ -255,10 +261,15 @@ export function openDevice(
 		/** The context of this EQ's operations. */
 		const target = info ? context(info.presets, info.id) : ctx;
 		const own = capabilitiesOf(id);
+		const wire = handler.codec.wire(handlerOptions);
 		const capabilities: DeviceCapabilities = {
 			...own,
 			types: handler.codec.types,
-			wire: handler.codec.wire(handlerOptions),
+			wire,
+			writesPreamp: wire.preamp !== undefined,
+			// Each of these is the handler having the method, unless it says otherwise.
+			readsCurrentSlot: handler.currentSlot !== undefined && own.readsCurrentSlot !== false,
+			canEnable: handler.setEnabled !== undefined && own.canEnable !== false,
 			slots: (info ? info.presets : protocol.presets) ?? [],
 			listsSlots: handler.slots !== undefined,
 			editsSlots:
@@ -330,19 +341,21 @@ export function openDevice(
 			},
 
 			currentSlot() {
-				return serial(async () => (handler.currentSlot ? handler.currentSlot(target) : null));
+				return serial(async () =>
+					capabilities.readsCurrentSlot ? handler.currentSlot!(target) : null
+				);
 			},
 
 			eqEnabled() {
-				return serial(async () => (handler.eqEnabled ? handler.eqEnabled(target) : null));
+				return serial(async () => (capabilities.readsEnabled ? handler.eqEnabled!(target) : null));
 			},
 
 			setEnabled(enabled, slot) {
 				return serial(async () => {
-					if (!handler.setEnabled) {
-						throw new BridgeError('unsupported', `${handler.id} has no EQ switch`);
+					if (!capabilities.canEnable) {
+						throw new BridgeError('unsupported', `${handler.id} has no EQ switch here`);
 					}
-					await handler.setEnabled(target, enabled, slot);
+					await handler.setEnabled!(target, enabled, slot);
 				});
 			},
 

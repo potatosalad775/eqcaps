@@ -205,7 +205,7 @@ export function moondropSteps(
 	request: PushRequest,
 	o: MoondropUsbHidOptions
 ): { step: MoondropStep; frame?: HidFrame }[] {
-	refuseUncarried('moondrop-usb-hid', request, { preamp: true });
+	refuseUncarried('moondrop-usb-hid', request, moondropUsbHidCodec.wire(o));
 	const { filters, preamp } = request;
 	const steps: { step: MoondropStep; frame?: HidFrame }[] = [];
 	const preampFrame = (db: number) =>
@@ -383,11 +383,8 @@ export const moondropUsbHid: HidHandler<MoondropUsbHidOptions> = {
 		canWrite: true,
 		readsPreamp: true,
 		readsSlot: false,
-		writesPreamp: true,
 		writesSlot: false,
-		needsBandCount: true,
-		readsCurrentSlot: true,
-		canEnable: false
+		needsBandCount: true
 	}),
 
 	async pull(ctx, { bands = 0 }) {

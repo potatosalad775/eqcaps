@@ -67,7 +67,7 @@ export const edifierCodec: Codec<object, Uint8Array> = {
 		gain: { min: -GAIN_ZERO / 4, max: (0xff - GAIN_ZERO) / 4, step: 0.25 }
 	}),
 	encode(request) {
-		refuseUncarried('edifier-serial', request, {});
+		refuseUncarried('edifier-serial', request, edifierCodec.wire({}));
 		return request.filters.map((f, i) => encodeBand(i, f));
 	},
 	decode(frames) {
@@ -97,12 +97,9 @@ export const edifierSerial: StreamHandler = {
 		canWrite: true,
 		readsPreamp: false,
 		readsSlot: false,
-		writesPreamp: false,
 		writesSlot: false,
 		bands: BAND_IDS.length,
-		needsBandCount: false,
-		readsCurrentSlot: false,
-		canEnable: false
+		needsBandCount: false
 	}),
 
 	async pull() {

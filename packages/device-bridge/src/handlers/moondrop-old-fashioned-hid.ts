@@ -54,7 +54,7 @@ export const oldFashionedCodec: Codec<object, HidFrame> = {
 	types: TYPES.types,
 	wire: () => ({ freq: grid(1, U16), q: { ...grid(1000, I16), min: 0.001 }, gain: grid(10, I8) }),
 	encode(request) {
-		refuseUncarried('moondrop-old-fashioned-hid', request, {});
+		refuseUncarried('moondrop-old-fashioned-hid', request, oldFashionedCodec.wire({}));
 		const { filters } = request;
 		const frames = filters.flatMap((f, i) => {
 			TYPES.encode(f.type);
@@ -95,11 +95,8 @@ export const moondropOldFashionedHid: HidHandler = {
 		canWrite: true,
 		readsPreamp: false,
 		readsSlot: false,
-		writesPreamp: false,
 		writesSlot: false,
-		needsBandCount: true,
-		readsCurrentSlot: false,
-		canEnable: false
+		needsBandCount: true
 	}),
 
 	async pull(ctx, { bands = 0 }) {

@@ -84,7 +84,7 @@ export const jdsLabsCodec: Codec<object, Uint8Array> = {
 	types: ['PK', 'LSC', 'HSC'],
 	wire: () => ({ freq: ANY, q: ANY, gain: ANY, preamp: ANY }),
 	encode(request) {
-		refuseUncarried('jds-labs-usb-serial', request, { preamp: true });
+		refuseUncarried('jds-labs-usb-serial', request, jdsLabsCodec.wire({}));
 		const { filters, preamp } = request;
 		if (filters.length > JDS_BANDS.length) {
 			throw new BridgeError(
@@ -160,12 +160,9 @@ export const jdsLabsUsbSerial: StreamHandler = {
 		canWrite: true,
 		readsPreamp: true,
 		readsSlot: false,
-		writesPreamp: true,
 		writesSlot: false,
 		bands: JDS_BANDS.length,
-		needsBandCount: false,
-		readsCurrentSlot: true,
-		canEnable: false
+		needsBandCount: false
 	}),
 
 	async pull(ctx) {

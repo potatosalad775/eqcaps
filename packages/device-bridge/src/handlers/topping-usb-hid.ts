@@ -713,17 +713,6 @@ async function sendName(ctx: Ctx, slot: number, name: string) {
 	await ctx.sleep(80);
 }
 
-/** The session, for a family whose configs are created, renamed and deleted. */
-async function editing(ctx: Ctx) {
-	if (!familyOf(ctx.options).edits) {
-		throw new BridgeError(
-			'unsupported',
-			'Topping: configs are created, renamed and deleted on the DX5 II and DX9 Discrete only'
-		);
-	}
-	return sessionOf(ctx);
-}
-
 const slotOf = (w: readonly number[], id: number): Slot => ({
 	id,
 	name: toppingConfigName(w) || `Config ${id + 1}`,
@@ -881,11 +870,8 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 		canWrite: true,
 		readsPreamp: true,
 		readsSlot: true,
-		writesPreamp: true,
 		writesSlot: true,
 		needsBandCount: false,
-		readsCurrentSlot: true,
-		canEnable: true,
 		editsSlots: familyOf(o).edits === true,
 		perChannel: familyOf(o).perChannel === true
 	}),
@@ -951,8 +937,9 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 		return list.configs.map(slotOf);
 	},
 
+	// The session calls the next three only for a family whose configs are edited (`editsSlots`).
 	async createSlot(ctx, { name }) {
-		const session = await editing(ctx);
+		const session = await sessionOf(ctx);
 		const family = familyOf(ctx.options);
 		// The app reads the list again first: the new config goes after the last one.
 		const held = (await readList(ctx, session)).configs.map(toppingConfigName);
@@ -993,7 +980,7 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 	},
 
 	async renameSlot(ctx, slot, name) {
-		const session = await editing(ctx);
+		const session = await sessionOf(ctx);
 		const count = session.count ?? (await readList(ctx, session)).configs.length;
 		if (!Number.isInteger(slot) || slot < 0 || slot >= count) {
 			throw new BridgeError(
@@ -1005,7 +992,7 @@ export const toppingUsbHid: HidHandler<ToppingHidOptions> = {
 	},
 
 	async deleteSlot(ctx, slot) {
-		const session = await editing(ctx);
+		const session = await sessionOf(ctx);
 		const count = (await readList(ctx, session)).configs.length;
 		if (!Number.isInteger(slot) || slot < 0 || slot >= count) {
 			throw new BridgeError(

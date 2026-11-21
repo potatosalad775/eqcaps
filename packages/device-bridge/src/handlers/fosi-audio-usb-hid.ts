@@ -174,7 +174,7 @@ export const fosiAudioCodec: Codec<FosiAudioHidOptions, HidFrame> = {
 		preamp: grid(1, I32)
 	}),
 	encode(request, o) {
-		refuseUncarried('fosi-audio-usb-hid', request, { preamp: true, slot: true });
+		refuseUncarried('fosi-audio-usb-hid', request, fosiAudioCodec.wire(o), true);
 		const { filters, slot, preamp } = request;
 		const id = reportId(o);
 		const p = preset(o, slot);
@@ -311,11 +311,8 @@ export const fosiAudioUsbHid: HidHandler<FosiAudioHidOptions> = {
 		canWrite: true,
 		readsPreamp: true,
 		readsSlot: true,
-		writesPreamp: true,
 		writesSlot: true,
-		needsBandCount: true,
-		readsCurrentSlot: true,
-		canEnable: true
+		needsBandCount: true
 	}),
 
 	async pull(ctx, { slot, bands = 0 }) {

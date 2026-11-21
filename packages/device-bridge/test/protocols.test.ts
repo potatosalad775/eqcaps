@@ -492,6 +492,87 @@ test('openReader gives a device with no way to write, on any view (D40)', () => 
 	expect(spk.eq()).toBe(reader);
 });
 
+// What a device's capabilities say it can't do, the session answers for the handler: null for a
+// read, a refusal for a write, and nothing is sent. A handler states a capability only where it
+// depends on its options; everywhere else it is whether the handler has the method.
+describe('capabilities are the session`s word', () => {
+	/** A device that fails any I/O: an answer that came from the handler would be this failure. */
+	const dead = (kind: string) => {
+		const io = async () => Promise.reject(new Error('the device was asked'));
+		return {
+			kind,
+			vendorId: 0,
+			productId: 0,
+			productName: '',
+			collections: [],
+			sendReport: io,
+			sendFeatureReport: io,
+			receiveFeatureReport: io,
+			onInputReport: () => () => {},
+			write: io,
+			read: io,
+			close: async () => {}
+		} as never;
+	};
+	const flat = (type: FilterType) => ({ type, freq: 1000, q: 1, gain: 0 });
+
+	test.each(driven)('%s', async (id, protocol) => {
+		const h = handlerOf(id);
+		const device = openDevice(dead(transportsOf(h)[0]!), protocol);
+		const caps = device.capabilities;
+		// Where the handler says nothing, it is having the method.
+		const own = h.capabilities(dead(transportsOf(h)[0]!), protocol.options ?? {});
+		if (own.readsCurrentSlot === undefined) {
+			expect(caps.readsCurrentSlot).toBe(h.currentSlot !== undefined);
+		}
+		if (own.canEnable === undefined) expect(caps.canEnable).toBe(h.setEnabled !== undefined);
+		if (own.readsEnabled === undefined) expect(caps.readsEnabled).toBe(h.eqEnabled !== undefined);
+		expect(caps.writesPreamp).toBe(caps.wire.preamp !== undefined);
+
+		const unsupported = { code: 'unsupported' };
+		if (!caps.readsCurrentSlot) expect(await device.currentSlot()).toBeNull();
+		if (!caps.readsEnabled) expect(await device.eqEnabled()).toBeNull();
+		if (!caps.canEnable) await expect(device.setEnabled(true)).rejects.toMatchObject(unsupported);
+		if (!caps.editsSlots) {
+			await expect(device.createSlot()).rejects.toMatchObject(unsupported);
+			await expect(device.renameSlot(0, 'x')).rejects.toMatchObject(unsupported);
+			await expect(device.deleteSlot(0)).rejects.toMatchObject(unsupported);
+		}
+		const filters = Array.from({ length: profile(id).bandCount ?? 1 }, () =>
+			flat(h.codec.types[0]!)
+		);
+		if (!caps.writesPreamp) {
+			await expect(device.push({ filters, preamp: 0 })).rejects.toMatchObject({
+				code: 'invalid-request',
+				message: expect.stringContaining('carries no preamp')
+			});
+		}
+	});
+
+	test('some device says no to each of them, so none of the above is idle', () => {
+		const all = driven.map(([id, protocol]) => {
+			const kind = transportsOf(handlerOf(id))[0]!;
+			return openDevice(dead(kind), protocol).capabilities;
+		});
+		for (const flag of [
+			'readsCurrentSlot',
+			'readsEnabled',
+			'canEnable',
+			'editsSlots',
+			'writesPreamp'
+		] as const) {
+			expect(
+				all.some((c) => c[flag]),
+				flag
+			).toBe(true);
+			expect(
+				all.some((c) => !c[flag]),
+				flag
+			).toBe(true);
+		}
+	});
+});
+
 test("each handler runs over a transport the profile's identity implies", () => {
 	const wrong = driven.filter(([id]) => {
 		const kinds = transportsOf(handlerOf(id));
@@ -505,12 +586,8 @@ test("each handler runs over a transport the profile's identity implies", () => 
 
 test('a profile with a manual preamp has a protocol that writes it', () => {
 	const wrong = driven.filter(([id, p]) => {
-		const h = handlerOf(id);
-		const caps = h.capabilities(
-			{ kind: transportsOf(h)[0], collections: [] } as never,
-			p.options ?? {}
-		);
-		return profile(id).preamp.mode === 'manual' && !caps.writesPreamp;
+		const carries = handlerOf(id).codec.wire(p.options ?? {}).preamp !== undefined;
+		return profile(id).preamp.mode === 'manual' && !carries;
 	});
 	expect(wrong.map(([id]) => id)).toEqual([]);
 });

@@ -37,7 +37,7 @@ export const fiioF110Codec: Codec<object, Uint8Array> = {
 	types: FIIO_TYPES.types,
 	wire: () => ({ freq: FIIO_WIRE.freq, q: FIIO_WIRE.q, gain: FIIO_WIRE.gain }),
 	encode(request) {
-		refuseUncarried('fiio-f110', request, {});
+		refuseUncarried('fiio-f110', request, fiioF110Codec.wire({}));
 		const { filters } = request;
 		if (filters.length > BANDS) {
 			throw new BridgeError(
@@ -95,12 +95,9 @@ export const fiioF110: StreamHandler = {
 		canWrite: true,
 		readsPreamp: false,
 		readsSlot: false,
-		writesPreamp: false,
 		writesSlot: false,
 		bands: BANDS,
-		needsBandCount: false,
-		readsCurrentSlot: false,
-		canEnable: false
+		needsBandCount: false
 	}),
 
 	async pull(ctx) {

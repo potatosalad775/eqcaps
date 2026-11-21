@@ -273,11 +273,8 @@ export const qudelixUsbHid: HidHandler = {
 		canWrite: true,
 		readsPreamp: true,
 		readsSlot: false,
-		writesPreamp: true,
 		writesSlot: true,
 		needsBandCount: false,
-		readsCurrentSlot: true,
-		canEnable: true,
 		// The speaker EQ's left and right, as the app's channel selector writes them.
 		perChannel: eq === 'spk'
 	}),
