@@ -20,10 +20,11 @@ export interface PullRequest {
 	 * chosen slot (`readsSlot`), rather than answered with the current one.
 	 */
 	slot?: number;
-	/** Bands to read, where the protocol can't tell. Default: the profile's `bandCount`. */
+	/**
+	 * Bands to read, where the protocol can't tell. Default: the band count of the EQ the device is
+	 * viewed as, from its profile.
+	 */
 	bands?: number;
-	/** Which of the device's EQs to read (SPEC §9.2): an id of `capabilities.eqs`. Default: the profile's own. */
-	eq?: string;
 }
 
 /** What the device holds, in canonical units: written values (D39). */
@@ -61,18 +62,16 @@ export interface PushRequest {
 	 * The right channel (SPEC §9, `channels: "independent"`). Given, `filters` and `preamp` are the
 	 * left channel's, and `right.preamp` left out is `preamp`. Left out, `filters` and `preamp` go
 	 * to both channels. Refused, like `preamp`, where the handler doesn't drive the channels of the
-	 * EQ the push names apart (`perChannel`).
+	 * EQ the device is viewed as apart (`perChannel`).
 	 */
 	right?: { filters: readonly Filter[]; preamp?: number };
 	/** Preset slot to write to. Refused, like `preamp`, where the write names none (`writesSlot`). */
 	slot?: number;
-	/** Which of the device's EQs to write (SPEC §9.2): an id of `capabilities.eqs`. Default: the profile's own. */
-	eq?: string;
 }
 
 /** Another EQ of the device, as its profile lists it (SPEC §9.2). */
 export interface EqInfo {
-	/** The handler's id of the EQ: what `eq` takes. */
+	/** The handler's id of the EQ: what `eq()` takes. */
 	id: string;
 	name: string;
 	/** Its band count, where the profile gives one that differs from its own. */
@@ -81,7 +80,7 @@ export interface EqInfo {
 	slots: readonly Slot[];
 	/**
 	 * Push takes its right channel as `right`, and pull returns it (SPEC §9.2, its `channels`):
-	 * the handler drives its channels apart (`HandlerCapabilities.perChannelEqs`).
+	 * the handler drives its channels apart (`HandlerCapabilities.perChannel`, asked for this EQ).
 	 */
 	perChannel: boolean;
 }
@@ -150,7 +149,7 @@ export interface Codec<O, F> {
 	decode(frames: readonly F[], options: O): WriteState;
 }
 
-/** What a handler can do, given its options and transport. */
+/** What a handler can do with one of its EQs, given its options and transport. */
 export interface HandlerCapabilities {
 	canRead: boolean;
 	canWrite: boolean;
@@ -182,12 +181,10 @@ export interface HandlerCapabilities {
 	editsSlots?: boolean;
 	/**
 	 * Push takes the right channel (`right`) and pull returns it (SPEC §9, `channels:
-	 * "independent"`), on the EQ the handler drives by default. Default false: a push with `right`
-	 * is refused, and a pull returns one channel.
+	 * "independent"`): the handler drives this EQ's channels apart. Default false: a push with
+	 * `right` is refused, and a pull returns one channel.
 	 */
 	perChannel?: boolean;
-	/** The same for the handler's other EQs (`eqs`), by id: those whose channels it drives apart. */
-	perChannelEqs?: readonly string[];
 }
 
 export interface HandlerContext<T extends Transport, O> {
@@ -232,7 +229,8 @@ export interface Handler<T extends Transport, O, F> {
 	 * `protocol.eqs` (SPEC §9.2). An operation names one in `ctx.eq`.
 	 */
 	readonly eqs?: readonly string[];
-	capabilities(transport: T, options: O): HandlerCapabilities;
+	/** For `eq`, one of `eqs`; for the EQ the handler drives by default without one. */
+	capabilities(transport: T, options: O, eq?: string): HandlerCapabilities;
 	/** `bands` is always set when `needsBandCount` is. */
 	pull(ctx: HandlerContext<T, O>, request: { slot?: number; bands?: number }): Promise<PullResult>;
 	push(ctx: HandlerContext<T, O>, request: PushRequest): Promise<PushResult>;

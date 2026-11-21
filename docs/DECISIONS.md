@@ -181,6 +181,18 @@ or domains still needs its own profile. The device's mode that swaps both EQs fo
 (Qudelix's single-EQ mode) is not modelled: the handler drives that EQ as the profile's own and
 reports its band count.
 
+*2026-11-21:* the bridge no longer takes the EQ per operation: it hands out the device viewed as
+one EQ. `openDevice` gives it viewed as the EQ the profile describes, and `eq(id)` as a listed
+one, over the same connection and queue: that EQ's `pull`, `push`, switch, presets and band
+count, and its `slots` and `perChannel` in `capabilities`. The firmware, the controls and closing
+are the device's from every view. **Why:** `eq` reached the operations three ways (in the
+request, as a trailing argument, after an optional one), every per-EQ fact was a branch on "own or
+listed" in the session and again in `capabilities`, and both callers that drove two EQs (uniPEQ
+and the Qudelix tests) had written the same adapter to bind it. A view holds no state, so it is
+not the switch rejected above, and "which EQ" is still said by the app, once. A handler gives its
+capabilities for each EQ, which replaces `perChannelEqs`. Breaking for the bridge on npm; the
+format, core and client are unchanged.
+
 ### D54. Independent left and right channels: format 1.4 (2026-11-21)
 `channels: "independent"`, the value v1 reserved for it, says an EQ holds a filter set and a
 preamp for each output channel, left and right, each with the profile's band count, domains and

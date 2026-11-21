@@ -193,10 +193,7 @@
 				const bandCount = profile?.bandCount ?? bandsWanted;
 				device = openReadOnly(transport, protocol, { profile: { bandCount } });
 			}
-			pulled = await device.pull({
-				...(profile ? {} : { bands: bandsWanted }),
-				...(listedEq ? { eq: listedEq.id } : {})
-			});
+			pulled = await device.eq(listedEq?.id).pull(profile ? {} : { bands: bandsWanted });
 		} catch (e) {
 			fail(e);
 		} finally {

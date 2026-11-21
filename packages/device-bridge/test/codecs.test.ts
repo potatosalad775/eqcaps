@@ -147,7 +147,11 @@ describe.each(
 
 	// Where the handler drives the EQ's channels apart, `decode` gives the right channel where it
 	// differs from the left; left out, it is the left's.
-	const apart = eq === undefined ? caps.perChannel : caps.perChannelEqs?.includes(eq);
+	const apart = handler.capabilities(
+		transportFor(transportsOf(handler)[0]!),
+		options,
+		eq
+	).perChannel;
 	if (apart) {
 		test('decode(encode(request)) gives both channels back', () => {
 			fc.assert(

@@ -161,8 +161,9 @@ refused (`invalid-request`): create it first. Like controls, these are never cal
 ## Other EQs
 
 A profile's `protocol.eqs` (format 1.3, SPEC §9.2) lists the device's EQs besides the one the
-profile describes: Qudelix's speaker EQ under its user EQ. One connection drives them all, and
-each operation says which EQ it is for.
+profile describes: Qudelix's speaker EQ under its user EQ. One connection drives them all:
+`openDevice` gives the device viewed as the EQ the profile describes, and `eq(id)` gives it
+viewed as another.
 
 ```ts
 import { eqProfile } from '@potatosalad775/eqcaps-core';
@@ -170,20 +171,26 @@ import { eqProfile } from '@potatosalad775/eqcaps-core';
 for (const eq of device.capabilities.eqs) {
 	console.log(eq.id, eq.name, eq.bandCount, eq.slots, eq.perChannel);
 }
-const held = await device.pull({ eq: 'spk' });
+const speaker = device.eq('spk'); // the same connection, viewed as the speaker EQ
+const held = await speaker.pull();
 const spk = eqProfile(profile, 'spk')!; // the profile of that EQ: band count, presets, channels
 const result = fit(spk, wantedFilters, wantedPreamp);
 const filters = complete(spk, result.slots, { hints: held.filters }).filters;
-await device.push({ filters, eq: 'spk' });
-await device.eqEnabled('spk'); // also currentSlot(eq), bandCount(eq), setEnabled(on, slot, eq)
+await speaker.push({ filters });
+await speaker.eqEnabled(); // also currentSlot(), bandCount(), setEnabled(on, slot), slots()
+speaker.capabilities.slots; // the speaker EQ's presets; speaker.capabilities.perChannel likewise
 ```
 
-Without `eq`, every operation is about the profile's own EQ, as on a device with one.
+A view is the device with one EQ's `pull`, `push`, switch, presets and band count, and that EQ's
+`capabilities.slots` and `capabilities.perChannel`. The firmware, the controls and `close()` are
+the device's, the same from every view. The views share one queue, so operations on two EQs
+never interleave; `eq(id)` gives the same view each time, and `eq()` the profile's own.
 `capabilities.eqs` holds the listed EQs this bridge's handler drives, each with its own preset
-`slots` and `perChannel` (below); one the handler doesn't know is left out, and naming an EQ that
-isn't there is an `invalid-request`. The EQs are independent: a push to one leaves the others as
-they are. A handler names its EQs in `eqs` and reads the operation's from `ctx.eq`; a new one goes
-there and in the table above.
+`slots` and `perChannel` (below), the same list on every view; one the handler doesn't know is
+left out, and asking for an EQ that isn't there is an `invalid-request` from `eq()`. An EQ the
+device's current mode lacks (a Qudelix in single-EQ mode) answers each operation `unsupported`.
+The EQs are independent: a push to one leaves the others as they are. A handler names its EQs in
+`eqs` and reads the operation's from `ctx.eq`; a new one goes there and in the table above.
 
 ## Left and right channels
 
@@ -191,7 +198,8 @@ A profile with `channels: "independent"` (format 1.4, SPEC §9) describes an EQ 
 filter set and a preamp for each output channel; a listed EQ may say it for itself (format 1.5,
 SPEC §9.2), and `eqProfile` carries it. Where the handler drives that EQ's channels apart, a push
 takes the right channel as `right`, and a pull returns it: `capabilities.perChannel` says so for
-the profile's own EQ, and `perChannel` of each of `capabilities.eqs` for that one.
+the EQ the device is viewed as, and `perChannel` of each of `capabilities.eqs` for that one
+before its view is opened.
 
 ```ts
 const left = fit(profile, wantedLeft, wantedLeftPreamp);
@@ -209,11 +217,11 @@ await device.push({
 
 With `right`, `filters` and `preamp` are the left channel's, and `right.preamp` left out is
 `preamp`. Without it a push writes both channels alike, as on a linked EQ, and every handler takes
-it. `right` for an EQ that isn't `perChannel` (the push's `eq`, or the profile's own without one)
-is an `invalid-request`, never written to both channels. A pull of a `perChannel` EQ always has
+it. `right` on a view whose EQ isn't `perChannel` is an `invalid-request`, never written to both
+channels. A pull of a `perChannel` EQ always has
 `right`, also when the channels are equal, and its top-level `filters` and `preamp` are the left
-channel's; other pulls have none. A handler says `perChannel` in its capabilities for the EQ it
-drives by default (it may depend on the options) and `perChannelEqs` for its other EQs, by id,
+channel's; other pulls have none. A handler says `perChannel` in its capabilities, which the
+bridge asks for each EQ (`capabilities(transport, options, eq)`; it may depend on the options),
 takes `right` in its push and codec, and returns it from its pull. The bridge never reads a
 profile's `channels`; the protocol tests check the data against the handlers.
 

@@ -400,17 +400,11 @@ test('a profile with a manual preamp has a protocol that writes it', () => {
 test('an EQ has independent channels exactly where its protocol drives them apart', () => {
 	const wrong = driven.flatMap(([id, p]) => {
 		const h = handlerOf(id);
-		const caps = h.capabilities(
-			{ kind: transportsOf(h)[0], collections: [] } as never,
-			p.options ?? {}
-		);
-		return [
-			{ eq: undefined, apart: caps.perChannel === true },
-			...(p.eqs ?? []).map((e) => ({
-				eq: e.id,
-				apart: caps.perChannelEqs?.includes(e.id) === true
-			}))
-		]
+		const apart = (eq?: string) =>
+			h.capabilities({ kind: transportsOf(h)[0], collections: [] } as never, p.options ?? {}, eq)
+				.perChannel === true;
+		return [undefined, ...(p.eqs ?? []).map((e) => e.id)]
+			.map((eq) => ({ eq, apart: apart(eq) }))
 			.filter(({ eq, apart }) => (eqProfile(profile(id), eq)!.channels === 'independent') !== apart)
 			.map(({ eq }) => (eq === undefined ? id : `${id} ${eq}`));
 	});

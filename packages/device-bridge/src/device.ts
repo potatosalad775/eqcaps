@@ -43,9 +43,9 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	/** What the write frames can carry. A profile domain outside it can't be written. */
 	wire: WireGrid;
 	/**
-	 * The preset slots of the EQ the profile describes. Where the device keeps a list of presets
-	 * (`listsSlots`), these are the ones it has room for, under the data's names: `slots()` says
-	 * which exist now.
+	 * The preset slots of the EQ this device is viewed as (`eq()`). Where the device keeps a list of
+	 * presets (`listsSlots`), these are the ones it has room for, under the data's names: `slots()`
+	 * says which exist now.
 	 */
 	slots: readonly Slot[];
 	/** `slots()` asks the device, which keeps a list of presets with names of its own. */
@@ -53,13 +53,13 @@ export interface DeviceCapabilities extends HandlerCapabilities {
 	/** `createSlot()`, `renameSlot()` and `deleteSlot()` send commands. */
 	editsSlots: boolean;
 	/**
-	 * `push` takes the right channel as `right`, and `pull` returns it (SPEC §9), on the profile's
-	 * own EQ. Each of `eqs` says it for itself.
+	 * `push` takes the right channel as `right`, and `pull` returns it (SPEC §9), on the EQ this
+	 * device is viewed as.
 	 */
 	perChannel: boolean;
 	/**
-	 * The device's other EQs (SPEC §9.2), each with its own slots: `pull`, `push` and the EQ's
-	 * switch and preset take one's id as `eq`. Empty for a device with one EQ.
+	 * The device's other EQs (SPEC §9.2), each with its own slots: `eq(id)` gives the device viewed
+	 * as one. Empty for a device with one EQ, and the same list on every view.
 	 */
 	eqs: readonly EqInfo[];
 	/** The device drops the connection after a push that saves; reconnect afterwards. */
@@ -81,7 +81,13 @@ export interface ControlWriteResult {
 	reconnect: boolean;
 }
 
-/** A connected device: a transport driven by a protocol. */
+/**
+ * A connected device, viewed as one of its EQs: a transport driven by a protocol. `openDevice`
+ * gives it viewed as the EQ its profile describes; `eq(id)` gives it viewed as another (SPEC
+ * §9.2). `pull`, `push`, the EQ's switch, its presets and its band count are that EQ's, and so
+ * are `capabilities.slots` and `capabilities.perChannel`. The firmware, the controls and closing
+ * are the device's, the same from every view.
+ */
 export interface BridgeDevice {
 	readonly transport: Transport;
 	readonly protocol: Protocol;
@@ -90,43 +96,40 @@ export interface BridgeDevice {
 	pull(request?: PullRequest): Promise<PullResult>;
 	push(request: PushRequest): Promise<PushResult>;
 	/**
-	 * Each of the next four takes the id of one of `capabilities.eqs` as `eq`, and is about the
-	 * profile's own EQ without it.
-	 *
 	 * The active preset slot; null when the protocol can't say, or (on some bypass-preset
 	 * protocols) when the EQ is off. Where the EQ switch is separate state (`readsEnabled`), this is
 	 * the preset the device plays when its EQ is on, whether it is on or not.
 	 */
-	currentSlot(eq?: string): Promise<number | null>;
+	currentSlot(): Promise<number | null>;
 	/** Whether the EQ is on (`readsEnabled`); null when the protocol or device doesn't say. */
-	eqEnabled(eq?: string): Promise<boolean | null>;
-	setEnabled(enabled: boolean, slot?: number, eq?: string): Promise<void>;
+	eqEnabled(): Promise<boolean | null>;
+	setEnabled(enabled: boolean, slot?: number): Promise<void>;
 	/**
 	 * The preset slots as they are now. Where the device keeps a list (`listsSlots`) it is asked:
 	 * the presets it holds, under the names it stores, ids counting from 0, followed by the data's
 	 * `bypass` preset if there is one. Elsewhere this is `capabilities.slots`.
 	 */
-	slots(eq?: string): Promise<readonly Slot[]>;
+	slots(): Promise<readonly Slot[]>;
 	/**
 	 * The next three need `editsSlots`. This one adds an empty preset after the last and returns
 	 * it; without a `name` the device or handler picks one. Refused when the device is full. The
 	 * device may start playing the new preset: ask `currentSlot()` afterwards.
 	 */
-	createSlot(request?: { name?: string; eq?: string }): Promise<Slot>;
+	createSlot(request?: { name?: string }): Promise<Slot>;
 	/** Renames a preset. A name the device can't store is refused, never shortened. */
-	renameSlot(slot: number, name: string, eq?: string): Promise<void>;
+	renameSlot(slot: number, name: string): Promise<void>;
 	/**
 	 * Deletes a preset. The ones after it move down by one and the device may switch to another:
 	 * ask `slots()` and `currentSlot()` afterwards.
 	 */
-	deleteSlot(slot: number, eq?: string): Promise<void>;
+	deleteSlot(slot: number): Promise<void>;
 	/** The device's firmware version, read once; null when the protocol or device doesn't say. */
 	firmware(): Promise<string | null>;
 	/**
 	 * The band count the device reports, asked each time; null when the protocol or device doesn't
 	 * say. It can differ from the profile's `bandCount`: the bridge doesn't reconcile them.
 	 */
-	bandCount(eq?: string): Promise<number | null>;
+	bandCount(): Promise<number | null>;
 	/**
 	 * The current value of every control in `capabilities.controls`; null for one the device
 	 * doesn't have now (SPEC §9.1: its firmware range or `when` doesn't hold). Opt-in: pull and
@@ -139,6 +142,13 @@ export interface BridgeDevice {
 	 * when the user changed the control (SPEC §9.1).
 	 */
 	writeControl(id: string, value: number): Promise<ControlWriteResult>;
+	/**
+	 * This device viewed as another of its EQs: an id of `capabilities.eqs`, or none for the EQ the
+	 * profile describes. The same connection, one operation at a time across every view, and the
+	 * same view each time it is asked for. An EQ the profile doesn't list is refused here
+	 * (`invalid-request`); one the device's current mode lacks answers each operation `unsupported`.
+	 */
+	eq(id?: string): BridgeDevice;
 	close(): Promise<void>;
 }
 
@@ -186,42 +196,18 @@ export function openDevice(
 	/** The profile's own EQ, and everything that isn't about one EQ. */
 	const ctx = context(protocol.presets);
 	// The data's other EQs that this handler drives: one it doesn't know is left out (SPEC §9.2).
-	const eqs = (protocol.eqs ?? []).filter((e) => (handler.eqs ?? []).includes(e.id));
-	const contexts = new Map(eqs.map((e) => [e.id, context(e.presets, e.id)]));
-	/** The context of an operation on `eq`; an EQ the profile doesn't list is refused. */
-	const on = (eq: string | undefined) => {
-		if (eq === undefined) return ctx;
-		const found = contexts.get(eq);
-		if (!found) throw new BridgeError('invalid-request', `${handler.id}: no EQ "${eq}" here`);
-		return found;
-	};
-	const own = handler.capabilities(transport, handlerOptions);
-	const capabilities: DeviceCapabilities = {
-		...own,
-		types: handler.codec.types,
-		wire: handler.codec.wire(handlerOptions),
-		slots: protocol.presets ?? [],
-		listsSlots: handler.slots !== undefined,
-		editsSlots:
-			handler.createSlot !== undefined &&
-			handler.renameSlot !== undefined &&
-			handler.deleteSlot !== undefined &&
-			own.editsSlots !== false,
-		perChannel: own.perChannel === true,
-		eqs: eqs.map(({ presets, ...e }) => ({
-			...e,
-			slots: presets ?? [],
-			perChannel: own.perChannelEqs?.includes(e.id) === true
-		})),
-		disconnectOnSave: protocol.disconnectOnSave ?? false,
-		experimental: protocol.experimental ?? false,
-		readsFirmware: handler.firmware !== undefined,
-		readsEnabled: handler.eqEnabled !== undefined && own.readsEnabled !== false,
-		readsBandCount: handler.bandCount !== undefined,
-		controls: (protocol.controls ?? []).filter((c) => handler.controls?.[c.id])
-	};
+	const listed = (protocol.eqs ?? []).filter((e) => (handler.eqs ?? []).includes(e.id));
+	const capabilitiesOf = (eq?: string): HandlerCapabilities =>
+		handler.capabilities(transport, handlerOptions, eq);
+	const eqs: readonly EqInfo[] = listed.map(({ presets, ...e }) => ({
+		...e,
+		slots: presets ?? [],
+		perChannel: capabilitiesOf(e.id).perChannel === true
+	}));
+	const controls = (protocol.controls ?? []).filter((c) => handler.controls?.[c.id]);
 
-	// One operation at a time: two pulls interleaving on one input stream corrupt each other.
+	// One operation at a time, across every view: two pulls interleaving on one input stream
+	// corrupt each other.
 	let queue: Promise<unknown> = Promise.resolve();
 	const serial = <T>(op: () => Promise<T>): Promise<T> => {
 		const run = queue.then(op, op);
@@ -244,7 +230,7 @@ export function openDevice(
 	const driver = (c: Control) => handler.controls![c.id]!;
 	/** Whether `c` exists now, reading the control its `when` names when it has one. */
 	const present = async (c: Control, values: ControlValues = {}) => {
-		const target = c.when && capabilities.controls.find((t) => t.id === c.when!.control);
+		const target = c.when && controls.find((t) => t.id === c.when!.control);
 		const known =
 			c.when && !(c.when.control in values) && target
 				? {
@@ -257,186 +243,220 @@ export function openDevice(
 		return controlPresent(c, { firmware: await readFirmware(), values: known });
 	};
 
-	return {
-		transport,
-		protocol,
-		identity: identityOf(transport),
-		capabilities,
-
-		pull(request = {}) {
-			return serial(async () => {
-				if (!capabilities.canRead) {
-					throw new BridgeError('unsupported', `${handler.id} can't read from this device`);
-				}
-				const r: { slot?: number; bands?: number } = {};
-				if (request.slot !== undefined) {
-					if (!capabilities.readsSlot) {
-						throw new BridgeError(
-							'invalid-request',
-							`${handler.id} reads only the current preset, not a chosen slot`
-						);
-					}
-					r.slot = request.slot;
-				}
-				const target = on(request.eq);
-				if (capabilities.needsBandCount) {
-					const listed = eqs.find((e) => e.id === request.eq)?.bandCount;
-					const bands = request.bands ?? listed ?? options.profile?.bandCount ?? undefined;
-					if (typeof bands !== 'number' || !Number.isInteger(bands) || bands < 0) {
-						throw new BridgeError(
-							'invalid-request',
-							`${handler.id} needs a band count: pass \`bands\`, or open the device with its profile`
-						);
-					}
-					r.bands = bands;
-				}
-				return handler.pull(target, r);
-			});
-		},
-
-		push(request) {
-			return serial(async () => {
-				if (!capabilities.canWrite) {
-					throw new BridgeError('unsupported', `${handler.id} can't write to this device`);
-				}
-				const { eq, ...rest } = request;
-				const target = on(eq);
-				const apart =
-					eq === undefined
-						? capabilities.perChannel
-						: capabilities.eqs.find((e) => e.id === eq)!.perChannel;
-				// Sent without it, the right channel would look written (D33).
-				if (rest.right !== undefined && !apart) {
-					throw new BridgeError(
-						'invalid-request',
-						`${handler.id}: the write drives both channels alike; it carries no right channel`
-					);
-				}
-				const result = await handler.push(target, rest);
-				return { reconnect: result.reconnect || capabilities.disconnectOnSave };
-			});
-		},
-
-		currentSlot(eq) {
-			return serial(async () => (handler.currentSlot ? handler.currentSlot(on(eq)) : null));
-		},
-
-		eqEnabled(eq) {
-			return serial(async () => (handler.eqEnabled ? handler.eqEnabled(on(eq)) : null));
-		},
-
-		setEnabled(enabled, slot, eq) {
-			return serial(async () => {
-				if (!handler.setEnabled) {
-					throw new BridgeError('unsupported', `${handler.id} has no EQ switch`);
-				}
-				await handler.setEnabled(on(eq), enabled, slot);
-			});
-		},
-
-		slots(eq) {
-			return serial(async () => {
-				const target = on(eq);
-				const listed =
-					eq === undefined ? capabilities.slots : capabilities.eqs.find((e) => e.id === eq)!.slots;
-				if (!handler.slots) return listed;
-				return [...(await handler.slots(target)), ...listed.filter((s) => s.bypass)];
-			});
-		},
-
-		createSlot({ name, eq } = {}) {
-			return serial(async () => {
-				const target = on(eq);
-				if (!capabilities.editsSlots) throw noEditing();
-				return handler.createSlot!(target, name === undefined ? {} : { name });
-			});
-		},
-
-		renameSlot(slot, name, eq) {
-			return serial(async () => {
-				const target = on(eq);
-				if (!capabilities.editsSlots) throw noEditing();
-				await handler.renameSlot!(target, slot, name);
-			});
-		},
-
-		deleteSlot(slot, eq) {
-			return serial(async () => {
-				const target = on(eq);
-				if (!capabilities.editsSlots) throw noEditing();
-				await handler.deleteSlot!(target, slot);
-			});
-		},
-
-		firmware() {
-			return serial(readFirmware);
-		},
-
-		bandCount(eq) {
-			return serial(async () => {
-				const target = on(eq);
-				try {
-					return (await handler.bandCount?.(target)) ?? null;
-				} catch (e) {
-					ctx.log(`${handler.id}: no band count (${(e as Error).message})`);
-					return null;
-				}
-			});
-		},
-
-		readControls() {
-			return serial(async () => {
-				const values: Record<string, number | null> = {};
-				// Controls without `when` first: a `when` names one of them (SPEC §9.1).
-				const order = [
-					...capabilities.controls.filter((c) => !c.when),
-					...capabilities.controls.filter((c) => c.when)
-				];
-				for (const c of order) {
-					values[c.id] = (await present(c, values)) ? await driver(c).read(ctx) : null;
-				}
-				return values;
-			});
-		},
-
-		writeControl(id, value) {
-			return serial(async () => {
-				const c = capabilities.controls.find((x) => x.id === id);
-				if (!c) throw new BridgeError('invalid-request', `${handler.id}: no control "${id}" here`);
-				if (!controlTakes(c, value)) {
-					throw new BridgeError('invalid-request', `${handler.id}: "${id}" doesn't take ${value}`);
-				}
-				if (!(await present(c))) {
-					throw new BridgeError('unsupported', `${handler.id}: the device has no "${id}" now`);
-				}
-				try {
-					await driver(c).write(ctx, value);
-				} catch (e) {
-					// A device that restarts for this control can drop off the bus before the write
-					// returns (the DS3 on a USB mode switch): the transport failing is it restarting.
-					if (!c.reconnect || !isBridgeError(e, 'transport')) throw e;
-					ctx.log(`${handler.id}: "${id}" lost the device as it restarted (${e.message})`);
-				}
-				if (c.reconnect) return { reconnect: true };
-				let back = await driver(c).read(ctx);
-				// Once more before calling it rejected: a device may apply a value a moment late,
-				// or a late answer to an earlier read may have come first.
-				if (!near(back, value)) {
-					await ctx.sleep(100);
-					back = await driver(c).read(ctx);
-				}
-				if (!near(back, value)) {
-					throw new BridgeError(
-						'rejected',
-						`${handler.id}: "${id}" reads back ${back}, not ${value}`
-					);
-				}
-				return { reconnect: false };
-			});
-		},
-
-		close() {
-			return serial(() => transport.close());
+	const views = new Map<string | undefined, BridgeDevice>();
+	/** The device viewed as one EQ: the profile's own for no id, else one of `listed`. */
+	const view = (id: string | undefined): BridgeDevice => {
+		const known = views.get(id);
+		if (known) return known;
+		const info = listed.find((e) => e.id === id);
+		if (id !== undefined && !info) {
+			throw new BridgeError('invalid-request', `${handler.id}: no EQ "${id}" here`);
 		}
+		/** The context of this EQ's operations. */
+		const target = info ? context(info.presets, info.id) : ctx;
+		const own = capabilitiesOf(id);
+		const capabilities: DeviceCapabilities = {
+			...own,
+			types: handler.codec.types,
+			wire: handler.codec.wire(handlerOptions),
+			slots: (info ? info.presets : protocol.presets) ?? [],
+			listsSlots: handler.slots !== undefined,
+			editsSlots:
+				handler.createSlot !== undefined &&
+				handler.renameSlot !== undefined &&
+				handler.deleteSlot !== undefined &&
+				own.editsSlots !== false,
+			perChannel: own.perChannel === true,
+			eqs,
+			disconnectOnSave: protocol.disconnectOnSave ?? false,
+			experimental: protocol.experimental ?? false,
+			readsFirmware: handler.firmware !== undefined,
+			readsEnabled: handler.eqEnabled !== undefined && own.readsEnabled !== false,
+			readsBandCount: handler.bandCount !== undefined,
+			controls
+		};
+
+		const device: BridgeDevice = {
+			transport,
+			protocol,
+			identity: identityOf(transport),
+			capabilities,
+
+			pull(request = {}) {
+				return serial(async () => {
+					if (!capabilities.canRead) {
+						throw new BridgeError('unsupported', `${handler.id} can't read from this device`);
+					}
+					const r: { slot?: number; bands?: number } = {};
+					if (request.slot !== undefined) {
+						if (!capabilities.readsSlot) {
+							throw new BridgeError(
+								'invalid-request',
+								`${handler.id} reads only the current preset, not a chosen slot`
+							);
+						}
+						r.slot = request.slot;
+					}
+					if (capabilities.needsBandCount) {
+						const bands =
+							request.bands ?? info?.bandCount ?? options.profile?.bandCount ?? undefined;
+						if (typeof bands !== 'number' || !Number.isInteger(bands) || bands < 0) {
+							throw new BridgeError(
+								'invalid-request',
+								`${handler.id} needs a band count: pass \`bands\`, or open the device with its profile`
+							);
+						}
+						r.bands = bands;
+					}
+					return handler.pull(target, r);
+				});
+			},
+
+			push(request) {
+				return serial(async () => {
+					if (!capabilities.canWrite) {
+						throw new BridgeError('unsupported', `${handler.id} can't write to this device`);
+					}
+					// Sent without it, the right channel would look written (D33).
+					if (request.right !== undefined && !capabilities.perChannel) {
+						throw new BridgeError(
+							'invalid-request',
+							`${handler.id}: the write drives both channels alike; it carries no right channel`
+						);
+					}
+					const result = await handler.push(target, request);
+					return { reconnect: result.reconnect || capabilities.disconnectOnSave };
+				});
+			},
+
+			currentSlot() {
+				return serial(async () => (handler.currentSlot ? handler.currentSlot(target) : null));
+			},
+
+			eqEnabled() {
+				return serial(async () => (handler.eqEnabled ? handler.eqEnabled(target) : null));
+			},
+
+			setEnabled(enabled, slot) {
+				return serial(async () => {
+					if (!handler.setEnabled) {
+						throw new BridgeError('unsupported', `${handler.id} has no EQ switch`);
+					}
+					await handler.setEnabled(target, enabled, slot);
+				});
+			},
+
+			slots() {
+				return serial(async () => {
+					if (!handler.slots) return capabilities.slots;
+					return [...(await handler.slots(target)), ...capabilities.slots.filter((s) => s.bypass)];
+				});
+			},
+
+			createSlot({ name } = {}) {
+				return serial(async () => {
+					if (!capabilities.editsSlots) throw noEditing();
+					return handler.createSlot!(target, name === undefined ? {} : { name });
+				});
+			},
+
+			renameSlot(slot, name) {
+				return serial(async () => {
+					if (!capabilities.editsSlots) throw noEditing();
+					await handler.renameSlot!(target, slot, name);
+				});
+			},
+
+			deleteSlot(slot) {
+				return serial(async () => {
+					if (!capabilities.editsSlots) throw noEditing();
+					await handler.deleteSlot!(target, slot);
+				});
+			},
+
+			firmware() {
+				return serial(readFirmware);
+			},
+
+			bandCount() {
+				return serial(async () => {
+					try {
+						return (await handler.bandCount?.(target)) ?? null;
+					} catch (e) {
+						ctx.log(`${handler.id}: no band count (${(e as Error).message})`);
+						return null;
+					}
+				});
+			},
+
+			readControls() {
+				return serial(async () => {
+					const values: Record<string, number | null> = {};
+					// Controls without `when` first: a `when` names one of them (SPEC §9.1).
+					const order = [...controls.filter((c) => !c.when), ...controls.filter((c) => c.when)];
+					for (const c of order) {
+						values[c.id] = (await present(c, values)) ? await driver(c).read(ctx) : null;
+					}
+					return values;
+				});
+			},
+
+			writeControl(controlId, value) {
+				return serial(async () => {
+					const c = controls.find((x) => x.id === controlId);
+					if (!c) {
+						throw new BridgeError(
+							'invalid-request',
+							`${handler.id}: no control "${controlId}" here`
+						);
+					}
+					if (!controlTakes(c, value)) {
+						throw new BridgeError(
+							'invalid-request',
+							`${handler.id}: "${controlId}" doesn't take ${value}`
+						);
+					}
+					if (!(await present(c))) {
+						throw new BridgeError(
+							'unsupported',
+							`${handler.id}: the device has no "${controlId}" now`
+						);
+					}
+					try {
+						await driver(c).write(ctx, value);
+					} catch (e) {
+						// A device that restarts for this control can drop off the bus before the write
+						// returns (the DS3 on a USB mode switch): the transport failing is it restarting.
+						if (!c.reconnect || !isBridgeError(e, 'transport')) throw e;
+						ctx.log(`${handler.id}: "${controlId}" lost the device as it restarted (${e.message})`);
+					}
+					if (c.reconnect) return { reconnect: true };
+					let back = await driver(c).read(ctx);
+					// Once more before calling it rejected: a device may apply a value a moment late,
+					// or a late answer to an earlier read may have come first.
+					if (!near(back, value)) {
+						await ctx.sleep(100);
+						back = await driver(c).read(ctx);
+					}
+					if (!near(back, value)) {
+						throw new BridgeError(
+							'rejected',
+							`${handler.id}: "${controlId}" reads back ${back}, not ${value}`
+						);
+					}
+					return { reconnect: false };
+				});
+			},
+
+			eq: view,
+
+			close() {
+				return serial(() => transport.close());
+			}
+		};
+		views.set(id, device);
+		return device;
 	};
+
+	return view(undefined);
 }

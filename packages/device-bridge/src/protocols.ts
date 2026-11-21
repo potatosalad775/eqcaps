@@ -314,8 +314,8 @@ function readPresets(presets: unknown, id: HandlerId, at: string): Slot[] {
 /**
  * A profile's other EQs (SPEC §9.2). Strict (CI): each must be one this bridge's handler drives.
  * Lenient (apps): one it doesn't is left out, so newer data never stops the rest being driven.
- * An EQ's `channels` is for the app, like the profile's: the handler says which EQs it drives
- * apart (`perChannelEqs`).
+ * An EQ's `channels` is for the app, like the profile's: the handler says for each EQ whether it
+ * drives its channels apart (`perChannel`).
  */
 function readEqs(raw: unknown, id: HandlerId, strict: boolean): ProtocolEq[] {
 	const driven: readonly string[] = (HANDLERS[id] as AnyHandler).eqs ?? [];
