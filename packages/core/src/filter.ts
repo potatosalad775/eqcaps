@@ -1,5 +1,6 @@
 import { near } from './domain.ts';
 import type { FilterType } from './types/schema.generated.ts';
+import { FILTER_TYPES } from './types/values.generated.ts';
 
 /** One filter in canonical units: Hz, RBJ-cookbook Q, dB (SPEC §1). */
 export interface Filter {
@@ -9,8 +10,7 @@ export interface Filter {
 	gain: number;
 }
 
-/** The v1 filter types (SPEC §5.3). */
-export const FILTER_TYPES = ['PK', 'LSC', 'HSC', 'LPQ', 'HPQ', 'BP', 'NO', 'AP'] as const;
+export { FILTER_TYPES };
 export type KnownFilterType = (typeof FILTER_TYPES)[number];
 
 const GAINLESS: ReadonlySet<FilterType> = new Set(['LPQ', 'HPQ', 'BP', 'NO', 'AP']);

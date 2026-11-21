@@ -15,7 +15,11 @@ import type { StreamTransport } from '../transport.ts';
 export interface NothingOptions {
 	/** The preset whose bands can be read and written. Default 5 ("Custom"). */
 	customSlot?: number;
-	/** Operation id of the frame (the session counts them). Default 1. */
+}
+
+/** The options, and what the handler tells its codec besides. */
+export interface NothingCodecOptions extends NothingOptions {
+	/** Operation id of the frame (the handler counts them per connection). Default 1. */
 	operation?: number;
 }
 
@@ -68,7 +72,7 @@ export function decodeNothingBands(frame: ArrayLike<number>): {
 	return { filters, preamp: tidyF32(readF32le(frame, 10)) };
 }
 
-export const nothingCodec: Codec<NothingOptions, Uint8Array> = {
+export const nothingCodec: Codec<NothingCodecOptions, Uint8Array> = {
 	types: NOTHING_TYPES.types,
 	wire: () => ({ freq: F32_FIELD, q: F32_FIELD, gain: F32_FIELD, preamp: F32_FIELD }),
 	encode({ filters, preamp, slot }, o) {

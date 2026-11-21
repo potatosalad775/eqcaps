@@ -4,6 +4,7 @@
 
 import {
 	FILTER_TYPES,
+	type PREAMP_MODES,
 	type AuthoringMeta,
 	type AuthoringProfile,
 	type AuthoringSource,
@@ -179,7 +180,7 @@ export const MANUAL_PREAMP: Domain = { min: -12, max: 0, step: 0.1 };
  */
 export function withPreampMode(
 	data: AuthoringProfile,
-	mode: '' | 'manual' | 'auto' | 'none' | 'unknown'
+	mode: '' | (typeof PREAMP_MODES)[number]
 ): AuthoringProfile {
 	return edited(data, (d) => {
 		if (mode === '') delete d.preamp;

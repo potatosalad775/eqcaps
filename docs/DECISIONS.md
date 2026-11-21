@@ -72,6 +72,13 @@ TS types, and `npm run check` fails on drift. Every language can read JSON Schem
 validator in `core` covers what the schema can't, and Ajv lives in `packages/build` so `core` has
 no dependencies. Format fixtures are RFC 7386 merge patches over one valid profile.
 
+*2026-11-22:* codegen also writes the schema's lists of allowed values as constants in `core`
+(`FILTER_TYPES`, `PREAMP_MODES`, `CONTROL_KINDS`, `CONTROL_ROLES`, `SOURCE_KINDS`, `STATUSES`),
+and code that needs one at run time imports it. **Why:** they were typed again by hand where a
+form lists its options or a lenient reader its known values (the bridge's roles and kinds, the
+editor's source kinds, statuses and preamp modes), with nothing tying a copy to the schema; a new
+control role took an edit in two places and a rule in AGENTS.md to remember the second.
+
 ### D14. Published files are flat; consumers are lenient
 `extends` is resolved at build time. Consumers ignore unknown keys and never run the strict CI
 schema, so new minors don't break old apps.
@@ -344,6 +351,17 @@ they're given, rounded onto the wire grid; anything the wire can't carry is a `B
 anything is sent. Push takes written values (apps run `fit` + `complete` first); pull returns
 them. Tests decode recorded device answers and round-trip every codec, rather than reproducing
 devicePEQ's bytes. Where the bridge deliberately differs from devicePEQ is listed in the archive.
+
+*2026-11-22:* two things an architecture review proposed and withdrew, so they aren't proposed
+again. **A codec returns bare frames**, not frames tagged with what each is (a band, a save).
+Each handler's `push` sits in the file of the codec that wrote the bytes and reads them by the
+same named constants, so the knowledge is already in one place; a tag would change every codec,
+its tests and an app's demo device to rename a handful of one-line checks. Where a `push` counts
+frame positions instead (KT Micro, Topping), it gets a step list of its own, as Moondrop's has.
+**A handler's per-connection state is keyed by the transport**, in the handler's module, not held
+by the bridge device. Several devices are opened on one transport in turn (an app reads the
+firmware, then opens the device it will drive; the inspector opens one per profile picked), and
+the state is what lets the later ones use the handshake the first one made.
 
 ### D50. The vendor's own app is the reference (2026-11-01)
 What a handler sends (frames, order, commits, saves, delays) and what the data says (ranges,

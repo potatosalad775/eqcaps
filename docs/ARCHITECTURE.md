@@ -83,7 +83,8 @@ eqcaps/
 ├── apps/inspector/               SvelteKit SPA (adapter-static)
 ├── tools/userscripts/            WebHID recorder for vendor web apps (recordings for bridge tests)
 └── scripts/
-    ├── codegen.ts                source.schema.json + TS types from profile.schema.json
+    ├── codegen.ts                source.schema.json, TS types and value lists from
+    │                             profile.schema.json
     ├── conformance.ts            engine vectors in conformance/v1/
     ├── data-format.ts            formats data/ like the inspector writes it
     ├── release.ts                npm publish, tag and GitHub Release (run locally)
@@ -124,7 +125,8 @@ Changing one of these needs a DECISIONS entry.
    engine is told. Nothing models or corrects how its filters sound (D39).
 4. **Profile ids are permanent public API.** A rename is `deprecated` + `replacedBy`.
 5. **Published files are flat.** `extends` and `abstract` exist only in authoring files (D14).
-6. **JSON Schema is the structural source of truth.** TS types are generated from it (D13).
+6. **JSON Schema is the structural source of truth.** TS types and its lists of allowed values
+   are generated from it (D13).
 7. **`project`, `resolveSlot` and `validate` are exact** across languages; `assign`, `fit`,
    `complete` and `plan` are normative through their properties (D15, D56).
 8. **Apps must work without the CDN.** The database enhances an app and never blocks it.

@@ -4,7 +4,7 @@
 // checks what the data says against the handlers this bridge has. The wire formats themselves are
 // in the handlers (invariant 2).
 
-import type { Control } from '@potatosalad775/eqcaps-core';
+import { CONTROL_KINDS, CONTROL_ROLES, type Control } from '@potatosalad775/eqcaps-core';
 import type { AnyHandler, Slot } from './handler.ts';
 import { HANDLERS, type HandlerId, type HandlerOptions } from './handlers/index.ts';
 
@@ -42,14 +42,14 @@ export type Protocol = {
 // --- Reading a profile's protocol -----------------------------------------------------------------
 
 /** Reads one option value from the data, or says why it can't. */
-type Read = (v: unknown) => unknown;
+type Read<T = unknown> = (v: unknown) => T;
 
 const fail = (why: string): never => {
 	throw new Error(why);
 };
 
 /** A byte, written as a number or a hex string (`"0x3f"`, like the profiles' USB ids). */
-const byte: Read = (v) => {
+const byte: Read<number> = (v) => {
 	const n = typeof v === 'string' && /^0x[0-9a-f]{1,2}$/.test(v) ? parseInt(v, 16) : v;
 	return typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 0xff
 		? n
@@ -57,37 +57,37 @@ const byte: Read = (v) => {
 };
 
 /** Any finite number. */
-const number: Read = (v) =>
+const number: Read<number> = (v) =>
 	typeof v === 'number' && Number.isFinite(v) ? v : fail(`${JSON.stringify(v)} is not a number`);
 
 /** A number above 0. */
-const positive: Read = (v) =>
+const positive: Read<number> = (v) =>
 	typeof v === 'number' && Number.isFinite(v) && v > 0
 		? v
 		: fail(`${JSON.stringify(v)} is not above 0`);
 
 /** A number of 0 or more. */
-const nonNegative: Read = (v) =>
+const nonNegative: Read<number> = (v) =>
 	typeof v === 'number' && Number.isFinite(v) && v >= 0
 		? v
 		: fail(`${JSON.stringify(v)} is not 0 or more`);
 
-const flag: Read = (v) =>
+const flag: Read<boolean> = (v) =>
 	typeof v === 'boolean' ? v : fail(`${JSON.stringify(v)} is not a boolean`);
 
 /** One of a handler's named choices. */
 const oneOf =
-	(...allowed: readonly string[]): Read =>
+	<const T extends string>(...allowed: readonly T[]): Read<T> =>
 	(v) =>
-		typeof v === 'string' && allowed.includes(v)
-			? v
+		typeof v === 'string' && (allowed as readonly string[]).includes(v)
+			? (v as T)
 			: fail(`${JSON.stringify(v)} is not one of ${allowed.map((a) => `"${a}"`).join(', ')}`);
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
 	typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /** KT Micro's per-band register pairs. */
-const registers: Read = (v) =>
+const registers: Read<{ freq: number; q: number }[]> = (v) =>
 	Array.isArray(v) && v.length > 0
 		? v.map((r: unknown) => {
 				if (!isObject(r) || Object.keys(r).some((k) => k !== 'freq' && k !== 'q')) {
@@ -99,17 +99,22 @@ const registers: Read = (v) =>
 		: fail('not a list of register pairs');
 
 /** Walkplay: what follows a control write, by control id. */
-const afterControl: Read = (v) =>
+const afterControl: Read<Record<string, 'done' | 'save'>> = (v) =>
 	isObject(v) && Object.values(v).every((x) => x === 'done' || x === 'save')
-		? { ...v }
+		? ({ ...v } as Record<string, 'done' | 'save'>)
 		: fail(`${JSON.stringify(v)} is not a map of control ids to "done" or "save"`);
 
 /**
- * The options a profile may set, per handler. Options a handler derives itself (Qudelix's framing
- * and EQ state from the device and its EQ from the operation, Airoha's layout from the transport)
- * aren't data and are left out.
+ * The options a profile may set, per handler: a reader for every option the handler takes, giving
+ * the option's own type. One that is missing, or reads another type, doesn't compile. What a
+ * handler works out for itself and tells its codec (Qudelix's EQ and device state, Airoha's
+ * layout, Nothing's operation count) is no option and isn't in its options type.
  */
-const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOptions<K>]?: Read } } = {
+const OPTIONS: {
+	readonly [K in HandlerId]: {
+		readonly [O in keyof HandlerOptions<K>]-?: Read<NonNullable<HandlerOptions<K>[O]>>;
+	};
+} = {
 	'fiio-usb-hid': { reportId: byte, saveCommand: byte },
 	'walkplay-hid': {
 		defaultSlot: byte,
@@ -161,33 +166,12 @@ const OPTIONS: { readonly [K in HandlerId]: { readonly [O in keyof HandlerOption
 	airoha: {}
 };
 
-const KINDS: ReadonlySet<string> = new Set(['toggle', 'choice', 'range']);
-const ROLES: ReadonlySet<string> = new Set([
-	'volume',
-	'output-gain',
-	'dac-filter',
-	'upsampling',
-	'usb-mode',
-	'sound-mode',
-	'light',
-	'tone-bass',
-	'tone-treble',
-	'amp-mode',
-	'mic-gain',
-	'balance-left',
-	'balance-right',
-	'noise-control',
-	'mic-noise-reduction',
-	'prompt-tone',
-	'prompt-tone-volume',
-	'mute',
-	'input',
-	'output',
-	'balance',
-	'polarity',
-	'crossfeed',
-	'display-brightness'
-]);
+/** The names of the options a profile may set for `handler`. */
+export const optionNames = (handler: HandlerId): readonly string[] => Object.keys(OPTIONS[handler]);
+
+// The kinds and roles the format names, from its schema (core generates them, D13).
+const KINDS: ReadonlySet<string> = new Set(CONTROL_KINDS);
+const ROLES: ReadonlySet<string> = new Set(CONTROL_ROLES);
 
 const numbers = (v: unknown, what: string): number[] =>
 	Array.isArray(v) && v.length > 0 && v.every((x) => typeof x === 'number' && Number.isFinite(x))

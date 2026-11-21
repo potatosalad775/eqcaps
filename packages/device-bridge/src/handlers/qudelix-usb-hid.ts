@@ -68,10 +68,14 @@ export interface QudelixDeviceState {
 	channels: number;
 }
 
-export interface QudelixUsbHidOptions {
+/**
+ * What the handler tells its codec. None of it is a profile's option: the handler takes none, and
+ * works these out from the operation and the device.
+ */
+export interface QudelixUsbHidCodecOptions {
 	/**
 	 * The EQ the frames are for: `usr`, the user EQ (default), or `spk`, the speaker (headphone)
-	 * EQ. Set by the handler, from the operation's EQ (SPEC §9.2); not a profile's option.
+	 * EQ. Set by the handler, from the operation's EQ (SPEC §9.2).
 	 */
 	group?: QudelixGroupName;
 	/** Set by the handler. Without it the codec writes to a 5K in its layered mode, on report 8. */
@@ -98,7 +102,7 @@ const ECHO_TIMEOUT = 250;
 /** The device-configuration bit of the EQ block, by device id. */
 const EQ_CONFIG_MASK: Readonly<Record<number, number>> = { [FIVE_K]: 0x80, [T71]: 0x40 };
 
-function target(o: QudelixUsbHidOptions) {
+function target(o: QudelixUsbHidCodecOptions) {
 	const d = o.device ?? {
 		link: OFFLINE_LINK,
 		model: QUDELIX_MODELS[FIVE_K]!,
@@ -111,7 +115,7 @@ function target(o: QudelixUsbHidOptions) {
 
 const s16 = (value: number, what: string) => be16(field(value, 10, I16, what) & 0xffff);
 
-export const qudelixUsbHidCodec: Codec<QudelixUsbHidOptions, HidFrame> = {
+export const qudelixUsbHidCodec: Codec<QudelixUsbHidCodecOptions, HidFrame> = {
 	types: QUDELIX_TYPES.types,
 	wire: () => QUDELIX_WIRE,
 	encode(request, o) {
@@ -171,7 +175,7 @@ export const qudelixUsbHidCodec: Codec<QudelixUsbHidOptions, HidFrame> = {
 	}
 };
 
-type Ctx = HandlerContext<HidTransport, QudelixUsbHidOptions>;
+type Ctx = HandlerContext<HidTransport, object>;
 
 /** The EQ an operation names (`spk`), or the user EQ. */
 const groupName = (ctx: Ctx): QudelixGroupName => (ctx.eq === 'spk' ? 'spk' : 'usr');
@@ -258,7 +262,7 @@ async function readStored(s: QudelixSession, model: QudelixModel, group: Qudelix
 	return readPreset(model, group, Uint8Array.from(bytes));
 }
 
-export const qudelixUsbHid: HidHandler<QudelixUsbHidOptions> = {
+export const qudelixUsbHid: HidHandler = {
 	id: 'qudelix-usb-hid',
 	transport: 'hid',
 	eqs: ['spk'],

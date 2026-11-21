@@ -17,8 +17,9 @@ import { BridgeError } from '../errors.ts';
 import { SPP, type Codec, type StreamHandler, type WriteState } from '../handler.ts';
 import { refuseUncarried, StreamReader, typeCodes } from '../io.ts';
 
-export interface AirohaOptions {
-	/** Write in the BLE layout. The session sets it from the transport. */
+/** What the handler tells its codec. Not a profile's option: the handler takes none. */
+export interface AirohaCodecOptions {
+	/** Write in the BLE layout. The handler sets it from the transport. */
 	ble?: boolean;
 }
 
@@ -49,7 +50,7 @@ function checkPreset(slot: number) {
 	return slot;
 }
 
-export const airohaCodec: Codec<AirohaOptions, Uint8Array> = {
+export const airohaCodec: Codec<AirohaCodecOptions, Uint8Array> = {
 	types: AIROHA_TYPES.types,
 	wire: () => ({ freq: grid(100, U32), q: grid(100, U32), gain: grid(100, I32) }),
 	encode(request, o) {
@@ -103,7 +104,7 @@ function frameAt(buf: readonly number[]): [number, number] | null {
 	return null;
 }
 
-export const airoha: StreamHandler<AirohaOptions> = {
+export const airoha: StreamHandler = {
 	id: 'airoha',
 	transport: ['serial', 'ble'],
 	codec: airohaCodec,
@@ -114,13 +115,13 @@ export const airoha: StreamHandler<AirohaOptions> = {
 		rx: '43484152-2dab-3141-6972-6f6861424c45'
 	},
 
-	capabilities: (t, o) => ({
+	capabilities: (t) => ({
 		canRead: true,
 		canWrite: true,
 		readsPreamp: false,
 		readsSlot: true,
 		writesPreamp: false,
-		writesSlot: t.kind !== 'ble' && !o.ble,
+		writesSlot: t.kind !== 'ble',
 		bands: BANDS,
 		needsBandCount: false,
 		readsCurrentSlot: false,
@@ -138,10 +139,7 @@ export const airoha: StreamHandler<AirohaOptions> = {
 	},
 
 	async push(ctx, request) {
-		const frames = airohaCodec.encode(request, {
-			...ctx.options,
-			ble: ctx.transport.kind === 'ble'
-		});
+		const frames = airohaCodec.encode(request, { ble: ctx.transport.kind === 'ble' });
 		for (const frame of frames) await ctx.transport.write(frame);
 		return { reconnect: false };
 	}

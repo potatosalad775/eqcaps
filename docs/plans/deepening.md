@@ -10,6 +10,8 @@ Each step is one commit; none changes the format.
 | 2 | The write recipe as one engine operation, `plan` | `core`, SPEC §9 and §13 | D12 (note), D56 | done 2026-11-21 |
 | 3 | The inspector's read session; the bridge's reading side; shared connect rules to their owners | inspector, `device-bridge`, `client` | D40 (note) | done 2026-11-22 |
 | 4 | The editor's edit rules and its starting file, out of the route | inspector | none | done 2026-11-22 |
+| 5 | The schema's value lists generated; option readers typed and total; the README's tables checked | `core`, `device-bridge`, inspector | D13 (note) | done 2026-11-22 |
+| 6 | Capabilities said once: method-backed flags by default, `writesPreamp` from the wire grid | `device-bridge` | none | next |
 
 ## 1. The device viewed as one EQ (done)
 
@@ -92,12 +94,29 @@ own type (`x-…`) the form has no box for, and an edit of the notes, the contri
 or a source on a file whose `meta` was deleted in the JSON puts `meta` back as a draft's, where
 it threw. A copy may now be made of a base too.
 
+## 5. Value lists and option readers (done)
+
+- **Value lists.** `scripts/codegen.ts` writes `packages/core/src/types/values.generated.ts`:
+  `FILTER_TYPES`, `PREAMP_MODES`, `CONTROL_KINDS`, `CONTROL_ROLES`, `SOURCE_KINDS`, `STATUSES`, each
+  from its place in the schema (D13, note of 2026-11-22). The bridge's roles and kinds and the
+  editor's lists import them; the editor's source kinds now show in the schema's order.
+- **Option readers.** `OPTIONS` in `src/protocols.ts` has a reader for every option of every
+  handler, typed to the option: a missing one, or one of another type, doesn't compile. For that,
+  what three handlers work out themselves and tell their codec left their options types
+  (`QudelixUsbHidCodecOptions`, `QudelixV2UsbHidCodecOptions`, `AirohaCodecOptions`,
+  `NothingCodecOptions`). A reader for an option a handler with no options doesn't take still
+  compiles.
+- **The README's tables** are checked by `protocols.test.ts`: a row per handler naming each of
+  its options, and each control a handler drives.
+
 ## What is left
 
 - A bridge release (breaking: step 1), then `core` and `client` (additive), before apps take
   them; the owner's, run locally. uniPEQ's follow-up is listed under each step above.
 - The inspector reading the firmware and matching again where `firmwareDecides`
   (`fosi-audio.md`).
-- The other candidates of the review, none started: one statement of what a handler can do; the
-  codec saying what each frame is; a handler's options and the schema's value lists in one place;
-  a handler's per-device state owned by the session.
+- Step 6 above.
+- Two candidates of the review were withdrawn, with the reasons in D33's note of 2026-11-22: the
+  codec saying what each frame is, and a handler's per-device state owned by the bridge device.
+  What is left of them needs no step: a step list for KT Micro's and Topping's `push`, and one
+  "once per transport" helper for Qudelix and Topping, each when that file is next touched.

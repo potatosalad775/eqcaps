@@ -12,6 +12,7 @@ import {
 	type Profile
 } from '@potatosalad775/eqcaps-core';
 import { matchDevice } from '@potatosalad775/eqcaps-client';
+import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import {
 	chooserFilters,
@@ -30,6 +31,7 @@ import {
 	type WireField,
 	type WireGrid
 } from '../src/index.ts';
+import { optionNames } from '../src/protocols.ts';
 import { profiles, PROTOCOLS } from './data.ts';
 
 const driven = Object.entries(PROTOCOLS);
@@ -373,6 +375,38 @@ test('protocolForMatches takes the first match with a protocol this bridge can d
 	).toBe('walkplay-schemeno16-devices');
 	expect(protocolForMatches([profile('fiio-ka17'), group])?.profileId).toBe('fiio-ka17');
 	expect(protocolForMatches([{ id: 'rme-adi-2-dac-fs' }])).toBeUndefined();
+});
+
+// The README is where a contributor looks up what a handler takes: every option a profile may
+// set and every control a handler drives is named in its row there.
+describe("the README's tables", () => {
+	const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
+	const [handlers = '', controls = ''] = readme.split('\n## Device controls\n');
+	const row = (table: string, id: string) =>
+		table.split('\n').find((line) => line.startsWith(`| \`${id}\` |`));
+	const ids = Object.keys(HANDLERS) as (keyof typeof HANDLERS)[];
+
+	test('have a row for every handler, naming each of its options', () => {
+		const missing = ids.flatMap((id) => {
+			const line = row(handlers, id);
+			if (!line) return [`${id}: no row`];
+			return optionNames(id)
+				.filter((name) => !line.includes(`\`${name}\``))
+				.map((name) => `${id}: ${name}`);
+		});
+		expect(missing).toEqual([]);
+	});
+
+	test('name every control a handler drives', () => {
+		const missing = ids.flatMap((id) => {
+			const driven = Object.keys((HANDLERS[id] as AnyHandler).controls ?? {});
+			if (driven.length === 0) return [];
+			const line = row(controls, id);
+			if (!line) return [`${id}: no row`];
+			return driven.filter((c) => !line.includes(`\`${c}\``)).map((c) => `${id}: ${c}`);
+		});
+		expect(missing).toEqual([]);
+	});
 });
 
 describe('protocolFor: the order every app takes', () => {

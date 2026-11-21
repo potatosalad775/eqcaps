@@ -2,6 +2,14 @@
 export const SCHEMA_VERSION = '1.5';
 
 export type * from './types/schema.generated.ts';
+// The schema's value lists (FILTER_TYPES is exported with the engine's filter helpers below).
+export {
+	CONTROL_KINDS,
+	CONTROL_ROLES,
+	PREAMP_MODES,
+	SOURCE_KINDS,
+	STATUSES
+} from './types/values.generated.ts';
 export { ISSUE_CODES } from './issues.ts';
 export type { Issue, IssueCode } from './issues.ts';
 export { EPSILON, near, onGrid, domainForm, domainBounds, isLockedDomain } from './domain.ts';

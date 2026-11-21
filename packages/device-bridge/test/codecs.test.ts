@@ -27,24 +27,28 @@ import { moondropUsbHidCodec } from '../src/handlers/moondrop-usb-hid.ts';
 import { PROTOCOLS } from './data.ts';
 
 /**
- * Each distinct handler and options pair, from the profiles and the vendor guesses, and the EQ of
- * the handler's (SPEC §9.2) that the options select, where they select another than its own.
+ * Each distinct handler and options pair, from the profiles and the vendor guesses. Where a
+ * handler tells its codec more than the profile's options, `options` holds that too, with the EQ
+ * (SPEC §9.2) or the transport it comes from.
  */
-const variants = new Map<string, { handler: string; options: object; eq?: string }>();
-const add = (handler: string, options: object = {}, eq?: string) =>
-	variants.set(`${handler} ${JSON.stringify(options)}`, {
-		handler,
-		options,
-		...(eq !== undefined ? { eq } : {})
-	});
+interface Variant {
+	handler: string;
+	options: object;
+	eq?: string;
+	kind?: Transport['kind'];
+}
+const variants = new Map<string, Variant>();
+const add = (handler: string, options: object = {}, from: Pick<Variant, 'eq' | 'kind'> = {}) =>
+	variants.set(`${handler} ${JSON.stringify(options)}`, { handler, options, ...from });
 for (const p of Object.values(PROTOCOLS)) add(p.handler, p.options);
 for (const v of KNOWN_HID_VENDORS) add(guessProtocol(v)!.handler, guessProtocol(v)!.options);
-add('airoha', { ble: true });
+// Airoha: the BLE layout, which the handler takes from the transport.
+add('airoha', { ble: true }, { kind: 'ble' });
 // Qudelix: the speaker EQ, which an operation selects (SPEC §9.2), not a profile's options.
 add('qudelix-usb-hid');
-add('qudelix-usb-hid', { group: 'spk' }, 'spk');
+add('qudelix-usb-hid', { group: 'spk' }, { eq: 'spk' });
 add('qudelix-v2-usb-hid');
-add('qudelix-v2-usb-hid', { group: 'spk' }, 'spk');
+add('qudelix-v2-usb-hid', { group: 'spk' }, { eq: 'spk' });
 
 function transportFor(kind: Transport['kind']): Transport {
 	if (kind !== 'hid')
@@ -99,11 +103,11 @@ const close = (a: number | undefined, b: number | undefined) =>
 
 describe.each(
 	[...variants.values()].map((v) => [`${v.handler} ${JSON.stringify(v.options)}`, v] as const)
-)('%s', (_name, { handler: id, options, eq }) => {
+)('%s', (_name, { handler: id, options, eq, kind }) => {
 	const handler = HANDLERS[id as keyof typeof HANDLERS] as AnyHandler;
 	const { codec } = handler;
 	const wire = codec.wire(options);
-	const caps = handler.capabilities(transportFor(transportsOf(handler)[0]!), options);
+	const caps = handler.capabilities(transportFor(kind ?? transportsOf(handler)[0]!), options, eq);
 	const types = codec.types.filter((t) => !t.startsWith('x-'));
 
 	const filter: fc.Arbitrary<Filter> = fc.record({
@@ -148,11 +152,7 @@ describe.each(
 
 	// Where the handler drives the EQ's channels apart, `decode` gives the right channel where it
 	// differs from the left; left out, it is the left's.
-	const apart = handler.capabilities(
-		transportFor(transportsOf(handler)[0]!),
-		options,
-		eq
-	).perChannel;
+	const apart = caps.perChannel;
 	if (apart) {
 		test('decode(encode(request)) gives both channels back', () => {
 			fc.assert(
