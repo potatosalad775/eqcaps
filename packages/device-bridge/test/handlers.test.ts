@@ -1943,6 +1943,26 @@ describe('Topping', () => {
 			expect(frames).toHaveLength(1 + 4 + 11 * 10);
 			expect(toppingCodec.decode(frames, { family: 'dx1' })).toEqual(request);
 		});
+
+		test('decodes the right channel where the frames write it apart, and only there', () => {
+			const o = { family: 'dx5' } as const;
+			const filters = [filter('LSC', 120, -2.5, 0.7), filter('PK', 1000, 3, 1)];
+			const apart = {
+				filters,
+				preamp: -3.5,
+				right: { filters: [filter('LSC', 120, 5, 0.7)], preamp: 1 },
+				slot: 2
+			};
+			expect(toppingCodec.decode(toppingCodec.encode(apart, o), o)).toEqual(apart);
+			// The right pre-gain alone differs: `right.preamp` left out is the left one.
+			const gainOnly = { filters, preamp: -3.5, right: { filters, preamp: 0 } };
+			expect(toppingCodec.decode(toppingCodec.encode(gainOnly, o), o)).toEqual(gainOnly);
+			const same = { filters, preamp: -3.5, right: { filters } };
+			expect(toppingCodec.decode(toppingCodec.encode(same, o), o)).toEqual({
+				filters,
+				preamp: -3.5
+			});
+		});
 	});
 
 	describe('the configs as a list', () => {
@@ -2102,8 +2122,12 @@ describe('Topping', () => {
 	});
 
 	describe.each(FAMILIES)('%s pull and push', (family, id) => {
-		test('pulls the active config: left bands, switched-off ones as null, and the pre-gain', async () => {
+		/** The DX5 II's channels are driven apart; the other families' are written alike. */
+		const apart = family === 'dx5';
+
+		test('pulls the active config: bands, switched-off ones as null, and the pre-gain; the right channel where driven apart', async () => {
 			const { t, device } = topping(family);
+			expect(device.capabilities.perChannel).toBe(apart);
 			const left = [
 				filter('PK', 100, 3, 1),
 				filter('LSC', 200, -2.5, 0.7),
@@ -2118,7 +2142,7 @@ describe('Topping', () => {
 				filter('PK', 5000, 1, 1)
 			];
 			const right = left.map((f) => (f ? { ...f, freq: f.freq + 1 } : f));
-			t.configs[1] = toppingConfig('Mine', -4.5, left, right);
+			t.configs[1] = toppingConfig('Mine', -4.5, left, right, 1.5);
 			t.active = 1;
 			expect(device.protocol.options).toEqual({ family });
 			expect(id).toBe(profileOf(family));
@@ -2126,9 +2150,14 @@ describe('Topping', () => {
 			expect(result.slot).toBe(1);
 			expect(result.preamp).toBe(-4.5);
 			expect(result.filters).toEqual(left.slice(0, 10));
+			expect(result.right).toEqual(
+				apart ? { filters: right.slice(0, 10), preamp: 1.5 } : undefined
+			);
+			// Equal channels: still both, where they are driven apart.
+			const flat = { filters: padded([]), preamp: 0 };
 			expect(await device.pull({ slot: 0 })).toEqual({
-				filters: padded([]),
-				preamp: 0,
+				...flat,
+				...(apart ? { right: flat } : {}),
 				slot: 0
 			});
 		});
@@ -2160,9 +2189,10 @@ describe('Topping', () => {
 			];
 			const before = [...t.configs[2]!];
 			await device.push({ filters, preamp: 2.5, slot: 2 });
+			const both = { filters: [...filters, null, null, null], preamp: 2.5 };
 			expect(await device.pull({ slot: 2 })).toEqual({
-				filters: [...filters, null, null, null],
-				preamp: 2.5,
+				...both,
+				...(apart ? { right: both } : {}),
 				slot: 2
 			});
 			const w = t.configs[2]!;
@@ -2286,6 +2316,120 @@ describe('Topping', () => {
 				code: 'invalid-request'
 			});
 		});
+	});
+
+	describe('left and right apart (the DX5 II)', () => {
+		const L = [filter('LSC', 105, 3, 0.7), filter('PK', 1000, -2, 1.5)];
+		const R = [filter('LSC', 105, 5, 0.7)];
+		/** The L/R-mode mask writes. */
+		const masks = (t: FakeTopping) =>
+			t.sent.filter((s) => s.command === 0x1112).map((s) => [s.kind, s.data]);
+
+		test('a push writes each channel its own, in the order the app sends them', async () => {
+			const { t, device } = topping('dx5');
+			await device.push({ filters: L, preamp: -3, right: { filters: R, preamp: 1.5 }, slot: 1 });
+			expect(await device.pull({ slot: 1 })).toEqual({
+				filters: padded(L),
+				preamp: -3,
+				right: { filters: padded(R), preamp: 1.5 },
+				slot: 1
+			});
+			const sent = writes(t).map((s) => [s.command, s.data]);
+			expect(sent.slice(1, 5)).toEqual([
+				[0x9c01, toppingPreampWord(-3)],
+				[0x9c02, 1],
+				[0x9c03, toppingPreampWord(1.5)],
+				[0x9c04, 1]
+			]);
+			// Band 1: the left's fields, then the right's (5.0 dB is 50, as the app sent it).
+			expect(sent.slice(5, 15)).toEqual([
+				...[4, 105, 30, 7000, 1].map((v, f) => [band(0, f + 1), v]),
+				...[4, 105, 50, 7000, 1].map((v, f) => [band(0, f + 6), v])
+			]);
+			// Band 2 is the left's only; the right's is switched off at the app's defaults.
+			expect(sent.slice(15, 25).map(([, v]) => v)).toEqual([
+				1, 1000, 0xffffffec, 15000, 1, 1, 632, 0, 7070, 0
+			]);
+			expect(sent).toHaveLength(1 + 4 + 11 * 10);
+		});
+
+		test("the right channel's pre-gain left out is the left one's", async () => {
+			const { device } = topping('dx5');
+			await device.push({ filters: L, preamp: -3, right: { filters: R }, slot: 1 });
+			expect((await device.pull({ slot: 1 })).right).toEqual({ filters: padded(R), preamp: -3 });
+		});
+
+		test('a right channel the config cannot hold is invalid-request, and nothing is written', async () => {
+			const { t, device } = topping('dx5');
+			const many = Array.from({ length: 12 }, () => filter('PK', 1000, 0, 1));
+			await expect(
+				device.push({ filters: L, right: { filters: many }, slot: 0 })
+			).rejects.toMatchObject({ code: 'invalid-request' });
+			await expect(
+				device.push({ filters: L, right: { filters: [filter('PK', 100, 1e9, 1)] }, slot: 0 })
+			).rejects.toMatchObject({ code: 'unrepresentable' });
+			expect(writes(t)).toEqual([]);
+		});
+
+		test("a push whose channels differ sets the config's L/R-mode bit, after the bands", async () => {
+			const { t, device } = topping('dx5');
+			t.lrMode = 0b1;
+			await device.push({ filters: L, right: { filters: R }, slot: 2 });
+			expect(t.sent.at(-1)).toMatchObject({ command: 0x1112, data: 0b101, kind: 0x20 });
+			expect(t.lrMode).toBe(0b101);
+			// Set already: nothing more is sent.
+			await device.push({ filters: R, right: { filters: L }, slot: 2 });
+			expect(masks(t)).toEqual([[0x20, 0b101]]);
+		});
+
+		test("a push with `right` equal to the left clears the config's L/R-mode bit", async () => {
+			const { t, device } = topping('dx5');
+			t.lrMode = 0b100;
+			// Clear already: nothing is sent.
+			await device.push({ filters: L, preamp: -3, right: { filters: L }, slot: 1 });
+			await device.push({ filters: L, preamp: -3, right: { filters: L, preamp: -3 }, slot: 0 });
+			expect(masks(t)).toEqual([]);
+			await device.push({ filters: L, preamp: -3, right: { filters: L }, slot: 2 });
+			expect(masks(t)).toEqual([[0x20, 0]]);
+			expect(t.lrMode).toBe(0);
+		});
+
+		test('a push without `right` leaves the mask alone', async () => {
+			const { t, device } = topping('dx5');
+			t.lrMode = 0b100;
+			await device.push({ filters: L, preamp: -3, slot: 2 });
+			expect(masks(t)).toEqual([]);
+			expect(t.lrMode).toBe(0b100);
+		});
+
+		test('a mask the device has not sent is never written', async () => {
+			const { t, device } = topping('dx5');
+			t.lrMode = undefined;
+			await device.push({ filters: L, right: { filters: R }, slot: 1 });
+			expect(masks(t)).toEqual([]);
+		});
+
+		test("after a delete the later configs' bits move down with them", async () => {
+			const { t, device } = topping('dx5');
+			t.configs = ['A', 'B', 'C', 'D'].map((n) => toppingConfig(n, 0, []));
+			t.lrMode = 0b1010;
+			await device.deleteSlot(0);
+			expect(t.lrMode).toBe(0b101);
+			await device.push({ filters: L, right: { filters: R }, slot: 1 });
+			expect(masks(t)).toEqual([[0x20, 0b111]]);
+		});
+
+		test.each(['dx1', 'e50', 'dx9d', 'd900'] as const)(
+			'%s: a push with `right` is refused, and nothing is written',
+			async (family) => {
+				const { t, device } = topping(family);
+				expect(device.capabilities.perChannel).toBe(false);
+				await expect(
+					device.push({ filters: L, right: { filters: R }, slot: 0 })
+				).rejects.toMatchObject({ code: 'invalid-request' });
+				expect(t.sent).toEqual([]);
+			}
+		);
 	});
 
 	describe('session', () => {

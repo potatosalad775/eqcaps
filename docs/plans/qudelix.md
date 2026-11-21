@@ -259,8 +259,10 @@ As they stood before this work: `qudelix-usb-hid` was devicePEQ's 5K handler, an
   "contains", and only two names are known.
 - **10 bands in the data** while the device is in single-EQ mode has 20 or 30: the handler reports
   the device's count, and 10 fit either mode.
-- **The headphone EQ writes left and right alike**: the format has linked channels only. The app
-  can set each channel.
+- **The headphone EQ writes left and right alike**. The app can set each channel. The format has
+  independent channels since 1.4 (D54), but a listed EQ has the profile's `channels`, and the user
+  EQ the profile describes has one channel: the headphone EQ needs a `channels` of its own in
+  `protocol.eqs` first, which D54 left for later.
 - **5K firmware 2.x is not driven**; the app drives it with older commands.
 - **No graphic EQ, crossfeed, headroom or device controls** yet (see Next).
 - **Custom memory names** in the data are the app's label for an unnamed memory; the device holds
