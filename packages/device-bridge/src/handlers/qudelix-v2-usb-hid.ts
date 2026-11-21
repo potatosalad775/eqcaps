@@ -89,10 +89,14 @@ export interface QudelixV2DeviceState {
 	preset: Uint8Array;
 }
 
-export interface QudelixV2UsbHidOptions {
+/**
+ * What the handler tells its codec. None of it is a profile's option: the handler takes none, and
+ * works these out from the operation and the device.
+ */
+export interface QudelixV2UsbHidCodecOptions {
 	/**
 	 * The EQ the frames are for: `usr`, the user EQ (default), or `spk`, the speaker (headphone)
-	 * EQ. Set by the handler, from the operation's EQ (SPEC §9.2); not a profile's option.
+	 * EQ. Set by the handler, from the operation's EQ (SPEC §9.2).
 	 */
 	group?: QudelixGroupName;
 	/**
@@ -142,7 +146,7 @@ export function fragmentsOf(command: number, message: readonly number[], packetS
 	return out;
 }
 
-function target(o: QudelixV2UsbHidOptions) {
+function target(o: QudelixV2UsbHidCodecOptions) {
 	const single = o.device?.single ?? false;
 	const group = groupOf(MODEL, o.group ?? 'usr', single);
 	const device = o.device ?? {
@@ -155,7 +159,7 @@ function target(o: QudelixV2UsbHidOptions) {
 	return { device, group, base: BASE[group.id] };
 }
 
-export const qudelixV2UsbHidCodec: Codec<QudelixV2UsbHidOptions, HidFrame> = {
+export const qudelixV2UsbHidCodec: Codec<QudelixV2UsbHidCodecOptions, HidFrame> = {
 	types: QUDELIX_TYPES.types,
 	wire: () => QUDELIX_WIRE,
 	encode(request, o) {
@@ -228,7 +232,7 @@ export const qudelixV2UsbHidCodec: Codec<QudelixV2UsbHidOptions, HidFrame> = {
 	}
 };
 
-type Ctx = HandlerContext<HidTransport, QudelixV2UsbHidOptions>;
+type Ctx = HandlerContext<HidTransport, object>;
 
 /** The EQ an operation names (`spk`), or the user EQ. */
 const groupName = (ctx: Ctx): QudelixGroupName => (ctx.eq === 'spk' ? 'spk' : 'usr');
@@ -315,7 +319,7 @@ async function storedPreset(s: QudelixSession, group: QudelixGroup, base: number
 	return { bytes, preset: readPreset(MODEL, group, bytes) };
 }
 
-export const qudelixV2UsbHid: HidHandler<QudelixV2UsbHidOptions> = {
+export const qudelixV2UsbHid: HidHandler = {
 	id: 'qudelix-v2-usb-hid',
 	transport: 'hid',
 	eqs: ['spk'],

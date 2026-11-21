@@ -10,8 +10,8 @@ first app on them. How the parts fit: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.m
 - `npm run lint` (`npm run format` fixes, data files included) · `npm run check` (generated files,
   vectors, typecheck) · `npm test` · `npm run build`. Run lint, check and test before a commit;
   `npm run data:validate` too after touching `data/`.
-- `npm run codegen` after editing `schema/v1/profile.schema.json`; `npm run conformance` after
-  changing engine behaviour.
+- `npm run codegen` after editing `schema/v1/profile.schema.json` (types and value lists);
+  `npm run conformance` after changing engine behaviour.
 - `npm run data:walkplay` regenerates the Walkplay groups' `match.usb` from
   `data/catalogs/walkplay.json` (D51). The snapshot is refreshed by the maintainer's fetch script
   in `../eqcaps_private` (`npm run walkplay:fetch` there; by hand, read the diff; D52), if that
@@ -50,10 +50,11 @@ folder exists (D52).
   included; a match field takes a list rather than one entry per combination (D43).
 - A device in a group gets its own profile extending the group's base, not the group (D37).
 - Per-vendor behaviour of a shared handler goes in an option, so other brands keep theirs. A new
-  option goes in `src/protocols.ts` `OPTIONS` and the bridge README; a new control in the
-  handler's `controls` and the README.
-- Give every control in `data/` a `role` (a new one in SPEC §9.1 and `ROLES` if none fits): apps
-  translate a control by its role. A setting only its vendor has goes without one, listed in
+  option goes in the handler's options type, `src/protocols.ts` `OPTIONS` (the compiler asks for
+  its reader) and the bridge README; a new control in the handler's `controls` and the README. A
+  test checks the README names both.
+- Give every control in `data/` a `role` (a new one in SPEC §9.1 and the schema, if none fits):
+  apps translate a control by its role. A setting only its vendor has goes without one, listed in
   `VENDOR_SETTINGS` in `packages/build/test/data.test.ts`.
 - Release the bridge before publishing data that uses a new option or control: `main` deploys
   `/v1/` on every push, and an older bridge drops a protocol it can't read.

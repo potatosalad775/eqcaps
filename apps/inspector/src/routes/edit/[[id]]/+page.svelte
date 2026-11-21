@@ -8,6 +8,9 @@
 	import {
 		describe,
 		FILTER_TYPES,
+		PREAMP_MODES,
+		SOURCE_KINDS,
+		STATUSES,
 		type AuthoringProfile,
 		type AuthoringSource,
 		type Domain
@@ -58,16 +61,6 @@
 	let { data }: PageProps = $props();
 
 	const read = httpReader(sourcesUrl());
-	const SOURCE_KINDS: AuthoringSource['kind'][] = [
-		'vendor-docs',
-		'vendor-app',
-		'measurement',
-		'community',
-		'handler-code'
-	];
-	const STATUSES = ['draft', 'community-verified', 'maintainer-verified', 'deprecated'] as const;
-	type PreampMode = 'manual' | 'auto' | 'none' | 'unknown';
-
 	/** The text the editor started from, and where it lives; null for a new file. */
 	let original = $state<string | null>(null);
 	let originalPath = $state<string | null>(null);
@@ -531,13 +524,12 @@
 							class={input}
 							value={parsed.preamp?.mode ?? ''}
 							onchange={(e) =>
-								put((d) => withPreampMode(d, e.currentTarget.value as PreampMode | ''))}
+								put((d) =>
+									withPreampMode(d, e.currentTarget.value as (typeof PREAMP_MODES)[number] | '')
+								)}
 						>
 							{#if inherited}<option value="">inherited</option>{/if}
-							<option value="manual">manual</option>
-							<option value="auto">auto</option>
-							<option value="none">none</option>
-							<option value="unknown">unknown</option>
+							{#each PREAMP_MODES as mode (mode)}<option value={mode}>{mode}</option>{/each}
 						</select>
 					</div>
 					{#if parsed.preamp?.mode === 'manual'}
