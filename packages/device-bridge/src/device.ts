@@ -138,8 +138,9 @@ export interface BridgeDevice {
 	bandCount(): Promise<number | null>;
 	/**
 	 * The current value of every control in `capabilities.controls`; null for one the device
-	 * doesn't have now (SPEC §9.1: its firmware range or `when` doesn't hold). Opt-in: pull and
-	 * push never touch controls.
+	 * doesn't have now (SPEC §9.1: its firmware range or `when` doesn't hold, or its handler says
+	 * so, as for a setting of an EQ the device's mode lacks). Opt-in: pull and push never touch
+	 * controls.
 	 */
 	readControls(): Promise<Record<string, number | null>>;
 	/**
@@ -444,14 +445,15 @@ export function openDevice(
 						ctx.log(`${handler.id}: "${controlId}" lost the device as it restarted (${e.message})`);
 					}
 					if (c.reconnect) return { reconnect: true };
+					const took = (back: number | null) => back !== null && near(back, value);
 					let back = await driver(c).read(ctx);
 					// Once more before calling it rejected: a device may apply a value a moment late,
 					// or a late answer to an earlier read may have come first.
-					if (!near(back, value)) {
+					if (!took(back)) {
 						await ctx.sleep(100);
 						back = await driver(c).read(ctx);
 					}
-					if (!near(back, value)) {
+					if (!took(back)) {
 						throw new BridgeError(
 							'rejected',
 							`${handler.id}: "${controlId}" reads back ${back}, not ${value}`

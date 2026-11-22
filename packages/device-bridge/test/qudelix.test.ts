@@ -8,6 +8,7 @@ import { qudelixUsbHidCodec } from '../src/handlers/qudelix-usb-hid.ts';
 import { qudelixV2UsbHidCodec } from '../src/handlers/qudelix-v2-usb-hid.ts';
 import { QUDELIX_MODELS, T71 } from '../src/handlers/qudelix.ts';
 import { openDevice, type BridgeDevice, type Protocol, type Transport } from '../src/index.ts';
+import { protocolFor as dataProtocol } from './data.ts';
 import { flatEq, FakeQudelix, FakeQudelixV2 } from './fake-qudelix.ts';
 import { loadCaptures, noSleep, ReplayHid } from './replay.ts';
 
@@ -1032,6 +1033,228 @@ describe('the device viewed as one of its EQs (SPEC §9.2)', () => {
 		const [usr, spk] = await Promise.all([device.pull(), device.eq('spk').pull()]);
 		expect(usr.filters).toHaveLength(10);
 		expect(spk.filters).toHaveLength(20);
+		expect(fake.errors).toEqual([]);
+	});
+});
+
+describe("Qudelix settings besides the EQ, as the app's screens set them", () => {
+	const fiveK = (fake: FakeQudelix) =>
+		openDevice(fake, dataProtocol('qudelix-5k')!, { sleep: noSleep });
+	const plus = (fake: FakeQudelixV2) =>
+		openDevice(fake, dataProtocol('qudelix-5k-plus')!, { sleep: noSleep });
+	/** The first protocol's writes of settings, as sent: 0x05xx, 0x0702 and 0x070D. */
+	const settingWrites = (fake: FakeQudelix) =>
+		fake.sent
+			.filter((_, i) => [0x0501, 0x0505, 0x0702, 0x070d].includes(fake.commands()[i]!))
+			.map((f) => f.data);
+	/** The elements the second protocol set, in order. */
+	const sets = (fake: FakeQudelixV2) =>
+		fake.messages.filter((m) => m.command === 0x9004).flatMap((m) => m.elements);
+
+	test('the data says which EQ each belongs to', () => {
+		for (const device of [fiveK(new FakeQudelix('5k')), plus(new FakeQudelixV2())]) {
+			expect(device.capabilities.controls.map((c) => [c.id, c.role, c.eq])).toEqual([
+				['headroom', 'headroom', true],
+				['headroomSpk', 'headroom', 'spk'],
+				['crossfeed', 'crossfeed', true],
+				['dacFilter', 'dac-filter', undefined],
+				['gain', 'output-gain', undefined]
+			]);
+		}
+	});
+
+	test('5K: every setting is read from the device', async () => {
+		const fake = new FakeQudelix('5k');
+		fake.eqs.get(0)!.headroom = -60;
+		fake.eqs.get(1)!.headroom = -120;
+		fake.eqs.get(0)!.xfeed = 25;
+		fake.dac = { gain: 1, filter: 6 };
+		expect(await fiveK(fake).readControls()).toEqual({
+			headroom: -6,
+			headroomSpk: -12,
+			crossfeed: 25,
+			dacFilter: 6,
+			gain: 1
+		});
+		expect(fake.errors).toEqual([]);
+	});
+
+	// The frames a 5K with firmware 3.2.9 took and answered (2026-11-22).
+	test("5K: each write is the app's one command, and the EQ stays on its preset", async () => {
+		const fake = new FakeQudelix('5k');
+		fake.eqs.get(0)!.preset = 22;
+		const device = fiveK(fake);
+		await device.writeControl('headroom', -6);
+		await device.writeControl('headroomSpk', -12);
+		await device.writeControl('crossfeed', 10);
+		await device.writeControl('dacFilter', 7);
+		await device.writeControl('gain', 0);
+		expect(settingWrites(fake)).toEqual(
+			[
+				[0x05, 0x80, 0x07, 0x02, 0x00, 0xc4],
+				[0x05, 0x80, 0x07, 0x02, 0x01, 0x88],
+				[0x08, 0x80, 0x07, 0x0d, 0x00, 0x01, 0x00, 0x00, 0x0a],
+				[0x04, 0x80, 0x05, 0x01, 0x07],
+				[0x04, 0x80, 0x05, 0x05, 0x00]
+			].map((f) => padded(f))
+		);
+		expect(await device.readControls()).toEqual({
+			headroom: -6,
+			headroomSpk: -12,
+			crossfeed: 10,
+			dacFilter: 7,
+			gain: 0
+		});
+		expect(await device.currentSlot()).toBe(22);
+		expect(fake.errors).toEqual([]);
+	});
+
+	test('5K: a value the data does not list is refused before anything is sent', async () => {
+		const fake = new FakeQudelix('5k');
+		const device = fiveK(fake);
+		for (const [id, value] of [
+			['headroom', -3],
+			['headroom', 6],
+			['crossfeed', 51],
+			['dacFilter', 8],
+			['gain', 2]
+		] as const) {
+			await expect(device.writeControl(id, value)).rejects.toMatchObject({
+				code: 'invalid-request'
+			});
+		}
+		expect(fake.sent).toEqual([]);
+	});
+
+	test("5K: an EQ that is off keeps its headroom and crossfeed, as the app's editor holds them still", async () => {
+		const fake = new FakeQudelix('5k');
+		fake.eqs.get(0)!.enable = 0;
+		const device = fiveK(fake);
+		await expect(device.writeControl('headroom', -6)).rejects.toMatchObject({
+			code: 'rejected',
+			message: 'Qudelix 5K: the user EQ is off, and the app sets its headroom only while it is on'
+		});
+		await expect(device.writeControl('crossfeed', 10)).rejects.toMatchObject({ code: 'rejected' });
+		// The speaker EQ is on, and the device's settings are no EQ's.
+		await device.writeControl('headroomSpk', -6);
+		await device.writeControl('dacFilter', 1);
+		expect(settingWrites(fake).map((f) => f.slice(2, 5))).toEqual([
+			[0x07, 0x02, 0x01],
+			[0x05, 0x01, 0x01]
+		]);
+		expect((await device.readControls()).headroom).toBe(0);
+	});
+
+	test('5K in single-EQ mode: the headroom and crossfeed are the all-band EQ’s, and the speaker EQ’s is not there', async () => {
+		const fake = new FakeQudelix('5k');
+		fake.single = true;
+		fake.eqs.get(2)!.headroom = -120;
+		const device = fiveK(fake);
+		expect(await device.readControls()).toMatchObject({
+			headroom: -12,
+			headroomSpk: null,
+			crossfeed: 0
+		});
+		await device.writeControl('headroom', 0);
+		await device.writeControl('crossfeed', 50);
+		expect(settingWrites(fake).map((f) => f.slice(2, f[0]! + 1))).toEqual([
+			[0x07, 0x02, 0x02, 0x00],
+			[0x07, 0x0d, 0x02, 0x01, 0x00, 0x00, 0x32]
+		]);
+		await expect(device.writeControl('headroomSpk', -6)).rejects.toMatchObject({
+			code: 'unsupported'
+		});
+		expect(fake.errors).toEqual([]);
+	});
+
+	test('T71: the headroom is driven as on the 5K; its crossfeed and DAC settings are refused', async () => {
+		const fake = new FakeQudelix('t71');
+		const device = fiveK(fake);
+		await device.writeControl('headroomSpk', -6);
+		expect(fake.eqs.get(1)!.headroom).toBe(-60);
+		await expect(device.writeControl('crossfeed', 10)).rejects.toMatchObject({
+			code: 'unsupported'
+		});
+		await expect(device.writeControl('dacFilter', 1)).rejects.toMatchObject({
+			code: 'unsupported'
+		});
+	});
+
+	test('5K Plus: every setting is read from the device', async () => {
+		const fake = new FakeQudelixV2();
+		fake.eqs.get(0)!.headroom = -60;
+		fake.eqs.get(1)!.headroom = -120;
+		fake.eqs.get(0)!.xfeed = 25;
+		fake.dac = { gain: 1, filter: 6, swap: 1 };
+		expect(await plus(fake).readControls()).toEqual({
+			headroom: -6,
+			headroomSpk: -12,
+			crossfeed: 25,
+			dacFilter: 6,
+			gain: 1
+		});
+		expect(fake.errors).toEqual([]);
+	});
+
+	test('5K Plus: each write sets the whole element with one field changed', async () => {
+		const fake = new FakeQudelixV2();
+		const usr = fake.eqs.get(0)!;
+		usr.preset = 22;
+		usr.impedance = 320;
+		const device = plus(fake);
+		await device.writeControl('headroom', -6);
+		await device.writeControl('headroomSpk', -12);
+		await device.writeControl('crossfeed', 10);
+		await device.writeControl('dacFilter', 6);
+		await device.writeControl('gain', 1);
+		expect(sets(fake)).toEqual([
+			// The configuration: on, headroom -60, still on preset 22.
+			{ id: 0x90, data: [0x10, 0x00, 0xc4, 22] },
+			{ id: 0xa0, data: [0x10, 0x00, 0x88, 0] },
+			// The attributes, 12 bytes: parametric, 32 ohms kept, crossfeed 10 from bit 26.
+			{ id: 0x92, data: [0x81, 0x02, 0x00, 0x28, 0, 0, 0, 0, 0, 0, 0, 0] },
+			// The DAC configuration, 8 bytes: the filter from bit 14, the gain at bit 18, the rest kept.
+			{ id: 0x40, data: [0x61, 0x98, 0x01, 0, 0, 0, 0, 0] },
+			{ id: 0x40, data: [0x61, 0x98, 0x05, 0, 0, 0, 0, 0] }
+		]);
+		expect(fake.dac).toEqual({ gain: 1, filter: 6, swap: 1 });
+		expect(usr).toMatchObject({ headroom: -60, xfeed: 10, impedance: 320, preset: 22, enable: 1 });
+		expect(await device.readControls()).toEqual({
+			headroom: -6,
+			headroomSpk: -12,
+			crossfeed: 10,
+			dacFilter: 6,
+			gain: 1
+		});
+		expect(fake.errors).toEqual([]);
+	});
+
+	test('5K Plus: an EQ that is off keeps its headroom and crossfeed', async () => {
+		const fake = new FakeQudelixV2();
+		fake.eqs.get(1)!.enable = 0;
+		const device = plus(fake);
+		await expect(device.writeControl('headroomSpk', -6)).rejects.toMatchObject({
+			code: 'rejected',
+			message:
+				'Qudelix 5K Plus: the speaker EQ is off, and the app sets its headroom only while it is on'
+		});
+		expect(sets(fake)).toEqual([]);
+		await device.writeControl('headroom', -6);
+		expect(fake.eqs.get(0)!.headroom).toBe(-60);
+	});
+
+	test('5K Plus in single-EQ mode: the headroom and crossfeed are the all-band EQ’s, and the speaker EQ’s is not there', async () => {
+		const fake = new FakeQudelixV2();
+		fake.single = true;
+		const device = plus(fake);
+		expect(await device.readControls()).toMatchObject({ headroom: 0, headroomSpk: null });
+		await device.writeControl('headroom', -12);
+		await device.writeControl('crossfeed', 30);
+		expect(sets(fake).map((e) => e.id)).toEqual([0xb0, 0xb2]);
+		expect(fake.eqs.get(2)).toMatchObject({ headroom: -120, xfeed: 30 });
+		await expect(device.writeControl('headroomSpk', -6)).rejects.toMatchObject({
+			code: 'unsupported'
+		});
 		expect(fake.errors).toEqual([]);
 	});
 });

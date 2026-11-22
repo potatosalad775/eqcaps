@@ -117,3 +117,35 @@ describe('eqProfile', () => {
 		expect(validateProfile(mic)).toEqual([]);
 	});
 });
+
+describe('a control of an EQ (format 1.6)', () => {
+	const headroom = { id: 'headroom', name: 'Headroom', kind: 'toggle', role: 'headroom' } as const;
+	const withControls = (version: string, ...eqs: (true | string | undefined)[]): Profile => ({
+		...profile,
+		schemaVersion: version,
+		protocol: {
+			...profile.protocol!,
+			controls: eqs.map((eq, i) => ({
+				...headroom,
+				id: `headroom${i}`,
+				...(eq !== undefined ? { eq } : {})
+			}))
+		}
+	});
+	const codes = (p: Profile) => validateProfile(p).map((i) => [i.code, i.path]);
+
+	test('true, a listed id, or no eq at all', () => {
+		expect(codes(withControls('1.6', true, 'spk', 'mic', undefined))).toEqual([]);
+	});
+
+	test("an id protocol.eqs doesn't list is control-eq-unknown", () => {
+		expect(codes(withControls('1.6', 'spk', 'speaker'))).toEqual([
+			['control-eq-unknown', '/protocol/controls/1/eq']
+		]);
+	});
+
+	test('needs schemaVersion 1.6', () => {
+		expect(codes(withControls('1.5', true))).toEqual([['version-too-low', '/schemaVersion']]);
+		expect(codes(withControls('1.5', undefined))).toEqual([]);
+	});
+});

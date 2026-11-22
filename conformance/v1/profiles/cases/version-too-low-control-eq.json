@@ -1,0 +1,14 @@
+{
+	"description": "A profile whose control is a setting of an EQ (format 1.6) must declare schemaVersion 1.6 or later.",
+	"spec": "§15",
+	"profile": {
+		"schemaVersion": "1.5",
+		"protocol": {
+			"handler": "chip-hid",
+			"controls": [
+				{ "id": "headroom", "name": "Headroom", "kind": "toggle", "role": "headroom", "eq": true }
+			]
+		}
+	},
+	"expect": [{ "code": "version-too-low", "path": "/schemaVersion" }]
+}

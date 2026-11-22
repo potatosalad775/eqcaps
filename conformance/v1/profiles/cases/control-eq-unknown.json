@@ -1,0 +1,29 @@
+{
+	"description": "A control's eq names an EQ listed in protocol.eqs; true (the profile's own EQ) is always valid.",
+	"spec": "§9.1",
+	"profile": {
+		"schemaVersion": "1.6",
+		"protocol": {
+			"handler": "chip-hid",
+			"eqs": [{ "id": "spk", "name": "Headphone EQ" }],
+			"controls": [
+				{ "id": "headroom", "name": "Headroom", "kind": "toggle", "role": "headroom", "eq": true },
+				{
+					"id": "spkHeadroom",
+					"name": "Headroom",
+					"kind": "toggle",
+					"role": "headroom",
+					"eq": "spk"
+				},
+				{
+					"id": "micHeadroom",
+					"name": "Headroom",
+					"kind": "toggle",
+					"role": "headroom",
+					"eq": "mic"
+				}
+			]
+		}
+	},
+	"expect": [{ "code": "control-eq-unknown", "path": "/protocol/controls/2/eq" }]
+}

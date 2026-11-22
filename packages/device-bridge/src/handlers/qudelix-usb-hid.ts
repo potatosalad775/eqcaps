@@ -21,10 +21,25 @@
 // preset configuration (4)]. 0x0123 [1 << group] is answered by 0x0128 fragments of the stored
 // preset [group, last << 4 | index, size u16, offset u16, bytes…], each channel's apart.
 // Firmware 2.x speaks another dialect, which this handler doesn't.
+//
+// Settings besides the EQ's bands (the bridge's controls), each one command, which the device
+// answers with a notification and holds at once (a 5K with firmware 3.2.9, 2026-11-22):
+//   0x0702 [group, headroom s8 ×10]         read from the group's configuration
+//   0x070D [group, mask, 0, crossfeed u16]  read from the stored preset's first fields
+//   0x0501 [DAC filter]   0x0505 [gain]     read from the 5K's DAC block, 0x0120 [0x08]
+// The app's headroom selector and crossfeed slider work only while that EQ is on, so a write to
+// either is refused while it is off. Neither moves the EQ off its stored preset on the device.
 
-import { field, I16, readI16be, readU16be, U16, U8, be16 } from '../bytes.ts';
+import { field, I16, I8, readI16be, readU16be, U16, U8, be16 } from '../bytes.ts';
 import { BridgeError } from '../errors.ts';
-import type { Codec, HandlerContext, HidFrame, HidHandler, WriteState } from '../handler.ts';
+import type {
+	Codec,
+	HandlerContext,
+	HandlerControl,
+	HidFrame,
+	HidHandler,
+	WriteState
+} from '../handler.ts';
 import { decimals, sendFrame } from '../io.ts';
 import type { HidTransport } from '../transport.ts';
 import {
@@ -34,6 +49,7 @@ import {
 	EDITED,
 	filterOf,
 	FIVE_K,
+	groupIn,
 	groupOf,
 	hidOut,
 	maskedChannels,
@@ -48,6 +64,7 @@ import {
 	qudelixSession,
 	readPreset,
 	sentPacket,
+	struct,
 	T71,
 	writtenState,
 	type Held,
@@ -55,7 +72,8 @@ import {
 	type QudelixGroupName,
 	type QudelixLink,
 	type QudelixModel,
-	type QudelixSession
+	type QudelixSession,
+	type Struct
 } from './qudelix.ts';
 
 /** What the handler learns from the device before it writes. */
@@ -89,6 +107,10 @@ const SAVE = 0x0708;
 const LOAD = 0x0709;
 const NAME = 0x070a;
 const BAND = 0x070f;
+const HEADROOM = 0x0702;
+const CROSSFEED = 0x070d;
+const DAC_FILTER = 0x0501;
+const DAC_GAIN = 0x0505;
 const ASK_CONFIG = 0x0120;
 const CONFIG = 0x0121;
 const ASK_PRESET = 0x0123;
@@ -101,6 +123,9 @@ const ECHO_TIMEOUT = 250;
 
 /** The device-configuration bit of the EQ block, by device id. */
 const EQ_CONFIG_MASK: Readonly<Record<number, number>> = { [FIVE_K]: 0x80, [T71]: 0x40 };
+/** The 5K's DAC block: its configuration bit, and the two settings of its 4 bytes driven here. */
+const DAC_CONFIG_MASK = 0x08;
+const DAC_CONFIG = struct(['', 5], ['gain', 1], ['', 12], ['filter', 4], ['', 10]);
 
 function target(o: QudelixUsbHidCodecOptions) {
 	const d = o.device ?? {
@@ -196,16 +221,20 @@ async function open(ctx: Ctx) {
 	return { s, model };
 }
 
-/** The EQ block: the mode, and each group's configuration, by group id. */
-async function readConfig(s: QudelixSession, model: QudelixModel) {
-	const mask = EQ_CONFIG_MASK[s.device.id]!;
+/** One block of the device's configuration, asked for by its bit alone. */
+async function configBlock(s: QudelixSession, mask: number, what: string) {
 	const { payload } = await s.ask(
 		packet(ASK_CONFIG, [mask]),
 		(m) => m.command === CONFIG && m.payload[0] === mask,
 		TIMEOUT,
-		'the EQ configuration request'
+		`the ${what} configuration request`
 	);
-	const block = payload.subarray(1);
+	return payload.subarray(1);
+}
+
+/** The EQ block: the mode, and each group's configuration, by group id. */
+async function readConfig(s: QudelixSession, model: QudelixModel) {
+	const block = await configBlock(s, EQ_CONFIG_MASK[s.device.id]!, 'EQ');
 	// The groups' configurations, each 4 bytes and followed by 4 of preset configuration.
 	const single = model.all !== undefined && block[0] !== 0;
 	const placed: [QudelixGroup, number][] = single
@@ -221,16 +250,33 @@ async function readConfig(s: QudelixSession, model: QudelixModel) {
 	return { single, groups };
 }
 
-/** The EQ the options name, in the device's mode, and its configuration. */
-async function drive(ctx: Ctx) {
+/** The session, the device's EQ mode and each group's configuration, asked for now. */
+async function mode(ctx: Ctx) {
 	const { s, model } = await open(ctx);
-	const config = await readConfig(s, model);
-	const group = groupOf(model, groupName(ctx), config.single);
-	return { s, model, group, single: config.single, config: config.groups.get(group.id)! };
+	return { s, model, ...(await readConfig(s, model)) };
+}
+
+/** The EQ `name` (default: the one the operation names), in the device's mode, and its configuration. */
+async function drive(ctx: Ctx, name = groupName(ctx)) {
+	const { s, model, single, groups } = await mode(ctx);
+	const group = groupOf(model, name, single);
+	return { s, model, group, single, config: groups.get(group.id)! };
+}
+
+/** `drive`, or nothing where the device's mode has no such EQ. */
+async function driveIfThere(ctx: Ctx, name: QudelixGroupName) {
+	const { s, model, single, groups } = await mode(ctx);
+	const group = groupIn(model, name, single);
+	return group && { s, model, group, config: groups.get(group.id)! };
 }
 
 /** The group's stored preset, reassembled from its fragments. */
 async function readStored(s: QudelixSession, model: QudelixModel, group: QudelixGroup) {
+	return readPreset(model, group, await storedBytes(s, group));
+}
+
+/** The bytes of the group's stored preset, reassembled from their fragments. */
+async function storedBytes(s: QudelixSession, group: QudelixGroup) {
 	const bytes: number[] = [];
 	let next = 0;
 	let last = -1;
@@ -259,8 +305,78 @@ async function readStored(s: QudelixSession, model: QudelixModel, group: Qudelix
 		TIMEOUT,
 		`the ${group.name} preset request`
 	);
-	return readPreset(model, group, Uint8Array.from(bytes));
+	return Uint8Array.from(bytes);
 }
+
+type Control = HandlerControl<HidTransport, object>;
+
+/** Refuses a write to a setting of an EQ that is off: the app's editor holds it still then. */
+function whileOn(model: QudelixModel, group: QudelixGroup, enable: number, what: string) {
+	if (enable === 1) return;
+	throw new BridgeError(
+		'rejected',
+		`Qudelix ${model.name}: the ${group.name} is off, and the app sets its ${what} only while it is on`
+	);
+}
+
+/** An EQ's headroom, in dB: 0x0702 [group, dB ×10], held in the group's configuration. */
+const headroom = (name: QudelixGroupName): Control => ({
+	async read(ctx) {
+		const there = await driveIfThere(ctx, name);
+		return there ? there.config.headroom / 10 : null;
+	},
+	async write(ctx, value) {
+		const { s, model, group, config } = await drive(ctx, name);
+		whileOn(model, group, config.enable, 'headroom');
+		await s.send(packet(HEADROOM, [group.id, field(value, 10, I8, 'headroom') & 0xff]));
+	}
+});
+
+/**
+ * The crossfeed of the EQ the profile describes (the user EQ, or the all-band EQ of single-EQ
+ * mode): 0x070D [group, 1, 0, level u16], held in the stored preset's first fields. The T71 holds
+ * a front and a back level, which this doesn't drive.
+ */
+const crossfeed: Control = {
+	async read(ctx) {
+		const { s, model, group } = await drive(ctx, 'usr');
+		return crossfeedField(model).read(await storedBytes(s, group)).xfeed;
+	},
+	async write(ctx, value) {
+		const { s, model, group, config } = await drive(ctx, 'usr');
+		crossfeedField(model);
+		whileOn(model, group, config.enable, 'crossfeed');
+		await s.send(packet(CROSSFEED, [group.id, 1, 0, ...be16(field(value, 1, U16, 'crossfeed'))]));
+	}
+};
+
+function crossfeedField(model: QudelixModel) {
+	if (model.preset.head.has('xfeed')) return model.preset.head as Struct<'xfeed'>;
+	throw new BridgeError(
+		'unsupported',
+		`Qudelix ${model.name}: its crossfeed has a front and a back level, which this bridge doesn't drive`
+	);
+}
+
+/** A setting of the 5K's DAC block: one command with the value, read from the block's field. */
+const dacSetting = (command: number, name: 'gain' | 'filter'): Control => {
+	const session = async (ctx: Ctx) => {
+		const { s, model } = await open(ctx);
+		if (s.device.id === FIVE_K) return s;
+		throw new BridgeError(
+			'unsupported',
+			`Qudelix ${model.name}: its DAC settings are laid out differently, which this bridge doesn't drive`
+		);
+	};
+	return {
+		async read(ctx) {
+			return DAC_CONFIG.read(await configBlock(await session(ctx), DAC_CONFIG_MASK, 'DAC'))[name];
+		},
+		async write(ctx, value) {
+			await (await session(ctx)).send(packet(command, [field(value, 1, U8, name)]));
+		}
+	};
+};
 
 export const qudelixUsbHid: HidHandler = {
 	id: 'qudelix-usb-hid',
@@ -352,5 +468,13 @@ export const qudelixUsbHid: HidHandler = {
 
 	async bandCount(ctx) {
 		return (await drive(ctx)).group.bands;
+	},
+
+	controls: {
+		headroom: headroom('usr'),
+		headroomSpk: headroom('spk'),
+		crossfeed,
+		dacFilter: dacSetting(DAC_FILTER, 'filter'),
+		gain: dacSetting(DAC_GAIN, 'gain')
 	}
 };

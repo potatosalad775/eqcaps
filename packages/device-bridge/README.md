@@ -265,7 +265,11 @@ await device.writeControl('volume', 24); // only when the user changed it
 
 `capabilities.controls` holds the profile's controls this bridge drives. `readControls()` gives
 null for a control the device doesn't have now: its `firmware` range doesn't hold (unknown firmware
-counts as outside it), or the control its `when` names holds another value. `writeControl` refuses
+counts as outside it), the control its `when` names holds another value, or it is a setting of an
+EQ the device's mode lacks (a Qudelix in single-EQ mode has no headphone EQ). A control with `eq`
+(format 1.6) is a setting of one EQ, `true` for the profile's own or the id of one in
+`capabilities.eqs`; it is read and written here like any other, from every view, and an app shows
+it with that EQ. `writeControl` refuses
 a value the control doesn't take (`invalid-request`) and a control the device doesn't have now
 (`unsupported`), then reads the value back (`rejected` if it didn't take). For a control marked
 `reconnect` it skips the read-back and returns `{ reconnect: true }`: the device may drop the
@@ -283,6 +287,8 @@ its role), so data newer than the bridge still drives the rest.
 | `walkplay-hid` | `dacFilter`, `gainLevel`, `workMode`, `volume` (one byte each); `dre` (toggle, held as 0 on, 1 off; Tanchjim's app); `micGain`, `leftGain`, `rightGain` (dB, on a 1/256 grid). From NICEHCK's and Walkplay's web apps; `firmware()` too |
 | `moondrop-usb-hid` | `globalGain` (dB on a 1/256 grid: read with `[0x80,3,0]`, written with `[1,3,2,s16 LE]` and the offset save `[1,4,0]`); then features that are read with `[0x80,cmd,0]` (the value at byte 3) and written with `[1,cmd,1,value]`, 50 ms, and no save: `dacFilter` (`0x11`), `dacMode` (`0x1D`), `led` (`0x28`, or `ledCommand`; 0 or 1), `gainLevel` (`0x26`), `ancMode` (`0x25`), `dualMicEnc` (`0x34`; 0 or 1); `promptTone` (on or off, 0 or 1) and `promptToneVolume`, which are bytes 0 and 1 of the three-byte `0x2B` (on, volume, tone): a write reads the three, changes its own and writes all three back, so the tone is never changed. A value that is not a whole number from 0 to 255 (0 or 1 for the toggles) is `unrepresentable`; the ones a device takes are the profile's. With `linkCheck`, the link is asked about before each read and write. From Moondrop's web app; `firmware()` too |
 | `ktmicro-usb-hid` | `globalGain` (the KT0211L's DAC gain register 0x3b as a step), `globalGainDb` (the same register in dB on models that hold it so, minus ten times the dB); both use `gainRegister` in place of 0x3b when it is set (Walkplay's SchemeNo19 holds the dB in 0x57). From Kiwi Ears' web app and Walkplay's Android app |
+| `qudelix-usb-hid` | `headroom` and `headroomSpk` (dB; the headroom of the EQ the profile describes, which is the all-band EQ in single-EQ mode, and of the headphone EQ, held as tenths); `crossfeed` (the level of the EQ the profile describes, 0 to 50); `dacFilter` and `gain` (the device's own numbers, one command each). A headroom or crossfeed write is refused (`rejected`) while that EQ is off, as the app's editor holds them still then; `headroomSpk` reads null in single-EQ mode. On a T71 only the two headrooms are driven; its crossfeed and DAC settings are `unsupported`. From Qudelix's app for Chrome; tried on a 5K |
+| `qudelix-v2-usb-hid` | `headroom`, `headroomSpk`, `crossfeed`, `dacFilter` and `gain`, as on `qudelix-usb-hid`. Each write sends the whole element that holds the setting with the one field changed: the EQ's configuration, the preset attributes, the DAC configuration. From Qudelix's app for Chrome; tried on a 5K Plus |
 | `topping-usb-hid` | `volume` and `balance` (dB; the device holds the volume as attenuation in 0.5 dB steps, or 1 dB in its 1 dB step mode, and the balance as signed tenths); `mute`, `input`, `output`, `gain`, `lineMode`, `dacFilter`, `polarity`, `crossfeed`, `brightness` (the device's own numbers). DX5 II only; the other families' settings are not driven. A volume write is refused (`rejected`) while a line output is in DAC mode, as the app sends nothing then. From Topping's web app; tried on a DX5 II |
 
 Errors are `BridgeError`s with a `code`: `unsupported-type`, `unrepresentable`, `unsupported`,

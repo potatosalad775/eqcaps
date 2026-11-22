@@ -215,7 +215,11 @@ export interface HandlerContext<T extends Transport, O> {
  * which the profile's control lists. The device session checks a write against the profile first.
  */
 export interface HandlerControl<T extends Transport, O> {
-	read(ctx: HandlerContext<T, O>): Promise<number>;
+	/**
+	 * Null: the device doesn't have the control as it is set up now, which only the handler can
+	 * tell (a Qudelix in single-EQ mode has no speaker EQ, so none of that EQ's settings).
+	 */
+	read(ctx: HandlerContext<T, O>): Promise<number | null>;
 	write(ctx: HandlerContext<T, O>, value: number): Promise<void>;
 }
 

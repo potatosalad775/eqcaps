@@ -282,6 +282,7 @@ function checkControls(profile: Profile): Issue[] {
 	const controls = profile.protocol?.controls ?? [];
 	const issues: Issue[] = [];
 	const byId = new Map<string, Control>();
+	const eqIds = new Set((profile.protocol?.eqs ?? []).map((e) => e.id));
 	controls.forEach((c, i) => {
 		const path = `/protocol/controls/${i}`;
 		if (byId.has(c.id)) {
@@ -301,6 +302,15 @@ function checkControls(profile: Profile): Issue[] {
 			}
 		});
 		issues.push(...checkFirmwareRange(c.firmware, `${path}/firmware`));
+		if (typeof c.eq === 'string' && !eqIds.has(c.eq)) {
+			issues.push(
+				error(
+					'control-eq-unknown',
+					`${path}/eq`,
+					`"${c.id}" names EQ "${c.eq}", which isn't listed`
+				)
+			);
+		}
 		(c.disablesEq ?? []).forEach((v, j) => {
 			if (!controlTakes(c, v)) {
 				issues.push(
@@ -434,6 +444,9 @@ function checkVersion(profile: Profile): Issue[] {
 	}
 	if (profile.protocol?.eqs?.some((e) => e.channels !== undefined)) {
 		needs.push({ minor: 5, field: 'protocol.eqs[].channels' });
+	}
+	if (profile.protocol?.controls?.some((c) => c.eq !== undefined)) {
+		needs.push({ minor: 6, field: 'protocol.controls[].eq' });
 	}
 	return needs
 		.filter((n) => n.minor > declared)

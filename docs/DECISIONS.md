@@ -229,6 +229,26 @@ for the profile's own. Rejected: marking the whole profile independent, which is
 one-channel user EQ, and a profile of its own for the headphone EQ, which D53 rejected for the
 same device.
 
+### D57. A control can be a setting of one EQ: format 1.6 (2026-11-22)
+A control may say `eq`: `true` for the EQ the profile describes, or the id of one listed in
+`protocol.eqs`. It keeps an id of its own, so a setting each EQ has is one control per EQ
+(`headroom`, `headroomSpk`), read and written through the device like any other; the bridge has
+no per-EQ control call. Qudelix's devices need it: each of their EQs has a headroom, and the
+user EQ a crossfeed held with its preset, while the DAC filter and the output power are the
+device's. With ids alone an app could not tell which EQ a headroom belongs to, and two rows
+under one translated name would sit among the device's settings. With `eq` an app puts the
+control where that EQ is edited, so its place says whose it is, and reads it again when that
+EQ's preset changes. The handler says when a device's mode lacks the EQ (a control's read may
+answer "not there now"), since no other control names the mode. `true` stands for the profile's
+own EQ because that EQ has no id anywhere else (D53). The role `headroom` comes with it: a
+fixed cut a device applies with an EQ, which an app working out a preamp against clipping should
+be able to recognise. An app that knows only 1.5 or earlier shows such a control among the device's
+settings under its name, so older apps lose nothing; their client accepts any `1.x` and ignores
+the key. Rejected: controls called with the EQ of the operation, as `pull` and `push` are, with
+one id for every EQ's headroom: `readControls()` gives one value per id, so every reader of it
+would have had to learn views; and a `when` on a mode control, since the EQ mode is not offered
+as a control (it changes which EQs exist, which a control cannot say).
+
 ---
 
 ## Engine

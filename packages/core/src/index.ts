@@ -1,5 +1,5 @@
 /** Format version this package implements (SPEC §15). */
-export const SCHEMA_VERSION = '1.5';
+export const SCHEMA_VERSION = '1.6';
 
 export type * from './types/schema.generated.ts';
 // The schema's value lists (FILTER_TYPES is exported with the engine's filter helpers below).

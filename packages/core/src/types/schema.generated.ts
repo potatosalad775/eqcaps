@@ -285,13 +285,16 @@ export interface Control {
 		| 'balance'
 		| 'polarity'
 		| 'crossfeed'
-		| 'display-brightness';
+		| 'display-brightness'
+		| 'headroom';
 	/** choice only: the values the device takes, with their labels. */
 	values?: ControlValue[];
 	/** range only: a range or stepped range (SPEC §4). */
 	range?: RangeDomain | SteppedDomain;
 	/** range only: the values are in dB. Without it they are the device's steps. */
 	unit?: 'dB';
+	/** The control is a setting of one of the device's EQs rather than of the device: true for the EQ the profile itself describes, or the id of an EQ in protocol.eqs (SPEC §9.1). Format 1.6. */
+	eq?: true | string;
 	when?: ControlCondition;
 	/** The control exists only on these firmware versions; with the firmware unknown it counts as absent. */
 	firmware?: FirmwareRange;

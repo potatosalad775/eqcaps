@@ -106,6 +106,27 @@ describe('controls (SPEC §9.1)', () => {
 		expect(protocolOf({ protocol: none })).toEqual({ handler: 'moondrop-usb-hid' });
 	});
 
+	test("a control's eq is true or an EQ the handler drives (format 1.6)", () => {
+		const headroom = { id: 'headroom', name: 'Headroom', kind: 'toggle', role: 'headroom' };
+		const read = (c: object) => ({ handler: 'qudelix-v2-usb-hid', controls: [c] });
+		expect((HANDLERS['qudelix-v2-usb-hid'] as AnyHandler).eqs).toContain('spk');
+		for (const eq of [true, 'spk']) {
+			const raw = read({ ...headroom, eq });
+			expect(protocolProblem(raw)).toBeUndefined();
+			expect(protocolOf({ protocol: raw })?.controls).toEqual([
+				{ ...headroom, role: 'headroom', eq }
+			]);
+		}
+		expect(protocolOf({ protocol: read(headroom) })?.controls?.[0]).not.toHaveProperty('eq');
+		// An EQ the handler doesn't drive: CI refuses the control, an app leaves it out.
+		const mic = read({ ...headroom, eq: 'mic' });
+		expect(protocolProblem(mic)).toMatch(/no EQ "mic"/);
+		expect(protocolOf({ protocol: mic })?.controls).toBeUndefined();
+		for (const eq of [false, 3, 'Bad id']) {
+			expect(protocolOf({ protocol: read({ ...headroom, eq }) })).toBeUndefined();
+		}
+	});
+
 	test('a malformed control makes the protocol unreadable', () => {
 		const bad = [
 			{ ...volume, range: { min: 0 } },

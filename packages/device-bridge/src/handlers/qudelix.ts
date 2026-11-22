@@ -261,8 +261,8 @@ export interface QudelixModel {
 	/** The one EQ of single-EQ mode, on a model that has the mode. */
 	all?: QudelixGroup;
 	preset: PresetLayout;
-	/** A group's configuration: its switch, headroom and current preset. */
-	groupConfig: Struct<'enable' | 'preset'>;
+	/** A group's configuration: its switch, headroom (dB ×10) and current preset. */
+	groupConfig: Struct<'enable' | 'preset' | 'headroom'>;
 }
 
 const user = (bands: number, customs: number, freqs: number, channels = [1]): QudelixGroup => ({
@@ -382,11 +382,21 @@ export const QUDELIX_MODELS: Readonly<Record<number, QudelixModel>> = {
 
 /**
  * The EQ `name` drives in the device's mode: the user EQ is the all-band EQ in single-EQ mode,
- * which has no speaker EQ.
+ * which has no speaker EQ, so nothing for it.
  */
-export function groupOf(model: QudelixModel, name: QudelixGroupName, single: boolean) {
+export function groupIn(
+	model: QudelixModel,
+	name: QudelixGroupName,
+	single: boolean
+): QudelixGroup | undefined {
 	if (!single) return model[name];
-	if (name === 'usr' && model.all) return model.all;
+	return name === 'usr' ? model.all : undefined;
+}
+
+/** `groupIn`, refusing an EQ the device's mode lacks. */
+export function groupOf(model: QudelixModel, name: QudelixGroupName, single: boolean) {
+	const group = groupIn(model, name, single);
+	if (group) return group;
 	throw new BridgeError(
 		'unsupported',
 		`Qudelix ${model.name}: the device is in single-EQ mode (one ${model.all?.bands ?? 0}-band EQ), which has no speaker EQ`

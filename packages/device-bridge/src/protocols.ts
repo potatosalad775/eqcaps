@@ -184,7 +184,9 @@ const numbers = (v: unknown, what: string): number[] =>
  * unknown role alone is dropped, so newer data never stops a device from being driven.
  */
 function readControls(raw: unknown, id: HandlerId, strict: boolean): Control[] {
-	const driven: object = (HANDLERS[id] as AnyHandler).controls ?? {};
+	const handler = HANDLERS[id] as AnyHandler;
+	const driven: object = handler.controls ?? {};
+	const driveEqs: readonly string[] = handler.eqs ?? [];
 	const out: Control[] = [];
 	for (const c of Array.isArray(raw) ? raw : fail('controls: not a list')) {
 		if (!isObject(c)) fail('controls: not an object');
@@ -193,6 +195,7 @@ function readControls(raw: unknown, id: HandlerId, strict: boolean): Control[] {
 			name,
 			kind,
 			role,
+			eq,
 			values,
 			range,
 			unit,
@@ -224,6 +227,14 @@ function readControls(raw: unknown, id: HandlerId, strict: boolean): Control[] {
 			if (typeof role === 'string' && ROLES.has(role))
 				control.role = role as NonNullable<Control['role']>;
 			else skip(`unknown role ${JSON.stringify(role)}`);
+		}
+		if (eq !== undefined) {
+			// A setting of one of the device's EQs: the profile's own (`true`) or one the handler drives.
+			if (eq === true || (typeof eq === 'string' && driveEqs.includes(eq))) control.eq = eq;
+			else if (typeof eq === 'string' && /^[a-z][A-Za-z0-9]*$/.test(eq)) {
+				skip(`${id} has no EQ "${eq}"`);
+				continue;
+			} else fail(`${at}: eq`);
 		}
 		if (kind === 'choice') {
 			if (!Array.isArray(values) || values.length < 2) fail(`${at}: values`);

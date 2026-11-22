@@ -34,7 +34,8 @@ export const CONTROL_ROLES = [
 	'balance',
 	'polarity',
 	'crossfeed',
-	'display-brightness'
+	'display-brightness',
+	'headroom'
 ] as const;
 
 /** Where a claim comes from (SPEC §10). */
