@@ -553,7 +553,8 @@
 						"balance",
 						"polarity",
 						"crossfeed",
-						"display-brightness"
+						"display-brightness",
+						"headroom"
 					]
 				},
 				"values": {
@@ -569,6 +570,10 @@
 				"unit": {
 					"description": "range only: the values are in dB. Without it they are the device's steps.",
 					"const": "dB"
+				},
+				"eq": {
+					"description": "The control is a setting of one of the device's EQs rather than of the device: true for the EQ the profile itself describes, or the id of an EQ in protocol.eqs (SPEC §9.1). Format 1.6.",
+					"oneOf": [{ "const": true }, { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" }]
 				},
 				"when": { "$ref": "#/$defs/controlCondition" },
 				"firmware": {

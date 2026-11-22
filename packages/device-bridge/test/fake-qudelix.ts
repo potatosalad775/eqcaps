@@ -46,6 +46,8 @@ export interface FakeEq {
 	type: number;
 	/** ×10 ohms, in the stored preset's attributes. */
 	impedance: number;
+	/** The crossfeed level, in the stored preset's attributes. */
+	xfeed: number;
 	/** Per channel, ×10. */
 	preGain: number[];
 	/** [channel][band]. */
@@ -66,6 +68,7 @@ export function flatEq(channels: number, bands: number): FakeEq {
 		headroom: 0,
 		type: 1,
 		impedance: 0,
+		xfeed: 0,
 		preGain: new Array<number>(channels).fill(0),
 		bands: Array.from({ length: channels }, () =>
 			Array.from({ length: bands }, (_, i) => ({
@@ -226,6 +229,8 @@ export class FakeQudelix extends FakeHid {
 	/** Opening answers in turn: 3 is ready, 2 waiting. */
 	openingStates = [3];
 	readonly eqs = new Map<number, FakeEq>();
+	/** The 5K's DAC settings the bridge drives: high gain, and the filter by its number. */
+	dac = { gain: 1, filter: 0 };
 
 	constructor(
 		model: '5k' | 't71',
@@ -296,6 +301,21 @@ export class FakeQudelix extends FakeHid {
 		return [...b.bytes];
 	}
 
+	/**
+	 * The 5K's DAC block, 4 bytes, as a 5K with firmware 3.2.9 answered it (2026-11-22): output
+	 * mode 2 bits, output selection 3, gain 1, two power-supply bits; clock 4, distortion
+	 * compensation 2, amplifier power 2; two amplifier bits, filter 4, oversampling 2; profile 4,
+	 * channel swap 1, a bypass bit, chipset 2.
+	 */
+	#dac(): number[] {
+		const b = new Bits(new Uint8Array(4));
+		b.put(1, 2).put(0, 3).put(this.dac.gain, 1).put(0, 2);
+		b.put(1, 4).put(1, 2).put(0, 2);
+		b.put(2, 2).put(this.dac.filter, 4).put(0, 2);
+		b.put(5, 4).put(0, 1).put(0, 1).put(2, 2);
+		return [...b.bytes];
+	}
+
 	/** The stored preset of a group, in the model's layout. */
 	presetBytes(group: number): Uint8Array {
 		const eq = this.eqs.get(group)!;
@@ -320,7 +340,7 @@ export class FakeQudelix extends FakeHid {
 		}
 		// 5K: 88 bytes for the user EQ, 128 for the speaker and all-band EQs.
 		const b = new Bits(new Uint8Array(group === 0 ? 88 : 128));
-		b.put(eq.type, 1).put(eq.impedance, 14).put(0, 11).put(0, 6);
+		b.put(eq.type, 1).put(eq.impedance, 14).put(0, 11).put(eq.xfeed, 6);
 		for (let ch = 0; ch < 2; ch++) b.put(eq.preGain[ch] ?? 0, 16);
 		const [rows, cols] = group === 2 ? [1, 20] : [2, 10];
 		for (let r = 0; r < rows; r++)
@@ -355,6 +375,7 @@ export class FakeQudelix extends FakeHid {
 			}
 			case 0x0120: {
 				const mask = this.model === 't71' ? 0x40 : 0x80;
+				if (g === 0x08 && this.model === '5k') return this.reply([0x01, 0x21, g, ...this.#dac()]);
 				if (g !== mask) return this.reply([0x01, 0x21, g]);
 				const block = this.single
 					? [2, ...this.#config(this.eqs.get(2)!)]
@@ -374,12 +395,32 @@ export class FakeQudelix extends FakeHid {
 				if (eq) eq.type = d[1]!;
 				return;
 			}
+			case 0x0702: {
+				// The headroom is not the preset's: the EQ stays on its preset (a 5K, 2026-11-22).
+				const eq = this.#eq(g);
+				if (eq) eq.headroom = (d[1]! << 24) >> 24;
+				return;
+			}
 			case 0x0703: {
 				const eq = this.#eq(g);
 				if (!eq) return;
 				for (const ch of this.#channels(eq, d[1]!)) eq.preGain[ch] = s16be(d, 3);
 				return edited(eq);
 			}
+			case 0x070d: {
+				// The crossfeed is in the stored preset, yet a 5K stayed on its preset (2026-11-22).
+				const eq = this.#eq(g);
+				if (!eq) return;
+				if (d.length !== 5) this.errors.push(`crossfeed write of ${d.length} bytes`);
+				if (this.#channels(eq, d[1]!).length) eq.xfeed = u16be(d, 3);
+				return;
+			}
+			case 0x0501:
+				this.dac.filter = g;
+				return;
+			case 0x0505:
+				this.dac.gain = g;
+				return;
 			case 0x070f: {
 				const eq = this.#eq(g);
 				if (!eq) return;
@@ -491,6 +532,8 @@ export class FakeQudelixV2 extends FakeHid {
 	 */
 	lateNotifications = false;
 	#notifications: number[] = [];
+	/** The DAC settings the bridge drives, and a neighbour of theirs that a write must keep. */
+	dac = { gain: 0, filter: 0, swap: 1 };
 	readonly eqs = new Map<number, FakeEq>([
 		[0, flatEq(1, 10)],
 		[1, flatEq(2, 20)],
@@ -538,7 +581,7 @@ export class FakeQudelixV2 extends FakeHid {
 	presetBytes(group: number): Uint8Array {
 		const eq = this.eqs.get(group)!;
 		const b = new Bits(new Uint8Array([76, 256, 196][group]!));
-		b.put(eq.type, 1).put(eq.impedance, 14).put(0, 11).put(0, 6).put(0, 6).put(0, 3);
+		b.put(eq.type, 1).put(eq.impedance, 14).put(0, 11).put(eq.xfeed, 6).put(0, 6).put(0, 3);
 		b.put(0, 23).put(0, 32);
 		for (let ch = 0; ch < 2; ch++) b.put(eq.preGain[ch] ?? 0, 16);
 		for (const ch of eq.bands) for (const x of ch) b.put(x.freq, 16);
@@ -546,6 +589,17 @@ export class FakeQudelixV2 extends FakeHid {
 			for (const x of ch) b.put(x.filter, 4).put(x.gain, 10).put(x.q, 16).put(0, 2);
 		}
 		return b.bytes;
+	}
+
+	/**
+	 * The DAC configuration, 8 bytes: version 4 bits, amplifier always on 1, channel swap 1,
+	 * distortion compensation 3, active ground 1, chipset 2, profile 2, filter 4, gain 1, spare.
+	 */
+	#dac(): number[] {
+		const b = new Bits(new Uint8Array(8));
+		b.put(1, 4).put(0, 1).put(this.dac.swap, 1).put(1, 3).put(0, 1).put(2, 2).put(1, 2);
+		b.put(this.dac.filter, 4).put(this.dac.gain, 1);
+		return [...b.bytes];
 	}
 
 	/** An element's data, as the device would answer a request for it. */
@@ -556,6 +610,7 @@ export class FakeQudelixV2 extends FakeHid {
 		if (id === 2) return [this.protocolMajor, 0, 0, this.packetSize];
 		if (id === 3) return [...this.firmware, 0, 1, 2, 3, 4];
 		if (id === 0x80) return [(this.single ? 1 : 0) << 4, 0, 0, 0];
+		if (id === 0x40) return this.#dac();
 		if (!eq) return undefined;
 		if ((id & 15) === 0) return [eq.enable << 4, 0, eq.headroom & 255, eq.preset];
 		if ((id & 15) === 3) return [...this.presetBytes(group)];
@@ -624,6 +679,16 @@ export class FakeQudelixV2 extends FakeHid {
 			eq.preset = 22 + d[1]!;
 			return;
 		}
+		if (command === 0x9004 && id === 0x40) {
+			if (d.length !== 8) return void this.errors.push(`DAC configuration of ${d.length}`);
+			const b = new Bits(Uint8Array.from(d));
+			b.at = 5;
+			this.dac.swap = b.get(1);
+			b.at = 14;
+			this.dac.filter = b.get(4);
+			this.dac.gain = b.get(1);
+			return;
+		}
 		const group = ELEMENT_BASE.indexOf(id & 0xf0);
 		const eq = command === 0x9004 ? this.#eq(group) : undefined;
 		if (!eq) return void this.errors.push(`element 0x${id.toString(16)} in ${command}`);
@@ -652,14 +717,19 @@ export class FakeQudelixV2 extends FakeHid {
 				return;
 			}
 			case 2:
+				if (d.length !== 12) return void this.errors.push(`attributes of ${d.length}`);
 				eq.type = b.get(1);
 				eq.impedance = b.get(14);
+				b.get(11);
+				eq.xfeed = b.get(6);
 				return;
 			case 3: {
 				if (d.length !== [76, 256, 196][group])
 					return void this.errors.push(`preset of ${d.length}`);
 				eq.type = b.get(1);
 				eq.impedance = b.get(14);
+				b.get(11);
+				eq.xfeed = b.get(6);
 				b.at = 96;
 				const gains = [b.get(16, true), b.get(16, true)];
 				eq.preGain = eq.preGain.map((_, ch) => gains[ch]!);

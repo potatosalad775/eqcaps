@@ -2,6 +2,7 @@
 	"$schema": "../../../schema/v1/source.schema.json",
 	"extends": "qudelix-app",
 	"id": "qudelix-5k",
+	"schemaVersion": "1.6",
 	"device": { "brand": "Qudelix", "model": "5K" },
 	"match": {
 		"usb": [
@@ -25,7 +26,63 @@
 			{ "vendorId": "0x0a12", "productId": "0x4007", "productName": "Qudelix-5K USB DAC" }
 		]
 	},
-	"protocol": { "experimental": false },
+	"protocol": {
+		"experimental": false,
+		"controls": [
+			{
+				"id": "headroom",
+				"name": "HEADROOM",
+				"kind": "range",
+				"role": "headroom",
+				"eq": true,
+				"range": { "min": -12, "max": 0, "step": 6 },
+				"unit": "dB"
+			},
+			{
+				"id": "headroomSpk",
+				"name": "SPK EQ HEADROOM",
+				"kind": "range",
+				"role": "headroom",
+				"eq": "spk",
+				"range": { "min": -12, "max": 0, "step": 6 },
+				"unit": "dB"
+			},
+			{
+				"id": "crossfeed",
+				"name": "QX-FEED",
+				"kind": "range",
+				"role": "crossfeed",
+				"eq": true,
+				"range": { "min": 0, "max": 50, "step": 1 }
+			},
+			{
+				"id": "dacFilter",
+				"name": "FILTER SELECTION",
+				"kind": "choice",
+				"role": "dac-filter",
+				"values": [
+					{ "value": 0, "name": "Linear phase fast roll-off" },
+					{ "value": 1, "name": "Linear phase slow roll-off" },
+					{ "value": 2, "name": "Linear phase super slow roll-off" },
+					{ "value": 3, "name": "Minimum phase fast roll-off" },
+					{ "value": 4, "name": "Minimum phase slow roll-off" },
+					{ "value": 5, "name": "Minimum phase super slow roll-off" },
+					{ "value": 6, "name": "Hybrid fast roll-off" },
+					{ "value": 7, "name": "NOS (88.2/96kHz only)" }
+				]
+			},
+			{
+				"id": "gain",
+				"name": "OUTPUT POWER",
+				"kind": "choice",
+				"role": "output-gain",
+				"values": [
+					{ "value": 0, "name": "NORMAL" },
+					{ "value": 1, "name": "HIGH" }
+				]
+			}
+		]
+	},
 	"meta": {
 		"status": "maintainer-verified",
 		"sources": [
@@ -64,8 +121,21 @@
 				"firmware": "3.2.9",
 				"date": "2026-11-21",
 				"by": "potatosalad775"
+			},
+			{
+				"kind": "vendor-app",
+				"ref": "Qudelix app for Chrome 4.0.3.1 (Chrome extension phaodiidhofhdmfkjiacigibgikhfafn): the 5K's headroom selector and crossfeed slider on each EQ, its DAC filter list and output power switch, with their values and how each is sent and read",
+				"date": "2026-11-22",
+				"by": "potatosalad775"
+			},
+			{
+				"kind": "community",
+				"ref": "A maintainer's 5K sent each setting as the app sends it and asked for it back: the DAC filter, the output power (lowered, then put back), the headroom of the user EQ and of the headphone EQ at -6 and -12 dB, and the user EQ's crossfeed; each read back as written and the device announced each change; left as found",
+				"firmware": "3.2.9",
+				"date": "2026-11-22",
+				"by": "potatosalad775"
 			}
 		],
-		"notes": "As Qudelix's app for Chrome 4.0.3.1 drives the 5K, read from the app (2026-11-19) and checked on a maintainer's 5K with firmware 3.2.9 (2026-11-20); the limits, filter types and presets are the app's. On that unit the device answered the opening request, both EQs read back what the bridge pushed (all five filter types, the pre-gain, both ends of every limit), a save to memory 22 could be loaded back, and a headphone-EQ push took on both channels and left the user EQ alone. The firmware stores what its fields hold rather than the editor's limits (gain to ±51.1 dB, Q just under 16), and stores a band written while the EQ is off; what its DSP does with values past the editor's limits was not measured, so the ranges stay the app's. In single-EQ mode the bridge read and wrote every band of the all-band EQ and refused the headphone EQ. The app shows the same firmware version and, for the memory the bridge saved, the same values. An EQ pushed without saving was still there after the device was unplugged and powered off and on. Other operating systems were not checked. Identity: the app lists eleven product ids under vendor 0x0a12 and accepts a device only when its product name contains \"Qudelix\". A match can't say \"contains\", so the first entry takes the ids with any name. The two names recorded are kept as more specific entries: 0x4005 \"Qudelix-5K USB DAC 48KHz\" from devicePEQ's capture and 0x4007 \"Qudelix-5K USB DAC\" from a maintainer's unit. The other nine names are unknown, and nothing in the app says what tells the ids apart (perhaps the USB audio setting). 0x0a12 is the Bluetooth chip vendor's id, shared with other makers (FiiO's among them), so the vendor alone says nothing. Firmware: the app refuses firmware below 2.0.0 and asks for an update. Firmware 2.x has another EQ layout (one 20-band EQ, or 10 bands per channel) with other filter codes, which the bridge does not drive: only 3.0.0 and later is driven. On 3.x the user EQ has 10 bands on one channel, layered on a headphone EQ of 10 bands per channel; in single-EQ mode (\"USR only\" in the app) one all-band EQ of 20 bands replaces both, and the bridge drives that one and reports 20 bands. In the QX-over output mode the app warns that the device supports a 10-band EQ only. This profile describes the user EQ. The headphone EQ has its own values: 10 bands per channel (left and right), parametric only, the same limits, a pre-gain per channel, and as presets Flat (0) and 20 memories of its own (22 to 41); in the QX-over output mode the app offers the built-in curves on it too. It does not exist in single-EQ mode. It is listed as the device's other EQ (protocol.eqs) with its left and right channels independent. On 2026-11-21 the same unit was sent one band write on the headphone EQ for the right channel alone (channel mask 2), which changed the right channel and left the left as it was, and one for the left alone (mask 1), which changed the left only; its stored preset then read back the two channels apart. A push through the bridge of a different curve and pre-gain on each channel read back as written, the user EQ untouched. So the bridge writes and reads them apart, as the app's selector does; a push without the right channel writes both alike. The graphic EQ, crossfeed, headroom, the QX-over crossover and the device's other settings are not driven. Before 2026-11-19 this profile was seeded from AutoEQ's optimizer setting: 20 to 20000 Hz, ±12 dB, Q 103/1024 to 7, peaking and shelves only, pre-gain unknown. The app's editor is wider on every range and adds low-pass and high-pass. AutoEQ's Q ceiling of 7 fits the 13-bit Q field of firmware 2.x (just under 8 in 1/1024ths); the 14-bit field of 3.x holds the app's 15. devicePEQ's handler, which the bridge's first version was ported from, wrote both channels of the user EQ where the app writes its one, saved and loaded memories the way firmware 2.x takes them, never sent the opening request the device answers (so it saw no answers and called the device write-only), and devicePEQ dropped the device for that."
+		"notes": "As Qudelix's app for Chrome 4.0.3.1 drives the 5K, read from the app (2026-11-19) and checked on a maintainer's 5K with firmware 3.2.9 (2026-11-20); the limits, filter types and presets are the app's. On that unit the device answered the opening request, both EQs read back what the bridge pushed (all five filter types, the pre-gain, both ends of every limit), a save to memory 22 could be loaded back, and a headphone-EQ push took on both channels and left the user EQ alone. The firmware stores what its fields hold rather than the editor's limits (gain to ±51.1 dB, Q just under 16), and stores a band written while the EQ is off; what its DSP does with values past the editor's limits was not measured, so the ranges stay the app's. In single-EQ mode the bridge read and wrote every band of the all-band EQ and refused the headphone EQ. The app shows the same firmware version and, for the memory the bridge saved, the same values. An EQ pushed without saving was still there after the device was unplugged and powered off and on. Other operating systems were not checked. Identity: the app lists eleven product ids under vendor 0x0a12 and accepts a device only when its product name contains \"Qudelix\". A match can't say \"contains\", so the first entry takes the ids with any name. The two names recorded are kept as more specific entries: 0x4005 \"Qudelix-5K USB DAC 48KHz\" from devicePEQ's capture and 0x4007 \"Qudelix-5K USB DAC\" from a maintainer's unit. The other nine names are unknown, and nothing in the app says what tells the ids apart (perhaps the USB audio setting). 0x0a12 is the Bluetooth chip vendor's id, shared with other makers (FiiO's among them), so the vendor alone says nothing. Firmware: the app refuses firmware below 2.0.0 and asks for an update. Firmware 2.x has another EQ layout (one 20-band EQ, or 10 bands per channel) with other filter codes, which the bridge does not drive: only 3.0.0 and later is driven. On 3.x the user EQ has 10 bands on one channel, layered on a headphone EQ of 10 bands per channel; in single-EQ mode (\"USR only\" in the app) one all-band EQ of 20 bands replaces both, and the bridge drives that one and reports 20 bands. In the QX-over output mode the app warns that the device supports a 10-band EQ only. This profile describes the user EQ. The headphone EQ has its own values: 10 bands per channel (left and right), parametric only, the same limits, a pre-gain per channel, and as presets Flat (0) and 20 memories of its own (22 to 41); in the QX-over output mode the app offers the built-in curves on it too. It does not exist in single-EQ mode. It is listed as the device's other EQ (protocol.eqs) with its left and right channels independent. On 2026-11-21 the same unit was sent one band write on the headphone EQ for the right channel alone (channel mask 2), which changed the right channel and left the left as it was, and one for the left alone (mask 1), which changed the left only; its stored preset then read back the two channels apart. A push through the bridge of a different curve and pre-gain on each channel read back as written, the user EQ untouched. So the bridge writes and reads them apart, as the app's selector does; a push without the right channel writes both alike. The graphic EQ, crossfeed, headroom, the QX-over crossover and the device's other settings are not driven. Before 2026-11-19 this profile was seeded from AutoEQ's optimizer setting: 20 to 20000 Hz, ±12 dB, Q 103/1024 to 7, peaking and shelves only, pre-gain unknown. The app's editor is wider on every range and adds low-pass and high-pass. AutoEQ's Q ceiling of 7 fits the 13-bit Q field of firmware 2.x (just under 8 in 1/1024ths); the 14-bit field of 3.x holds the app's 15. devicePEQ's handler, which the bridge's first version was ported from, wrote both channels of the user EQ where the app writes its one, saved and loaded memories the way firmware 2.x takes them, never sent the opening request the device answers (so it saw no answers and called the device write-only), and devicePEQ dropped the device for that. Settings besides the EQ (format 1.6): each EQ's headroom (the app offers 0, -6 and -12 dB) and the crossfeed of the user EQ, or of the all-band EQ in single-EQ mode, belong to an EQ; the DAC filter and the output power are the device's. The app's headroom selector and crossfeed slider work only while that EQ is on, so the bridge refuses a write to either while it is off. On a maintainer's 5K (firmware 3.2.9, 2026-11-22) each of them read back as written, at once, and neither the headroom nor the crossfeed moved the EQ off its stored preset, though the crossfeed is held with the preset. The headroom field takes other values than the app's three; they are not offered. The filter the app calls NOS is marked by it as for 88.2 and 96 kHz only; what the device plays with it at another rate was not tried. The app's other settings (output selection and the QX-over crossover, DAC profile, channel swap, amplifier power, volume, Bluetooth and button settings) are not driven."
 	}
 }

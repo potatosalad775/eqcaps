@@ -22,6 +22,7 @@ export const ISSUE_CODES = {
 	'control-when-invalid':
 		"§9.1: `when` names no other control, a control with a `when` of its own, or a value that control doesn't take.",
 	'control-value-invalid': "§9.1: `disablesEq` lists a value the control doesn't take.",
+	'control-eq-unknown': "§9.1: a control's `eq` names an EQ that protocol.eqs doesn't list.",
 	'eq-duplicate': '§9.2: two EQs in protocol.eqs share an id.',
 	'status-needs-evidence': '§10: a verified status without a counting source.',
 	'status-needs-maintainer':

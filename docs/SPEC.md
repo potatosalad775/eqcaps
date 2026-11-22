@@ -4,8 +4,9 @@
 > 1.1** (2026-10-10, D48) adds `writable` presets (§9); **format 1.2** (2026-10-28, D49) adds
 > device controls (§9.1); **format 1.3** (2026-11-20, D53) adds a device's other EQs (§9.2);
 > **format 1.4** (2026-11-21, D54) adds independent left and right channels (§9); **format 1.5**
-> (2026-11-21, D55) gives a listed EQ channels of its own (§9.2). This file is the single place
-> the format is defined. From here on it changes only by minors that add (§15); anything else
+> (2026-11-21, D55) gives a listed EQ channels of its own (§9.2); **format 1.6** (2026-11-22, D57)
+> lets a control be a setting of one EQ (§9.1). This file is the single place the format is
+> defined. From here on it changes only by minors that add (§15); anything else
 > needs v2. Published under `/v1/`.
 > MUST / SHOULD / MAY are used as in RFC 2119. Rationale for each choice is in
 > [DECISIONS.md](DECISIONS.md).
@@ -385,11 +386,27 @@ the device accepts and the handler knows how to send them.
   modes), `mic-noise-reduction` (noise reduction on a built-in microphone), `prompt-tone` (the
   device's own announcement sounds), `prompt-tone-volume` (their level), `mute`, `input` (the
   source the device plays), `output` (the outputs it plays to), `balance` (one value for both
-  channels, negative towards the left), `polarity` (the output's absolute phase), `crossfeed` and
-  `display-brightness` (a screen's, where `light` is an indicator's). A device with both
-  `balance-left` and `balance-right` holds a gain per channel; an app MAY show the pair as one
-  balance control. A control without a role is a setting only that vendor has, under the
-  vendor's name for it.
+  channels, negative towards the left), `polarity` (the output's absolute phase), `crossfeed`,
+  `display-brightness` (a screen's, where `light` is an indicator's) and `headroom` (a fixed cut
+  the device applies with an EQ so that its boosts don't clip, apart from that EQ's preamp, §9).
+  A device with both `balance-left` and `balance-right` holds a gain per channel; an app MAY
+  show the pair as one balance control. A control without a role is a setting only that vendor
+  has, under the vendor's name for it.
+- `eq` (optional, format 1.6): the control is a setting of one of the device's EQs, not of the
+  device: `true` for the EQ the profile describes, or the `id` of one in `protocol.eqs` (§9.2),
+  which MUST list it (`control-eq-unknown`). Such a control still has an `id` of its own, so a
+  setting that each EQ has is one control per EQ:
+
+  ```jsonc
+  { "id": "headroom", "name": "HEADROOM", "kind": "range", "role": "headroom", "eq": true,
+    "range": { "min": -12, "max": 0, "step": 6 }, "unit": "dB" },
+  { "id": "headroomSpk", "name": "SPK EQ HEADROOM", "kind": "range", "role": "headroom",
+    "eq": "spk", "range": { "min": -12, "max": 0, "step": 6 }, "unit": "dB" }
+  ```
+
+  It follows its EQ: it exists only while the device runs that EQ, a device may refuse to set
+  it while that EQ is switched off, and where the device stores it with a preset, selecting a
+  preset can change it.
 - `when` (optional): the control exists only while the control named in `when.control` holds one
   of `when.values`. That control MUST be another one in the list, MUST NOT have a `when` of its
   own, and MUST take every listed value.
@@ -410,6 +427,14 @@ Rules for consumers:
   user set that value.
 - A consumer that doesn't know a control's `id`, `kind` or `role` ignores that control (for an
   unknown `role`, the role alone) and keeps the rest of the protocol.
+- An app SHOULD show a control with `eq` with that EQ, beside its switch, preamp and presets,
+  and not among the device's settings, so that the place says which EQ it belongs to; it SHOULD
+  read such a control again after it selects a preset of that EQ. An app that offers one EQ at a
+  time offers that EQ's controls with it. A consumer that doesn't know `eq` (before 1.6) shows
+  the control among the device's settings under its `name`, which therefore SHOULD tell two
+  EQs' controls apart.
+- A `headroom` control is a second cut beside its EQ's preamp. An app that works out a preamp
+  against clipping (§9) MAY count the headroom the device holds.
 
 ### 9.2 Other EQs (`protocol.eqs`, format 1.3)
 
@@ -447,7 +472,8 @@ is matched once and an app offers its EQs side by side.
   says `"linked"`.
 - `presets` follows the rules of `protocol.presets` (§9), and its ids are that EQ's own preset
   numbers. An EQ without `presets` has none: the profile's presets are never a listed EQ's.
-- `controls`, `options` and the rest of `protocol` are the device's, not one EQ's.
+- `controls`, `options` and the rest of `protocol` are the device's, not one EQ's. A control
+  that is a setting of one EQ says so itself (`eq`, §9.1, format 1.6).
 - An EQ that takes other filter types or domains than the profile's needs a profile of its own
   with another `engine` label (§3).
 
@@ -1007,3 +1033,4 @@ the host app: the database enhances an app and never blocks it. The reference cl
 | 1.3 | 2026-11-20 | `protocol.eqs` (§9.2, D53) |
 | 1.4 | 2026-11-21 | `channels: "independent"` (§9, D54) |
 | 1.5 | 2026-11-21 | `protocol.eqs[].channels` (§9.2, D55) |
+| 1.6 | 2026-11-22 | `protocol.controls[].eq` (§9.1, D57) |
