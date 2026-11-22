@@ -62,7 +62,7 @@ because they change what it plays and whether its EQ applies.
 eqcaps/
 ├── AGENTS.md                     rules for coding agents (CLAUDE.md imports it)
 ├── docs/                         SPEC, ARCHITECTURE, DECISIONS, INSPECTOR;
-│                                 plans/, research/, history/
+│                                 plans/, history/
 ├── schema/v1/
 │   ├── profile.schema.json       published (flat) profiles; hand-written
 │   └── source.schema.json        authoring files (adds extends / abstract); generated
@@ -111,6 +111,9 @@ apps           ──▶ core, client (+ device-bridge to drive hardware)
   run CI's own checks.
 - **`device-bridge`** knows how to talk to a device, not what the device accepts or which device
   it is. Nothing in `schema/`, `data/`, `core` or `client` depends on it (D2, D20).
+
+ESLint enforces these imports for each package's `src/` (`MAY_IMPORT` in `eslint.config.js`),
+along with core's zero dependencies and §9's rule that only `src/browser/` sees browser APIs.
 
 ## 6. Invariants
 

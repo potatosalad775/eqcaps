@@ -15,7 +15,7 @@ import {
 import { ChunkQueue } from '../src/browser/stream.ts';
 import { identityOf } from '../src/index.ts';
 import { protocolFor } from './data.ts';
-import { validateRepository } from '../../build/src/node.ts';
+import { validateRepository } from '@potatosalad775/eqcaps-build/node';
 
 const profiles = [...validateRepository().profiles.values()];
 

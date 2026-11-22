@@ -10,9 +10,11 @@ may move in coarse steps, or the frequencies may come from a fixed list. eqcaps 
 limits per device, with where each one came from. It also ships an engine that fits any preset
 into them.
 
-- **Browse the database and check your device:** [potatosalad775.github.io/eqcaps](https://potatosalad775.github.io/eqcaps/)
-- **An app built on it:** [uniPEQ](https://unipeq.com) ([source](https://github.com/potatosalad775/uniPEQ)),
-  a parametric EQ for USB audio hardware, on the web and Android
+- **Browse the database and check your device:**
+  [potatosalad775.github.io/eqcaps](https://potatosalad775.github.io/eqcaps/)
+- **An app built on it:** [uniPEQ](https://unipeq.com)
+  ([source](https://github.com/potatosalad775/uniPEQ)), a parametric EQ for USB audio hardware, on
+  the web and Android
 - **Data:** `https://potatosalad775.github.io/eqcaps/v1/` (static JSON, CORS-enabled, CC0)
 
 ## What a profile looks like

@@ -2,7 +2,7 @@
 // below. Exact ops get their expectation from the reference engine in packages/core; property
 // ops carry the facts a case asserts, and runners check the properties themselves.
 //
-// Usage: node scripts/conformance.ts [--check]
+// Usage: node --conditions=eqcaps:source scripts/conformance.ts [--check]
 // With --check nothing is written; the script fails if a vector file is out of date. After an
 // intended change in engine behaviour, regenerate and review the diff of the vectors: it is the
 // change every port has to follow.
@@ -25,7 +25,7 @@ import {
 	type PlanOptions,
 	type PlanWanted,
 	type Profile
-} from '../packages/core/src/index.ts';
+} from '@potatosalad775/eqcaps-core';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const dir = `${root}conformance/v1/`;

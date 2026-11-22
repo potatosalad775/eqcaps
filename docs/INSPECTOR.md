@@ -36,8 +36,8 @@ D40).
 ### T1: Identify (read-only, no protocol needed)
 
 - Connect via WebHID with empty filters (any HID device), WebSerial, or Web Bluetooth.
-- Show the raw identity the browser exposes (see [research/prior-art.md §3](research/prior-art.md#3-identity-data-available-to-consumers)),
-  the matched profiles with specificity, and whether the device bridge has a handler for it.
+- Show the raw identity the browser exposes, the matched profiles with specificity, and whether
+  the device bridge has a handler for it.
 - **Descriptor dump** (WebHID): collections, usages, input/output/feature report IDs and sizes.
   Protocol developers get this without installing anything.
 - Unknown device: a "Report this device" button produces a prefilled GitHub issue (identity JSON +
@@ -75,7 +75,8 @@ inspector reads the device back after each step. What the vendor app let the use
   device matched only by a group profile is offered **Add my device**: a profile of its own that
   extends the group's base, prefilled from its identity and read-back (D37).
 - Submit without any backend:
-  1. **Pull request:** open `https://github.com/potatosalad775/eqcaps/new/main?filename=data/profiles/<brand>/<id>.json&value=<urlencoded>`.
+  1. **Pull request:** open
+     `https://github.com/potatosalad775/eqcaps/new/main?filename=data/profiles/<brand>/<id>.json&value=<urlencoded>`.
      GitHub forks automatically for non-collaborators and offers "Propose new file".
      Edits to an existing profile go through the `edit/` URL plus clipboard.
   2. **Issue** (fallback, and the route for large evidence files): issue form URL with prefilled
@@ -176,10 +177,9 @@ may touch other controls (a preamp moved during the first check on hardware).
 ### 3.6 What read-back can't tell you
 
 - **Read-back ≠ what you hear.** Firmware may store 15 dB while the DSP clips at 12, or store a Q
-  it then ignores, or place a filter off the frequency it stores
-  ([research/prior-art.md §2.1](research/prior-art.md#21-realization-compensation-devicepeq-upstream)).
-  Only acoustic measurement shows how the device sounds, and the format doesn't record that
-  (SPEC §8, DECISIONS D39). The evidence report says so.
+  it then ignores, or place a filter off the frequency it stores. Only acoustic measurement shows
+  how the device sounds, and the format doesn't record that (SPEC §8, DECISIONS D39). The evidence
+  report says so.
 - **Vendor-app limits are a subset.** The firmware may accept more than the app allows. A profile
   from a guided read describes what the vendor supports, which is what apps should send.
 

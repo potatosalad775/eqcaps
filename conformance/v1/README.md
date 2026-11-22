@@ -70,8 +70,8 @@ JSON has no NaN or infinities, so `project` inputs spell them `"NaN"`, `"Infinit
   - `fit`: sound, safe, faithful (on active filters), idempotent, and no added active filters;
     `feasible` as given.
   - `complete`: exactly `bandCount` filters, filled slots unchanged, fillers (hints included) in
-    their domains and neutral unless warned, `ascendingFrequency` kept when `validate` found room; `warnings` as
-    given.
+    their domains and neutral unless warned, `ascendingFrequency` kept when `validate` found room;
+    `warnings` as given.
   - `plan`: each written channel is the implementation's own `complete(fit(…).slots, { hints })`
     with that channel's filters, preamp and hints; the right channel is written apart exactly
     where the profile's channels are independent, `perChannel` is true and `right` is given; a

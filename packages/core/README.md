@@ -19,7 +19,8 @@ and say what the write carries (`writesPreamp`, `perChannel`) so it sends the pr
 right channel only where they go. Reading from one: decode.
 While editing: `validateList`.
 
-To load profiles, use [`@potatosalad775/eqcaps-client`](https://www.npmjs.com/package/@potatosalad775/eqcaps-client).
+To load profiles, use
+[`@potatosalad775/eqcaps-client`](https://www.npmjs.com/package/@potatosalad775/eqcaps-client).
 The format definition is
 [docs/SPEC.md](https://github.com/potatosalad775/eqcaps/blob/main/docs/SPEC.md) (v1, frozen).
 
