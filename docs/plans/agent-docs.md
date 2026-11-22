@@ -55,6 +55,34 @@ the vendor app comes first, and agents followed CLAUDE.md (the Space II commit, 
   the plans README still said `feat/device-controls`, now merged; SPEC example F mentioned the
   importer; lines past 100 columns rewrapped (SPEC changes are editorial only).
 
+## Done (2026-11-22)
+
+Rules a script can check moved out of AGENTS.md into checks that fail the build.
+
+- **`scripts/docs-check.ts`**, in `npm run check`, reads the live docs (and, for citations, the
+  sources' comments): relative links and their `#` headings resolve; every `D<n>` is a decision in
+  DECISIONS.md, or says "archived" when only `history/decisions.md` has it; every `SPEC`,
+  `INSPECTOR` or `ARCHITECTURE §N`, and a bare `§N` inside those docs, is a numbered heading;
+  backticked repository paths and `npm run` scripts exist (plans left out, as dated notes); prose
+  lines fit 100 columns where they can be wrapped; every plan has a row in the plans README. Two
+  findings are right as written and listed in its `EXCEPTIONS`, which fails when one goes unused.
+  Its first run asked for about 30 lines rewrapped, and found `docs/research/` describing a
+  superseded design as current (D29, archived; D39 replaced it). `docs/research/` (prior art and
+  a measurement script, both from before v1) was removed the same day: nothing would read it
+  again, and SPEC and INSPECTOR no longer link to it.
+- **`eslint.config.js`** derives `no-restricted-imports` from one table of what each package's
+  `src/` may import (ARCHITECTURE §5), bans every non-relative import in `core`, and keeps browser
+  imports and the `navigator`, `window` and `document` globals inside the bridge's `src/browser/`
+  (§9). It also refuses a path into another package's `src/`: three such imports (two bridge
+  tests, `scripts/conformance.ts`) now use the package name, and `conformance.ts` runs with
+  `--conditions=eqcaps:source`. `scripts/boundaries.test.ts` runs each restriction through ESLint.
+- **AGENTS.md lines replaced:** "Workspace packages import each other by package name"; "Hand-wrap
+  Markdown at 100 columns"; "Make `schema/`, `data/`, `core` or `client` depend on `device-bridge`;
+  give `core` a dependency or environment types" (core's environment types are already refused by
+  its build, whose `types` is empty); "Let a handler see browser APIs (only `src/transport.ts`)";
+  and "Call `push`, `setEnabled` or `writeControl` from the inspector", which
+  `apps/inspector/src/lib/no-writes.test.ts` already enforces.
+
 ## Next
 
 - Step 4, the fresh-session check.

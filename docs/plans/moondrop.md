@@ -108,7 +108,8 @@ here is from the app, and the profiles stay `draft`.
   (`outputReportSize`), 63 bytes on `moondrop-usb-hid` when it declares none. Never shorter than
   the frame.
 - Moondrop's ids stay in the Walkplay groups: a group yields to a device profile on the same pair,
-  and CI no longer calls that a collision (D43, 2026-11-11). The Kiwi Ears carve-outs are undone too.
+  and CI no longer calls that a collision (D43, 2026-11-11). The Kiwi Ears carve-outs are undone
+  too.
 
 Needs a bridge release before this data reaches `main`: a bridge that doesn't know an option drops
 the protocol (AGENTS.md).

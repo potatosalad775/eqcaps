@@ -8,7 +8,7 @@
 > the format is defined. From here on it changes only by minors that add (§15); anything else
 > needs v2. Published under `/v1/`.
 > MUST / SHOULD / MAY are used as in RFC 2119. Rationale for each choice is in
-> [DECISIONS.md](DECISIONS.md), and the evidence is in [research/prior-art.md](research/prior-art.md).
+> [DECISIONS.md](DECISIONS.md).
 
 ## 1. Concepts
 
@@ -157,8 +157,9 @@ Semantic rules (checked by the validator, not expressible in JSON Schema):
   MUST use `values`. Tooling can generate these.
 
 **Tolerance.** All membership tests use `ε = 1e-9` relative:
-`near(a, b) ⇔ |a − b| ≤ ε · max(1, |a|, |b|)`. A value is on a grid if `near(x/step, round(x/step))`.
-This is what makes non-decimal steps like `1/14` (written `0.07142857142857142`) work.
+`near(a, b) ⇔ |a − b| ≤ ε · max(1, |a|, |b|)`. A value is on a grid if
+`near(x/step, round(x/step))`. This is what makes non-decimal steps like `1/14` (written
+`0.07142857142857142`) work.
 
 ## 5. Slots
 
@@ -270,16 +271,15 @@ expression language (DECISIONS D11).
 ## 8. Realization (not in v1)
 
 A profile says which values an engine accepts, not how the filters it builds from them sound. Some
-engines are reported to build a different filter from the cookbook meaning of the values they
-take, by a constant factor (a band placed ×0.9775 off the frequency sent) or by one that depends on
-another field (a Q that narrows as gain grows)
-([prior-art §2.1](research/prior-art.md#21-realization-compensation-devicepeq-upstream)). v1
-records neither: such behaviour changes with firmware and vendor customization, only acoustic
-measurement shows it, and vendor apps don't correct for it. Domains hold what the engine is told
-(§1), and consumers send the values the user asks for. A reported quirk may be noted in
-`meta.notes` (DECISIONS D39). Where the vendor's own app converts a value before sending it (sends
-half the frequency, say), that conversion is wire format: the profile's `protocol` options say so
-and the device bridge applies it (§9); the domain stays in the app's units.
+engines are reported to build a different filter from the cookbook meaning of the values they take,
+by a constant factor (a band placed ×0.9775 off the frequency sent) or by one that depends on
+another field (a Q that narrows as gain grows). v1 records neither: such behaviour changes with
+firmware and vendor customization, only acoustic measurement shows it, and vendor apps don't correct
+for it. Domains hold what the engine is told (§1), and consumers send the values the user asks for.
+A reported quirk may be noted in `meta.notes` (DECISIONS D39). Where the vendor's own app converts a
+value before sending it (sends half the frequency, say), that conversion is wire format: the
+profile's `protocol` options say so and the device bridge applies it (§9); the domain stays in the
+app's units.
 
 ## 9. Preamp, channels and protocol
 

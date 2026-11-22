@@ -2,7 +2,7 @@
 // database's devices.
 
 import type { Profile } from '@potatosalad775/eqcaps-core';
-import { validateRepository } from '../../build/src/node.ts';
+import { validateRepository } from '@potatosalad775/eqcaps-build/node';
 import { protocolOf, type Protocol } from '../src/index.ts';
 
 /** Every published profile of the repository, flattened, by id. */

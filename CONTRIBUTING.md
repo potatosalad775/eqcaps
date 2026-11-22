@@ -99,7 +99,7 @@ invariants there hold for every change.
 
 ```sh
 npm run lint           # Prettier + ESLint
-npm run check          # generated files and conformance vectors up to date + typecheck
+npm run check          # generated files and conformance vectors up to date, docs, typecheck
 npm test
 npm run build
 npm run codegen        # after editing schema/v1/profile.schema.json

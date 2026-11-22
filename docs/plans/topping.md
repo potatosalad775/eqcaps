@@ -148,11 +148,11 @@ the other four are unchecked and `draft`.**
   `channels: "independent"`, and the handler is `perChannel` for the `dx5` family. A push takes
   the right channel as `right`, in the app's frame order; a pull returns it (word 7 and words 41
   on of the stored config); after a push that names `right` the handler sets or clears the
-  config's bit in the L/R-mode mask, as above. The simulated device keeps both channels and the mask. The other
-  four families stay linked: the app's editor is the same for them, but the device keeping the
-  channels apart was seen on the DX5 II only, and the app keeps the mask differently on the DX9
-  Discrete (a save never clears a bit) and the E50 II (for a moment after writing one, it ignores
-  a mask from the device that doesn't match).
+  config's bit in the L/R-mode mask, as above. The simulated device keeps both channels and the
+  mask. The other four families stay linked: the app's editor is the same for them, but the device
+  keeping the channels apart was seen on the DX5 II only, and the app keeps the mask differently on
+  the DX9 Discrete (a save never clears a bit) and the E50 II (for a moment after writing one, it
+  ignores a mask from the device that doesn't match).
 
 ## Deliberate deviations from the app
 

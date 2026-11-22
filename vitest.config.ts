@@ -10,6 +10,9 @@ export default defineConfig({
 		alias: {
 			'@potatosalad775/eqcaps-core': src('core'),
 			'@potatosalad775/eqcaps-client': src('client'),
+			'@potatosalad775/eqcaps-build/node': fileURLToPath(
+				new URL('./packages/build/src/node.ts', import.meta.url)
+			),
 			'@potatosalad775/eqcaps-build': src('build'),
 			'@potatosalad775/eqcaps-device-bridge/browser': fileURLToPath(
 				new URL('./packages/device-bridge/src/browser/index.ts', import.meta.url)

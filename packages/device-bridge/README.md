@@ -1,10 +1,10 @@
 # @potatosalad775/eqcaps-device-bridge
 
 Reads and writes parametric EQ on audio hardware: FiiO, Walkplay-chipset dongles, Moondrop,
-KT Micro, Fosi Audio, Qudelix, Topping, JDS Labs, Nothing, Tanchjim, Edifier, Audeze and others, every
-hardware device in the [eqcaps](https://github.com/potatosalad775/eqcaps) database. Protocols
-ported from [devicePEQ](https://github.com/jeromeof/devicePEQ), and changed to do what each
-vendor's own app does where one is known.
+KT Micro, Fosi Audio, Qudelix, Topping, JDS Labs, Nothing, Tanchjim, Edifier, Audeze and others,
+every hardware device in the [eqcaps](https://github.com/potatosalad775/eqcaps) database. Protocols
+ported from [devicePEQ](https://github.com/jeromeof/devicePEQ), and changed to do what each vendor's
+own app does where one is known.
 
 - **No platform types.** Handlers talk to two small transport interfaces (`HidTransport`,
   `StreamTransport`). Browser transports for WebHID, Web Serial and Web Bluetooth are in
@@ -144,9 +144,10 @@ device's EQ memories), `disconnectOnSave`, `baudRate` (serial; default 115200 ov
 Bluetooth) and `experimental`. A preset marked `"bypass": true` is the one that turns the EQ off:
 `setEnabled(false)` selects it, and reading it back reports no current slot. Only `fiio-usb-hid`
 and `ktmicro-usb-hid` turn the EQ off with a preset (KT Micro's default is slot 2, unless its
-`enableRegister` is set); the others refuse a `bypass` preset. Presets marked `"writable": true` (format 1.1) are the user memories a
-write may target; once any preset is marked, the unmarked ones are built-in curves (SPEC §9). The
-bridge passes the mark on in `capabilities.slots` and doesn't enforce it. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
+`enableRegister` is set); the others refuse a `bypass` preset. Presets marked `"writable": true`
+(format 1.1) are the user memories a write may target; once any preset is marked, the unmarked ones
+are built-in curves (SPEC §9). The bridge passes the mark on in `capabilities.slots` and doesn't
+enforce it. A new option goes in `src/protocols.ts` (`OPTIONS`) and this table.
 
 ## Presets a device keeps as a list
 

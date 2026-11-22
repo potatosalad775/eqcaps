@@ -8,8 +8,8 @@ first app on them. How the parts fit: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.m
 ## Commands
 
 - `npm run lint` (`npm run format` fixes, data files included) · `npm run check` (generated files,
-  vectors, typecheck) · `npm test` · `npm run build`. Run lint, check and test before a commit;
-  `npm run data:validate` too after touching `data/`.
+  vectors, docs, typecheck) · `npm test` · `npm run build`. Run lint, check and test before a
+  commit; `npm run data:validate` too after touching `data/`.
 - `npm run codegen` after editing `schema/v1/profile.schema.json` (types and value lists);
   `npm run conformance` after changing engine behaviour.
 - `npm run data:walkplay` regenerates the Walkplay groups' `match.usb` from
@@ -60,10 +60,9 @@ folder exists (D52).
   `/v1/` on every push, and an older bridge drops a protocol it can't read.
 - Test the bridge against device answers and codec round trips, never devicePEQ's bytes.
 - Put testable inspector logic in plain `.ts` under `apps/inspector/src/lib/`; keep routes thin.
-- Workspace packages import each other by package name; relative imports carry `.ts`; scripts are
-  `.ts` run by Node (`--conditions=eqcaps:source` where they need sources).
-- Hand-wrap Markdown at 100 columns (it isn't run through Prettier). Cite decisions as `D39`,
-  SPEC and INSPECTOR sections as `SPEC §9`; those numbers are stable.
+- Relative imports carry `.ts`; scripts are `.ts` run by Node (`--conditions=eqcaps:source` where
+  they need sources).
+- Cite decisions as `D39`, SPEC and INSPECTOR sections as `SPEC §9`; those numbers are stable.
 - Record work in progress in `docs/plans/<effort>.md` and its README row.
 
 ## Never
@@ -73,11 +72,8 @@ folder exists (D52).
   `bluetooth_tools/`. Facts only, cited as sources (D25).
 - Put app-specific things in profiles (measurement names, store ids, UI concepts), or bytes,
   frames, commands or wire grids: `protocol` only names a handler and its settings (D2, D42).
-- Make `schema/`, `data/`, `core` or `client` depend on `device-bridge`; give `core` a dependency
-  or environment types.
-- Let a handler see browser APIs (only `src/transport.ts`), or match identities (the client does).
+- Let a handler match identities (the client does).
 - Let a codec clamp, pad or convert: round onto the wire grid, else throw a `BridgeError` (D33).
-- Call `push`, `setEnabled` or `writeControl` from the inspector (invariant 9, D40).
 - Write `LSQ`/`HSQ` in a profile: types are Equalizer APO's `PK LSC HSC LPQ HPQ BP NO AP` (D22).
 - Edit by hand: `schema/v1/source.schema.json`, `*.generated.ts`, `conformance/v1/*.json`, the
   `match.usb` of `data/profiles/walkplay/walkplay-schemeno*-devices.json` (edit `extra` in the

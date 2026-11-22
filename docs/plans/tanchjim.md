@@ -104,11 +104,11 @@ found under another vendor id.
   0x4B (75) and 0x54 (84), 10 bytes in and out, and input report 1, 1 byte. The app uses only
   0x4B; 0x54 is left alone. `productId` added to the profile's match.
 - Inspector pull: bands read in Hz, so the FOLA is not a half-frequency model.
-- uniPEQ push (dev, with tarballs from `release --pack` and the local build): the first write took, the next one hung. After the
-  commit the FOLA re-enumerates (it drops out of the audio device list for a moment), which is
-  what the app's close-after-save and Android's repeated permission dialog follow from.
-  `disconnectOnSave: true` on `tanchjim-ktmicro`: with it, every write took, and the Android app
-  read them back as written.
+- uniPEQ push (dev, with tarballs from `release --pack` and the local build): the first write took,
+  the next one hung. After the commit the FOLA re-enumerates (it drops out of the audio device list
+  for a moment), which is what the app's close-after-save and Android's repeated permission dialog
+  follow from. `disconnectOnSave: true` on `tanchjim-ktmicro`: with it, every write took, and the
+  Android app read them back as written.
 - Reconnecting in Chrome after the drop sometimes needs the device chooser again, sometimes not.
 - Still to do before `maintainer-verified`: one band of each type by ear, and replug-and-read.
 

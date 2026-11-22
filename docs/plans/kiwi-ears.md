@@ -9,10 +9,10 @@ on; no other Kiwi Ears device.
 
 ## What the app does
 
-- **Transport**: WebHID, output and input report 0x4B, 10 bytes, `[register, 0, 0, 0, cmd, 0, d0…d3]`,
-  usage page 0x000C. `R` 0x52, `W` 0x57, `S` 0x53 save to flash, `C` 0x43 clear flash. Every command
-  waits for an echo of register and cmd, 5 s; a write or save checks byte 6 against the model's flag
-  and fails on anything else.
+- **Transport**: WebHID, output and input report 0x4B, 10 bytes,
+  `[register, 0, 0, 0, cmd, 0, d0…d3]`, usage page 0x000C. `R` 0x52, `W` 0x57, `S` 0x53 save to
+  flash, `C` 0x43 clear flash. Every command waits for an echo of register and cmd, 5 s; a write or
+  save checks byte 6 against the model's flag and fails on anything else.
 - **Three register maps**, chosen by USB id:
 
   | Model | EQ switch | Bands (freq/gain, Q) | Write flag | Global gain |
@@ -25,8 +25,8 @@ on; no other Kiwi Ears device.
   `3302:20E3` AD1; `3302:12C3` KT-12C3L USB D1; `31B2:3016` S-Link (KT_3016L); `31B2:0113` AD1 Pro;
   `31B2:0117` Allegro Nano; `31B2:011B` Coda; `0BDA:0023` Allegro BAL (all KT_0211L unless marked);
   `31B2:3001` S-Link Type-C 0.78 Mic; `31B2:3030` Stardust; `31B2:1132` Chorus; `31B2:3006` KT-1132L
-  USB DAC (all KT_1132L). The list shown to users names the Belle but gives it no id; `0x3006` is the
-  only id left for it. `3302:2017` and `12C3` aren't in that list.
+  USB DAC (all KT_1132L). The list shown to users names the Belle but gives it no id; `0x3006` is
+  the only id left for it. `3302:2017` and `12C3` aren't in that list.
 - **EQ**: 5 bands. The type selector is `disabled` and always peaking; the Q write's type byte is
   always 0, and a read ignores it. Freq 20–20000 whole Hz, gain ±12 and Q 0.1–10, 0.1 steps in the
   editor. Neighbouring bands stay strictly ascending; on connect, a device that reads out of order
@@ -67,12 +67,13 @@ on; no other Kiwi Ears device.
 ## Done
 
 - `ktmicro-usb-hid`: options `enableRegister`, `writeAck`, `bandDelay`; controls `globalGain`,
-  `globalGainDb`. Other brands keep the old behaviour by default. `HandlerCapabilities.readsEnabled`,
-  so a method that depends on options doesn't claim the capability for Tanchjim or Moondrop.
+  `globalGainDb`. Other brands keep the old behaviour by default.
+  `HandlerCapabilities.readsEnabled`, so a method that depends on options doesn't claim the
+  capability for Tanchjim or Moondrop.
 - Bases `kiwi-ears-kt0211l` (format 1.2), `kiwi-ears-kt0211l-linear-gain`, `kiwi-ears-kt1132l`,
   `kiwi-ears-kt3016l`.
-- Allegro Mini, Allegro Pro, Chorus and S-Link moved onto them. New: Allegro Nano, Allegro BAL, Coda,
-  AD1, AD1 Pro, Belle, Stardust, S-Link (Type-C 0.78 Mic), USB D1, KT-0211L USB DAC.
+- Allegro Mini, Allegro Pro, Chorus and S-Link moved onto them. New: Allegro Nano, Allegro BAL,
+  Coda, AD1, AD1 Pro, Belle, Stardust, S-Link (Type-C 0.78 Mic), USB D1, KT-0211L USB DAC.
   `kiwi-ears-kt0211l-devices` is deprecated, replaced by the AD1 Pro.
 - Recorder adapter `kiwi-ears-eq`, no read-all (it reads on connect), and its checks.
 
@@ -91,23 +92,24 @@ The recorder's wrapper was injected into the page, as the installed userscript w
 - **Save**: answered, USB drops about 40 ms later, back 850 ms after that as a new `HIDDevice`, so
   `disconnectOnSave` is right. Register 0x24, band and gain all persist.
 - **0x24 held 3 as found.** A zeroed read answers `03 00 00 00`, so the 3 is the device's and not an
-  echo. The app shows that as off, and can only write 1 or 0, each read back as written. So the app's
-  on and the state as found differ, and nothing but a raw write gets 3 back. Following the app
+  echo. The app shows that as off, and can only write 1 or 0, each read back as written. So the
+  app's on and the state as found differ, and nothing but a raw write gets 3 back. Following the app
   (owner's decision): `eqEnabled` is false at 3, and a push writes 1.
 - **3 by ear (owner, 2026-11-09)**: writing 3 to 0x24 sounds like neither 0 nor 1, so it is a third
   state and not another "on". What it does isn't known. The bridge doesn't write it on Kiwi devices
-  (tested). devicePEQ's and the older handler's "custom slot" is exactly that write, so a device that
-  has been driven by them may hold 3; whether this Mini's came from there is unknown.
+  (tested). devicePEQ's and the older handler's "custom slot" is exactly that write, so a device
+  that has been driven by them may hold 3; whether this Mini's came from there is unknown.
 - **Elsewhere in the scan**: 0x20–0x23 look like two more bands (8 kHz, 10 kHz, Q 0.707, gain 0) the
   app doesn't use; 0x48–0x4D the product name, 0x5B the USB ids, 0x66 `00 02 00 00`.
-- **Recorder bug, fixed (version 3)**: a send was logged when it resolved, so a fast answer could land
-  before its request and pair with the wrong one. Eight events in the fixture are put back in order,
-  as its notes say. The older recordings still pass.
+- **Recorder bug, fixed (version 3)**: a send was logged when it resolved, so a fast answer could
+  land before its request and pair with the wrong one. Eight events in the fixture are put back in
+  order, as its notes say. The older recordings still pass.
 - Left as found: band flat, step 13, 0x24 = 3, saved and read back.
 
-The owner then ran every feature from a uniPEQ debug build on Android (`npm run android -- --eqcaps`,
-this bridge and data over wireless adb): identify, read, write and save, reconnect, EQ switch, global
-gain, replug. All worked by ear, so the profile is `maintainer-verified`.
+The owner then ran every feature from a uniPEQ debug build on Android
+(`npm run android -- --eqcaps`, this bridge and data over wireless adb): identify, read, write and
+save, reconnect, EQ switch, global gain, replug. All worked by ear, so the profile is
+`maintainer-verified`.
 
 ## Global gain stays a control (owner, 2026-11-09)
 

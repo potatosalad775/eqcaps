@@ -181,12 +181,12 @@ on a 5K and a 5K Plus first: both EQs read and written, neither touching the oth
 Rejected: a profile per EQ sharing the match under different `engine` labels (SPEC §3), which
 ties at every connect, so the user is asked which EQ before anything is read; and a handler
 option or a switch held by the bridge, which is session state posing as device data and leaves
-the profile's band count wrong for the 5K Plus's 20-band headphone EQ. The list sits in `protocol` because its ids are the handler's
-vocabulary, like controls, and the index already carries `protocol`; the engine still never
-reads it. It covers EQs that differ in band count and presets only: one with other filter types
-or domains still needs its own profile. The device's mode that swaps both EQs for one larger EQ
-(Qudelix's single-EQ mode) is not modelled: the handler drives that EQ as the profile's own and
-reports its band count.
+the profile's band count wrong for the 5K Plus's 20-band headphone EQ. The list sits in `protocol`
+because its ids are the handler's vocabulary, like controls, and the index already carries
+`protocol`; the engine still never reads it. It covers EQs that differ in band count and presets
+only: one with other filter types or domains still needs its own profile. The device's mode that
+swaps both EQs for one larger EQ (Qudelix's single-EQ mode) is not modelled: the handler drives that
+EQ as the profile's own and reports its band count.
 
 *2026-11-21:* the bridge no longer takes the EQ per operation: it hands out the device viewed as
 one EQ. `openDevice` gives it viewed as the EQ the profile describes, and `eq(id)` as a listed

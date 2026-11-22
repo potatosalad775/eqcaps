@@ -35,9 +35,10 @@ copied (D25), and cited as a `vendor-app` source.
 - Data: base `nicehck-walkplay` (the app's limits), `nicehck-stringsnow`, `nicehck-tears`,
   `nicehck-10th-anniversary-edition`, `nicehck-pureaural` (format 1.2, with controls). `0x4322`
   left the `walkplay-schemeno16-devices` group, whose match entry was the same.
-- Recorder: adapter `nicehck-app` (**Read all** calls the app's connect-time read), `recording-nicehck.ts` checks, and `RecordingReplay` answers on input reports.
-  Checked by a synthetic recording against `fake-walkplay.ts`; the adapter was
-  smoke-tested on the live page without a device.
+- Recorder: adapter `nicehck-app` (**Read all** calls the app's connect-time read),
+  `recording-nicehck.ts` checks, and `RecordingReplay` answers on input reports. Checked by a
+  synthetic recording against `fake-walkplay.ts`; the adapter was smoke-tested on the live page
+  without a device.
 
 ## Next
 
@@ -88,22 +89,22 @@ copied (D25), and cited as a `vendor-app` source.
    A positive pre-gain (+3) reads back as written. Its flat EQ in slot 101 was restored with the
    handler's frames.
 
-   StringSnow done on 2026-10-28, firmware 0.4 (`test/recordings/2026-10-28-nicehck-stringsnow.json`),
-   maintainer-verified: it agreed with no changes. USB product name `StringSnow DSP`. Sleep mode
-   writes preset 6 and off rewrites the preset before it (3). Its custom EQ in slot 101 was
-   restored with the handler's frames.
+   StringSnow done on 2026-10-28, firmware 0.4
+   (`test/recordings/2026-10-28-nicehck-stringsnow.json`), maintainer-verified: it agreed with no
+   changes. USB product name `StringSnow DSP`. Sleep mode writes preset 6 and off rewrites the
+   preset before it (3). Its custom EQ in slot 101 was restored with the handler's frames.
 
    All four of the owner's devices are recorded. What was expected to settle:
    - Product names: `NICEHCK PureAural`, `StringSnow DSP`, `Tears DSP`, `10th Anniversary
      Edition`, in each match entry. The SchemeNo16 group could take `0x4322` back: the PureAural
-     would still win, by specificity (vid+pid+name) and as a non-group profile (SPEC §8). devicePEQ's
-     groups come from Walkplay's product catalog (its `walkplayPreprocessor/walkplay.json`, 367
-     products with real vendor/product pairs and a SchemeNo each); its generator keeps one vendor
-     list and per-scheme product lists, so our groups match every combination (SchemeNo16: 19
-     vendor ids × 79 product ids, of which 80 pairs are in the catalog). The catalog lists
-     `0x3302:0x4322` as SchemeNo16 with no name; StringSnow, Tears and the 10th Anniversary
-     Edition aren't in it. Whether to rebuild the groups from the real pairs is open. *2026-11-12:*
-     done, from the vendor's own catalog (D51, walkplay.md).
+     would still win, by specificity (vid+pid+name) and as a non-group profile (SPEC §8).
+     devicePEQ's groups come from Walkplay's product catalog (its
+     `walkplayPreprocessor/walkplay.json`, 367 products with real vendor/product pairs and a
+     SchemeNo each); its generator keeps one vendor list and per-scheme product lists, so our groups
+     match every combination (SchemeNo16: 19 vendor ids × 79 product ids, of which 80 pairs are in
+     the catalog). The catalog lists `0x3302:0x4322` as SchemeNo16 with no name; StringSnow, Tears
+     and the 10th Anniversary Edition aren't in it. Whether to rebuild the groups from the real
+     pairs is open. *2026-11-12:* done, from the vendor's own catalog (D51, walkplay.md).
    - The commit: the handler's works (by ear, above); no `commit` option.
    - `setEnabled(false)` doesn't turn the EQ off on the PureAural, and the app has no EQ off
      switch: `enableCommand: false` in the `nicehck-walkplay` base, for every NICEHCK device.
