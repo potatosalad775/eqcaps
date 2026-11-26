@@ -4,8 +4,7 @@ import { checkDocs, type Exception, type Repo } from './docs-check.ts';
 /** The docs every check reads, small. */
 const BASE: Record<string, string> = {
 	'package.json': JSON.stringify({ scripts: { check: 'tsc' } }),
-	'docs/DECISIONS.md': '# Decisions\n\n### D1. Current\n',
-	'docs/history/decisions.md': '# Decisions\n\n### D2. Old\n',
+	'docs/DECISIONS.md': '# Decisions\n\n### D1. Current\n\n## Archived\n\n### D2. Old (archived)\n',
 	'docs/SPEC.md': '# Spec\n\n## 9. Preamp\n\n### 9.1 Controls\n',
 	'docs/INSPECTOR.md': '# Inspector\n\n## 3. Guided reads\n',
 	'docs/ARCHITECTURE.md': '# Architecture\n\n## 5. Package boundaries\n',
@@ -49,8 +48,7 @@ describe('checkDocs', () => {
 					'docs/a.md': lines,
 					'packages/core/src/a.ts': '// D7',
 					'packages/core/src/a.json': '"D7"',
-					'conformance/v1/a.ts': '// D7',
-					'docs/history/plan.md': 'D7'
+					'conformance/v1/a.ts': '// D7'
 				})
 			)
 		).toEqual(['docs/a.md:3', 'docs/a.md:4', 'packages/core/src/a.ts:1']);

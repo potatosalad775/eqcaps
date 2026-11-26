@@ -1,9 +1,8 @@
 # Decisions
 
 The design decisions that shape eqcaps today, each with its main reason. Numbers are stable: code
-comments and other docs cite them (`D39`). The full log, with what was rejected, dated amendments
-and the decisions since superseded or removed (D23, D29, D31, D38), is archived in
-[history/decisions.md](history/decisions.md).
+comments and other docs cite them (`D39`). The decisions since superseded or removed are listed
+under [Archived](#archived), with where the full log of the build-out is kept.
 
 To change a decision, edit its entry here with a dated note, and update [SPEC.md](SPEC.md) in the
 same change if the format is affected. A new decision takes the next free number (D56). The rules
@@ -468,3 +467,24 @@ The user changes the EQ in the vendor's own app, step by step, and the inspector
 each step. The vendor app's limits become a `vendor-app` source whose `ref` is the evidence file,
 which records the full read-back per step so a reviewer can recompute every conclusion
 (INSPECTOR §3).
+
+## Archived
+
+Decisions that no longer apply. Their numbers are not reused, and a citation of one says
+"archived". The full log of the build-out (2026-10-02 to 2026-10-10), with what each decision
+rejected and its dated amendments, and the build-out plan beside it, were kept under docs/history
+until v0.6.0 and are in the repository's history:
+[decisions.md](https://github.com/potatosalad775/eqcaps/blob/v0.6.0/docs/history/decisions.md),
+[plan.md](https://github.com/potatosalad775/eqcaps/blob/v0.6.0/docs/history/plan.md).
+
+### D23. Seed data is imported and marked draft (archived)
+Done once, on 2026-10-02; `data/` has been edited by hand since (D26).
+
+### D29. Domains are written values; realization laws are profile data (archived)
+Superseded by D39.
+
+### D31. Seed import: what was taken and how (archived)
+The importer was removed on 2026-10-04; its last version is in commit `1b3dc3c`.
+
+### D38. Probe mode: engine, strategy and evidence (archived)
+Removed the day it was accepted, with the `probe` source kind (D40).
