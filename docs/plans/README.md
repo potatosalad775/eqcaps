@@ -1,21 +1,21 @@
 # Plans
 
-Work in progress, one file per effort: what it is for, what is done, what is next. A plan is a
-working note, not a source of truth. The format is defined only in [../SPEC.md](../SPEC.md),
-decisions are recorded in [../DECISIONS.md](../DECISIONS.md), and what the project is now lives in
-[../ARCHITECTURE.md](../ARCHITECTURE.md). Once the work has landed and nothing cites the plan, it
-is deleted: the repository's history keeps it.
+Work in progress, one file per effort: what it is for, what was found, what is open. A plan is a
+working note, not a source of truth, and not a changelog: `git log` has what changed. The format is
+defined only in [../SPEC.md](../SPEC.md), decisions are recorded in
+[../DECISIONS.md](../DECISIONS.md), and what the project is now lives in
+[../ARCHITECTURE.md](../ARCHITECTURE.md). Once the work has landed and nothing cites the plan, it is
+deleted: the repository's history keeps it.
 
 | Plan | Status |
 | --- | --- |
-| [fosi-audio.md](fosi-audio.md) | Device controls (format 1.2), the DS3 (recorded, maintainer-verified) and the WebHID recorder done; inspector support next; the C1, C3, ZH1 and ZH3 re-read (2026-11-26: same EQ protocol, 8 bands) and waiting on their preset layout (a recording, or the handler writing after the built-in presets as the app does) |
-| [nicehck.md](nicehck.md) | Walkplay firmware and controls, four NICEHCK profiles (recorded, maintainer-verified) and the recorder adapter done; the Octave waits for an owner |
-| [walkplay.md](walkplay.md) | Walkplay's own app read against walkplay-hid; the commit now follows the vendor apps (2026-11-01); recorder adapter done; the groups are generated from its product catalog; schemes 17 and 19 moved to the KT Micro handler, the other groups and 12 of the 19 other-brand device profiles aligned with Walkplay's apps (2026-11-12; Q and pre-gain take the web app's wider limits); a bridge release before the data reaches `main` |
-| [tanchjim.md](tanchjim.md) | Tanchjim's KT Micro devices follow the vendor app (handler options, two bases, 8 new profiles); FOLA identified; the app's Walkplay-chip (TTGK) devices profiled and written as the app does; Space II retest next; Luna has no EQ |
-| [agent-docs.md](agent-docs.md) | AGENTS.md, the `read-vendor-app` skill and D50 done (2026-11-01); its checkable rules moved into `scripts/docs-check.ts` and ESLint import boundaries (2026-11-22); a fresh-session check next |
-| [kiwi-ears.md](kiwi-ears.md) | Kiwi Ears aligned with its web EQ (handler options, four bases, 10 new profiles, gain controls); Allegro Mini recorded and maintainer-verified; next a bridge release before the data reaches `main` |
-| [moondrop.md](moondrop.md) | Moondrop aligned with its web app (handler options, `globalGain`, new bases, 7 new profiles); nothing confirmed on a device yet; a bridge release before the data reaches `main` |
-| [fiio.md](fiio.md) | FiiO, Snowsky and JadeAudio aligned with FiiO Control (limits, types, presets, `bandCount()`, 12 new profiles); re-aligned with 4.4.6 (2026-11-26: TS13, Game Engine Mini and ROO, the Warmer Nano deprecated for the TS13, presets of four models); K17 family, K15 and recording next |
-| [qudelix.md](qudelix.md) | Qudelix's Chrome app read (2026-11-19): two bases, the 5K updated, 5K Plus and T71 new, all `draft` and `experimental`; the user EQ in the data, the headphone EQ listed as its other EQ (format 1.3, D53, 2026-11-20); a 5K and a 5K Plus checked 2026-11-20 (both EQs read and written, a save, the limits; captures kept), their protocols no longer `experimental`; the headphone EQ's left and right apart (format 1.5, D55, 2026-11-21; tried through the bridge on a 5K and a 5K Plus; the 5K Plus's handler now asks for the mode and configuration on every operation, as another program's change went unannounced); both `maintainer-verified`; each EQ's headroom, the crossfeed, the DAC filter and the gain as controls (format 1.6, D57, 2026-11-22; tried on a 5K and a 5K Plus); a bridge release before the data reaches `main` |
-| [topping.md](topping.md) | Topping Home's web app read (2026-11-20): handler `topping-usb-hid` (five families), base `topping-home` and five profiles (DX1 II, DX5 II, E50 II, DX9 Discrete, D900), `draft` but for the DX5 II; reads, writes, creating, renaming and deleting configs, and the DX5 II's settings (controls) tried on a DX5 II, the app recorded with it and checked (`maintainer-verified`), the other four unchecked; left and right apart on the DX5 II (format 1.4, D54, 2026-11-21), its trial through the bridge next; a bridge release before the data reaches `main` |
-| [deepening.md](deepening.md) | Four modules callers were writing for themselves (architecture review, 2026-11-21): the bridge device viewed as one EQ (D53), the write recipe as `plan` (D56), connecting (the inspector's read session, `openReader`, `protocolFor`, `ties`; D40) the editor's rules, the schema's value lists and typed option readers (D13) and capabilities said once done (2026-11-22); next a bridge release, breaking, that apps must follow |
+| [fosi-audio.md](fosi-audio.md) | The DS3 recorded and `maintainer-verified`; next the inspector reading the firmware and controls, and profiles for the C1, C3, ZH1 and ZH3 once their preset layout is known (a recording, or the handler writing after the built-in presets as the app does) |
+| [nicehck.md](nicehck.md) | All four of the owner's NICEHCK devices recorded and `maintainer-verified`; the Octave waits for an owner to record it |
+| [walkplay.md](walkplay.md) | Walkplay's web and Android apps followed by every group (schemes 17 and 19 on the KT Micro handler) and 12 of the 19 other-brand profiles; next a recording of a Walkplay-scheme device, the pre-gain in byte 34, noise reduction, and the seven profiles the catalog can't place |
+| [tanchjim.md](tanchjim.md) | The KT Micro (FeiFan) and Walkplay (TTGK) devices follow the app; the FOLA tried, not yet `maintainer-verified`; next its by-ear pass, the TTGK coefficient test, a recording and the Space II retest; the Luna has no EQ |
+| [agent-docs.md](agent-docs.md) | AGENTS.md, D50 and the `read-vendor-app` skill done; the rules a script can check are checks (2026-11-22); next a fresh-session check |
+| [kiwi-ears.md](kiwi-ears.md) | Follows the web EQ; the Allegro Mini recorded and `maintainer-verified`; next whether the global gain acts before or after the EQ, and the devices nobody here has |
+| [moondrop.md](moondrop.md) | Follows the web app (1.8.0); every profile `draft`, nothing confirmed on a device; next a device to test on, a recorder adapter and the newer build compared |
+| [fiio.md](fiio.md) | FiiO, Snowsky and JadeAudio follow FiiO Control 4.4.6, all `draft`; next the K17 family and the K15 over serial, a recorder adapter for the band counts, and the EQ switch |
+| [qudelix.md](qudelix.md) | The 5K and 5K Plus follow the Chrome app 4.0.3.1 and are `maintainer-verified` (both EQs, the headphone EQ's left and right apart, the settings as controls); the T71 `draft` and `experimental`; next the settings checked against the app's screen |
+| [topping.md](topping.md) | Topping Home drives five families; the DX5 II `maintainer-verified` (EQ, configs, settings, left and right apart), the other four `draft`; next recording them, their settings as controls, and the D900's config layout |

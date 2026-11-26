@@ -1,17 +1,12 @@
 # FiiO Control, against the FiiO profiles
 
-Started 2026-11-03. Branch `feat/device-controls`, after [tanchjim.md](tanchjim.md).
-
-## Goal
-
 The FiiO, Snowsky and JadeAudio profiles came from devicePEQ and were out of date: a user reported
-that the Snowsky Tiny A has 10 bands, not 5. FiiO's web app was read for facts only (D25) and is
-cited as a `vendor-app` source; the vendor's app is the reference (D50). Nothing here has run on a
-device: every profile stays `draft`.
+that the Snowsky Tiny A has 10 bands, not 5. FiiO's web app, fiiocontrol.fiio.com, is the
+reference (D50), read for facts only (D25) and cited as a `vendor-app` source: version 4.3.4 of
+2026-10-13, read on 2026-11-03, and version 4.4.6 of 2026-11-21, read on 2026-11-26. Nothing here
+has run on a device: every profile stays `draft`.
 
-Read on 2026-11-03: fiiocontrol.fiio.com, version 4.3.4 of 2026-10-13.
-
-## What the app showed
+## FiiO Control 4.3.4 (2026-11-03)
 
 - **Band count is mostly not in the app.** It asks the device (`0x18`) and never writes that
   command; only the K17 family is fixed, at 31. So the app can't confirm a count. The Tiny's 10
@@ -26,80 +21,63 @@ Read on 2026-11-03: fiiocontrol.fiio.com, version 4.3.4 of 2026-10-13.
   always sends one byte.
 - **Frames** carry a sequence number at bytes 2–3 and a CRC before `EE`, where the handler sends
   zeros.
-- FiiO's online preset service wasn't pursued.
 
-## Done
-
-- `fiio-usb-hid`: the seven type codes, two-byte presets, no band count write.
-- `bandCount()` on the device session with `capabilities.readsBandCount`, on `fiio-usb-hid` and
-  `fiio-usb-serial`: what the device reports, null when it reports 0 or the read fails. The bridge
-  doesn't reconcile it with the profile.
-- Bases: `fiio-usb-hid` Q 0.25–8; `fiio-peq-31-band-12db-wide-shelves` Q 0.4–128; new
-  `fiio-peq-10-band-12db-shelves`, `-no-all-pass`, `-no-band-pass`, `-all-filters-3-users`.
-- Profiles:
-  - Tiny A and B: 10 bands.
-  - Melody and QX11: −24…+12. Air Link and BT11: ±12, no band-pass, the app's presets.
-  - FG3: the app's presets, on a base. Air Amp: Retro (8) for Monitor (7).
-  - JIEZI: report id 7. BTR17: saves with `0x19`.
-- New profiles: BTR15, BTR19, BTR25, K13, FX25, Game Engine, JD1 Gaming, KG13, Warmer Nano, JK13,
-  Trustblu, Mage. **Their 10 bands are an assumption** (the app's default layout, noted in each
-  profile), and their product names come from the app's list, which it matches loosely.
-- Q7 and DM15 R2R aren't in the app and inherit the base's Q 0.25–8 like the rest of the family.
+The handler and the profiles follow these. `fiio-usb-hid` doesn't write the band count; it and
+`fiio-usb-serial` read what the device reports (`bandCount()`), which the bridge doesn't reconcile
+with the profile. Twelve profiles were added from the app's list: BTR15, BTR19, BTR25, K13, FX25,
+Game Engine, JD1 Gaming, KG13, Warmer Nano (now the TS13), JK13, Trustblu and Mage. **Their 10
+bands are an assumption** (the app's default layout, noted in each profile), and their product
+names come from the app's list, which it matches loosely. The Q7 and DM15 R2R aren't in the app
+and inherit the base's Q 0.25–8 like the rest of the family.
 
 ## FiiO Control 4.4.6 (2026-11-26)
 
-Read on 2026-11-26: version 4.4.6 of 2026-11-21. Every model the app lists was compared with its
-profile: its filter types, gain range, presets and report id, and whether it is driven over HID or
-serial. Facts only (D25). What changed since 4.3.4, per the app and its changelog:
+What changed since 4.3.4, per the app and its changelog:
 
 - **TS13**: 4.4.0 renamed the Warmer Nano to the TS13, and the app identifies it by the new name.
-  New `fiio-ts13`, matching both names, with the Warmer Nano as an alias. `fiio-warmer-nano` is
-  deprecated, replaced by it. 4.4.6 gave it, and the JK13, a Close EQ preset (240), now in both
-  profiles. The app drives the TS13 as it drives the JK13.
+  `fiio-ts13` matches both names and replaces `fiio-warmer-nano`. The app drives the TS13 as it
+  drives the JK13, and 4.4.6 gave both a Close EQ preset (240).
 - **Game Engine Mini** (4.4.3, beta): the app gives it everything it gives the Game Engine (filter
-  types, gain range, presets, controls). New `fiio-game-engine-mini`.
+  types, gain range, presets, controls).
 - **JadeAudio ROO** (4.3.6, beta; presets updated in 4.4.1): peaking and shelves, ±12 dB, its own
-  presets with Close EQ (240). New `jadeaudio-roo` on `fiio-peq-10-band-12db-shelves`.
+  presets with Close EQ (240).
 - **BTR19**: 4.4.0 removed its BYPASS preset (240) as unsupported, and 4.4.5 added Retro and the
   two sDamp presets (8–10). So it has no EQ-off preset.
 - **KG13**: 4.4.5 lists HiFi (416), and BYPASS (752) among its game presets. Close EQ (240) stays
   the one marked as the bypass.
 - **Oak Nano**: the app knows it as "OAK NANO", a name its profile didn't match.
 
-The new profiles' 10 bands are the app's default layout, as for the profiles of 2026-11-03.
-Everything else agrees, except what Next already lists: the K17 R2R is on serial (2; still no
-profile), the K15 (3), and the QX11's, BT11's and Air Link's modes and variants (8).
+Every other model the app lists agrees with its profile in filter types, gain range, presets,
+report id and HID or serial, except what Next lists: the K17 R2R (on serial, no profile), the K15,
+and the QX11's, BT11's and Air Link's modes and variants. The 10 bands of the TS13, Game Engine
+Mini and ROO profiles are the app's default layout, as for the profiles of 2026-11-03.
 
 ## Next
 
-Under D50, 2 and 3 don't need a recording to change; they were left because each needs a decision
+Under D50, 1 and 2 don't need a recording to change; they were left because each needs a decision
 on what a HID profile means for a device the app drives over serial.
 
-1. **Release**: this adds no handler option or control, so the data can reach `main` first. Until
-   apps have the new bridge, it refuses the presets above 255 and the filter types beyond PK, LSC
-   and HSC, as it already did for the types. uniPEQ follows the device's count through
-   `bandCount()` once it has the release.
-2. **K17, K19, K17 R2R**: the app drives them over serial with its own protocol and a heartbeat, and
-   they have no global gain, while the profiles say HID with a preamp. devicePEQ's `saveCommand`
-   0x21 is gone (2026-11-03), since it is factory reset on the rest of the family, so these save
-   with 0x19, which the app doesn't send them either: saving is unconfirmed, and the profiles say
-   so. A serial handler is the real fix. No K17 R2R profile until then.
-3. **K15**: the app uses USER 160–169 and `0xFF` for EQ off, and moved to serial in 4.3.3; the
+1. **K17, K19, K17 R2R**: the app drives them over serial with its own protocol and a heartbeat, and
+   they have no global gain, while the profiles say HID with a preamp. They save with 0x19, not
+   devicePEQ's 0x21, which is factory reset on the rest of the family, and the app sends them
+   neither: saving is unconfirmed, and the profiles say so. A serial handler is the real fix. No
+   K17 R2R profile until then.
+2. **K15**: the app uses USER 160–169 and `0xFF` for EQ off, and moved to serial in 4.3.3; the
    profile says USER 7–16 and bypass 240 over HID.
-4. **Record with the recorder** (needs an adapter for this app):
+3. **Record with the recorder** (needs an adapter for this app):
    - the band count of the Tiny A and B, LS-TC2, JA11, JIEZI and the new profiles. A device that
      got devicePEQ's or the old bridge's count write may now report the lower number;
    - whether newer firmware checks the frame's sequence and CRC;
    - the product names of the new profiles.
-5. **EQ switch `0x1A`**: the app turns it on at connect for BTR17, Oak Nano, FP3, LS-TC2 and FX17,
+4. **EQ switch `0x1A`**: the app turns it on at connect for BTR17, Oak Nano, FP3, LS-TC2 and FX17,
    and toggles it for models outside its "always on" list. `fiio-usb-hid` doesn't send it, so these
    models have no "EQ off" where no bypass preset exists. An option, if a recording agrees.
-6. **Settling time**: the app waits 1 s after selecting a preset on BTR15, BTR19 and BTR25 before
+5. **Settling time**: the app waits 1 s after selecting a preset on BTR15, BTR19 and BTR25 before
    reading bands. Add it if reads come back stale.
-7. **Writable game presets**: the app lets the KG13 edit its game presets and the Mage has
+6. **Writable game presets**: the app lets the KG13 edit its game presets and the Mage has
    GAME-USER 416–418. They are read-only here because the save carries one byte.
-8. **Modes and variants**: the QX11's game mode (`0x4014`) has its own presets; the BT11 and Air
+7. **Modes and variants**: the QX11's game mode (`0x4014`) has its own presets; the BT11 and Air
    Link have "tengtai" variants (`0x4032`, `0x4033`) with their own settings. Same EQ commands, so
    no split yet.
-9. **USB ids**: the app's filter also accepts `0x3302:0x3bc0–2`, `0x0a12:0x4007`, `0x0666:0x0888`
-   and `0x31b2:0xfff8`, without saying which models use them. Add them when a device shows up there.
+8. **USB ids**: the app also accepts `0x3302:0x3bc0–2`, `0x0a12:0x4007`, `0x0666:0x0888` and
+   `0x31b2:0xfff8`, without saying which models use them. Add them when a device shows up there.
