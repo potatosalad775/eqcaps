@@ -8,7 +8,7 @@ decisions are recorded in [../DECISIONS.md](../DECISIONS.md), and what the proje
 
 | Plan | Status |
 | --- | --- |
-| [fosi-audio.md](fosi-audio.md) | Device controls (format 1.2), the DS3 (recorded, maintainer-verified) and the WebHID recorder done; inspector support and more Fosi devices next |
+| [fosi-audio.md](fosi-audio.md) | Device controls (format 1.2), the DS3 (recorded, maintainer-verified) and the WebHID recorder done; inspector support next; the C1, C3, ZH1 and ZH3 re-read (2026-11-26: same EQ protocol, 8 bands) and waiting on their preset layout (a recording, or the handler writing after the built-in presets as the app does) |
 | [nicehck.md](nicehck.md) | Walkplay firmware and controls, four NICEHCK profiles (recorded, maintainer-verified) and the recorder adapter done; the Octave waits for an owner |
 | [walkplay.md](walkplay.md) | Walkplay's own app read against walkplay-hid; the commit now follows the vendor apps (2026-11-01); recorder adapter done; the groups are generated from its product catalog; schemes 17 and 19 moved to the KT Micro handler, the other groups and 12 of the 19 other-brand device profiles aligned with Walkplay's apps (2026-11-12; Q and pre-gain take the web app's wider limits); a bridge release before the data reaches `main` |
 | [tanchjim.md](tanchjim.md) | Tanchjim's KT Micro devices follow the vendor app (handler options, two bases, 8 new profiles); FOLA identified; the app's Walkplay-chip (TTGK) devices profiled and written as the app does; Space II retest next; Luna has no EQ |
