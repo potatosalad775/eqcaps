@@ -151,3 +151,6 @@ profiles (or the codec refuses what doesn't fit), for Walkplay's devices too.
 3. **Controls**: whether any of them outlasts a replug (the app saves none), BLUE ROSE's
    microphone gain (no read, so not a control yet), the prompt tone selection, and the battery.
 4. **Chu 2 DSP and CDSP** (KT Micro) aren't in this app; their reference is still open.
+5. **A newer build** (seen 2026-11-26) lists the same devices as the one read, plus the CM1
+   microphone (`0x35d8:0x0130`), which has no EQ in the app and so no profile. Its limits and
+   frames haven't been compared yet.

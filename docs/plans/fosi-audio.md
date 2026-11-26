@@ -58,6 +58,28 @@ copied (D25), and cited as a `vendor-app` source.
    spatial audio that turn the EQ off (`disablesEq`). The Q8 and DA30 use other protocols and
    would each need a handler.
 
+   *2026-11-26*, read again for the control center as served that day:
+   - **The same EQ protocol.** The C1, C3, ZH1 and ZH3 still send the DS3's EQ commands (0x8A to
+     0x92, the same band layout). They edit within the same limits: 20–20000 Hz, ±30 dB, Q
+     0.1–20. Each now reads 8 bands per preset, built-in or user.
+   - **The 10 bands were another EQ.** The C1's and C3's game mode has an EQ of its own, with 10
+     bands, its own presets and its own commands. That is where the C3's 10 bands came from.
+     Listing it would be the device's other EQ (D53).
+   - **Pre-gain.** The ZH1 and ZH3 clamp it to −50…0 dB.
+   - **The ZH1** now sets its other settings through a protocol of parameters by address; its EQ
+     is unchanged.
+   - **Matching.** The ZH3 shares `0x152a:0x889b` with the DS3, so its match needs a product
+     name. The app takes "Fosi Audio ZH3", "ZH3" or "Fosi ZH3", in any case.
+   - **What blocks a profile.** The app can't give a device's preset layout. It asks the device
+     how many presets it has and how many are built in (0x91), and writes only to the presets
+     after the built-in ones. The handler writes to slot 7 unless told otherwise: the DS3's first
+     user preset, which may be a built-in one on another model. So these four get no profile
+     until one of two things happens: a device of each answers 0x91 (a recording), or the handler
+     writes where the app does, after the built-in count 0x91 reports. That second route is a
+     bridge change and needs a release.
+
+   Unchanged: the Q8 and DA30 still need handlers of their own.
+
 ## Notes from the control center
 
 - USB mode 0 is UAC 2.0 and 1 is UAC 1.0. In UAC 1.0 the DS3 is `0x20b1:0x80d5` (XMOS's vendor

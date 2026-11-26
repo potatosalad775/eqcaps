@@ -46,6 +46,30 @@ Read on 2026-11-03: fiiocontrol.fiio.com, version 4.3.4 of 2026-10-13.
   profile), and their product names come from the app's list, which it matches loosely.
 - Q7 and DM15 R2R aren't in the app and inherit the base's Q 0.25–8 like the rest of the family.
 
+## FiiO Control 4.4.6 (2026-11-26)
+
+Read on 2026-11-26: version 4.4.6 of 2026-11-21. Every model the app lists was compared with its
+profile: its filter types, gain range, presets and report id, and whether it is driven over HID or
+serial. Facts only (D25). What changed since 4.3.4, per the app and its changelog:
+
+- **TS13**: 4.4.0 renamed the Warmer Nano to the TS13, and the app identifies it by the new name.
+  New `fiio-ts13`, matching both names, with the Warmer Nano as an alias. `fiio-warmer-nano` is
+  deprecated, replaced by it. 4.4.6 gave it, and the JK13, a Close EQ preset (240), now in both
+  profiles. The app drives the TS13 as it drives the JK13.
+- **Game Engine Mini** (4.4.3, beta): the app gives it everything it gives the Game Engine (filter
+  types, gain range, presets, controls). New `fiio-game-engine-mini`.
+- **JadeAudio ROO** (4.3.6, beta; presets updated in 4.4.1): peaking and shelves, ±12 dB, its own
+  presets with Close EQ (240). New `jadeaudio-roo` on `fiio-peq-10-band-12db-shelves`.
+- **BTR19**: 4.4.0 removed its BYPASS preset (240) as unsupported, and 4.4.5 added Retro and the
+  two sDamp presets (8–10). So it has no EQ-off preset.
+- **KG13**: 4.4.5 lists HiFi (416), and BYPASS (752) among its game presets. Close EQ (240) stays
+  the one marked as the bypass.
+- **Oak Nano**: the app knows it as "OAK NANO", a name its profile didn't match.
+
+The new profiles' 10 bands are the app's default layout, as for the profiles of 2026-11-03.
+Everything else agrees, except what Next already lists: the K17 R2R is on serial (2; still no
+profile), the K15 (3), and the QX11's, BT11's and Air Link's modes and variants (8).
+
 ## Next
 
 Under D50, 2 and 3 don't need a recording to change; they were left because each needs a decision

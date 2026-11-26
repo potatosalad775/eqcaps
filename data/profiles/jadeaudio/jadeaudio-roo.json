@@ -1,0 +1,36 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "fiio-peq-10-band-12db-shelves",
+	"id": "jadeaudio-roo",
+	"schemaVersion": "1.1",
+	"device": { "brand": "JadeAudio", "model": "ROO" },
+	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "JadeAudio ROO" }] },
+	"protocol": {
+		"presets": [
+			{ "id": 0, "name": "Jazz" },
+			{ "id": 1, "name": "Pop" },
+			{ "id": 2, "name": "Rock" },
+			{ "id": 3, "name": "Dance" },
+			{ "id": 4, "name": "R&B" },
+			{ "id": 5, "name": "Classic" },
+			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 16, "name": "Bass" },
+			{ "id": 19, "name": "Vocal" },
+			{ "id": 160, "name": "USER1", "writable": true },
+			{ "id": 161, "name": "USER2", "writable": true },
+			{ "id": 162, "name": "USER3", "writable": true },
+			{ "id": 240, "name": "Close EQ", "bypass": true }
+		]
+	},
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "FiiO Control web app 4.4.6 of 2026-11-21 (https://fiiocontrol.fiio.com): its model list, and the filter types, gain range and presets it gives this model",
+				"date": "2026-11-26"
+			}
+		],
+		"notes": "FiiO Control lists it as a beta device (added in 4.3.6, presets updated in 4.4.1): peaking and shelves only, gain ±12 dB. FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
+	}
+}

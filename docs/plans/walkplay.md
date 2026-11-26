@@ -122,6 +122,10 @@ this repository fetches it into `data/catalogs/walkplay.json` (D51, D52).
   10: 2, 11: 175, 13: 46, 15: 16, 16: 95, 17: 37, 18: 23, 19: 18, 20: 2, 21: 18, 24: 2, 25: 2,
   26: 1, 28: 4, and scheme 1: 1 (a test row, product id `0xEEEE`). One row has a malformed product
   id (`0x43H1`).
+- **2026-11-26:** 450 products: 8 added and 3 renamed, none removed and none moved scheme. Scheme
+  28 now has 5 rows, still with no group (another chip class). Two of the new products have names
+  of their own, Joy2Hear AA080 (scheme 21) and Strauss & Wagner (scheme 11). Like the catalog's
+  other named products, they are left to their scheme's group.
 - **Against devicePEQ's saved copy** (`walkplayPreprocessor/walkplay.json`, 367 products, newest
   2026-08-07): 75 new products, none removed, and one that moved scheme (`0x3302:0x39e0`, 16 to
   18). devicePEQ has no fetch script. Its `updateDeviceConfig.py` only merges that saved file into
@@ -152,11 +156,13 @@ the vendor ids the catalog never lists, the few product ids it never lists, and 
 - `npm run check` runs it with `--check`, so a group edited by hand, or a snapshot not applied,
   fails.
 
-The fetch is run by hand, never in CI or on a schedule, and only by the maintainer: the diff needs a
-person to read it (a new scheme needs a base chosen by hand; named products may deserve device
-profiles, D37), and `main` deploys `/v1/` on every push. The repository builds, checks and tests
-without it. Device profiles are unaffected: a group yields to a device profile on the same pair
-(D43, SPEC §3).
+The fetch runs only on the maintainer's machine, by hand or on the schedule of the maintainer's
+vendor watcher, and never in CI: the diff needs a person to read it
+(a new scheme needs a base chosen by hand; named products may deserve device profiles, D37). Since
+`main` deploys `/v1/` on every push, the watcher never pushes there: it opens a draft pull request
+from `auto/vendor-watch` with the refreshed snapshot, the regenerated groups, and what needs a
+decision (D51, 2026-11-26). The repository builds, checks and tests without it. Device profiles are
+unaffected: a group yields to a device profile on the same pair (D43, SPEC §3).
 
 ## Done
 
