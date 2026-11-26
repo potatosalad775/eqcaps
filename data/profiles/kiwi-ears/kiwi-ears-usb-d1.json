@@ -9,10 +9,10 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): device table, 0x3302:0x12C3 \"KT-12C3L USB D1\"",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): the USB ids it knows, 0x3302:0x12C3 \"KT-12C3L USB D1\"",
 				"date": "2026-11-09"
 			}
 		],
-		"notes": "In the app's device table but not in its list of supported devices, so the name is only the table's description."
+		"notes": "Known to the app by its USB id but not in its list of supported devices, so the name is only the app's description of that id."
 	}
 }

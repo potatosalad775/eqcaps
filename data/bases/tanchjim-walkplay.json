@@ -23,7 +23,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): the commands it sends, the device table, the filter type codes and its custom EQ screen",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): the commands it sends, the devices it knows, the filter type codes and its custom EQ screen",
 				"date": "2026-11-01"
 			}
 		],

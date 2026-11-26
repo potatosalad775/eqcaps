@@ -9,10 +9,10 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): the device table and how it finds a device by USB vendor and product id",
+				"ref": "TANCHJIM Android app 2.5.7.4 (com.tanchjim.android): the devices it knows and how it finds one by USB vendor and product id",
 				"date": "2026-11-01"
 			}
 		],
-		"notes": "The app reads the USB id a device keeps in flash (0x0D at a chip-specific address) only to recover one that comes up as 0x0666:0x0888 after a failed update; its table gives no product id of its own for the Space Pro AT (any other 0x3302 id), so it is matched by name under Walkplay's vendor id."
+		"notes": "The app reads the USB id a device keeps in flash (0x0D at a chip-specific address) only to recover one that comes up as 0x0666:0x0888 after a failed update; the app gives no product id of its own for the Space Pro AT (any other 0x3302 id), so it is matched by name under Walkplay's vendor id."
 	}
 }

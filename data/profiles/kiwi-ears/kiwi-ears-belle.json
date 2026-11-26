@@ -9,7 +9,7 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): device table, 0x31B2:0x3006 \"KT-1132L USB DAC\"; supported device list \"Kiwi Ears Belle(Type-C Version)\"",
+				"ref": "Kiwi Ears web EQ (https://equalizer.kiwiears.com): the USB ids it knows, 0x31B2:0x3006 \"KT-1132L USB DAC\"; supported device list \"Kiwi Ears Belle(Type-C Version)\"",
 				"date": "2026-11-09"
 			},
 			{
@@ -18,6 +18,6 @@
 				"date": "2026-10-02"
 			}
 		],
-		"notes": "That 0x3006 is the Belle is by elimination: it is the only device in the app's list without a named table entry, and the only unnamed KT1132L id in its table. devicePEQ groups 0x3006 with the Chorus."
+		"notes": "That 0x3006 is the Belle is by elimination: it is the only device in the app's list without a name for its USB id, and the only KT1132L id the app knows without a name. devicePEQ groups 0x3006 with the Chorus."
 	}
 }

@@ -20,10 +20,10 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/): device table, MM3A config",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/): the MM3A as it drives it",
 				"date": "2026-11-11"
 			}
 		],
-		"notes": "The app holds the pre-gain at its minimum while it writes the bands. It requires firmware 1.2.3 or later and forces an upgrade through Moondrop's mobile app below that. The custom EQ stays in effect together with a selected preset, according to the app's \"overlay\" flag (inferred from the app, unconfirmed). Selecting a built-in preset in the app also sets the pre-gain to 0. Its USB product name is unknown, so only the ids match."
+		"notes": "The app holds the pre-gain at its minimum while it writes the bands. It requires firmware 1.2.3 or later and forces an upgrade through Moondrop's mobile app below that. The custom EQ stays in effect together with a selected preset, (inferred from the app, unconfirmed). Selecting a built-in preset in the app also sets the pre-gain to 0. Its USB product name is unknown, so only the ids match."
 	}
 }

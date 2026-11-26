@@ -63,10 +63,10 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/): device table, GM01 Pro config, and its global gain, noise control, LED, prompt tone and dual-mic noise reduction pages",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/): the GM01 Pro as it drives it, and its global gain, noise control, LED, prompt tone and dual-mic noise reduction pages",
 				"date": "2026-11-11"
 			}
 		],
-		"notes": "10 bands. A wireless headset on a USB dongle: the dongle answers only while the headset is linked. Its custom EQ is the only slot; the app's gaming presets are curves it downloads and writes as a custom EQ, so none are listed. The controls are the app's controller panel, with its names: what it calls Global Gain here is a three-step gain level, not the main family's dB offset. Noise Control lists every value the app accepts from the device; its picker offers Off, Noise Cancel and Transparency, and the other three are noise-cancelling effects. The app writes each control without saving, so whether one outlasts a power cycle is unconfirmed, and which of them it shows is decided by Moondrop's server per firmware. Not listed: the battery level, which is only read, and the prompt tone selection, whose list comes from that server. Its USB product name is unknown, so only the ids match."
+		"notes": "10 bands. A wireless headset on a USB dongle: the dongle answers only while the headset is linked. Its custom EQ is the only slot; the app's gaming presets are curves it writes as a custom EQ, so none are listed. The controls are the app's controller panel, with its names: what it calls Global Gain here is a three-step gain level, not the main family's dB offset. Noise Control lists every value the app accepts from the device; its picker offers Off, Noise Cancel and Transparency, and the other three are noise-cancelling effects. The app writes each control without saving, so whether one outlasts a power cycle is unconfirmed, and which of them it shows depends on the product and firmware. Not listed: the battery level, which is only read, and the prompt tone selection, whose list was not read. Its USB product name is unknown, so only the ids match."
 	}
 }

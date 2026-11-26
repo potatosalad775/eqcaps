@@ -46,10 +46,10 @@
 		"sources": [
 			{
 				"kind": "vendor-app",
-				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/): device table, BLUE ROSE config, and its DAC filter, DAC mode, LED and microphone gain offset pages",
+				"ref": "Moondrop Custom EQ web app 1.8.0 build 26B1107 (https://hub.moondroplab.com/): the BLUE ROSE as it drives it, and its DAC filter, DAC mode, LED and microphone gain offset pages",
 				"date": "2026-11-11"
 			}
 		],
-		"notes": "The app lists it under the brand ddHiFi and does not switch slots on it (its custom EQ is slot 0); it has no built-in presets. Its controller panel has the DAC's filter, the DAC output mode and the LED, listed here with the app's names; the app writes each without saving, so whether one outlasts a replug is unconfirmed, and which of them it shows is decided by Moondrop's server per firmware. Global Gain is the main family's, repeated here because a profile's control list replaces its base's. Not listed: Microphone Gain, two steps (Low Gain, High Gain) that the app writes and saves but never reads back, keeping its own record of the choice, and a factory reset. Its USB product name is unknown, so only the ids match."
+		"notes": "The app lists it under the brand ddHiFi and does not switch slots on it (its custom EQ is slot 0); it has no built-in presets. Its controller panel has the DAC's filter, the DAC output mode and the LED, listed here with the app's names; the app writes each without saving, so whether one outlasts a replug is unconfirmed, and which of them it shows depends on the product and firmware. Global Gain is the main family's, repeated here because a profile's control list replaces its base's. Not listed: Microphone Gain, two steps (Low Gain, High Gain) that the app writes and saves but never reads back, keeping its own record of the choice, and a factory reset. Its USB product name is unknown, so only the ids match."
 	}
 }

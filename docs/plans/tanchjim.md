@@ -145,6 +145,6 @@ Tanchjim's order and pacing, with the controls written as above. The Space profi
    (Stargate II, Space), modest gains.
 3. **Space II retest**: the volume across 0–60, DRE, and that the DAC filter,
    gain and mode survive an EQ write and a replug.
-4. **Record the vendor app writing**: the Windows app over USBPcap/Wireshark (plain
-   HID reports), or the Android app. Cover a write with each filter type, the save, and
+4. **Record the vendor app writing**: the Windows app over USBPcap/Wireshark (plain HID
+   reports), or the Android app. Cover a write with each filter type, the save, and
    replug-and-read. Keep it under `packages/device-bridge/test/captures/`.
