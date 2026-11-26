@@ -14,6 +14,9 @@
 			{ "id": 4, "name": "R&B" },
 			{ "id": 5, "name": "Classic" },
 			{ "id": 6, "name": "Hip-hop" },
+			{ "id": 8, "name": "Retro" },
+			{ "id": 9, "name": "sDamp-1" },
+			{ "id": 10, "name": "sDamp-2" },
 			{ "id": 160, "name": "USER1", "writable": true },
 			{ "id": 161, "name": "USER2", "writable": true },
 			{ "id": 162, "name": "USER3", "writable": true },
@@ -23,15 +26,19 @@
 			{ "id": 166, "name": "USER7", "writable": true },
 			{ "id": 167, "name": "USER8", "writable": true },
 			{ "id": 168, "name": "USER9", "writable": true },
-			{ "id": 169, "name": "USER10", "writable": true },
-			{ "id": 240, "name": "BYPASS", "bypass": true }
+			{ "id": 169, "name": "USER10", "writable": true }
 		]
 	},
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "FiiO Control web app 4.4.6 of 2026-11-21 (https://fiiocontrol.fiio.com): its model list, and the filter types, gain range and presets it gives this model",
+				"date": "2026-11-26"
+			},
 			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
 		],
-		"notes": "FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
+		"notes": "FiiO Control 4.4.0 removed its BYPASS preset (240) as unsupported, so it has no EQ-off preset; 4.4.5 added Retro and the two sDamp presets. FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
 	}
 }

@@ -30,10 +30,11 @@
 		]
 	},
 	"meta": {
-		"status": "draft",
+		"status": "deprecated",
+		"replacedBy": "fiio-ts13",
 		"sources": [
 			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
 		],
-		"notes": "FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
+		"notes": "Renamed: FiiO Control 4.4.0 calls this device the TS13 (fiio-ts13). FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
 	}
 }

@@ -7,7 +7,7 @@
 	"match": {
 		"usb": [
 			{ "vendorId": "0x2972", "productId": "0x4016", "productName": "FIIO OAK NANO" },
-			{ "vendorId": ["0x0a12", "0x2972"], "productName": ["FIIO OAK NANO", "Oak Nano"] }
+			{ "vendorId": ["0x0a12", "0x2972"], "productName": ["FIIO OAK NANO", "Oak Nano", "OAK NANO"] }
 		]
 	},
 	"protocol": {
@@ -26,6 +26,11 @@
 		"status": "draft",
 		"sources": [
 			{
+				"kind": "vendor-app",
+				"ref": "FiiO Control web app 4.4.6 of 2026-11-21 (https://fiiocontrol.fiio.com): its model list, and the filter types, gain range and presets it gives this model",
+				"date": "2026-11-26"
+			},
+			{
 				"kind": "handler-code",
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/devicePEQ/usbDeviceConfig.js",
 				"date": "2026-10-02"
@@ -35,6 +40,7 @@
 				"ref": "https://github.com/jeromeof/devicePEQ/blob/0617f382e76629792a5933e6933e4b396a756a93/tests/captures/fiio_fiio_oak_nano.json",
 				"date": "2026-10-02"
 			}
-		]
+		],
+		"notes": "FiiO Control 4.4.6 identifies it by the product name \"OAK NANO\"."
 	}
 }

@@ -14,8 +14,9 @@ first app on them. How the parts fit: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.m
   `npm run conformance` after changing engine behaviour.
 - `npm run data:walkplay` regenerates the Walkplay groups' `match.usb` from
   `data/catalogs/walkplay.json` (D51). The snapshot is refreshed by the maintainer's fetch script
-  in `../eqcaps_private` (`npm run walkplay:fetch` there; by hand, read the diff; D52), if that
-  folder exists.
+  in `../eqcaps_private` (`npm run walkplay:fetch` there by hand, read the diff; D52), if that
+  folder exists, or by the maintainer's scheduled vendor watcher, which opens a draft PR from
+  `auto/vendor-watch` and never pushes to `main` (D51).
 - `npm run data:build` writes `dist/site/v1/`; `npm run inspector:dev` serves it (build first).
 - `npm run release -- <version> --pack` puts tarballs in `dist/pack/` for trying in uniPEQ. A real
   release is the owner's, run locally for npm 2FA.

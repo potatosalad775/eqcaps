@@ -12,10 +12,12 @@
 			{ "id": 1, "name": "Pop" },
 			{ "id": 2, "name": "Rock" },
 			{ "id": 3, "name": "Dance" },
+			{ "id": 416, "name": "HiFi" },
 			{ "id": 257, "name": "FPS" },
 			{ "id": 258, "name": "ACT" },
 			{ "id": 259, "name": "MOBA" },
 			{ "id": 260, "name": "MUG" },
+			{ "id": 752, "name": "BYPASS" },
 			{ "id": 513, "name": "Cinema" },
 			{ "id": 160, "name": "USER1", "writable": true },
 			{ "id": 161, "name": "USER2", "writable": true },
@@ -25,8 +27,13 @@
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "FiiO Control web app 4.4.6 of 2026-11-21 (https://fiiocontrol.fiio.com): its model list, and the filter types, gain range and presets it gives this model",
+				"date": "2026-11-26"
+			},
 			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
 		],
-		"notes": "FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
+		"notes": "FiiO Control 4.4.5 lists HiFi (416) and, among the game presets, BYPASS (752); only Close EQ (240) is marked as the bypass. FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
 	}
 }
