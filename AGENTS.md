@@ -82,7 +82,7 @@ folder exists (D52).
 - Write how a vendor app was read (tools, steps, vendor addresses, scripts), or a name from inside
   the app (in source refs too), in this repository: it goes in `../eqcaps_private` (D52). A source
   ref says the app, version, and what was read.
-- Edit `docs/history/`, or put developer detail in README.md (it is for users).
+- Put developer detail in README.md (it is for users).
 - Edit `../modernGraphTool`, `../devicePEQ` or `../uniPEQ` from a task in this repo.
 
 ## Where things live

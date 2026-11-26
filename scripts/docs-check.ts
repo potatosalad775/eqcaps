@@ -1,12 +1,10 @@
 // Checks the docs against the repository, so a stale reference fails `npm run check` instead of
-// waiting for a reader to trip on it. "Live docs" are the tracked Markdown files outside
-// docs/history/, which is a frozen record.
+// waiting for a reader to trip on it. "Docs" are the tracked Markdown files.
 //
 //   links       a relative Markdown link names a tracked file or directory, and its #fragment a
 //               heading of the linked Markdown file
-//   decisions   a D<n> citation is a decision in docs/DECISIONS.md; one archived in
-//               docs/history/decisions.md says "archived" on the same line. Two digits only:
-//               D900 is a Topping DAC.
+//   decisions   a D<n> citation is a decision in docs/DECISIONS.md; one under its "Archived"
+//               heading says "archived" on the same line. Two digits only: D900 is a Topping DAC.
 //   sections    a SPEC, INSPECTOR or ARCHITECTURE §N citation is a numbered heading of that doc;
 //               inside one of them, a §N with no doc name before it is one of its own
 //   repoPaths   a backticked repository path names a tracked file or directory (not in plans)
@@ -58,7 +56,8 @@ export const EXCEPTIONS: readonly Exception[] = [
 ];
 
 const DECISIONS = 'docs/DECISIONS.md';
-const ARCHIVED_DECISIONS = 'docs/history/decisions.md';
+/** The heading of DECISIONS.md under which the decisions that no longer apply are listed. */
+const ARCHIVED_HEADING = /^## Archived$/m;
 const PLANS = 'docs/plans/';
 const PLANS_README = 'docs/plans/README.md';
 /** The docs whose numbered sections are cited as `<NAME> §N`. */
@@ -71,9 +70,8 @@ const SECTION_DOCS: Readonly<Record<string, string>> = {
 const SOURCE = /\.(ts|js|svelte|yml)$/;
 const WIDTH = 100;
 
-const isLiveDoc = (path: string) => path.endsWith('.md') && !path.startsWith('docs/history/');
-const isSource = (path: string) =>
-	SOURCE.test(path) && !path.startsWith('conformance/') && !path.startsWith('docs/history/');
+const isLiveDoc = (path: string) => path.endsWith('.md');
+const isSource = (path: string) => SOURCE.test(path) && !path.startsWith('conformance/');
 
 function texts(repo: Repo, keep: (path: string) => boolean): [string, string][] {
 	return [...repo.texts].filter(([path]) => keep(path));
@@ -173,8 +171,9 @@ function decisionNumbers(text: string | undefined): Set<number> {
 }
 
 const decisions: Check = (repo) => {
-	const current = decisionNumbers(repo.texts.get(DECISIONS));
-	const archived = decisionNumbers(repo.texts.get(ARCHIVED_DECISIONS));
+	const [live, retired] = (repo.texts.get(DECISIONS) ?? '').split(ARCHIVED_HEADING, 2);
+	const current = decisionNumbers(live);
+	const archived = decisionNumbers(retired);
 	const findings: Finding[] = [];
 	for (const [file, text] of texts(repo, (p) => isLiveDoc(p) || isSource(p))) {
 		text.split('\n').forEach((line, i) => {
@@ -186,7 +185,7 @@ const decisions: Check = (repo) => {
 					findings.push({
 						file,
 						line: i + 1,
-						message: `D${n} is archived (${ARCHIVED_DECISIONS}): say "archived" on the line, or cite a current decision`
+						message: `D${n} is archived (${DECISIONS}): say "archived" on the line, or cite a current decision`
 					});
 				} else {
 					findings.push({ file, line: i + 1, message: `D${n}: no such decision in ${DECISIONS}` });
