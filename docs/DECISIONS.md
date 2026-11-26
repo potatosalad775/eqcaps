@@ -396,8 +396,8 @@ neither Walkplay's, NICEHCK's nor Tanchjim's app sends them. D39's 2026-10-28 no
 rule for unit conversions.
 
 ### D51. Walkplay's groups are generated from its product catalog (2026-11-12)
-Walkplay's app has a product catalog: vendor id, product
-id, `SchemeNo`, brand and model of every product. `data/catalogs/walkplay.json` keeps a trimmed
+Walkplay's app has a product catalog: vendor id, product id, `SchemeNo`, brand and model of every
+product. `data/catalogs/walkplay.json` keeps a trimmed
 snapshot of it, facts only (D25), CC0 like the rest of `data/` and not published under `/v1/`.
 The `match.usb` of the ten Walkplay group profiles is generated from the snapshot, one entry per
 vendor id with its real product ids, and is not edited by hand. What the catalog doesn't list, and
@@ -408,9 +408,8 @@ regenerates the groups from the snapshot, and CI checks that they match it. A de
 beats its group on the same pair (D43).
 **Why:** the groups matched every vendor id with every product id of a scheme, a cross product of
 which about 80 of 1501 pairs exist for SchemeNo16. The real pairs are known, so the groups can say
-what exists, and a refresh is a diff someone reads: a new
-scheme needs a base chosen by hand, a named product may deserve its own profile (D37), and `main`
-deploys `/v1/` on every push.
+what exists, and a refresh is a diff someone reads: a new scheme needs a base chosen by hand, a
+named product may deserve its own profile (D37), and `main` deploys `/v1/` on every push.
 
 *2026-11-26:* the fetch also runs on a schedule, on the maintainer's machine, in a vendor watcher
 kept outside this repository (D52). The watcher also reads the vendors' own web apps for devices
@@ -484,7 +483,7 @@ Done once, on 2026-10-02; `data/` has been edited by hand since (D26).
 Superseded by D39.
 
 ### D31. Seed import: what was taken and how (archived)
-The importer was removed on 2026-10-04; its last version is in commit `1b3dc3c`.
+The importer was removed on 2026-10-04.
 
 ### D38. Probe mode: engine, strategy and evidence (archived)
 Removed the day it was accepted, with the `probe` source kind (D40).
