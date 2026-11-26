@@ -62,7 +62,7 @@ because they change what it plays and whether its EQ applies.
 eqcaps/
 ├── AGENTS.md                     rules for coding agents (CLAUDE.md imports it)
 ├── docs/                         SPEC, ARCHITECTURE, DECISIONS, INSPECTOR;
-│                                 plans/, history/
+│                                 plans/
 ├── schema/v1/
 │   ├── profile.schema.json       published (flat) profiles; hand-written
 │   └── source.schema.json        authoring files (adds extends / abstract); generated

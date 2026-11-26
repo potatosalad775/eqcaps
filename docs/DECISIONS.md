@@ -1,9 +1,8 @@
 # Decisions
 
 The design decisions that shape eqcaps today, each with its main reason. Numbers are stable: code
-comments and other docs cite them (`D39`). The full log, with what was rejected, dated amendments
-and the decisions since superseded or removed (D23, D29, D31, D38), is archived in
-[history/decisions.md](history/decisions.md).
+comments and other docs cite them (`D39`). The decisions since superseded or removed are listed
+under [Archived](#archived), with where the full log of the build-out is kept.
 
 To change a decision, edit its entry here with a dated note, and update [SPEC.md](SPEC.md) in the
 same change if the format is affected. A new decision takes the next free number (D56). The rules
@@ -397,8 +396,8 @@ neither Walkplay's, NICEHCK's nor Tanchjim's app sends them. D39's 2026-10-28 no
 rule for unit conversions.
 
 ### D51. Walkplay's groups are generated from its product catalog (2026-11-12)
-Walkplay's app has a product catalog: vendor id, product
-id, `SchemeNo`, brand and model of every product. `data/catalogs/walkplay.json` keeps a trimmed
+Walkplay's app has a product catalog: vendor id, product id, `SchemeNo`, brand and model of every
+product. `data/catalogs/walkplay.json` keeps a trimmed
 snapshot of it, facts only (D25), CC0 like the rest of `data/` and not published under `/v1/`.
 The `match.usb` of the ten Walkplay group profiles is generated from the snapshot, one entry per
 vendor id with its real product ids, and is not edited by hand. What the catalog doesn't list, and
@@ -409,9 +408,8 @@ regenerates the groups from the snapshot, and CI checks that they match it. A de
 beats its group on the same pair (D43).
 **Why:** the groups matched every vendor id with every product id of a scheme, a cross product of
 which about 80 of 1501 pairs exist for SchemeNo16. The real pairs are known, so the groups can say
-what exists, and a refresh is a diff someone reads: a new
-scheme needs a base chosen by hand, a named product may deserve its own profile (D37), and `main`
-deploys `/v1/` on every push.
+what exists, and a refresh is a diff someone reads: a new scheme needs a base chosen by hand, a
+named product may deserve its own profile (D37), and `main` deploys `/v1/` on every push.
 
 *2026-11-26:* the fetch also runs on a schedule, on the maintainer's machine, in a vendor watcher
 kept outside this repository (D52). The watcher also reads the vendors' own web apps for devices
@@ -468,3 +466,24 @@ The user changes the EQ in the vendor's own app, step by step, and the inspector
 each step. The vendor app's limits become a `vendor-app` source whose `ref` is the evidence file,
 which records the full read-back per step so a reviewer can recompute every conclusion
 (INSPECTOR §3).
+
+## Archived
+
+Decisions that no longer apply. Their numbers are not reused, and a citation of one says
+"archived". The full log of the build-out (2026-10-02 to 2026-10-10), with what each decision
+rejected and its dated amendments, and the build-out plan beside it, were kept under docs/history
+until v0.6.0 and are in the repository's history:
+[decisions.md](https://github.com/potatosalad775/eqcaps/blob/v0.6.0/docs/history/decisions.md),
+[plan.md](https://github.com/potatosalad775/eqcaps/blob/v0.6.0/docs/history/plan.md).
+
+### D23. Seed data is imported and marked draft (archived)
+Done once, on 2026-10-02; `data/` has been edited by hand since (D26).
+
+### D29. Domains are written values; realization laws are profile data (archived)
+Superseded by D39.
+
+### D31. Seed import: what was taken and how (archived)
+The importer was removed on 2026-10-04.
+
+### D38. Probe mode: engine, strategy and evidence (archived)
+Removed the day it was accepted, with the `probe` source kind (D40).

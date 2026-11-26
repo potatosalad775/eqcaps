@@ -1,91 +1,29 @@
 # Agent docs: one short AGENTS.md of rules
 
-Started 2026-11-01.
+Started 2026-11-01. AGENTS.md, D50 and the `read-vendor-app` skill landed that day; the rules a
+script can check moved into `scripts/docs-check.ts` and ESLint's import boundaries on 2026-11-22.
 
 ## Why
 
 Agents read CLAUDE.md every session and the rest only when sent there. The rules they must follow
-are spread over about 50 decisions, SPEC and the plans, and CLAUDE.md mixes them with description.
-It also contradicted a rule: it said protocols come from devicePEQ while D39's dated note said
-the vendor app comes first, and agents followed CLAUDE.md (the Space II commit, tanchjim.md).
+were spread over about 50 decisions, SPEC and the plans, and CLAUDE.md mixed them with
+description. It also contradicted a rule: it said protocols come from devicePEQ while D39's dated
+note said the vendor app comes first, and agents followed CLAUDE.md.
 
 ## Shape
 
 - **AGENTS.md** is the one agent file; CLAUDE.md only imports it (`@AGENTS.md`), as in uniPEQ.
-  About 60–80 lines of short imperatives:
-  - what the repo is (three lines);
-  - commands;
-  - sources of truth, in order: the vendor's app, recorded device answers, devicePEQ;
-  - hard rules (always / never), one line each;
-  - where things live, one line per doc.
+  Short imperatives: what the repo is, commands, sources of truth in order (the vendor's app,
+  recorded device answers, devicePEQ), hard rules, where things live.
 - **A rule exists for agents only if it is a line in AGENTS.md.** DECISIONS.md stays as the human
   record of why, and is not where an agent looks up what to do.
-- **SPEC.md is unchanged**: the public format definition.
-- **Skills for repeated procedures**, first "read a vendor app": get at its code, facts only
-  (D25), change the handler and data to match, `vendor-app` source, devicePEQ's differences as
-  notes. Done three times so far (Walkplay, NICEHCK, Tanchjim), each a little differently.
-
-## Steps
-
-1. List every rule now in CLAUDE.md, DECISIONS.md and the conventions, and mark stale or
-   contradicting ones.
-2. Write AGENTS.md from the list; move descriptive detail to ARCHITECTURE or CONTRIBUTING.
-3. Point CLAUDE.md at it; add the vendor-app skill (now in the maintainer's private folder, D52).
-4. Check it by starting a fresh session on a past task (e.g. the Tanchjim TTGK read) and seeing
-   whether it follows the vendor app without being told.
-
-## Done (2026-11-01)
-
-- **Rules listed** from CLAUDE.md, DECISIONS, the conventions and the plans. Stale or
-  contradicting: the vendor-app rule had no decision of its own (only D39's note on conversions,
-  and plans cited "CLAUDE.md" for it); CLAUDE.md still named modernGraphTool as the main consumer
-  and the old `eqDeviceInfo` folder; nothing said that data using a new handler option must wait
-  for a bridge release, though `main` deploys `/v1/` on every push (tanchjim.md).
-- **AGENTS.md** written (commands, sources of truth, always / never, where things live); CLAUDE.md
-  is `@AGENTS.md`. Description moved out: what the conventions explained is already in
-  ARCHITECTURE §4–§9 and CONTRIBUTING.
-- **D50**, the vendor's own app is the reference; D20 points at it, plans cite it.
-- **Skill** `read-vendor-app`, from the Walkplay, NICEHCK, Tanchjim and Fosi reads. Moved on
-  2026-11-12 from `.claude/skills/` to `../eqcaps_private/.claude/skills/`, beside the notes on
-  how each app was read (D52).
-- **Found on the way and fixed:** ARCHITECTURE §1 put DAC filters and mic gain out of scope (D49
-  brought them in), §9 said the handlers come from devicePEQ, §11's roadmap was a month old; the
-  bridge README still described `enableCommand` as working; INSPECTOR §3.5 and §4 left
-  `writeControl` out of what the inspector never calls; DECISIONS named D49 as the next number;
-  the plans README still said `feat/device-controls`, now merged; SPEC example F mentioned the
-  importer; lines past 100 columns rewrapped (SPEC changes are editorial only).
-
-## Done (2026-11-22)
-
-Rules a script can check moved out of AGENTS.md into checks that fail the build.
-
-- **`scripts/docs-check.ts`**, in `npm run check`, reads the live docs (and, for citations, the
-  sources' comments): relative links and their `#` headings resolve; every `D<n>` is a decision in
-  DECISIONS.md, or says "archived" when only `history/decisions.md` has it; every `SPEC`,
-  `INSPECTOR` or `ARCHITECTURE §N`, and a bare `§N` inside those docs, is a numbered heading;
-  backticked repository paths and `npm run` scripts exist (plans left out, as dated notes); prose
-  lines fit 100 columns where they can be wrapped; every plan has a row in the plans README. Two
-  findings are right as written and listed in its `EXCEPTIONS`, which fails when one goes unused.
-  Its first run asked for about 30 lines rewrapped, and found `docs/research/` describing a
-  superseded design as current (D29, archived; D39 replaced it). `docs/research/` (prior art and
-  a measurement script, both from before v1) was removed the same day: nothing would read it
-  again, and SPEC and INSPECTOR no longer link to it.
-- **`eslint.config.js`** derives `no-restricted-imports` from one table of what each package's
-  `src/` may import (ARCHITECTURE §5), bans every non-relative import in `core`, and keeps browser
-  imports and the `navigator`, `window` and `document` globals inside the bridge's `src/browser/`
-  (§9). It also refuses a path into another package's `src/`: three such imports (two bridge
-  tests, `scripts/conformance.ts`) now use the package name, and `conformance.ts` runs with
-  `--conditions=eqcaps:source`. `scripts/boundaries.test.ts` runs each restriction through ESLint.
-- **AGENTS.md lines replaced:** "Workspace packages import each other by package name"; "Hand-wrap
-  Markdown at 100 columns"; "Make `schema/`, `data/`, `core` or `client` depend on `device-bridge`;
-  give `core` a dependency or environment types" (core's environment types are already refused by
-  its build, whose `types` is empty); "Let a handler see browser APIs (only `src/transport.ts`)";
-  and "Call `push`, `setEnabled` or `writeControl` from the inspector", which
-  `apps/inspector/src/lib/no-writes.test.ts` already enforces.
+- **A rule a script can check is a check, not a line**: it fails `npm run check` or the linter.
+- **Skills for repeated procedures.** The first, reading a vendor app, is kept in the maintainer's
+  private folder (D52).
 
 ## Next
 
-- Step 4, the fresh-session check.
+- Check it by starting a fresh session on a past task (the Tanchjim read of its Walkplay-chip
+  devices, say) and seeing whether it follows the vendor app without being told.
 - A second skill if another procedure repeats: recording a device with the WebHID recorder and
   adding an adapter is the likely one (tools/userscripts/README.md covers it for people).
-- Archive nicehck.md once the Octave is recorded or parked.
