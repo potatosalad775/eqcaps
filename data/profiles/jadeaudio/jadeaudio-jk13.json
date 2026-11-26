@@ -7,6 +7,7 @@
 	"match": { "usb": [{ "vendorId": ["0x0a12", "0x2972"], "productName": "JadeAudio JK13" }] },
 	"protocol": {
 		"presets": [
+			{ "id": 240, "name": "Close EQ", "bypass": true },
 			{ "id": 0, "name": "Jazz" },
 			{ "id": 1, "name": "Pop" },
 			{ "id": 2, "name": "Rock" },
@@ -32,8 +33,13 @@
 	"meta": {
 		"status": "draft",
 		"sources": [
+			{
+				"kind": "vendor-app",
+				"ref": "FiiO Control web app 4.4.6 of 2026-11-21 (https://fiiocontrol.fiio.com): its model list, and the filter types, gain range and presets it gives this model",
+				"date": "2026-11-26"
+			},
 			{ "kind": "vendor-app", "ref": "https://fiiocontrol.fiio.com/", "date": "2026-11-03" }
 		],
-		"notes": "FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
+		"notes": "FiiO Control 4.4.6 added the Close EQ preset (240). FiiO Control asks the device for its band count; 10 is the app's default layout, not a confirmed count for this model."
 	}
 }
