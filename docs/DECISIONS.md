@@ -403,14 +403,25 @@ snapshot of it, facts only (D25), CC0 like the rest of `data/` and not published
 The `match.usb` of the ten Walkplay group profiles is generated from the snapshot, one entry per
 vendor id with its real product ids, and is not edited by hand. What the catalog doesn't list, and
 only devicePEQ `0617f38` does, is kept by hand in the snapshot's `extra` list. The snapshot is
-refreshed by the maintainer's fetch script, kept outside this repository (D52), run by hand, never
-in CI or on a schedule; `npm run data:walkplay` regenerates the groups from the snapshot, and CI
-checks that they match it. A device profile still beats its group on the same pair (D43).
+refreshed by the maintainer's fetch script, kept outside this repository (D52), run by hand or by
+the maintainer's scheduled watcher (2026-11-26 below), never in CI; `npm run data:walkplay`
+regenerates the groups from the snapshot, and CI checks that they match it. A device profile still
+beats its group on the same pair (D43).
 **Why:** the groups matched every vendor id with every product id of a scheme, a cross product of
 which about 80 of 1501 pairs exist for SchemeNo16. The real pairs are known, so the groups can say
 what exists, and a refresh is a diff someone reads: a new
 scheme needs a base chosen by hand, a named product may deserve its own profile (D37), and `main`
 deploys `/v1/` on every push.
+
+*2026-11-26:* the fetch also runs on a schedule, on the maintainer's machine, in a vendor watcher
+kept outside this repository (D52). The watcher also reads the vendors' own web apps for devices
+no profile matches. It drafts a profile only where the app drives a device like others of its
+brand that all extend one base, and it leaves every other case to a person. It never pushes to
+`main`: it opens or updates one draft pull request from the branch `auto/vendor-watch`, its
+profiles are `draft`, and the maintainer reviews it before merging. It never runs in CI.
+**Why:** by hand, a refresh waited for someone to remember it. The reasons above still hold with a
+pull request in between: a daily request is one app launch's traffic, a person still reads the
+diff and chooses the bases, and nothing deploys until it is merged.
 
 ### D52. How a vendor app was read stays out of the repository (2026-11-12)
 The repository holds the facts read from vendor apps and names the app, its version and the date

@@ -152,11 +152,13 @@ the vendor ids the catalog never lists, the few product ids it never lists, and 
 - `npm run check` runs it with `--check`, so a group edited by hand, or a snapshot not applied,
   fails.
 
-The fetch is run by hand, never in CI or on a schedule, and only by the maintainer: the diff needs a
-person to read it (a new scheme needs a base chosen by hand; named products may deserve device
-profiles, D37), and `main` deploys `/v1/` on every push. The repository builds, checks and tests
-without it. Device profiles are unaffected: a group yields to a device profile on the same pair
-(D43, SPEC §3).
+The fetch runs only on the maintainer's machine, by hand or on the schedule of the maintainer's
+vendor watcher, and never in CI: the diff needs a person to read it
+(a new scheme needs a base chosen by hand; named products may deserve device profiles, D37). Since
+`main` deploys `/v1/` on every push, the watcher never pushes there: it opens a draft pull request
+from `auto/vendor-watch` with the refreshed snapshot, the regenerated groups, and what needs a
+decision (D51, 2026-11-26). The repository builds, checks and tests without it. Device profiles are
+unaffected: a group yields to a device profile on the same pair (D43, SPEC §3).
 
 ## Done
 
