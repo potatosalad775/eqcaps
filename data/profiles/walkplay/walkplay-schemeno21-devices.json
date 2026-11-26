@@ -15,6 +15,7 @@
 					"0x3db4",
 					"0x3db5",
 					"0x3db6",
+					"0x3db7",
 					"0x3dc1",
 					"0x3dc4",
 					"0x3dc5",
@@ -53,7 +54,7 @@
 			{
 				"kind": "vendor-app",
 				"ref": "Walkplay Android app 2.3.1 (com.ttgk.musicbox): its product catalog, kept in data/catalogs/walkplay.json",
-				"date": "2026-11-12"
+				"date": "2026-11-26"
 			},
 			{
 				"kind": "handler-code",
