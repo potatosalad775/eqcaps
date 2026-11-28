@@ -1,0 +1,34 @@
+{
+	"$schema": "../../../schema/v1/source.schema.json",
+	"extends": "walkplay-app-10-band",
+	"id": "epz-tp65",
+	"device": { "brand": "EPZ", "model": "TP65" },
+	"match": { "usb": [{ "vendorId": "0x3302", "productId": "0x4325", "productName": "TP65" }] },
+	"meta": {
+		"status": "draft",
+		"sources": [
+			{
+				"kind": "community",
+				"ref": "evidence/epz-tp65/2026-11-27-906e60.json",
+				"firmware": "0.4",
+				"date": "2026-11-27",
+				"by": "jrequiroso"
+			},
+			{
+				"kind": "community",
+				"ref": "https://github.com/jreqtech/usb-audio-protocols/tree/main/devices/epz/tp65",
+				"firmware": "0.4",
+				"date": "2026-11-27",
+				"by": "jrequiroso"
+			},
+			{
+				"kind": "community",
+				"ref": "https://github.com/Chronosauros/contour/issues/6",
+				"firmware": "0.4",
+				"date": "2026-11-27"
+			}
+		],
+		"contributors": ["jrequiroso"],
+		"notes": "Tested on firmware 0.4. Ten-band PEQ readback verified using the eqcaps Inspector. Independent hardware testing with Contour verified selective Peak, Low Shelf and High Shelf writes, RAM apply, USB reconnect persistence and raw-byte restoration. Parameter limits remain inherited and have not been independently validated. Acoustic shelf Q behavior, hardware presets and other firmware versions remain unverified."
+	}
+}
